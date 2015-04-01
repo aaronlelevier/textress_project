@@ -7,9 +7,9 @@
 *.gif
 .DS_Store
 .coverage
-/static
-/media
-/production_*
+clipone/
+static/
+media
 /__pycache__
 *.ipynb*
 vendor/

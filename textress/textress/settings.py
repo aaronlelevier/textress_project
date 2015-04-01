@@ -44,6 +44,7 @@ THIRD_PARTY_APPS = (
 
 LOCAL_APPS = (
     'contact',
+    'djrill',
 )
 
 INSTALLED_APPS = DEFAULT_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -98,4 +99,27 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
-STATIC_URL = '/static/'
+TEMPLATE_DIRS = (
+    os.path.join(BASE_DIR, 'templates'),
+    )
+
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'source'),
+    )
+
+STATIC_URL = '/source/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+
+### 3RD PARTY APPS CONFIG ###
+
+# DJRILL
+MANDRILL_API_KEY = os.environ['T17_MANDRILL_API_KEY']
+EMAIL_BACKEND = "djrill.mail.backends.djrill.DjrillBackend"
+
+
+
+
+
+
