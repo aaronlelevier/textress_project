@@ -1,0 +1,16 @@
+# original .gitignore's
+*.py[co]
+*.swp
+*.db
+*.jpg
+*.png
+*.gif
+.DS_Store
+.coverage
+/static
+/media
+/production_*
+/__pycache__
+*.ipynb*
+vendor/
+config.rst
