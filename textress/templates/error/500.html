@@ -1,29 +1,34 @@
 {% extends "cpanel/base.html" %}
 {% load staticfiles %}
 
+{% block body_tag %}class="error-full-page"{% endblock %}
 
 {% block body %}
-    <body class="error-full-page">
-        <!-- start: PAGE -->
-        <div class="container">
-            <div class="row">
-                <!-- start: 500 -->
-                <div class="col-sm-12 page-error">
-                    <div class="error-number bricky">
-                        500
-                    </div>
-                    <div class="error-details col-sm-6 col-sm-offset-3">
-                        <h3>Oops! You are stuck at 500</h3>
-                        <p>
-                            Something's wrong!
-                            <br>
-                            It looks as though we've broken something on our system.
-                            <br>
-                            Don't panic, we are fixing it! Please come back in a while.
-                        </p>
-                    </div>
+    <div class="container">
+        <div class="row">
+            <!-- start: 500 -->
+            <div class="col-sm-12 page-error">
+                <div class="error-number bricky">
+                    500
                 </div>
-                <!-- end: 500 -->
+                <div class="error-details col-sm-6 col-sm-offset-3">
+                    <h3>Oops! You are stuck at 500</h3>
+                    <p>
+                        Something's wrong!
+                        <br>
+                        It looks as though we've broken something on our system.
+                        <br>
+                        Don't panic, we are fixing it! Please come back in a while.
+                    </p>
+                </div>
             </div>
+            <!-- end: 500 -->
         </div>
+    </div>
 {% endblock body %}
+
+{% block main_js %}
+{% endblock main_js %}
+
+{% block init_js %}
+{% endblock init_js %}

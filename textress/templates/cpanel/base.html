@@ -36,8 +36,19 @@
         {% endblock page_css %}
 
     </head>
+        <body {% block body_tag %}{% endblock %}>
+        
+        {% block django_messages %}
+            {% if messages %}
+            <div class="row" style="background-color: #363839;">
+                <div class="container">
+                {% for message in messages %}
+                    <h4 class="text-center" style="color: white;">{{ message }}</h4>
+                {% endfor %}</div>
+            </div>
+            {% endif %}
+        {% endblock django_messages %}
 
-        <!-- Contains the initial <body> tag all the way up until the start of the JS Scripts-->
         {% block body %}
         {% endblock body %}
 

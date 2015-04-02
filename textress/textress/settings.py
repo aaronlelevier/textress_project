@@ -105,6 +105,14 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
+### EMAIL ###
+
+DEFAULT_EMAIL_SAYHELLO = 'sayhello@textress.com'
+DEFAULT_EMAIL_ADMIN = 'admin@textress.com'
+DEFAULT_EMAIL_SUPPORT = 'support@textress.com'
+DEFAULT_EMAIL_BILLING = 'billing@textress.com'
+
+
 ### 3RD PARTY APPS CONFIG ###
 
 # DJRILL

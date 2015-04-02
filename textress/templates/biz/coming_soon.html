@@ -43,13 +43,23 @@
             We'll also throw in a freebie for your effort :)</h2>
             <div class="row">
                 <div class="col-sm-4 col-sm-offset-4">
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="enter your email address">
-                        <span class="input-group-btn">
-                            <button class="btn btn-teal" type="button">
-                                NOTIFY ME
-                            </button> </span>
-                    </div>
+                    <form method="post" action="">
+                        {% csrf_token %}
+                        <div class="errorHandler alert alert-danger no-display">
+                            <i class="fa fa-times-sign"></i> {{ form.non_field_errors }}
+                        </div>
+                        <div class="input-group">
+                            <div class="errorHandler alert alert-danger no-display">
+                                <i class="fa fa-times-sign"></i> {{ form.email.errors }}
+                            </div>
+                            <input type="email" id="id_email" class="form-control" placeholder="enter your email address">
+                            <span class="input-group-btn">
+                                <button class="btn btn-teal" type="submit">
+                                    NOTIFY ME
+                                </button> 
+                            </span>
+                        </div>
+                    </form>
                 </div>
             </div>
             <div class="row">
@@ -61,7 +71,7 @@
             </div>
         </div>
         <div class="copyright">
-            2014 &copy; clip-one by cliptheme.
+            2014-2015 &copy; Textress.
         </div>
 {% endblock body %}
 

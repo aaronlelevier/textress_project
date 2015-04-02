@@ -18,6 +18,6 @@ class ComingSoonView(CreateView):
 
     template_name = 'biz/coming_soon.html'
     # form_class = NewsletterForm
-    success_url = reverse_lazy('main:coming_soon')
     model = Newsletter
     fields = ['email']
+    success_url = reverse_lazy('main:coming_soon')
