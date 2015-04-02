@@ -76,8 +76,7 @@ DATABASES = {
     }
 }
 
-# Internationalization
-# https://docs.djangoproject.com/en/1.7/topics/i18n/
+### SITE ###
 
 LANGUAGE_CODE = 'en-us'
 
@@ -88,6 +87,9 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+SITE_URL = "localhost:8000"
+SITE_NAME = 'Textress'
 
 
 # Static files (CSS, JavaScript, Images)
@@ -114,6 +116,11 @@ DEFAULT_EMAIL_SUPPORT = 'support@textress.com'
 DEFAULT_EMAIL_BILLING = 'billing@textress.com'
 
 
+### OTHER CONTACT INFO ###
+TEXTRESS_PHONE_NUMBER = '775-419-4000'
+
+
+
 ### 3RD PARTY APPS CONFIG ###
 
 # DJRILL
@@ -127,7 +134,7 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 NOSE_ARGS = [
     '--with-coverage',
-    '--cover-package=contact,textress',
+    '--cover-package=textress,contact,utils',
 ]
 
 if 'test' in sys.argv:
