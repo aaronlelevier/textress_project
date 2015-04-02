@@ -1,15 +1,7 @@
-"""
-Django settings for textress project.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/1.7/topics/settings/
-
-For the full list of settings and their values, see
-https://docs.djangoproject.com/en/1.7/ref/settings/
-"""
-
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import sys
+
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 
@@ -40,6 +32,7 @@ DEFAULT_APPS = (
 
 THIRD_PARTY_APPS = (
     'psycopg2',
+    'django_nose',
 )
 
 LOCAL_APPS = (
@@ -107,7 +100,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'source'),
     )
 
-STATIC_URL = '/source/'
+STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
@@ -119,7 +112,20 @@ MANDRILL_API_KEY = os.environ['T17_MANDRILL_API_KEY']
 EMAIL_BACKEND = "djrill.mail.backends.djrill.DjrillBackend"
 
 
+### TESTS ###
 
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
+NOSE_ARGS = [
+    '--with-coverage',
+    '--cover-package=contact,textress',
+]
 
-
+if 'test' in sys.argv:
+    DEBUG = True
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'tests.db',
+    }
+    PASSWORD_HASHERS = ('django.contrib.auth.hashers.MD5PasswordHasher', )
+    DEFAULT_FILE_STORAGE = 'inmemorystorage.InMemoryStorage'

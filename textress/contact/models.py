@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import ugettext, ugettext_lazy as _
 
+
 class Newsletter(models.Model):
     '''
     All `Newsletter` signups are `unique`
