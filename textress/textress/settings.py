@@ -32,12 +32,13 @@ DEFAULT_APPS = (
 
 THIRD_PARTY_APPS = (
     'psycopg2',
+    'djrill',
     'django_nose',
+    'djangular',
 )
 
 LOCAL_APPS = (
     'contact',
-    'djrill',
 )
 
 INSTALLED_APPS = DEFAULT_APPS + THIRD_PARTY_APPS + LOCAL_APPS
