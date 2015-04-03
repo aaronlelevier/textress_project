@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.views.generic import CreateView
 from django.http import HttpResponseRedirect
 
+from contact import tasks
 from contact.forms import NewsletterForm
 from contact.models import Newsletter
 from utils.messages import dj_messages
@@ -25,6 +26,10 @@ class ComingSoonView(CreateView):
     model = Newsletter
     fields = ['email']
     success_url = reverse_lazy('contact:coming_soon')
+
+    def get(self, request, *args, **kwargs):
+        tasks.hello_world.delay()
+        return super().get(request, *args, **kwargs)
 
     def form_valid(self, form):
         super().form_valid(form)
