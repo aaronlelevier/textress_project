@@ -14,3 +14,4 @@ media
 *.ipynb*
 vendor/
 config.rst
+dump.rdb
