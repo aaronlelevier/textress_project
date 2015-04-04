@@ -13,23 +13,13 @@ from utils import email
 
 class ComingSoonView(CreateView):
     '''
-    NEXT
-    ----
-    write tests
-    Change Template verbiage to "Textress"
-    coming_soon date = Jun 21st
-    change to use a Django Form in Template
+    Landing page for Launch of site.
     '''
-
     template_name = 'biz/coming_soon.html'
     form_class = NewsletterForm
     model = Newsletter
     fields = ['email']
     success_url = reverse_lazy('contact:coming_soon')
-
-    def get(self, request, *args, **kwargs):
-        tasks.add.delay(1,1)
-        return super().get(request, *args, **kwargs)
 
     def form_valid(self, form):
         super().form_valid(form)
