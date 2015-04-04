@@ -28,7 +28,7 @@ class ComingSoonView(CreateView):
     success_url = reverse_lazy('contact:coming_soon')
 
     def get(self, request, *args, **kwargs):
-        tasks.hello_world.delay()
+        tasks.add.delay(1,1)
         return super().get(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -37,6 +37,10 @@ class ComingSoonView(CreateView):
         
         # dispatch to Celery
         obj = Newsletter.objects.get(email=form.cleaned_data['email'])
-        email.send(obj)
+        tasks.send_email.delay(
+            to=obj.email,
+            subject='email/coming_soon_subject.txt',
+            html_content='email/coming_soon_email.html'
+            )
 
         return HttpResponseRedirect(self.get_success_url())

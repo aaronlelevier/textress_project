@@ -110,11 +110,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 ### EMAIL ###
 
+DEFAULT_FROM_EMAIL = 'sayhello@textress.com'
 DEFAULT_EMAIL_SAYHELLO = 'sayhello@textress.com'
 DEFAULT_EMAIL_ADMIN = 'admin@textress.com'
 DEFAULT_EMAIL_SUPPORT = 'support@textress.com'
 DEFAULT_EMAIL_BILLING = 'billing@textress.com'
-
+DEFAULT_EMAIL_AARON = 'aaron@textress.com'
+DEFAULT_EMAIL_NOREPLY = 'noreply@textress.com'
 
 ### OTHER CONTACT INFO ###
 TEXTRESS_PHONE_NUMBER = '775-419-4000'
