@@ -1,8 +1,8 @@
 import os
 import sys
 
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+# ``textress/`` is the base dir
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 
 # Quick-start development settings - unsuitable for production
@@ -12,11 +12,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 SECRET_KEY = os.environ['T17_SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
 
-TEMPLATE_DEBUG = True
+# TEMPLATE_DEBUG = DEBUG
 
-ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -88,7 +88,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-SITE_URL = "localhost:8000"
+# SITE_URL = "localhost:8000"
 SITE_NAME = 'Textress'
 
 
