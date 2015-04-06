@@ -15,4 +15,3 @@ media
 vendor/
 config.rst
 dump.rdb
-local.py

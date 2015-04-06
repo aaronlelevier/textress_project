@@ -1,0 +1,17 @@
+db:
+  image: postgres
+redis:
+  image: redis
+ubuntu:
+  image: ubuntu:trusty
+web:
+  build: .
+  command: python textress/manage.py runserver 0.0.0.0:8000
+  volumes:
+    - .:/code
+  ports:
+    - "8000:8000"
+  links:
+    - ubuntu
+    - db
+    - redis

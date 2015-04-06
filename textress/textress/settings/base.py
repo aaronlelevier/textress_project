@@ -5,21 +5,8 @@ import sys
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ['T17_SECRET_KEY']
 
-# SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
-
-# TEMPLATE_DEBUG = DEBUG
-
-# ALLOWED_HOSTS = ['*']
-
-
-# Application definition
 
 DEFAULT_APPS = (
     'django.contrib.admin',
@@ -59,15 +46,12 @@ ROOT_URLCONF = 'textress.urls'
 WSGI_APPLICATION = 'textress.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/1.7/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', 
-        'NAME': 'textra_17',                     
-        'USER': os.environ['ASQL_DB_USER'],
-        'PASSWORD': os.environ['ASQL_DB_PASSWORD'], 
+        'NAME': os.environ['T17_DB_NAME'],                     
+        'USER': os.environ['T17_DB_USER'],
+        'PASSWORD': os.environ['T17_DB_PASSWORD'], 
         'HOST': 'localhost',                      
         'PORT': '5432',                      
         'OPTIONS': {
@@ -88,12 +72,9 @@ USE_L10N = True
 
 USE_TZ = True
 
-# SITE_URL = "localhost:8000"
+
 SITE_NAME = 'Textress'
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.7/howto/static-files/
 
 TEMPLATE_DIRS = (
     os.path.join(BASE_DIR, 'templates'),
@@ -109,7 +90,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
 ### EMAIL ###
-
 DEFAULT_FROM_EMAIL = 'sayhello@textress.com'
 DEFAULT_EMAIL_SAYHELLO = 'sayhello@textress.com'
 DEFAULT_EMAIL_ADMIN = 'admin@textress.com'
@@ -119,8 +99,7 @@ DEFAULT_EMAIL_AARON = 'aaron@textress.com'
 DEFAULT_EMAIL_NOREPLY = 'noreply@textress.com'
 
 ### OTHER CONTACT INFO ###
-TEXTRESS_PHONE_NUMBER = '775-419-4000'
-
+TEXTRESS_PHONE_NUMBER = os.environ['T17_PHONE_NUMBER'] 
 
 
 ### 3RD PARTY APPS CONFIG ###

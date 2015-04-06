@@ -22,7 +22,7 @@ class ComingSoonView(CreateView):
     success_url = reverse_lazy('contact:coming_soon')
 
     def form_valid(self, form):
-        super().form_valid(form)
+        super(ComingSoonView, self).form_valid(form)
         messages.info(self.request, dj_messages['coming_soon'])
         
         # dispatch to Celery
