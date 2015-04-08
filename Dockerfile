@@ -1,12 +1,16 @@
-FROM python:3.4
-FROM postgres:latest
 FROM ubuntu:trusty
-FROM redis:latest
-FROM rabbitmq
+MAINTAINER Aaron Lelevier <pyaaron@gmail.com>
+
+# FROM python:3.4
+# FROM postgres
+# FROM redis
+# FROM rabbitmq
 
 RUN apt-get update
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential git python python-dev python-setuptools nginx sqlite3 supervisor
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential git python python-dev python-setuptools nginx supervisor
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y postgresql postgresql-contrib
+
 RUN easy_install pip
 RUN pip install uwsgi
 
@@ -20,10 +24,10 @@ RUN ln -s /opt/django/supervisord.conf /etc/supervisor/conf.d/
 RUN pip install -r /opt/django/requirements.txt
 
 # Expose RabbitMQ port
-EXPOSE 5672
+# EXPOSE 5672
 
 # Expose Redis port
-EXPOSE 6379
+# EXPOSE 6379
 
 VOLUME ["/opt/django/textress"]
 EXPOSE 80
