@@ -11,7 +11,7 @@ To start all background process, in separate terminals run
 Docker
 ------
 CMD:
-    docker images | grep "ubuntu" | awk '{print $3}' | xargs docker rmi -f
+    docker images | grep "<none>" | awk '{print $3}' | xargs docker rmi -f
 
 Reference:
     http://stackoverflow.com/questions/17236796/how-to-remove-old-docker-containers
