@@ -17,5 +17,13 @@ to
 
 Common Commands
 ---------------
-`salt '*' network.ip_addrs`
+# get all IP addresses for master and minions
+salt '*' network.ip_addrs
 
+# send state to all
+salt '*' state.sls <state_name>
+
+# send out `highstate` from /srv/salt/top.sls
+salt '*' state.highstate
+[note: the '*' is always an arg, so if I want to send out state to only certain
+minions, then I would just name them there instead of '*']
