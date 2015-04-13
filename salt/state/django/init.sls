@@ -1,8 +1,8 @@
-python-pip:
-  pkg.installed
+include:
+    - packages
   
 django:
     pip.installed:
         - requirements: salt://django/requirements.txt
         - require: 
-            - pkg: python-pip
+            - sls: packages

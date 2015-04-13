@@ -16,3 +16,4 @@ vendor/
 config.rst
 dump.rdb
 cloud.providers
+settings.sls

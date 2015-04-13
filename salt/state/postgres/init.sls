@@ -4,6 +4,7 @@ pg_pkgs:
             - postgresql-9.3
             - postgresql-contrib
             - postgresql-client
+            - postgresql-server-dev-9.3
 
 db:
     postgres_database.present:
