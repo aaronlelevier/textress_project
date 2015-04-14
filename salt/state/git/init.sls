@@ -1,6 +1,6 @@
 git:
     pkg.installed: []
-    
+
 bitbucket.org:
     ssh_known_hosts:
         - present
@@ -16,7 +16,7 @@ github.com:
 git-website-prod:
     git.latest:
         - name: git@bitbucket.org:pyaaron/textra_17.git
-        - rev: latest
+        - rev: master
         - target: /opt/django
         - identity: /root/.ssh/id_rsa
         - require:
