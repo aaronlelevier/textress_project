@@ -41,6 +41,12 @@ Minion
 salt-call <commands...>
 
 
+Grains
+------ 
+# sync minion grains on start
+http://docs.saltstack.com/en/latest/topics/reactor/index.html#minion-start-reactor
+
+
 Pillar
 ------
 # walkthrough:
