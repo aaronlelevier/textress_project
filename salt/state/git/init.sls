@@ -1,6 +1,13 @@
 git:
     pkg.installed: []
 
+key-perms:
+    cmd.run:
+        - name: chmod 400 id_rsa
+        - cwd: /root/.ssh
+        - user: root
+        - group: root
+
 bitbucket.org:
     ssh_known_hosts:
         - present
