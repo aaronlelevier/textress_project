@@ -15,7 +15,7 @@ DATABASES = {
         'NAME': '{{ pillar["T17_DB_NAME"] }}',                     
         'USER': '{{ pillar["T17_DB_USER"] }}',
         'PASSWORD': '{{ pillar["T17_DB_PASSWORD"] }}', 
-        'HOST': 'localhost',                      
+        'HOST': '{{ pillar["MINION_IP"] }}',                      
         'PORT': '5432',                      
         'OPTIONS': {
             'autocommit': True,
