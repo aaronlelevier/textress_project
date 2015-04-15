@@ -27,10 +27,12 @@ class ComingSoonView(CreateView):
         
         # dispatch to Celery
         obj = Newsletter.objects.get(email=form.cleaned_data['email'])
-        tasks.send_email.delay(
-            to=obj.email,
-            subject='email/coming_soon_subject.txt',
-            html_content='email/coming_soon_email.html'
-            )
+
+        ## comment out to test w/o redis/rabbitmq
+        # tasks.send_email.delay(
+        #     to=obj.email,
+        #     subject='email/coming_soon_subject.txt',
+        #     html_content='email/coming_soon_email.html'
+        #     )
 
         return HttpResponseRedirect(self.get_success_url())
