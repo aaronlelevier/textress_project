@@ -46,6 +46,17 @@ Grains
 # sync minion grains on start
 http://docs.saltstack.com/en/latest/topics/reactor/index.html#minion-start-reactor
 
+# reload grains
+salt '*' saltutil.sync_grains
+
+or
+
+salt '*' state.highstate
+
+note
+    if keys or _grains dir isn't correctly created, won't raise erros, but key/values will be missing from:
+        `salt '*' grains.items`
+
 
 Pillar
 ------

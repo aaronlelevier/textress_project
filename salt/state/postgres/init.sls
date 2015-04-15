@@ -8,8 +8,8 @@ pg_pkgs:
 
 db:
     postgres_database.present:
-        - name: textra_17
-        - db_user: postgres
-        - db_password: postgres
+        - name: {{ grains['T17_DB_NAME']}}
+        - db_user: {{ grains['T17_DB_USER']}}
+        - db_password: {{ grains['T17_DB_PASSWORD']}}
         - db_port: 5432
-        - user: postgres
+        - user: {{ grains['T17_DB_USER']}}
