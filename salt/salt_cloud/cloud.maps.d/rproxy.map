@@ -1,0 +1,6 @@
+ubuntu_512MB_ny3:
+    - nginx-rproxy
+
+ubuntu_1GB_ny3:
+    - appserver-01
+    - appserver-02
