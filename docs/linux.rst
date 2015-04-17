@@ -31,3 +31,9 @@ nginx
 -----
 # make unix websocket executable
 chomod 0666 textress.sock
+
+uWSGI
+-----
+# test app runs
+# CWD (working dir) needs to be=> /opt/django
+uwsgi --socket textress.sock --wsgi-file /opt/django/textress.wsgi --chmod-socket=666

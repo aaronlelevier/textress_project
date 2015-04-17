@@ -8,7 +8,7 @@ from contact import tasks
 from contact.forms import NewsletterForm
 from contact.models import Newsletter
 from utils.messages import dj_messages
-from utils import email
+from utils.email import Email
 
 
 class ComingSoonView(CreateView):
@@ -34,5 +34,13 @@ class ComingSoonView(CreateView):
         #     subject='email/coming_soon_subject.txt',
         #     html_content='email/coming_soon_email.html'
         #     )
+        
+        # send email w/o Celery
+        email = Email(
+            to=obj.email,
+            subject='email/coming_soon_subject.txt',
+            html_content='email/coming_soon_email.html'
+        )
+        email.msg.send()
 
         return HttpResponseRedirect(self.get_success_url())
