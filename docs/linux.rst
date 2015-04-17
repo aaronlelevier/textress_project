@@ -25,3 +25,9 @@ fuser -k 8000/tcp
 
 # kill using pid #
 kill -9 pid
+
+
+nginx
+-----
+# make unix websocket executable
+chomod 0666 textress.sock

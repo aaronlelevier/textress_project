@@ -2,9 +2,6 @@
 *.py[co]
 *.swp
 *.db
-*.jpg
-*.png
-*.gif
 .DS_Store
 .coverage
 static/
