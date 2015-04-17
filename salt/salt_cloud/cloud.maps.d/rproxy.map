@@ -15,10 +15,10 @@ ubuntu_1GB_ny3:
                     interface: eth0
             grains:
                 roles: appserver
-    - appserver-02:
+    - database-01:
         minion:
             mine_functions:
                 network.ip_addrs:
                     interface: eth0
             grains:
-                roles: appserver
+                roles: database
