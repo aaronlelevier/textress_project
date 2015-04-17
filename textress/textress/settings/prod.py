@@ -1,7 +1,7 @@
 from textress.settings.base import *
 
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['textress.com']
 
@@ -13,7 +13,7 @@ DATABASES = {
         'NAME': os.environ['T17_DB_NAME'],                     
         'USER': os.environ['T17_DB_USER'],
         'PASSWORD': os.environ['T17_DB_PASSWORD'], 
-        'HOST': '45.55.157.193',                      
+        'HOST':  'localhost' #'45.55.157.193',                      
         'PORT': '5432',                      
         'OPTIONS': {
             'autocommit': True,
