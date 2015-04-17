@@ -7,15 +7,11 @@
 *.gif
 .DS_Store
 .coverage
-clipone/
 static/
-media
 /__pycache__
 *.ipynb*
 vendor/
 config.rst
 dump.rdb
-cloud.providers
-settings.sls
 **/environ/init.sls
 digital_ocean.conf
