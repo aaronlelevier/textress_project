@@ -1,6 +1,24 @@
 ubuntu_512MB_ny3:
-    - nginx-rproxy
+    - nginx-rproxy:
+        minion:
+            mine_functions:
+                network.ip_addrs:
+                    interface: eth0
+            grains:
+                roles: rproxy
 
 ubuntu_1GB_ny3:
-    - appserver-01
-    - appserver-02
+    - appserver-01:
+        minion:
+            mine_functions:
+                network.ip_addrs:
+                    interface: eth0
+            grains:
+                roles: appserver
+    - appserver-02:
+        minion:
+            mine_functions:
+                network.ip_addrs:
+                    interface: eth0
+            grains:
+                roles: appserver
