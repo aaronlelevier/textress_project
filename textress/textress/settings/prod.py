@@ -10,11 +10,11 @@ SITE_URL = "textress.com"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', 
-        'NAME': os.environ['T17_DB_NAME'],                     
+        'NAME': os.environ['T17_DB_NAME'],
         'USER': os.environ['T17_DB_USER'],
         'PASSWORD': os.environ['T17_DB_PASSWORD'], 
-        'HOST':  'localhost', #'45.55.157.193',                      
-        'PORT': '5432',                      
+        'HOST': '104.131.57.229', # 'localhost',
+        'PORT': '5432',
         'OPTIONS': {
             'autocommit': True,
             },

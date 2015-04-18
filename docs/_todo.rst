@@ -39,3 +39,39 @@ steps needed:
 
     - create a log dir / file for uwsgi here:
         /var/log/uwsgi/textress.log
+
+    * no "daemonize for now" b/c harder to kill uwsgi process
+
+
+4-18-15
+-------
+TODO
+    
+    ssl cert for new server(s)?
+    
+    separate servers
+        salt
+        nginx-rproxy
+        appserver-01
+        database-01
+
+
+- change Nginx / uWSGI config to run using Salt State
+
+    :nodename:
+        the server node name assigned by Salt
+
+- db server config
+    
+    - hardcode db IP to django project & c if it runs under uwsgi
+    - replace as a `salt.mine('roles:database')
+
+
+
+
+
+
+
+
+
+

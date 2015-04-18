@@ -10,10 +10,11 @@ base:
         - users
         - cmd
 
-    # main django application server
-    'salt':
+    'nginx-rproxy':
         - nginx
 
-    # postres db server
-    'minion':
+    'appserver-01':
+        - uwsgi # todo: build this
+
+    'database-01':
         - postgres
