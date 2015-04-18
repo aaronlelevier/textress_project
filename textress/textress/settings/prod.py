@@ -3,7 +3,10 @@ from textress.settings.base import *
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['textress.com']
+ALLOWED_HOSTS = [
+    'textress.com',
+    '104.131.57.229'
+]
 
 SITE_URL = "textress.com"
 

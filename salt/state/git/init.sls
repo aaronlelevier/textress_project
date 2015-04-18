@@ -1,12 +1,8 @@
-git:
-    pkg.installed: []
+include:
+- keys
 
-key-perms:
-    cmd.run:
-        - name: chmod 400 id_rsa
-        - cwd: /root/.ssh
-        - user: root
-        - group: root
+git:
+    pkg.installed
 
 bitbucket.org:
     ssh_known_hosts:
@@ -27,5 +23,6 @@ git-website-prod:
         - target: /opt/django
         - identity: /root/.ssh/id_rsa
         - require:
+            - sls: keys
             - pkg: git
             - ssh_known_hosts: bitbucket.org

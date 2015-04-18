@@ -17,6 +17,9 @@ ssh-add <path_to_key>
 # get ssh rsa fingerprint
 ssh-keygen -lf ~/.ssh/id_rsa.pub
 
+# required permissions for private / public keys
+chmod 0400 <key>
+
 
 ports
 -----
