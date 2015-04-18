@@ -33,3 +33,5 @@ steps needed:
             ssl_certificate_key /etc/nginx/ssl/textress.com.key;
 
 - then uWSGI
+    
+    - ini file: copy Dockerfile orig `ini` setup n c if that works
