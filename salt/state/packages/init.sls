@@ -10,3 +10,4 @@ mypkgs:
             - python-setuptools
             - supervisor
             - libncurses5-dev
+            - uwsgi-plugin-python

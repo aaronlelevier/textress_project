@@ -37,3 +37,6 @@ uWSGI
 # test app runs
 # CWD (working dir) needs to be=> /opt/django
 uwsgi --socket textress.sock --wsgi-file /opt/django/textress.wsgi --chmod-socket=666
+
+# test `ini` file
+uwsgi --ini /opt/django/uwsgi.ini
