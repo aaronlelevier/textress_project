@@ -35,3 +35,7 @@ steps needed:
 - then uWSGI
     
     - ini file: copy Dockerfile orig `ini` setup n c if that works
+    - needed `socket` assignment still in .wsgi file
+
+    - create a log dir / file for uwsgi here:
+        /var/log/uwsgi/textress.log
