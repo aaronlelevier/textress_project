@@ -5,6 +5,18 @@ ps --sort -rss -eo rss,pid,command | head
 free -m
 
 
+echo
+----
+# insert date into file
+echo Test Job ran at  `date` >> /var/log/testjob.log
+
+
+ubuntu server
+-------------
+# reboot
+shutdown -r now
+
+
 ssh
 ---
 # generate ssh key
