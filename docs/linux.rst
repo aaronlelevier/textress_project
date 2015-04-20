@@ -4,6 +4,10 @@ ps --sort -rss -eo rss,pid,command | head
 # free memory
 free -m
 
+# completely remove a package
+apt-get remove <package>
+apt-get purge <package>
+
 
 echo
 ----
@@ -40,18 +44,3 @@ fuser -k 8000/tcp
 
 # kill using pid #
 kill -9 pid
-
-
-nginx
------
-# make unix websocket executable
-chomod 0666 textress.sock
-
-uWSGI
------
-# test app runs
-# CWD (working dir) needs to be=> /opt/django
-uwsgi --socket textress.sock --wsgi-file /opt/django/textress.wsgi --chmod-socket=666
-
-# test `ini` file
-uwsgi --ini /opt/django/uwsgi.ini

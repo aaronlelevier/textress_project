@@ -2,6 +2,9 @@ supervisord
 -----------
 apt-get install supervisor
 
+# start
+supervisord -c /path/to/supervisord.conf
+
 # file location:
 /etc/supervisor/
 
