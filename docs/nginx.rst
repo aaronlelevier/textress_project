@@ -42,3 +42,31 @@ server {
 # reload nginx and run w/ uwsgi
 sudo /etc/init.d/nginx restart
 uwsgi --socket :9000 --wsgi-file test.py
+
+
+SSL
+---
+https://www.digitalocean.com/community/tutorials/how-to-create-an-ssl-certificate-on-nginx-for-ubuntu-14-04
+
+# cert location
+/etc/nginx/ssl/
+
+# key
+openssl genrsa -out /etc/nginx/ssl/textress.com.key 2048
+
+# csr
+openssl req -new -sha256 -key /etc/nginx/ssl/textress.com.key -out /etc/nginx/ssl/textress.com.csr
+
+
+
+
+
+
+
+
+
+
+
+
+
+
