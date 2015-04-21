@@ -2,6 +2,7 @@
 *.py[co]
 *.swp
 *.db
+*.pid
 .DS_Store
 .coverage
 static/
