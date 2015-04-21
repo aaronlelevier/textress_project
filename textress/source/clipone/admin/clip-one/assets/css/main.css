@@ -3767,8 +3767,8 @@ div.timeline_element.purple div.timeline_title {
 .timer-area {
 	background-image: url("../images/bg.png");
 	background-color: rgba(0, 0, 0, 0);
-	margin-bottom: 4em;
-	padding-top: 2em;
+	margin-bottom: 1em;
+	padding-top: 1em;
 	color: #1F2225;
 	font: 1em/1.5em "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
 }
@@ -3783,7 +3783,7 @@ ul#countdown li {
 	display: inline-block;
 	background: transparent url('../images/timer-piece.png') no-repeat left top;
 	width: 104px;
-	margin-bottom: 4em;
+	margin-bottom: 1em;
 	text-align: center;
 }
 ul#countdown li span {

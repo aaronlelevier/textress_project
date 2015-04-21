@@ -5,7 +5,7 @@
 
 {% block body %}
     <div class="logo">
-        TEXT<img src="{% static 'images/textress_icon.jpg' %}" class="textress-icon">RESS
+        TEXT<a href="{% url 'contact:coming_soon' %}"><img src="{% static 'images/textress_icon.jpg' %}" class="textress-icon"></a>RESS
     </div>
     <div class="timer-area">
         <h1>We're coming soon...</h1>
@@ -64,6 +64,7 @@
             </div>
         </div>
     </div>
+    <br>
     <div class="copyright">
         2014-2015 &copy; Textress.
     </div>
