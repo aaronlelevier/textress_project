@@ -1,7 +1,7 @@
 from textress.settings.base import *
 
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     'textress.com',
