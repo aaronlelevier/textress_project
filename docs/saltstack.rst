@@ -1,5 +1,8 @@
 Install
 -------
+- Get the "Develop" branch in a 1 liner
+curl -L https://bootstrap.saltstack.com | sudo sh -s -- git develop
+
 - Install all dependencies from: http://docs.saltstack.com/en/latest/topics/installation/ubuntu.html 
 on the salt master server named `salt`
 
