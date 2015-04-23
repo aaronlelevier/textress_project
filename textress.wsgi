@@ -19,5 +19,4 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'textress.settings.prod'
 
 
 def application(environ, start_response):
-    os.environ['uwsgi.url_scheme'] = os.environ.get('HTTP_X_URL_SCHEME', 'http')
     return _application(environ, start_response)
