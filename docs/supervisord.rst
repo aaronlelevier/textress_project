@@ -31,10 +31,10 @@ unlink /run/supervisor.sock
 IF RESTART FAILS PROCESS
 ------------------------
 # 1st stop supervisord
-/etc/init.d/supervisor stop
+sudo /etc/init.d/supervisor stop
 
-# check that supervisor.sock is not connected
+# check that supervisor.sock is not connected [should not have to do this step]
 unlink /run/supervisor.sock
 
 # start explicitly saying which supervisor.conf file to use
-supervisord -c /path/to/supervisor.conf
+supervisord -c /opt/django/supervisord.conf
