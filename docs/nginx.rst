@@ -6,10 +6,10 @@ chomod 0666 textress.sock
 # test `conf` files
 nginx -t
 
-# start
+# START
 sudo /etc/init.d/nginx start 
 
-# restart
+# RESTART
 sudo /etc/init.d/nginx restart
 
 # remove default
