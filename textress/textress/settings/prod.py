@@ -1,7 +1,11 @@
+import os
+
 from textress.settings.base import *
 
+os.environ['HTTPS'] = True
+os.environ['wsgi.url_scheme'] = 'https'
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['textress.com']
 
@@ -20,3 +24,8 @@ DATABASES = {
             },
     }
 }
+
+# HTTPS
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE=True
