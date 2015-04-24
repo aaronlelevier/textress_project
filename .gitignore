@@ -14,3 +14,4 @@ dump.rdb
 **/environ/init.sls
 digital_ocean.conf
 *id_rsa*
+so_*
