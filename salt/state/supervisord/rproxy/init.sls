@@ -11,4 +11,4 @@ supervisor:
             - pkg: supervisor
             - sls: nginx
         - watch:
-            - file: nginx
+            - file: nginx-rproxy

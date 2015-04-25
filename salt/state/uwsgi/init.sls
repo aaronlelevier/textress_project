@@ -13,3 +13,11 @@ uwsgi:
         - template: jinja
         - require:
             - pkg: uwsgi
+    service.running:
+        - name: uwsgi
+        - enable: true
+        - require:
+            - pkg: uwsgi
+            - file: uwsgi
+        - watch:
+            - file: uwsgi
