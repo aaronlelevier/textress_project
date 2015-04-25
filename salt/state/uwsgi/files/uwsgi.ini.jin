@@ -1,6 +1,6 @@
 [uwsgi]
 # %d is the dir this configuration file is in
-socket = {{ salt['network.ip_addrs'][0] }}:9000 
+socket = {{ salt['network.ip_addrs']('eth0')[0] }}:9000 
 
 chmod-socket = 666
 master = True
