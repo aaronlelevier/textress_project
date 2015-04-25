@@ -1,5 +1,11 @@
 base:
-    # main django/pip reqs, apt-get packages
+
+    ## cmd
+    '*':
+        - cmd
+    'roles:rproxy':
+        - cmd.nginx
+
     '*':
         - bashrc
         - django
@@ -8,7 +14,6 @@ base:
         - git
         - keys
         - users
-        - cmd
 
     'nginx-rproxy':
         - nginx
