@@ -92,3 +92,15 @@ salt-cloud -P -m /etc/salt/cloud.maps.d/map-file.map
 salt-cloud -d -m /etc/salt/cloud.maps.d/map-file.map
 
 
+States
+------
+cmd
+
+    separate out cmds that need to be run on a per server-function basis
+
+
+
+
+
+
+
