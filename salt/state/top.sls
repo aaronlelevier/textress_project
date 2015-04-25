@@ -1,4 +1,7 @@
 base:
+    # update state from git repo
+    'salt':
+        - cmd.salt
 
     ## cmd
     '*':

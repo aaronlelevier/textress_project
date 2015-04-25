@@ -7,8 +7,17 @@ uwsgi --socket textress.sock --wsgi-file /opt/django/textress.wsgi --chmod-socke
 # test `ini` file
 uwsgi --ini /opt/django/uwsgi.ini
 
-# STOP uWSGI
+STOP uWSGI
+----------
 uwsgi --stop /tmp/textress-master.pid
+
+or
+
+# find all ``uwsgi`` pids
+ps ax | grep uwsgi
+
+# stop them
+killall -s INT /usr/local/bin/uwsgi
 
 
 
