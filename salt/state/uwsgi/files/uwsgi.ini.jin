@@ -2,6 +2,8 @@
 # %d is the dir this configuration file is in
 socket = {{ salt['network.ip_addrs']('eth0')[0] }}:9000 
 
+plugins = python
+
 chmod-socket = 666
 master = True
 processes = 4

@@ -1,4 +1,4 @@
-pg_pkgs:
+install-postgresql:
     pkg.installed:
         - pkgs: 
             - postgresql-9.3
@@ -13,3 +13,10 @@ db:
         - db_password: {{ grains['T17_DB_PASSWORD']}}
         - db_port: 5432
         - user: {{ grains['T17_DB_USER']}}
+
+run-postgresql:
+    service.running:
+        - enable: true
+        - name: postgresql
+        - require:
+            - pkg: postgresql

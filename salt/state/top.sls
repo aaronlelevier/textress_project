@@ -1,28 +1,26 @@
 base:
-    # update state from git repo
-    'salt':
-        - cmd.salt
-
-    ## cmd
     '*':
         - cmd
-    'roles:rproxy':
-        - cmd.nginx
-
-    '*':
         - bashrc
-        - django
         - packages
+        - pip
         - environ
         - git
         - keys
         - users
 
-    'nginx-rproxy':
-        - nginx
+    'salt':
+        - cmd.salt
 
-    'appserver-01':
-        - uwsgi # todo: build this
+    'roles:rproxy':
+        - cmd.rproxy
+        - cmd.collectstatic
+        - keys.ssl
+        - supervisord.rproxy
 
-    'database-01':
+    'roles:appserver':
+        - uwsgi
+        - supervisord.appserver
+
+    'roles:database':
         - postgres
