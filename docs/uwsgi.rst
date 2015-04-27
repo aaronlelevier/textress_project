@@ -21,6 +21,13 @@ killall -s INT /usr/local/bin/uwsgi
 
 
 
+Salt
+----
+Remember to call: ``salt -G 'roles:appserver' state.sls uwsgi`` and not just reload
+uwsgi via CL b/c ``uwsgi.ini`` uses Jinja templating and needs the IP refreshed for 
+the "appserver's" IP
+
+
 Emperor mode
 ------------
 http://uwsgi-docs.readthedocs.org/en/latest/tutorials/Django_and_nginx.html#emperor-mode
