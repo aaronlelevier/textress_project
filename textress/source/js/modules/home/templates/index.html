@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ngseed (0.2.1)</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div ui-view="features"></div>
+    <div ui-view="pricing"></div>
+</body>
+
+<footer></footer>
+
+<!-- Scripts -->
+<script src="vendor/requirejs/require.js"></script>
+<script>
+  // obtain requirejs config
+  require(['require', './js/config-require'], function (require, config) {
+
+    // set cache beater
+    config.urlArgs = 'bust=v0.4.0';
+
+    // update global require config
+    window.require.config(config);
+
+    // load app
+    require(['./js/main.js']);
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,522 @@
+[
+{
+  "fields": {
+    "modified": "2015-01-10T20:08:06.597Z",
+    "created": "2014-12-14T14:07:05.502Z",
+    "email": "pyaaron@gmail.com",
+    "short_pk": "HvvK6hEF5Y"
+  },
+  "pk": "cus_5KHaHvvK6hEF5Y",
+  "model": "payment.customer"
+},
+{
+  "fields": {
+    "modified": "2015-01-10T20:08:06.599Z",
+    "created": "2014-12-14T14:06:29.056Z",
+    "email": "pyaaron@gmail.com",
+    "short_pk": "L0GzxsiKTD"
+  },
+  "pk": "cus_5KHaL0GzxsiKTD",
+  "model": "payment.customer"
+},
+{
+  "fields": {
+    "modified": "2015-01-10T20:08:06.596Z",
+    "created": "2014-12-16T14:01:35.226Z",
+    "email": "pyaaron@gmail.com",
+    "short_pk": "JqCw0CFWZK"
+  },
+  "pk": "cus_5L1xJqCw0CFWZK",
+  "model": "payment.customer"
+},
+{
+  "fields": {
+    "modified": "2015-01-10T20:08:06.594Z",
+    "created": "2014-12-16T14:03:17.504Z",
+    "email": "pyaaron@gmail.com",
+    "short_pk": "imYfwn60Pc"
+  },
+  "pk": "cus_5L1yimYfwn60Pc",
+  "model": "payment.customer"
+},
+{
+  "fields": {
+    "modified": "2015-01-10T20:08:06.593Z",
+    "created": "2014-12-16T15:21:58.873Z",
+    "email": "pyaaron@gmail.com",
+    "short_pk": "zHHPlLNUVL"
+  },
+  "pk": "cus_5L3FzHHPlLNUVL",
+  "model": "payment.customer"
+},
+{
+  "fields": {
+    "modified": "2015-01-10T20:08:06.591Z",
+    "created": "2015-01-05T02:30:22.676Z",
+    "email": "pyaaron@gmail.com",
+    "short_pk": "R6kxTtNccA"
+  },
+  "pk": "cus_5SLKR6kxTtNccA",
+  "model": "payment.customer"
+},
+{
+  "fields": {
+    "modified": "2015-01-10T20:08:06.590Z",
+    "created": "2015-01-05T02:32:43.468Z",
+    "email": "pyaaron@gmail.com",
+    "short_pk": "m9YbZdjj16"
+  },
+  "pk": "cus_5SLMm9YbZdjj16",
+  "model": "payment.customer"
+},
+{
+  "fields": {
+    "modified": "2015-01-10T20:08:06.588Z",
+    "created": "2015-01-05T02:38:02.066Z",
+    "email": "pyaaron@gmail.com",
+    "short_pk": "0fW0D4hh9c"
+  },
+  "pk": "cus_5SLR0fW0D4hh9c",
+  "model": "payment.customer"
+},
+{
+  "fields": {
+    "modified": "2015-01-10T20:08:06.587Z",
+    "created": "2015-01-05T02:40:00.624Z",
+    "email": "pyaaron@gmail.com",
+    "short_pk": "iEui0IVAUW"
+  },
+  "pk": "cus_5SLTiEui0IVAUW",
+  "model": "payment.customer"
+},
+{
+  "fields": {
+    "modified": "2015-01-10T20:08:06.586Z",
+    "created": "2015-01-05T02:43:40.479Z",
+    "email": "pyaaron@gmail.com",
+    "short_pk": "yzb4iIPv6m"
+  },
+  "pk": "cus_5SLXyzb4iIPv6m",
+  "model": "payment.customer"
+},
+{
+  "fields": {
+    "modified": "2015-01-10T20:08:06.584Z",
+    "created": "2015-01-05T02:46:51.690Z",
+    "email": "pyaaron@gmail.com",
+    "short_pk": "fMacdSBcGl"
+  },
+  "pk": "cus_5SLafMacdSBcGl",
+  "model": "payment.customer"
+},
+{
+  "fields": {
+    "modified": "2015-01-10T20:08:06.583Z",
+    "created": "2015-01-05T02:49:10.099Z",
+    "email": "pyaaron@gmail.com",
+    "short_pk": "3zMuNwXMgr"
+  },
+  "pk": "cus_5SLc3zMuNwXMgr",
+  "model": "payment.customer"
+},
+{
+  "fields": {
+    "modified": "2015-01-10T20:08:06.581Z",
+    "created": "2015-01-05T02:53:21.507Z",
+    "email": "pyaaron@gmail.com",
+    "short_pk": "nueTaBu56Q"
+  },
+  "pk": "cus_5SLhnueTaBu56Q",
+  "model": "payment.customer"
+},
+{
+  "fields": {
+    "modified": "2015-01-10T20:08:06.580Z",
+    "created": "2015-01-05T02:54:37.108Z",
+    "email": "pyaaron@gmail.com",
+    "short_pk": "jbLQlrIfYg"
+  },
+  "pk": "cus_5SLijbLQlrIfYg",
+  "model": "payment.customer"
+},
+{
+  "fields": {
+    "modified": "2015-01-10T20:08:06.578Z",
+    "created": "2015-01-05T02:56:54.148Z",
+    "email": "pyaaron@gmail.com",
+    "short_pk": "aYq5ctH73z"
+  },
+  "pk": "cus_5SLkaYq5ctH73z",
+  "model": "payment.customer"
+},
+{
+  "fields": {
+    "modified": "2015-01-10T20:08:06.577Z",
+    "created": "2015-01-05T02:59:56.812Z",
+    "email": "pyaaron@gmail.com",
+    "short_pk": "FPUwWTcZUY"
+  },
+  "pk": "cus_5SLnFPUwWTcZUY",
+  "model": "payment.customer"
+},
+{
+  "fields": {
+    "modified": "2015-01-10T20:08:06.575Z",
+    "created": "2015-01-05T03:00:51.619Z",
+    "email": "pyaaron@gmail.com",
+    "short_pk": "oXgN2Rnln5"
+  },
+  "pk": "cus_5SLooXgN2Rnln5",
+  "model": "payment.customer"
+},
+{
+  "fields": {
+    "modified": "2015-01-10T20:08:06.574Z",
+    "created": "2015-01-05T03:01:36.338Z",
+    "email": "pyaaron@gmail.com",
+    "short_pk": "Txikva2jzw"
+  },
+  "pk": "cus_5SLpTxikva2jzw",
+  "model": "payment.customer"
+},
+{
+  "fields": {
+    "modified": "2015-01-10T20:08:06.572Z",
+    "created": "2015-01-05T03:19:27.412Z",
+    "email": "pyaaron@gmail.com",
+    "short_pk": "SjFE0wKztk"
+  },
+  "pk": "cus_5SM7SjFE0wKztk",
+  "model": "payment.customer"
+},
+{
+  "fields": {
+    "modified": "2015-01-10T20:08:06.571Z",
+    "created": "2015-01-05T03:20:48.291Z",
+    "email": "pyaaron@gmail.com",
+    "short_pk": "RzT0jjp973"
+  },
+  "pk": "cus_5SM8RzT0jjp973",
+  "model": "payment.customer"
+},
+{
+  "fields": {
+    "modified": "2015-01-10T20:08:06.569Z",
+    "created": "2015-01-05T14:20:12.543Z",
+    "email": "pyaaron@gmail.com",
+    "short_pk": "6jUtlRWr3e"
+  },
+  "pk": "cus_5SWl6jUtlRWr3e",
+  "model": "payment.customer"
+},
+{
+  "fields": {
+    "modified": "2015-01-10T20:08:06.568Z",
+    "created": "2015-01-05T14:23:32.975Z",
+    "email": "pyaaron@gmail.com",
+    "short_pk": "ZgUbUKRqQW"
+  },
+  "pk": "cus_5SWpZgUbUKRqQW",
+  "model": "payment.customer"
+},
+{
+  "fields": {
+    "created": "2015-01-04T16:40:20.873Z",
+    "exp_month": 12,
+    "exp_year": 2019,
+    "expires": "12 / 2019",
+    "modified": "2015-01-10T20:08:07.711Z",
+    "default": false,
+    "last4": 4242,
+    "short_pk": "kKhHYE7IrB",
+    "customer": "cus_5L3FzHHPlLNUVL",
+    "brand": "Visa"
+  },
+  "pk": "card_15HHQK2DyompLxkKhHYE7IrB",
+  "model": "payment.card"
+},
+{
+  "fields": {
+    "created": "2015-01-04T19:10:35.897Z",
+    "exp_month": 12,
+    "exp_year": 2019,
+    "expires": "12 / 2019",
+    "modified": "2015-01-10T20:08:07.709Z",
+    "default": false,
+    "last4": 4242,
+    "short_pk": "kK7MwaFIPI",
+    "customer": "cus_5L3FzHHPlLNUVL",
+    "brand": "Visa"
+  },
+  "pk": "card_15HJlj2DyompLxkK7MwaFIPI",
+  "model": "payment.card"
+},
+{
+  "fields": {
+    "created": "2015-01-04T19:32:34.999Z",
+    "exp_month": 12,
+    "exp_year": 2019,
+    "expires": "12 / 2019",
+    "modified": "2015-01-10T20:08:07.708Z",
+    "default": false,
+    "last4": 4242,
+    "short_pk": "kKzLJ8G9cD",
+    "customer": "cus_5L3FzHHPlLNUVL",
+    "brand": "Visa"
+  },
+  "pk": "card_15HK712DyompLxkKzLJ8G9cD",
+  "model": "payment.card"
+},
+{
+  "fields": {
+    "created": "2015-01-05T02:40:02.217Z",
+    "exp_month": 12,
+    "exp_year": 2019,
+    "expires": "12 / 2019",
+    "modified": "2015-01-10T20:08:07.706Z",
+    "default": false,
+    "last4": 4242,
+    "short_pk": "kKiXmwBv6E",
+    "customer": "cus_5SLTiEui0IVAUW",
+    "brand": "Visa"
+  },
+  "pk": "card_15HQmf2DyompLxkKiXmwBv6E",
+  "model": "payment.card"
+},
+{
+  "fields": {
+    "created": "2015-01-05T02:43:41.967Z",
+    "exp_month": 12,
+    "exp_year": 2019,
+    "expires": "12 / 2019",
+    "modified": "2015-01-10T20:08:07.705Z",
+    "default": false,
+    "last4": 4242,
+    "short_pk": "kKdlVKkwG2",
+    "customer": "cus_5SLXyzb4iIPv6m",
+    "brand": "Visa"
+  },
+  "pk": "card_15HQqA2DyompLxkKdlVKkwG2",
+  "model": "payment.card"
+},
+{
+  "fields": {
+    "created": "2015-01-05T02:46:52.920Z",
+    "exp_month": 12,
+    "exp_year": 2019,
+    "expires": "12 / 2019",
+    "modified": "2015-01-10T20:08:07.703Z",
+    "default": false,
+    "last4": 4242,
+    "short_pk": "kKH3KJgKTu",
+    "customer": "cus_5SLafMacdSBcGl",
+    "brand": "Visa"
+  },
+  "pk": "card_15HQtI2DyompLxkKH3KJgKTu",
+  "model": "payment.card"
+},
+{
+  "fields": {
+    "created": "2015-01-05T02:49:11.176Z",
+    "exp_month": 12,
+    "exp_year": 2019,
+    "expires": "12 / 2019",
+    "modified": "2015-01-10T20:08:07.701Z",
+    "default": false,
+    "last4": 4242,
+    "short_pk": "kKtjHcRT5R",
+    "customer": "cus_5SLc3zMuNwXMgr",
+    "brand": "Visa"
+  },
+  "pk": "card_15HQvW2DyompLxkKtjHcRT5R",
+  "model": "payment.card"
+},
+{
+  "fields": {
+    "created": "2015-01-05T02:53:22.646Z",
+    "exp_month": 12,
+    "exp_year": 2019,
+    "expires": "12 / 2019",
+    "modified": "2015-01-10T20:08:07.700Z",
+    "default": false,
+    "last4": 4242,
+    "short_pk": "kKmhO8JUG9",
+    "customer": "cus_5SLhnueTaBu56Q",
+    "brand": "Visa"
+  },
+  "pk": "card_15HQza2DyompLxkKmhO8JUG9",
+  "model": "payment.card"
+},
+{
+  "fields": {
+    "created": "2015-01-05T02:54:38.323Z",
+    "exp_month": 12,
+    "exp_year": 2019,
+    "expires": "12 / 2019",
+    "modified": "2015-01-10T20:08:07.698Z",
+    "default": false,
+    "last4": 4242,
+    "short_pk": "kKQmchMhQ6",
+    "customer": "cus_5SLijbLQlrIfYg",
+    "brand": "Visa"
+  },
+  "pk": "card_15HR0n2DyompLxkKQmchMhQ6",
+  "model": "payment.card"
+},
+{
+  "fields": {
+    "created": "2015-01-05T02:56:55.312Z",
+    "exp_month": 12,
+    "exp_year": 2019,
+    "expires": "12 / 2019",
+    "modified": "2015-01-10T20:08:07.697Z",
+    "default": false,
+    "last4": 4242,
+    "short_pk": "kKjjQ97SMy",
+    "customer": "cus_5SLkaYq5ctH73z",
+    "brand": "Visa"
+  },
+  "pk": "card_15HR302DyompLxkKjjQ97SMy",
+  "model": "payment.card"
+},
+{
+  "fields": {
+    "created": "2015-01-05T02:59:58.350Z",
+    "exp_month": 12,
+    "exp_year": 2019,
+    "expires": "12 / 2019",
+    "modified": "2015-01-10T20:08:07.695Z",
+    "default": false,
+    "last4": 4242,
+    "short_pk": "kKBdZPE8o6",
+    "customer": "cus_5SLnFPUwWTcZUY",
+    "brand": "Visa"
+  },
+  "pk": "card_15HR5x2DyompLxkKBdZPE8o6",
+  "model": "payment.card"
+},
+{
+  "fields": {
+    "created": "2015-01-05T03:00:53.704Z",
+    "exp_month": 12,
+    "exp_year": 2019,
+    "expires": "12 / 2019",
+    "modified": "2015-01-10T20:08:07.693Z",
+    "default": false,
+    "last4": 4242,
+    "short_pk": "kKJJq5nD6Z",
+    "customer": "cus_5SLooXgN2Rnln5",
+    "brand": "Visa"
+  },
+  "pk": "card_15HR6q2DyompLxkKJJq5nD6Z",
+  "model": "payment.card"
+},
+{
+  "fields": {
+    "created": "2015-01-05T03:01:37.525Z",
+    "exp_month": 12,
+    "exp_year": 2019,
+    "expires": "12 / 2019",
+    "modified": "2015-01-10T20:08:07.692Z",
+    "default": false,
+    "last4": 4242,
+    "short_pk": "kKyP00HEeF",
+    "customer": "cus_5SLpTxikva2jzw",
+    "brand": "Visa"
+  },
+  "pk": "card_15HR7Z2DyompLxkKyP00HEeF",
+  "model": "payment.card"
+},
+{
+  "fields": {
+    "created": "2015-01-05T14:23:33.970Z",
+    "exp_month": 12,
+    "exp_year": 2019,
+    "expires": "12 / 2019",
+    "modified": "2015-01-10T20:08:07.690Z",
+    "default": false,
+    "last4": 4242,
+    "short_pk": "kKr4eLXCkz",
+    "customer": "cus_5SWpZgUbUKRqQW",
+    "brand": "Visa"
+  },
+  "pk": "card_15HblV2DyompLxkKr4eLXCkz",
+  "model": "payment.card"
+},
+{
+  "fields": {
+    "created": "2015-01-06T13:52:49.008Z",
+    "exp_month": 12,
+    "exp_year": 2019,
+    "expires": "12 / 2019",
+    "modified": "2015-01-10T20:08:07.680Z",
+    "default": true,
+    "last4": 4242,
+    "short_pk": "kKEgAA4DQp",
+    "customer": "cus_5SWpZgUbUKRqQW",
+    "brand": "Visa"
+  },
+  "pk": "card_15HxlJ2DyompLxkKEgAA4DQp",
+  "model": "payment.card"
+},
+{
+  "fields": {
+    "amount": 1000,
+    "created": "2015-01-05T02:56:55.322Z",
+    "card": "card_15HR302DyompLxkKjjQ97SMy",
+    "modified": "2015-01-10T20:08:06.609Z",
+    "short_pk": "kKeWqJK2yT",
+    "customer": "cus_5SLkaYq5ctH73z"
+  },
+  "pk": "ch_15HR342DyompLxkKeWqJK2yT",
+  "model": "payment.charge"
+},
+{
+  "fields": {
+    "amount": 1000,
+    "created": "2015-01-05T02:59:58.360Z",
+    "card": "card_15HR5x2DyompLxkKBdZPE8o6",
+    "modified": "2015-01-10T20:08:06.608Z",
+    "short_pk": "kKU3dkmFrG",
+    "customer": "cus_5SLnFPUwWTcZUY"
+  },
+  "pk": "ch_15HR612DyompLxkKU3dkmFrG",
+  "model": "payment.charge"
+},
+{
+  "fields": {
+    "amount": 1000,
+    "created": "2015-01-05T03:00:53.714Z",
+    "card": "card_15HR6q2DyompLxkKJJq5nD6Z",
+    "modified": "2015-01-10T20:08:06.606Z",
+    "short_pk": "kKf0BK7bB6",
+    "customer": "cus_5SLooXgN2Rnln5"
+  },
+  "pk": "ch_15HR6u2DyompLxkKf0BK7bB6",
+  "model": "payment.charge"
+},
+{
+  "fields": {
+    "amount": 1000,
+    "created": "2015-01-05T03:01:37.536Z",
+    "card": "card_15HR7Z2DyompLxkKyP00HEeF",
+    "modified": "2015-01-10T20:08:06.605Z",
+    "short_pk": "kKGZgre9ak",
+    "customer": "cus_5SLpTxikva2jzw"
+  },
+  "pk": "ch_15HR7c2DyompLxkKGZgre9ak",
+  "model": "payment.charge"
+},
+{
+  "fields": {
+    "amount": 1000,
+    "created": "2015-01-05T14:23:34.391Z",
+    "card": "card_15HblV2DyompLxkKr4eLXCkz",
+    "modified": "2015-01-10T20:08:06.603Z",
+    "short_pk": "kKgudRRiSQ",
+    "customer": "cus_5SWpZgUbUKRqQW"
+  },
+  "pk": "ch_15Hbla2DyompLxkKgudRRiSQ",
+  "model": "payment.charge"
+}
+]

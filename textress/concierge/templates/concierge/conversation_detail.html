@@ -1,0 +1,27 @@
+{% extends "base_test.html" %}
+
+{% block main %}
+
+  <h1>Conversation Detail</h1>
+  <p>Object: {{ object }} </p>
+  <p>Conversation: {{ conversation }}</p>
+  <p>Guest: {{ guest }}</p>
+
+  <ul>
+    {% for message in guest_messages %}
+    <li>{{ message }}</li>
+    {% empty %}
+    <li>No Messages</li>
+    {% endfor %}
+  </ul>
+
+  <h3>Message Form</h3>
+  <form action="" method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Send" />
+  </form>
+
+  <!-- AngularJS "Include" tag -->
+  <div ui-view></div>
+
+{% endblock main %}

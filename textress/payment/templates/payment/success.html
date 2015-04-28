@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <h4>User</h4>
+        <p>{{ user.username }}</p>
+        <p>{{ user.email }}</p>
+        <br>
+        <h4>Hotel</h4>
+        <p>{{ hotel.name }}</p>
+        <p>{{ hotel.phone }}</p>
+        <p>Stripe customer id: {{ hotel.customer }}</p>
+        <br>
+        <h4>Stripe Plan</h4>
+        <p>{{ plan.description }}</p>
+        <br>
+        <p><a href="{% url 'accounts:account' %}">Go to Account and finish account setup</a></p>
+    </div>
+</body>
+
+</html>

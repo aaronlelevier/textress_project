@@ -1,0 +1,16 @@
+{% extends "base_test.html" %}
+
+{% block main %}
+    <h3>phone number list</h3>
+    <form action="" method="post">{% csrf_token %}
+        {% for radio in form.phone_numbers %}
+            {{ radio }}
+        {% empty %}
+            <p>No phone numbers on account.</p>
+        {% endfor %}
+        <input type="submit" value="Make Primary" />
+    </form>
+    <br>
+    <!-- Add Phone Numer -->
+    <a href="{% url 'sms:phone_number_select' %}"><button>Add</button><a/>
+{% endblock main %}

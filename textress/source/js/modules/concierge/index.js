@@ -1,0 +1,1 @@
+define(['./concierge-ctrl', './concierge-service'], function () {});

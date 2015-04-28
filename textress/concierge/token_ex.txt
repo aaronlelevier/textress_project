@@ -1,0 +1,3 @@
+curl -X GET http://127.0.0.1:8000/api/users/ -H 'Authorization: Token 2e3078736e651417aaf0059ce65a2345fc809bb2'
+
+curl -X GET http://127.0.0.1:8000/api/contact/ -H 'Authorization: Token 2e3078736e651417aaf0059ce65a2345fc809bb2'

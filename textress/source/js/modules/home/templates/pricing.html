@@ -1,0 +1,31 @@
+<h3>Pricing</h3>
+
+<h4>Estimated SMS Per Month</h4>
+<form>
+    <input ng-model="volume" ng-init="" type="number" value="[[ volume ]]" ng-submit="submit_volume(volume)">
+</form>
+
+<h4>Example Volumes</h4>
+<ul>
+    <li ng-repeat="volume in volumes"><a href="" ng-click="submit_volume(volume)">[[ volume ]]</a></li>
+</ul>
+
+<h4>SMS Volume: [[ volume ]]</h4>
+
+<h4>Cost: [[ calc_cost() | currency ]]</h4>
+
+<h4>Cost Table</h4>
+<table class="table">
+    <tr>
+        <th>Tier</th>
+        <th>Pricer per SMS</th>
+        <th>Description</th>
+        <th>SMS Sent</th>
+    </tr>
+    <tr ng-repeat="price in prices">
+        <td>[[ price.tier_name ]]</td>
+        <td>[[ price.price ]]</td>
+        <td>[[ price.desc ]]</td>
+        <td>[[ price.start ]] - [[ price.end ]]</td>
+    </tr>
+</table>

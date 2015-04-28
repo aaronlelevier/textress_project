@@ -1,6 +1,10 @@
 import os
 import sys
 
+DEBUG = True
+
+ALLOWED_HOSTS = ['*']
+
 # ``textress/`` is the base dir
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
@@ -13,23 +17,55 @@ DEFAULT_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
+    'django.contrib.flatpages',
 )
 
 THIRD_PARTY_APPS = (
     'psycopg2',
-    'djrill',
     'django_nose',
+    'rest_framework',
+    'rest_framework.authtoken',
     'djangular',
 )
 
 LOCAL_APPS = (
-    'account',
+    'main',
     'contact',
+    'sms',
+    'concierge',
+    'account',
+    'payment',
 )
 
 INSTALLED_APPS = DEFAULT_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+
+
+AUTHENTICATION_BACKENDS = (
+    # Defaulth Auth backend for Users registered via Django
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+
+### [TODO: will this be replaced by Redis ??]
+# For Cache templates and inc 
+# TEMPLATE_LOADERS = (
+#     ('django.template.loaders.cached.Loader', (
+#         'django.template.loaders.filesystem.Loader',
+#         'django.template.loaders.app_directories.Loader',
+#     )),
+# )
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.request',
+    'django.contrib.messages.context_processors.messages',
+    'django.core.context_processors.static',
+    )
 
 
 MIDDLEWARE_CLASSES = (
@@ -74,8 +110,9 @@ USE_L10N = True
 USE_TZ = True
 
 
+SITE =  "textress.com"
 SITE_NAME = 'Textress'
-
+SITE_URL = "localhost:8000/"
 
 TEMPLATE_DIRS = (
     os.path.join(BASE_DIR, 'templates'),
@@ -100,7 +137,25 @@ DEFAULT_EMAIL_AARON = 'aaron@textress.com'
 DEFAULT_EMAIL_NOREPLY = 'noreply@textress.com'
 
 ### OTHER CONTACT INFO ###
-TEXTRESS_PHONE_NUMBER = os.environ['T17_PHONE_NUMBER'] 
+TEXTRESS_PHONE_NUMBER = os.environ['T17_PHONE_NUMBER']
+
+COMPANY_NAME = "Textress"
+
+# Textress Concierge Settings
+SMS_LIMIT = 50
+# Default Costs for Accounts (Stripe Amounts ~ in cents)
+DEFAULT_MONTHLY_FEE = 500.0
+DEFAULT_SMS_COST = 5.5
+
+### Twilio Settings ###
+DEFAULT_TO_PH = "+17754194000"
+DEFAULT_TO_PH_2 = "+17023012823"
+DEFAULT_TO_PH_BAD = "+14043488557"
+
+DEFAULT_FROM_PH = os.environ['TWILIO_PHONE_NUMBER'] # +17024302691
+DEFAULT_FROM_PH_BAD = "+1234567890"
+
+RESERVED_REPLY_LETTERS = ['Y', 'S'] # 'H' for HELP will be added to each Hotel upon signup
 
 
 ### 3RD PARTY APPS CONFIG ###
@@ -109,6 +164,53 @@ TEXTRESS_PHONE_NUMBER = os.environ['T17_PHONE_NUMBER']
 MANDRILL_API_KEY = os.environ['T17_MANDRILL_API_KEY']
 EMAIL_BACKEND = "djrill.mail.backends.djrill.DjrillBackend"
 
+# DJANGO-REST-FRAMEWORK
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+        # 'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+    ),
+    'PAGINATE_BY': 10
+}
+
+# JWT_AUTH = {
+#     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=14),
+#     'JWT_ALLOW_REFRESH': True,
+#     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=14)
+# }
+
+# Celery
+# BROKER_URL = 'redis://127.0.0.1:6379/0'
+# BROKER_TRANSPORT = 'redis'
+# CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+
+
+if DEBUG:
+    # TWILIO
+    # Twilio LIVE account under: pyaaron@gmail.com.
+    PHONE_NUMBER = os.environ['TWILIO_PHONE_NUMBER']
+    TWILIO_ACCOUNT_SID = os.environ['TWILIO_ACCOUNT_SID']
+    TWILIO_AUTH_TOKEN = os.environ['TWILIO_AUTH_TOKEN']
+
+    # STRIPE
+    STRIPE_SECRET_KEY = os.environ['STRIPE_TEST_SECRET_KEY']
+    STRIPE_PUBLIC_KEY = os.environ['STRIPE_TEST_PUBLIC_KEY']
+else:
+    # TWILIO
+    # Twilio LIVE account under: pyaaron@gmail.com.
+    PHONE_NUMBER = os.environ['TWILIO_PHONE_NUMBER']
+    TWILIO_ACCOUNT_SID = os.environ['TWILIO_ACCOUNT_SID']
+    TWILIO_AUTH_TOKEN = os.environ['TWILIO_AUTH_TOKEN']
+    # STRIPE
+    STRIPE_SECRET_KEY = os.environ['STRIPE_LIVE_SECRET_KEY']
+    STRIPE_PUBLIC_KEY = os.environ['STRIPE_LIVE_PUBLIC_KEY']
+
+TWILIO_RESOURCE_URI = "www.twilio.com/2010-01-01/Accounts/"+TWILIO_ACCOUNT_SID
 
 ### TESTS ###
 

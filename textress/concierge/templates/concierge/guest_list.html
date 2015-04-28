@@ -1,0 +1,12 @@
+{% extends "base_test.html" %}
+
+{% block main %}
+  <h1>Guests</h1>
+  <ul>
+  {% for guest in object_list %}
+      <li><a href="{{ guest.get_absolute_url }}">{{ guest }}</a></li>
+  {% empty %}
+      <li>No guests yet.</li>
+  {% endfor %}
+  </ul>
+{% endblock main %}

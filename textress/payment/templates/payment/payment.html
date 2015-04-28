@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load stripe_tags %}
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <!-- Plan Info -->
+            <h4>TODO: Add more details about the plan here. Will also need a disclaimer, terms n cond's, etc..</h4>
+            <h4>Step1: User: {{ user.username }}</h4>
+            <h4>Step2: Hotel: {{ user.profile.hotel }}</h4>
+            <h4>Step3: Payment Settings:</h4>
+              <ul>
+                <li>Initial Payment: {{acct_cost.init_amt|stripe_money }}</li>
+                <li>If Balance falls Below: {{ acct_cost.balance_min|stripe_money }}</li>
+                <li>Refill Account to: {{ acct_cost.recharge_amt|stripe_money }}</li>
+              </ul>
+
+          <form action="" method="POST">{% csrf_token %}
+            <script
+              src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+              data-key="{{ publishable_key }}"
+              data-amount="{{ plan.amount }}"
+              data-name="Textress"
+              data-description="{{ plan.description }}">
+            </script>
+          </form>
+
+      </div>
+  </div>
+
+</body> 
+</html>

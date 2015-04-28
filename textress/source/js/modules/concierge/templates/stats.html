@@ -1,0 +1,5 @@
+<h4>Messages</h4>
+<div ng-repeat="(key, value) in messages | countBy: 'insert_date'">
+    <p>Group: [[ key ]], Count: [[ value ]]</p>
+</div>
+

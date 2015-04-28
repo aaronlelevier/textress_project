@@ -44,3 +44,22 @@ class ComingSoonView(CreateView):
         email.msg.send()
 
         return HttpResponseRedirect(self.get_success_url())
+
+
+########
+# REST #
+########
+
+class ContactListCreateAPIView(generics.ListCreateAPIView):
+    '''Admin Only Access For connecting with AngJs Contact form 
+    and testing Token Auth.'''
+
+    queryset = Contact.objects.all()
+    serializer_class = ContactSerializer
+    # permission_classes = (permissions.IsAdminUser,)
+
+    def list(self, request, *args, **kwargs):
+        '''For JSON Encoding.'''
+
+        serializer = ContactSerializer(self.queryset, many=True)
+        return Response(serializer.data)

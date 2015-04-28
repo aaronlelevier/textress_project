@@ -1,0 +1,1 @@
+define(['./biz-ctrl', './biz-service'], function () {});

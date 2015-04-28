@@ -1,12 +1,58 @@
 from django import forms
 from django.contrib import messages
 from django.core.exceptions import ValidationError
+from djangular.forms.fields import FloatField
 
-from contact.models import Newsletter
+from djangular.forms import NgFormValidationMixin
+from djangular.styling.bootstrap3.forms import (Bootstrap3Form,
+    Bootstrap3ModelForm)
+
+from contact.models import Contact, Newsletter
+from utils.email import send_contact_email
+
+
+class ContactForm(NgFormValidationMixin, Bootstrap3ModelForm):
+    '''
+    Main ContactForm for Biz Inquiries.
+
+    Have a ``Contact`` button that scrolls to bottom of business page, 
+    and 1 form will be at the bottom of the Single Business Homepage.
+    '''
+    form_name = 'contact_form'
+
+    class Meta:
+        model = Contact  
+        fields = ('name', 'email', 'subject', 'message',)
+        widgets = {
+            'message': forms.Textarea(attrs={'cols': 40, 'rows': 6.5}),
+        }
+
+
+class NewsletterFormAngular(NgFormValidationMixin, Bootstrap3Form):
+    '''
+    Footer Newsletter Form
+    ----------------------
+    For when site main Biz Homepage is redone to be in the Footer.
+
+    TODO
+    ----
+    Switch the "Landing Page" form out for this one when ready.
+    '''
+    form_name = 'newsletter_form'
+
+    email = forms.EmailField(label='E-Mail', required=True,
+        help_text='Please enter a valid email address')
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        obj, created = Newsletter.objects.get_or_create(email=email)
+        return obj.email
 
 
 class NewsletterForm(forms.ModelForm):
     '''
+    Landing Page Form
+    -----------------
     Will eventually show as the footer on most pages.
 
     For now, it is on the "coming soon" page. All early signups

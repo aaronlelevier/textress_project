@@ -1,0 +1,8 @@
+{% extends "base_test.html" %}
+
+{% block main %}
+  <h1>Guest Detail</h1>
+  <p>{{ object }} </p>
+  <p><a href="{% url 'concierge:guest_delete' object.pk %}"><button>Delete</button></a></p>
+  <p><a href="{% url 'concierge:guest_update' object.pk %}"><button>Update</button></a></p>
+{% endblock main %}

@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+
+
+{% block main %}
+<div id="content" role="main">
+    <section class="section swatch-blue  section-text-shadow section-inner-shadow section-normal section-opaque"  data-label="">
+        <div class="background-overlay grid-overlay-10 " style="background-color: rgba(0,0,0,0);"></div>
+        <div class="container">
+            <div class="row">
+                <header class="portfolio-header col-md-12 text-left  element-medium-top element-medium-bottom not-condensed" data-os-animation="none" data-os-animation-delay="0s" >
+                    <h1 class="portfolio-header-title bigger hairline no-bordered-header bordered-normal">
+                        Try It Out  
+                    </h1>
+                </header>
+            </div>
+        </div>
+    </section>
+
+    <section class="section swatch-white  section-text-no-shadow section-inner-no-shadow section-normal section-opaque"  data-label="">
+        <div class="background-overlay grid-overlay-0 " style="background-color: rgba(0,0,0,0);"></div>
+        <div class="container">
+            <div class="row">
+
+                <div class="col-md-8  text-default small-screen-default" >
+                    <div class="figure  element-medium-top element-short-bottom os-animation image-filter-grayscale image-filter-onhover fade-in text-center figcaption-middle normalwidth" data-os-animation="fadeInLeft" data-os-animation-delay="0s">
+                        <a href="{% static 'my-images/textress-flow-chart.jpg' %}" class="figure-image magnific" data-links="" target="_self">
+                            <img src="{% static 'my-images/textress-flow-chart.jpg' %}" alt="" class="normalwidth"/>
+                            <div class="figure-overlay grid-overlay-0">
+                                <div class="figure-overlay-container">
+                                    <span class="figure-icon">
+                                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100"  preserveaspectratio="none">
+                                            <g>
+                                                <line display="inline" fill="none"  stroke-width="1" stroke-miterlimit="10" x1="50.941" y1="34.953" x2="50.941" y2="65.047"/>
+                                                <line display="inline" fill="none" stroke-width="1" stroke-miterlimit="10" x1="65.988" y1="50" x2="35.895" y2="50"/>
+                                            </g>
+                                        </svg>
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-md-4  text-default small-screen-default" >
+                    <header class="text-left  element-medium-top element-short-bottom not-condensed os-animation" data-os-animation="fadeInRight" data-os-animation-delay="0.1s" >
+                        <h2 class="big light bordered bordered-small" >
+                            Give it a Try    
+                        </h2>
+                    </header>
+                    <div class=" element-no-top element-short-bottom os-animation" data-os-animation="fadeInRight" data-os-animation-delay="0s">
+                        <p class="lead">Find out what the weather is like right now in <strong>Las Vegas</strong> using the <em>Yahoo! Weather API</em>.</p>
+                        <p class="lead">Our SMS platform will send you a text message right now!</p> 
+                        <p class="lead">Enter a phone number.</p>
+                    </div>
+                    <div class="sidebar-widget  widget_search">
+                        <div class="my-form-errors">{{ form.non_field_errors }} </div>
+                        <form method="post" action="">{% csrf_token %}
+                            <div class="input-group">
+                                <input type="text" value="" name="to" class="form-control" id="id_to" placeholder="777-777-7777" required>
+                                <span class="input-group-btn">
+                                    <button class="btn" type="submit" value="Send">
+                                        <i class="fa fa-exchange"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        </form>
+                        {% if form.to.errors %}
+                            {% for error in form.to.errors %}
+                                <p class="my-form-field-error">{{ error|escape }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section swatch-gray">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <div class="col-md-3">
+                        <p class="lead text-left element-no-top element-short-bottom os-animation" data-os-animation="fadeIn" data-os-animation-delay="0.2s">
+                            <div class="row text-center">
+                                <img class="img-icon-width" src="{% static 'my-images/icons/event.jpg' %}">
+                            </div>
+                        </p>
+                    </div>
+                    <div class="col-md-8 col-md-offset-1">
+                        <header class="element-tall-top element-medium-bottom not-condensed os-animation" data-os-animation="fadeIn" data-os-animation-delay="0s">
+                            <h1 class="hairline bordered bordered-normal">
+                                It starts with the <strong>Event</strong>
+                            </h1>
+                        </header>
+                        <p class="lead text-left element-no-top element-normal-bottom os-animation" data-os-animation="fadeIn" data-os-animation-delay="0.2s">
+                            A Business Event at your Hotel initiates the transaction. For example, a guest has tried to check in early, but the room is not clean yet. At this step the housekeeping attendant has cleaned the room.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section swatch-white">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <div class="col-md-8">
+                    <header class="element-tall-top element-medium-bottom not-condensed os-animation" data-os-animation="fadeIn" data-os-animation-delay="0s">
+                        <h1 class="hairline bordered bordered-normal">
+                            The <strong>Hotel Sytem</strong> receives an update.
+                        </h1>
+                    </header>
+                        <p class="lead text-left element-no-top element-short-bottom os-animation" data-os-animation="fadeIn" data-os-animation-delay="0.2s">
+                            The Hotel System is updated as normal procedure that the room is now clean via the house keeping attendant punching a code into the phone in the hotel room for example.
+                        </p>
+                    </div>
+                    <div class="col-md-3 col-md-offset-1">
+                        <p class="lead text-left element-no-top element-normal-bottom os-animation" data-os-animation="fadeIn" data-os-animation-delay="0.2s">
+                            <div class="row text-center">
+                                <img class="img-icon-width" src="{% static 'my-images/icons/hotel.jpg' %}">
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+    </section>
+
+    <section class="section swatch-gray">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <div class="col-md-3">
+                        <p class="lead text-left element-no-top element-short-bottom os-animation" data-os-animation="fadeIn" data-os-animation-delay="0.2s">
+                            <div class="row text-center">
+                                <img class="img-icon-width" src="{% static 'my-images/icons/textress.jpg' %}">
+                            </div>
+                        </p>
+                    </div>
+                    <div class="col-md-8 col-md-offset-1">
+                        <header class="element-tall-top element-medium-bottom not-condensed os-animation" data-os-animation="fadeIn" data-os-animation-delay="0s">
+                            <h1 class="hairline bordered bordered-normal">
+                                <strong>Textress</strong> is alerted of the Business Event
+                            </h1>
+                        </header>
+                        <p class="lead text-left element-no-top element-normal-bottom os-animation" data-os-animation="fadeIn" data-os-animation-delay="0.2s">
+                            Textress is notified through a Secure Interface with the Hotel System of the Business Event, and will now communicate the information to the Hotel Guest.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section swatch-white">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <div class="col-md-8">
+                        <header class="element-tall-top element-medium-bottom not-condensed os-animation" data-os-animation="fadeIn" data-os-animation-delay="0s">
+                            <h1 class="hairline bordered bordered-normal">
+                                The <strong>Message</strong> is delivered to the Hotel Guest
+                            </h1>
+                        </header>                        
+                        <p class="lead text-left element-no-top element-short-bottom os-animation" data-os-animation="fadeIn" data-os-animation-delay="0.2s">
+                            The Hotel guest receives an SMS message that their room is now clean. This message is secure, and can be personally tailored to the Guest and to fit your Brand.
+                        </p>
+                    </div>
+                    <div class="col-md-3 col-md-offset-1">
+                        <p class="lead text-left element-no-top element-normal-bottom os-animation" data-os-animation="fadeIn" data-os-animation-delay="0.2s">
+                            <div class="row text-center">
+                                <img class="img-icon-width" src="{% static 'my-images/icons/message.jpg' %}">
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+    </section>
+
+</div>
+{% endblock main %}

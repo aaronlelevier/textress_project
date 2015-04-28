@@ -1,0 +1,30 @@
+<p>Guest Name: [[ guest.name ]]</p>
+<p>Phone Number: <span id="phone">[[ guest.phone_number ]]</span></p>
+<br>
+
+<div class="message-container">
+    <form ng-submit="submitMessage(body)">
+      <input name="messageForm" type="text" class="new-message-input" ng-model="body">
+      <input type="submit" id="submit" value="Submit" />
+  </form>
+</div>
+
+<br>
+
+<h5>Will send this message:</h5><span><em>[[ body ]]</em></span>
+
+<br>
+
+<h5>Incoming Messages</h5>
+<ul id="messages"></ul>
+
+<h5>Outgoing Messages</h5>
+<div class="messages" id="messages-target">
+  <div class="message-container" ng-repeat="message in messages">
+    <div class="message-body"><em>[[ message.created | date:'medium' ]]</em> -- [[ message.body | limitTo : 30 ]]</div>
+  </div>
+</div>
+
+
+
+

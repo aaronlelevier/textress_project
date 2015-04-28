@@ -451,14 +451,3 @@ class AcctTrans(AbstractBase):
             raise InvalidAmtException("Must be either a Debit or Credit.")
 
         return self.debit, self.credit
-
-
-
-
-
-
-
-
-
-
-
