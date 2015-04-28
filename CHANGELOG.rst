@@ -24,4 +24,7 @@ v0.1.1
 ------
 20150427:
 
+    **Note: 1 commit prior to the commit w/ this version # (v0.0.1) is the
+    stable commit in Prod.**
+
     1st stable release to production of *Landing Page* only
