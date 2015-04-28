@@ -1,0 +1,13 @@
+### Test ``curl`` commands to test the DRF API
+
+
+# Curl Post Message
+curl -u "dave":"1234" -X POST -H "Content-Type: application/json" -d '{"guest": 37,"user": 44,"hotel": 23,"to_ph": "+17754194000", "body":"curl test","from_ph": "+17028324062"}' http://localhost:8000/api/messages/
+
+# Guest
+curl -u "dave":"1234" -X POST -H "Content-Type: application/json" -d '{"hotel": 23, "name": "mike", "room_number": "123","phone_number": "+17028324062"}' http://localhost:8000/api/guests/
+
+# Python Requests
+r = requests.post('http://localhost:8000/api/messages/',
+                  data={"guest": 37,"user": 44,"hotel": 23,"to_ph": "+17754194000", "body":"curl test","from_ph": "+17028324062"},
+                  auth=('dave', '1234'))

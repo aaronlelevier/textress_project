@@ -1,0 +1,42 @@
+[
+{
+  "pk": 2,
+  "fields": {
+    "modified": "2015-01-05T01:13:18.378Z",
+    "name": "init_amt",
+    "desc": "initial account funding",
+    "created": "2014-12-27T13:47:57.473Z"
+  },
+  "model": "account.transtype"
+},
+{
+  "pk": 3,
+  "fields": {
+    "modified": "2015-01-05T01:13:52.203Z",
+    "name": "recharge_amt",
+    "desc": "Recharge amount selected by the Hotel",
+    "created": "2014-12-27T13:53:19.757Z"
+  },
+  "model": "account.transtype"
+},
+{
+  "pk": 4,
+  "fields": {
+    "modified": "2014-12-27T13:54:02.052Z",
+    "name": "sms_used",
+    "desc": "daily deduction for sms used for that day; cache - sms used during the day to save DB trips",
+    "created": "2014-12-27T13:54:02.052Z"
+  },
+  "model": "account.transtype"
+},
+{
+  "pk": 5,
+  "fields": {
+    "modified": "2015-01-04T23:28:28.339Z",
+    "name": "bulk_discount",
+    "desc": "credit applied from previous months use based on bulk",
+    "created": "2015-01-04T23:28:28.339Z"
+  },
+  "model": "account.transtype"
+}
+]

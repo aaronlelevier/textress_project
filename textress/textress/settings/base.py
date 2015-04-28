@@ -25,6 +25,7 @@ THIRD_PARTY_APPS = (
 )
 
 LOCAL_APPS = (
+    'account',
     'contact',
 )
 
@@ -115,7 +116,7 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 NOSE_ARGS = [
     '--with-coverage',
-    '--cover-package=textress,contact,utils',
+    '--cover-package=textress,account,contact,utils',
 ]
 
 if 'test' in sys.argv:

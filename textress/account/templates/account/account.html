@@ -1,0 +1,22 @@
+{% extends "base_test.html" %}
+
+{% block main %}
+    <h4>User: {{ user.username }}</h4>
+
+    <p><a href="{% url 'main:user_update' user.pk %}">Update User</a></p>
+
+    <p>Subaccount Sid: {{ hotel.subaccount.sid }}</p>
+    <p>Phone Number: {{ phone_number.friendly_name }}</p>
+    <p>Denormalized Hotel Phone Number - attached to Hotel Obj: {{ hotel.address_phone }}</p>
+
+    <a href="{% url 'main:create_user' %}"><button>Create User</button></a>
+    <a href="{% url 'main:create_manager' %}"><button>Create Manager</button></a>
+
+    <h3>Hotel Users</h3>
+    {% for up in user.profile.hotel.userprofile_set.all %}
+        <p>{{ up }}</p>
+    {% empty %}
+        <p>No Users</p>
+    {% endfor %}
+
+{% endblock main %}

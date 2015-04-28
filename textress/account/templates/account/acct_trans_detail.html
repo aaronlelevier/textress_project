@@ -1,0 +1,31 @@
+{% extends "base_test.html" %}
+{% load stripe_tags %}
+
+{% block main %}
+<h4>Montly transaction details</h4>
+
+    <h5>Initial Balance</h5>
+    <p>{{ init_balance|stripe_money }}</p>
+
+    <h5>Credit</h5>
+    <ul>
+    {% for trans in monthly_trans.credit %}
+        <li>{{ trans }}</li>
+    {% empty %}
+        <li>No Credit Transactions</li>
+    {% endfor %}
+    </ul>
+    <p>Credit Total: {{ monthly_trans.credit.balance|stripe_money }}</p>
+
+    <h5>Debit</h5>
+    <ul>
+    {% for trans in monthly_trans.debit %}
+        <li>{{ trans }}</li>
+    {% empty %}
+        <li>No Debit Transactions</li>
+    {% endfor %}
+    </ul>
+    <p>Debit Total: {{ monthly_trans.debit.balance|stripe_money }}</p>
+
+<h5>Balance: {{ balance|stripe_money }}</h5>
+{% endblock main %}
