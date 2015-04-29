@@ -1,5 +1,9 @@
 {% extends "biz/base.html" %}
 
+{% block main_css %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+{% endblock main_css %}
+
 {% block body %}
 <div class="container">
     <h3>Terms and Conditions</h3>
@@ -283,7 +287,6 @@
 
 
 {% block js %}
-    {{ block.super }}
     <script>
         function goBack()
           {

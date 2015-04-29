@@ -1,0 +1,29 @@
+{% extends "cpanel/auth-forms/base.html" %}
+
+{% block body_class %}login example2{% endblock %}
+
+{% block main_div_class %}main-login col-sm-4 col-sm-offset-4{% endblock %}
+
+{% block box_div_class %}box-login{% endblock %}
+
+{% block form_title %}Sign in to your Account{% endblock %}
+
+{% block form_tag %}class="form-login" name="{{ form.form_name }}" method="post" action="{% url 'login' %}" novalidate{% endblock %}
+
+{% block form_submission %}
+    <a href="{% url 'password_reset' %}">
+        <span>I forgot my password</span>
+    </a>
+    <button type="submit" class="btn btn-bricky pull-right" ng-disabled="{{ form.form_name }}.$invalid">
+        Login <i class="fa fa-arrow-circle-right"></i>
+    </button>
+{% endblock %}
+                
+{% block form_foot %}
+    <div class="new-account">
+        Don't have an account yet?
+        <a href="#" class="register">
+            Create an account
+        </a>
+    </div>
+{% endblock %}

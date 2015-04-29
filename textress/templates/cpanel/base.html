@@ -28,28 +28,16 @@
         <link rel="stylesheet" href="{% static 'clipone/admin/clip-one/assets/css/print.css' %}" type="text/css" media="print"/>
         
         <!-- TODO: connect favicont ? -->
-        <link rel="shortcut icon" href="{% static 'images/my-fa-phone.png' %}" />
+        <link rel="shortcut icon" href="favicon.ico" />
         {% endblock main_css %}
 
 
         {% block page_css %}
-        <link rel="stylesheet" href="{% static 'css/custom.css' %}" type="text/css" id="skin_color">
         {% endblock page_css %}
 
     </head>
-        <body {% block body_tag %}{% endblock %}>
-        
-        {% block django_messages %}
-            {% if messages %}
-            <div class="row" style="background-color: #363839;">
-                <div class="container">
-                {% for message in messages %}
-                    <h4 class="text-center" style="color: white;">{{ message }}</h4>
-                {% endfor %}</div>
-            </div>
-            {% endif %}
-        {% endblock django_messages %}
 
+        <!-- Contains the initial <body> tag all the way up until the start of the JS Scripts-->
         {% block body %}
         {% endblock body %}
 
@@ -80,17 +68,6 @@
             });
         </script>
         {% endblock init_js %}
-
-        {% block google_analytics %}
-        <script>
-            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-            ga('create', 'UA-57610281-1', 'auto');
-            ga('send', 'pageview');
-        </script>
-        {% endblock google_analytics %}
 
     </body>
 </html>

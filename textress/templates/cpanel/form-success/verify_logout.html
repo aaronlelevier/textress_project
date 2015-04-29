@@ -1,0 +1,19 @@
+{% extends "cpanel/form-success/base.html" %}
+
+{% block box_title %}
+    <div class="text-center">
+        <h3>Are you sure that you want to logout?</h3>
+    </div>
+{% endblock %}
+
+{% block box_message %}
+    <br>
+{% endblock %}
+
+{% block box_foot %}
+    <div class="row">
+        <div class="center">
+            <a href="{% url 'logout' %}"><button class="btn btn-primary">Logout</button></a>
+        </div>
+    </div>
+{% endblock %}
