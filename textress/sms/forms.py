@@ -3,10 +3,6 @@ from django.forms.widgets import RadioSelect
 from django.conf import settings
 from django.utils.timezone import now 
 
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Field, Submit, Div
-from crispy_forms.bootstrap import StrictButton
-
 from sms.models import Text, DemoCounter
 from sms.helpers import sms_messages, clean_to
 from utils.exceptions import DailyLimit
@@ -18,15 +14,6 @@ class DemoForm(forms.ModelForm):
         model = Text 
         fields = ('to',)
 
-    helper = FormHelper()
-    helper.form_method = 'POST'
-    helper.form_class = 'contact-form-standard' # 'form-inline'
-    # helper.field_class = 'col-lg-7'
-    helper.layout = Layout(
-        Field('to', placeholder='555-555-5555'),
-        Div(Submit('submit', 'Send', css_id='submit'),
-        )
-    )
 
     def clean(self):
         """

@@ -3,10 +3,6 @@ from django.conf import settings
 
 from twilio import twiml, TwilioRestException 
 
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Field, Submit, Div
-from crispy_forms.bootstrap import StrictButton
-
 from concierge.models import Message
 from sms.helpers import sms_messages, clean_to, send_message
 
@@ -16,13 +12,6 @@ class MessageForm(forms.ModelForm):
     class Meta:
         model = Message 
         fields = ('body',)
-
-    helper = FormHelper()
-    helper.form_method = 'POST'
-    helper.layout = Layout(
-        Div(Submit('submit', 'Send', css_id='submit'),
-        )
-    )
 
     def clean(self):
         cleaned_data = super().clean()

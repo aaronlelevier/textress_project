@@ -18,14 +18,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
     GroupRequiredMixin)
 
-from .models import Customer, Card, Charge
-from .forms import StripeForm
-from .helpers import signup_register_step4
-from .mixins import (StripeMixin, HotelContextMixin, HotelUserMixin,
-    HotelAdminCheckMixin, AdminOnlyMixin, HotelCardOnlyMixin,
-    AcctCostContextMixin)
+from payment.models import Customer, Card, Charge
+from payment.forms import StripeForm
+from payment.helpers import signup_register_step4
+from payment.mixins import (StripeMixin, HotelContextMixin, HotelUserMixin,
+    HotelAdminCheckMixin, AdminOnlyMixin, HotelCardOnlyMixin, AcctCostContextMixin)
 from account.models import AcctCost
-from utils.email import send_purchase_conf_email
 from main.models import Hotel
 from sms.models import PhoneNumber
 

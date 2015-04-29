@@ -13,10 +13,7 @@ from djangular.forms import NgFormValidationMixin
 from djangular.styling.bootstrap3.forms import (Bootstrap3Form,
     Bootstrap3ModelForm)
 
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, Div, HTML
-
-from .helpers import login_messages, salt
+from account.helpers import login_messages, salt
 from utils import email
 
 

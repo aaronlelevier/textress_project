@@ -127,6 +127,16 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
+### STATIC ACCOUNT URLS ###
+LOGIN_URL = '/account/login/'
+LOGIN_REDIRECT_URL = '/account/private/'
+LOGIN_ERROR_URL = '/account/login-error/'
+VERIFY_LOGOUT_URL = '/account/verify-logout/'
+REDIRECT_FIELD_NAME = '/'
+LOGIN_REDIRECT = '/account/conversation/'
+LOGIN_SUCCESS_URL = '/account/'
+
+
 ### EMAIL ###
 DEFAULT_FROM_EMAIL = 'sayhello@textress.com'
 DEFAULT_EMAIL_SAYHELLO = 'sayhello@textress.com'

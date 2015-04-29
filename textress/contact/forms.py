@@ -8,7 +8,6 @@ from djangular.styling.bootstrap3.forms import (Bootstrap3Form,
     Bootstrap3ModelForm)
 
 from contact.models import Contact, Newsletter
-from utils.email import send_contact_email
 
 
 class ContactForm(NgFormValidationMixin, Bootstrap3ModelForm):

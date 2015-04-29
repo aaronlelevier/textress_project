@@ -9,6 +9,12 @@ apt-get remove <package>
 apt-get purge <package>
 
 
+grep
+----
+# look for a string in files
+grep -rl "some string" /path
+
+
 echo
 ----
 # insert date into file

@@ -16,7 +16,6 @@ from .forms import (DemoForm, PhoneNumberForm, PhoneNumberSelectForm,
 from .helpers import send_text, sms_messages, get_weather
 from payment.views import HotelAdminCheckMixin
 from utils.exceptions import DailyLimit
-from utils.hotel import TwilioHotel
 
 
 class DemoView(FormView):
