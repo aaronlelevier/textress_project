@@ -203,9 +203,8 @@ class UserProfile(AbstractBase):
 
     class Meta:
         permissions = (
-            ("hotel_admin", "Hotel Admin: Full access to all Hotel functionality including Payment \
-                info, and open/closing of Account."),
-            ("hotel_manager", "Hotel Manager: Can add Users, view other Users stats, API access"),
+            ("hotel_admin", "hotel_admin"),
+            ("hotel_manager", "hotel_manager"),
         )
 
     def __str__(self):

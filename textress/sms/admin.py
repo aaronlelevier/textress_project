@@ -6,14 +6,7 @@ from django.forms import TextInput, Textarea
 from sms.models import Text, DemoCounter, PhoneNumber
 
 
-class TextForm(forms.ModelForm):
-
-    class Meta:
-        model = Text
-
-
 class TextAdmin(admin.ModelAdmin):
-    form = TextForm
     search_fields = ['body']
     list_display = ('created', 'sent', 'to', 'frm', 'body',)
     readonly_fields = ('created',)
