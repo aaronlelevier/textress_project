@@ -5,12 +5,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-# ``textress/`` is the base dir
+SITE_ID = 1
+
+# ``../textra_project/textress/`` is the base dir
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
-
 SECRET_KEY = os.environ['T17_SECRET_KEY']
-
 
 DEFAULT_APPS = (
     'django.contrib.admin',

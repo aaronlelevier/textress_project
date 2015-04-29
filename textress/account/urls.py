@@ -22,7 +22,7 @@ urlpatterns = patterns('',
     url(r'^$', views.AccountView.as_view(), name='account'),
 
     # Registration Views
-    url(r'^login/$', auth_views.login,
+    url(r'^login/$',auth_views.login,
         {'template_name': 'cpanel/auth-forms/login.html',
         'authentication_form': AuthenticationForm},
         name='login'),

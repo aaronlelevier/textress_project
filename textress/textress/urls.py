@@ -49,7 +49,7 @@ urlpatterns += patterns('',
     url(r'api/v1/auth/login/', 'rest_framework_jwt.views.obtain_jwt_token'),
     url(r'api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     # Pages
-    url(r'^404/$', handler404),
-    url(r'^500/$', handler500),
+    url(r'^404/$', handler404, name='404'),
+    url(r'^500/$', handler500, name='500'),
     url(r'^info/terms-and-conditions/$', TermsView.as_view(), name='terms'),
 )
