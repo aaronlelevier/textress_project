@@ -2930,9 +2930,9 @@ body.login .box-login, body.login .box-forgot, body.login .box-register {
 	overflow: hidden;
 	padding: 15px;
 }
-body.login .box-forgot, body.login .box-register, body.login .box-login {
+/*body.login .box-forgot, body.login .box-register, body.login .box-login {
 	display: none;
-}
+}*/
 body.login .form fieldset {
 	border: none;
 	margin: 0;

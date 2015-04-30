@@ -15,15 +15,86 @@ from django.utils import timezone
 
 from model_mommy import mommy
 
-from .factory import make_acct_stmts, make_acct_trans
-
-from ..models import AcctStmt, TransType, AcctTrans
-
+from account.models import AcctStmt, TransType, AcctTrans
+from account.tests.factory import make_acct_stmts, make_acct_trans
 from main.models import Hotel
 from main.tests.factory import create_hotel, make_subaccount
 from payment.models import Customer
-# from sms.tests.factory import make_phone_number
-# from utils import create
+from utils import create
+
+
+class RenderTests(TestCase):
+    # Test Rending of view, template path is correct, url
+    # User of each permission type needed
+
+    def setUp(self):
+        create._get_groups_and_perms()
+        self.password = '1234'
+
+        # Admin
+        self.admin = User.objects.create_user('admin', settings.DEFAULT_FROM_EMAIL, self.password)
+        self.admin_group = Group.objects.get(name="hotel_admin")
+        self.admin.groups.add(self.admin_group)
+        self.admin.save()
+
+        # Manager
+        self.manager = User.objects.create_user('manager', settings.DEFAULT_FROM_EMAIL, self.password)
+        self.manager_group = Group.objects.get(name="hotel_manager")
+        self.manager.groups.add(self.manager_group)
+        self.manager.save()
+
+        # User
+        self.user = User.objects.create_user('user', settings.DEFAULT_FROM_EMAIL, self.password)
+
+
+    ### inherit from - django.contrib.auth.forms
+
+    def test_login(self):
+        response = self.client.get(reverse('login'))
+        assert response.status_code == 200
+        assert response.context['form']
+
+    ### 2 views for password change
+
+    def test_password_change(self):
+        # login required view
+        response = self.client.get(reverse('password_change'))
+        assert response.status_code == 302
+
+        # login
+        self.client.login(username=self.user.username, password=self.password)
+        response = self.client.get(reverse('password_change'))
+        assert response.status_code == 200
+        assert response.context['form']
+
+    def test_password_change_done(self):
+        # login required view
+        response = self.client.get(reverse('password_change_done'))
+        assert response.status_code == 302
+
+        # login
+        self.client.login(username=self.user.username, password=self.password)
+        response = self.client.get(reverse('password_change_done'))
+        assert response.status_code == 200
+
+    ### 4 views for password reset
+
+    def test_password_reset(self):
+        response = self.client.get(reverse('password_reset'))
+        assert response.status_code == 200
+        assert response.context['form']
+
+    def test_password_reset_done(self):
+        response = self.client.get(reverse('password_reset_done'))
+        assert response.status_code == 200
+
+    def test_password_reset_confirm(self):
+        # TODO: write an integration for Form test for this
+        pass
+
+    def test_password_reset_complete(self):
+        response = self.client.get(reverse('password_reset_complete'))
+        assert response.status_code == 200
 
 
 class LoginTests(TestCase):

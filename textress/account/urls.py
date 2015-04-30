@@ -27,6 +27,9 @@ urlpatterns = patterns('',
         'authentication_form': AuthenticationForm},
         name='login'),
 
+    ### 2 views for password change - when you are logged in and want to 
+    ### change your password
+
     url(r'^password_change/$', auth_views.password_change,
         {'template_name': 'cpanel/auth-forms/password_change.html',
         'password_change_form': PasswordChangeForm},
@@ -35,6 +38,8 @@ urlpatterns = patterns('',
     url(r'^password_change/done/$', auth_views.password_change_done,
         {'template_name': 'cpanel/form-success/password_change_done.html'},
         name='password_change_done'),
+
+    ### 4 views for password reset - when you can't remember your password
 
     url(r'^password_reset/$', auth_views.password_reset,
         {
