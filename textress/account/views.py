@@ -63,74 +63,6 @@ def verify_logout(request):
 
 ### ACCOUNT VIEWS ###
 
-
-
-# class LoginView(SetHeadlineMixin, FormView):
-
-#     headline = "Sign in to your account"
-#     template_name = 'cpanel/auth-forms/login.html'
-#     form_class = LoginForm
-#     success_url = reverse_lazy('login')
-#     authenticated_redirect_url = reverse_lazy('account')
-
-    
-#     def get(self, request, *args, **kwargs):
-#         if isinstance(request.user, AnonymousUser):
-#             print('anon')
-#         else:
-#             print(request.user.username)
-#         return super().get(request, *args, **kwargs)
-
-#     def get_success_url(self):
-#         try:
-#             next = self.request.GET['next']
-#         except KeyError:
-#             next = self.success_url
-#         return next
-
-#     def form_valid(self, form):
-#         cd = form.cleaned_data
-#         user = auth.authenticate(username=cd['username'], 
-#             password=cd['password'])
-#         if user:
-#             auth.login(self.request, user)
-#             messages.info(self.request, login_messages['now_logged_in'])
-#         return super().form_valid(form)
-
-
-# class ForgotPasswordView(SetHeadlineMixin, AnonymousRequiredMixin, FormView):
-
-#     headline = "Forget Password?"
-#     template_name = 'cpanel/auth-forms/forgot-password.html'
-#     form_class = PasswordResetForm
-#     success_url = reverse_lazy('reset_password')
-#     authenticated_redirect_url = reverse_lazy('verify_logout')
-
-#     def form_valid(self, form):
-#         form.save()
-#         messages.info(self.request, login_messages['reset_pw_sent'])
-#         # form.send_reset_password()
-#         return super().form_valid(form)
-
-
-# class ResetPasswordView(AnonymousRequiredMixin, FormView):
-
-#     template_name = 'account/account_form.html'
-#     form_class = ResetPasswordForm
-#     success_url = settings.LOGIN_SUCCESS_URL
-#     authenticated_redirect_url = settings.VERIFY_LOGOUT_URL
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['page_title'] = 'Reset Password'
-#         return context
-
-#     def form_valid(self, form):
-#         messages.info(request, login_messages['password_has_reset'])
-#         reset_success = form.set_new_password(self.request)
-#         return super().form_valid(form)
-
-
 class AccountView(LoginRequiredMixin, HotelUserMixin, TemplateView):
     """
     Main Account (profile) View.
@@ -139,7 +71,7 @@ class AccountView(LoginRequiredMixin, HotelUserMixin, TemplateView):
     - Hotel has a subaccount_sid
     - Assign a Twilio Ph #
     """
-    template_name = 'account/account.html'
+    template_name = 'cpanel/account.html'
 
     def get_context_data(self, **kwargs):
         '''TODO: clean up logic here b/4 produciton

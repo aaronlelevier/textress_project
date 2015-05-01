@@ -2,7 +2,7 @@
 {% load staticfiles %}
 
 {% block page_css %}
-<link rel="stylesheet" href="{% static 'admin/clip-one/assets/plugins/fullcalendar/fullcalendar/fullcalendar.css' %}">
+<link rel="stylesheet" href="{% static 'clipone/admin/clip-one/assets/plugins/fullcalendar/fullcalendar/fullcalendar.css' %}">
 {% endblock page_css %}
 
     {% block body %}
@@ -259,7 +259,7 @@
                                                 <a href="javascript:;">
                                                     <div class="clearfix">
                                                         <div class="thread-image">
-                                                            <img alt="" src="{% static 'admin/clip-one/assets/images/avatar-2.jpg' %}">
+                                                            <img alt="" src="{% static 'clipone/admin/clip-one/assets/images/avatar-2.jpg' %}">
                                                         </div>
                                                         <div class="thread-content">
                                                             <span class="author">Nicole Bell</span>
@@ -273,7 +273,7 @@
                                                 <a href="javascript:;">
                                                     <div class="clearfix">
                                                         <div class="thread-image">
-                                                            <img alt="" src="{% static 'admin/clip-one/assets/images/avatar-1.jpg' %}">
+                                                            <img alt="" src="{% static 'clipone/admin/clip-one/assets/images/avatar-1.jpg' %}">
                                                         </div>
                                                         <div class="thread-content">
                                                             <span class="author">Peter Clark</span>
@@ -287,7 +287,7 @@
                                                 <a href="javascript:;">
                                                     <div class="clearfix">
                                                         <div class="thread-image">
-                                                            <img alt="" src="{% static 'admin/clip-one/assets/images/avatar-3.jpg' %}">
+                                                            <img alt="" src="{% static 'clipone/admin/clip-one/assets/images/avatar-3.jpg' %}">
                                                         </div>
                                                         <div class="thread-content">
                                                             <span class="author">Steven Thompson</span>
@@ -301,7 +301,7 @@
                                                 <a href="javascript:;">
                                                     <div class="clearfix">
                                                         <div class="thread-image">
-                                                            <img alt="" src="{% static 'admin/clip-one/assets/images/avatar-1.jpg' %}">
+                                                            <img alt="" src="{% static 'clipone/admin/clip-one/assets/images/avatar-1.jpg' %}">
                                                         </div>
                                                         <div class="thread-content">
                                                             <span class="author">Peter Clark</span>
@@ -315,7 +315,7 @@
                                                 <a href="javascript:;">
                                                     <div class="clearfix">
                                                         <div class="thread-image">
-                                                            <img alt="" src="{% static 'admin/clip-one/assets/images/avatar-5.jpg' %}">
+                                                            <img alt="" src="{% static 'clipone/admin/clip-one/assets/images/avatar-5.jpg' %}">
                                                         </div>
                                                         <div class="thread-content">
                                                             <span class="author">Kenneth Ross</span>
@@ -339,7 +339,7 @@
                         <!-- start: USER DROPDOWN -->
                         <li class="dropdown current-user">
                             <a data-toggle="dropdown" data-hover="dropdown" class="dropdown-toggle" data-close-others="true" href="#">
-                                <img src="{% static 'admin/clip-one/assets/images/avatar-1-small.jpg' %}" class="circle-img" alt="">
+                                <img src="{% static 'clipone/admin/clip-one/assets/images/avatar-1-small.jpg' %}" class="circle-img" alt="">
                                 <span class="username">Peter Clark</span>
                                 <i class="clip-chevron-down"></i>
                             </a>
@@ -387,12 +387,16 @@
             <!-- end: TOP NAVIGATION CONTAINER -->
         </div>
         <!-- end: HEADER -->
+
+
         <!-- start: MAIN CONTAINER -->
         <div class="main-container">
+
+            <!-- start: SIDEBAR -->
             <div class="navbar-content">
-                <!-- start: SIDEBAR -->
+
+                <!-- start: MAIN MENU TOGGLER BUTTON -->
                 <div class="main-navigation navbar-collapse collapse">
-                    <!-- start: MAIN MENU TOGGLER BUTTON -->
                     <div class="navigation-toggler">
                         <i class="clip-chevron-left"></i>
                         <i class="clip-chevron-right"></i>
@@ -459,7 +463,7 @@
         <!-- start: FOOTER -->
         <div class="footer clearfix">
             <div class="footer-inner">
-                2014 &copy; clip-one by cliptheme.
+                2015 &copy; Textress.
             </div>
             <div class="footer-items">
                 <span class="go-top"><i class="clip-chevron-up"></i></span>
@@ -492,31 +496,4 @@
                 </div>
             </div>
         </div>
-        <!-- end: Calendar Event -->
-
-        {% block main_js %}
-        <!-- start: MAIN JAVASCRIPTS -->
-        <script src="{% static 'admin/clip-one/assets/plugins/jQuery-lib/2.0.3/jquery.min.js' %}"></script>
-        <script src="{% static 'admin/clip-one/assets/plugins/jquery-ui/jquery-ui-1.10.2.custom.min.js' %}"></script>
-        <script src="{% static 'admin/clip-one/assets/plugins/bootstrap/js/bootstrap.min.js' %}"></script>
-        <script src="{% static 'admin/clip-one/assets/plugins/bootstrap-hover-dropdown/bootstrap-hover-dropdown.min.js' %}"></script>
-        <script src="{% static 'admin/clip-one/assets/plugins/blockUI/jquery.blockUI.js' %}"></script>
-        <script src="{% static 'admin/clip-one/assets/plugins/iCheck/jquery.icheck.min.js' %}"></script>
-        <script src="{% static 'admin/clip-one/assets/plugins/perfect-scrollbar/src/jquery.mousewheel.js' %}"></script>
-        <script src="{% static 'admin/clip-one/assets/plugins/perfect-scrollbar/src/perfect-scrollbar.js' %}"></script>
-        <script src="{% static 'admin/clip-one/assets/plugins/less/less-1.5.0.min.js' %}"></script>
-        <script src="{% static 'admin/clip-one/assets/plugins/jquery-cookie/jquery.cookie.js' %}"></script>
-        <script src="{% static 'admin/clip-one/assets/plugins/bootstrap-colorpalette/js/bootstrap-colorpalette.js' %}"></script>
-        <script src="{% static 'admin/clip-one/assets/js/main.js' %}"></script>
-        <!-- end: MAIN JAVASCRIPTS -->
-        <script>
-            jQuery(document).ready(function() {
-                Main.init();
-            });
-        </script>
-        {% endblock main_js %}
-
-
-    </body>
-    <!-- end: BODY -->
-</html>
+{% endblock body %}

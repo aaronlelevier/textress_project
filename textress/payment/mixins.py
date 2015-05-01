@@ -5,6 +5,7 @@ from django.contrib.auth.views import redirect_to_login
 from django.shortcuts import get_object_or_404
 from django.views.generic.base import View
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib import auth, messages
 
 from braces.views import LoginRequiredMixin, GroupRequiredMixin
 
@@ -48,11 +49,13 @@ class HotelUserMixin(HotelContextMixin):
     def dispatch(self, *args, **kwargs):
         self.hotel = self.request.user.profile.hotel
         if not self.hotel:
-            raise Http404
+            # raise Http404
+            messages.warning(self.request, "No Hotel associated with this account.")
 
         # TODO: Redirect to an alert page that funds need to be added
-        if not self.hotel.active:
-            raise Http404
+        if self.hotel and not self.hotel.active:
+            # raise Http404
+            messages.warning(self.request, "The Hotel associated with this account is not active.")
             
         return super().dispatch(*args, **kwargs)
 
