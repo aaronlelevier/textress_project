@@ -14,10 +14,26 @@ from djangular.styling.bootstrap3.forms import (Bootstrap3Form,
     Bootstrap3ModelForm)
 
 from account.helpers import login_messages, salt
+from account.models import AcctCost
 from utils import email
 
 
-# Forms use `djangular` client side validation w/ django native contrib.forms logic
+#################
+# DEFAULT FORMS #
+#################
+
+class AcctCostCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):
+    # djangular req
+    form_name = 'acct_cost_create_form'
+
+    class Meta:
+        model = AcctCost
+        fields = ['init_amt', 'balance_min', 'recharge_amt']
+        
+
+########
+# AUTH #
+########
 
 class AuthenticationForm(NgFormValidationMixin, auth_forms.AuthenticationForm, Bootstrap3Form):
     form_name = 'login_form'

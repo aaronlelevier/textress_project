@@ -12,7 +12,7 @@ from braces.views import GroupRequiredMixin
 from main.models import Hotel
 from contact.models import Newsletter
 from contact.forms import NewsletterForm
-from payment.views import HotelUserMixin, HotelContextMixin
+from payment.mixins import HotelContextMixin
 
 
 class NewsletterMixin(FormMixin):
@@ -97,6 +97,3 @@ class RegistrationContextMixin(object):
         context['steps'] = ['User Information', 'Hotel Information', 'Plan Structure',
             'Payment', 'Pick Phone #', 'Confirmation']
         return context
-
-
-

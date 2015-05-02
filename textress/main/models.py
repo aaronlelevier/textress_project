@@ -56,7 +56,8 @@ class AbstractBaseManager(models.Manager):
 
 
 class AbstractBase(models.Model):
-    """Abstract model for *created, and modified*."""
+    """Base model to keep track of Model edits and hide Model objects
+    if necessary."""
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     hidden = models.BooleanField(_("Hide"), blank=True, default=False)
@@ -114,11 +115,13 @@ class Hotel(TwilioClient, AbstractBase):
     """
     # Required
     name = models.CharField(_("Hotel Name"), unique=True, max_length=100)
-    address_phone = models.CharField(_("Contact Phone Number"), max_length=12, help_text="Example: 7025101234")
+    address_phone = models.CharField(_("Contact Phone Number"), max_length=12,
+        help_text="10-digit phone number. i.e.: 7025101234")
     address_line1 = models.CharField(_("Address Line 1"), max_length=100)
     address_city = models.CharField(_("City"), max_length=100)
     address_state = models.CharField(_("State"), max_length=25, choices=STATES, default=STATES[0][0])
-    address_zip = models.IntegerField(_("Zipcode"), max_length=5)
+    address_zip = models.PositiveIntegerField(_("Zipcode"), max_length=5,
+        help_text="5-digit zipcode. i.e.: 89109")
     # Optional
     address_line2 = models.CharField(_("Address Line 2"), max_length=100, blank=True)
     hotel_type = models.CharField(_("Hotel Type"), max_length=100, choices=HOTEL_TYPES,
@@ -356,5 +359,3 @@ def delete_userprofile(sender, instance=None, **kwargs):
     if instance:
         userprofile = UserProfile.objects.get(user=instance)
         userprofile.delete()
-
-        # Delete Denormalized Token

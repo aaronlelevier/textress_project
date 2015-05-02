@@ -64,8 +64,14 @@ class AdminCreateView(RegistrationContextMixin, CreateView):
     success_url = reverse_lazy('main:register_step2')
     authenticated_redirect_url = settings.VERIFY_LOGOUT_URL
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['step_number'] = 0
+        context['step'] = context['steps'][context['step_number']]
+        return context
+
     def form_valid(self, form):
-        # Call super() so `User` object is available
+        # Call super() so ``User`` object is available
         super().form_valid(form) 
         cd = form.cleaned_data
 
@@ -83,7 +89,7 @@ class AdminCreateView(RegistrationContextMixin, CreateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-class HotelCreateView(LoginRequiredMixin, CreateView):
+class HotelCreateView(LoginRequiredMixin, RegistrationContextMixin, CreateView):
     """
     Step #2 of Registration
 
@@ -94,16 +100,25 @@ class HotelCreateView(LoginRequiredMixin, CreateView):
     """
     model = Hotel
     form_class = HotelCreateForm
+    template_name = 'frontend/register.html'
+    success_url = reverse_lazy('register_step3')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['step_number'] = 1
+        context['step'] = context['steps'][context['step_number']]
+        return context
 
     def form_valid(self, form):
+        # Call super() so ``Hotel`` object is available
         super().form_valid(form)
 
+        # User is now this Hotel's Admin
         self.object.set_admin_id(user=self.request.user)
+        # Link Hotel and User
+        self.request.user.profile.update_hotel(hotel=self.object)
 
-        user_profile = self.request.user.profile
-        user_profile.update_hotel(hotel=self.object)
-
-        return HttpResponseRedirect(reverse('payment:register_step3'))
+        return HttpResponseRedirect(self.get_success_url())
 
 
 #########

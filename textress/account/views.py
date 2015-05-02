@@ -23,10 +23,11 @@ from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
 
 from account.decorators import anonymous_required
 from account.forms import (AuthenticationForm, CloseAccountForm,
-    CloseAcctConfirmForm)
+    CloseAcctConfirmForm, AcctCostCreateForm)
 from account.helpers import login_messages
-from account.models import AcctStmt, AcctTrans, Pricing
+from account.models import AcctCost, AcctStmt, AcctTrans, Pricing
 from account.serializers import PricingSerializer
+from main.mixins import RegistrationContextMixin
 from main.models import UserProfile, Subaccount
 from main.forms import UserCreateForm
 from payment.mixins import AdminOnlyMixin, HotelUserMixin, HotelAdminCheckMixin
@@ -98,6 +99,34 @@ class AccountView(LoginRequiredMixin, HotelUserMixin, TemplateView):
         context['hotel'] = self.hotel
 
         return context
+
+
+### REGISTRATION VIEWS ###
+
+class PickPlanView(LoginRequiredMixin, RegistrationContextMixin, CreateView):
+    """
+    Step #3 of Registration
+
+    Pick a Plan, and save the Plan as a `session cookie` before creating
+    the Stipe Customer/Subscription using the Plan Choice.
+    """
+    model = AcctCost
+    form_class = AcctCostCreateForm
+    template_name = 'frontend/register.html'
+    success_url = reverse_lazy('payment:register_step4')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['step_number'] = 2
+        context['step'] = context['steps'][context['step_number']]
+        return context
+
+    def form_valid(self, form):
+        '''Add the Hotel Obj to the AcctCost instance b/4 saving.'''
+        self.object = form.save(commit=False)
+        self.object.hotel = self.request.user.profile.hotel
+        self.object.save()
+        return super().form_valid(form)
 
 
 #############

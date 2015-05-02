@@ -35,7 +35,7 @@ class UserCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):
     email = forms.EmailField(label=_("Email"), required=True)
 
     username = forms.RegexField(label=_("Username"), max_length=30,
-        regex=r'^[\w.@+-]+$',
+        regex=r'^[\w.@+-_]+$',
         help_text=_("Required. 30 characters or fewer. Letters, digits and "
                       "@/./+/-/_ only."),
         error_messages={
@@ -95,7 +95,7 @@ class HotelCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):
     class Meta:
         model = Hotel
         fields = ['name', 'address_phone', 'address_line1', 'address_line2',
-        'address_city', 'address_state', 'address_zip']
+            'address_city', 'address_state', 'address_zip']
 
     def clean_phone(self):
         """
@@ -103,8 +103,3 @@ class HotelCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):
         """
         phone = self.cleaned_data.get('address_phone')
         return validate_phone(phone)
-
-
-
-
-

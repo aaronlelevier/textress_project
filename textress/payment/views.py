@@ -25,30 +25,36 @@ from payment.mixins import (StripeMixin, HotelContextMixin, HotelUserMixin,
     HotelAdminCheckMixin, AdminOnlyMixin, HotelCardOnlyMixin, AcctCostContextMixin)
 from account.models import AcctCost
 from main.models import Hotel
+from main.mixins import RegistrationContextMixin
 from sms.models import PhoneNumber
 
 
 ### REGISTRATION VIEWS ###
 
-class PickPlanView(LoginRequiredMixin, CreateView):
-    """
-    Step #3 of Registration
+# class PickPlanView(LoginRequiredMixin, RegistrationContextMixin, CreateView):
+#     """
+#     Step #3 of Registration
 
-    Pick a Plan, and save the Plan as a `session cookie` before creating
-    the Stipe Customer/Subscription using the Plan Choice.
-    """
-    model = AcctCost
-    fields = ['init_amt', 'balance_min', 'recharge_amt']
-    template_name = 'main/hotel_form.html'
-    success_url = reverse_lazy('payment:register_step4')
-    authenticated_redirect_url = settings.VERIFY_LOGOUT_URL
+#     Pick a Plan, and save the Plan as a `session cookie` before creating
+#     the Stipe Customer/Subscription using the Plan Choice.
+#     """
+#     model = AcctCost
+#     fields = ['init_amt', 'balance_min', 'recharge_amt']
+#     template_name = 'frontend/register.html'
+#     success_url = reverse_lazy('payment:register_step4')
 
-    def form_valid(self, form):
-        '''Add the Hotel Obj to the AcctCost instance b/4 saving.'''
-        self.object = form.save(commit=False)
-        self.object.hotel = self.request.user.profile.hotel
-        self.object.save()
-        return super().form_valid(form)
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['step_number'] = 2
+#         context['step'] = context['steps'][context['step_number']]
+#         return context
+
+#     def form_valid(self, form):
+#         '''Add the Hotel Obj to the AcctCost instance b/4 saving.'''
+#         self.object = form.save(commit=False)
+#         self.object.hotel = self.request.user.profile.hotel
+#         self.object.save()
+#         return super().form_valid(form)
 
 
 class RegisterPmtView(AdminOnlyMixin,
@@ -161,14 +167,3 @@ class CardDeleteView(AdminOnlyMixin, HotelCardOnlyMixin, DeleteView):
     model = Card
     template_name = 'account/account_form.html'
     success_url = reverse_lazy('payment:card_list')
-
-
-
-
-
-
-
-
-
-
-

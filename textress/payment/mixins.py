@@ -9,7 +9,7 @@ from django.contrib import auth, messages
 
 from braces.views import LoginRequiredMixin, GroupRequiredMixin
 
-from .models import Card
+from payment.models import Card
 from main.models import Hotel
 
 

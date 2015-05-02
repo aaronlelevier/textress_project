@@ -7,13 +7,16 @@ from contact.models import Contact, Newsletter, Topic, QA
 class ContactAdmin(admin.ModelAdmin):
     pass
 
+
 @admin.register(Newsletter)
 class NewsletterAdmin(admin.ModelAdmin):
     pass
 
+
 @admin.register(Topic)
 class TopicAdmin(admin.ModelAdmin):
     pass
+
 
 @admin.register(QA)
 class QAAdmin(admin.ModelAdmin):

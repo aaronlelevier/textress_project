@@ -38,11 +38,11 @@ urlpatterns += patterns('',
     # Admin
     url(r'^aronysidoro/', include(admin.site.urls)),
     # Apps
-    url(r'account/', include('account.urls')),
+    url(r'', include('account.urls')),
     url(r'concierge/', include('concierge.urls', namespace='concierge')),
     url(r'', include('contact.urls', namespace='contact')),
     url(r'', include('main.urls', namespace='main')),
-    url(r'payment/', include('payment.urls', namespace='payment')),
+    url(r'', include('payment.urls', namespace='payment')),
     url(r'sms/', include('sms.urls', namespace='sms')),
     # django-rest-framework
     url(r'api/', include(api_urlpatterns)),

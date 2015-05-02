@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db import models
 from django.forms.widgets import TextInput
 
-from .models import AcctCost, AcctStmt, AcctTrans, TransType, Pricing
+from account.models import AcctCost, AcctStmt, AcctTrans, TransType, Pricing
 
 
 class TransTypeAdmin(admin.ModelAdmin):

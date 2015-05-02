@@ -40,7 +40,7 @@ class BasicTests(TestCase):
     def setUp(self):
         self.username = 'test'
         self.password = '1234'
-        self.email = settings.DEFAULT_TO_EMAIL
+        self.email = settings.DEFAULT_FROM_EMAIL
 
     def test_create_user(self):
         user = User.objects.create(username=self.username,
@@ -70,14 +70,31 @@ class RegistrationTests(TestCase):
         self.factory = RequestFactory()
         create._get_groups_and_perms()
 
+        # Login Credentials
+        self.username = 'test'
+        self.password = '1234'
+
     ### SUCCESSFUL REGISTRATION TESTs ###
 
-    def test_register_step1(self):
-        response = self.client.post(reverse('main:register_step1'),
-            {'username':'test', 'first_name': 'Test', 'last_name': 'Test',
-            'email':settings.DEFAULT_TO_EMAIL,
-            'password1':'1234', 'password2':'1234'},
+    def _register_step1(self):
+        return self.client.post(reverse('main:register_step1'),
+            {'username': self.username, 'first_name': 'Test', 'last_name': 'Test',
+            'email':settings.DEFAULT_FROM_EMAIL, 'password1': self.password,
+            'password2': self.password},
             follow=True)
+
+    def _register_step2(self):
+        return self.client.post(reverse('main:register_step2'),
+            {'name': 'Test Hotel',
+            'address_phone': '6195105555',
+            'address_line1': '123 Some St.',
+            'address_city': 'San Diego',
+            'address_state': STATES[0][0],
+            'address_zip': '92131'},
+            follow=True)
+
+    def test_register_step1(self):
+        response = self._register_step1()
 
         self.assertRedirects(response, reverse('main:register_step2'))
 
@@ -86,31 +103,21 @@ class RegistrationTests(TestCase):
         assert isinstance(user.profile, UserProfile)
         assert user == User.objects.get(groups__name='hotel_admin')
 
-#     def test_register_step2(self):
-#         # Step 1
-#         response = self.client.post(reverse('main:register_step1'),
-#             {'username':'test', 'first_name': 'Test', 'last_name': 'Test',
-#             'email':settings.DEFAULT_TO_EMAIL,
-#             'password1':'1234', 'password2':'1234'})
+    def test_register_step2(self):
+        # Step 1
+        # assert logged in and can access "register step2 form"
+        response = self._register_step1()
+        self.client.login(username=self.username, password=self.password)
 
-#         # Tests
-#         response = self.client.get(reverse('main:register_step2'))
-#         assert response.status_code == 200
+        # Step 2
+        response = self._register_step2()
+        self.assertRedirects(response, reverse('register_step3'))
 
-#         response = self.client.post(reverse('main:register_step2'),
-#             {'name': 'Test Hotel',
-#             'phone': '6195105555',
-#             'address_line1': '123 Some St.',
-#             'address_city': 'San Diego',
-#             'address_state': STATES[0][0],
-#             'address_zip': '92131'}, follow=True)
-
-#         self.assertRedirects(response, reverse('payment:register_step3'))
-
-#         hotel = Hotel.objects.get(name='Test Hotel')
-#         updated_user = User.objects.get(username='test')
-#         assert hotel.admin_id == updated_user.id
-#         assert updated_user.profile.hotel == hotel
+        # User set as Admin and Hotel properly linked
+        hotel = Hotel.objects.get(name='Test Hotel')
+        updated_user = User.objects.get(username='test')
+        assert hotel.admin_id == updated_user.id
+        assert updated_user.profile.hotel == hotel
 
 #     def test_register_step3(self):
 #         # Plan choice
@@ -120,7 +127,7 @@ class RegistrationTests(TestCase):
 #         # Step 1
 #         response = self.client.post(reverse('main:register_step1'),
 #             {'username':'test', 'first_name': 'Test', 'last_name': 'Test',
-#             'email':settings.DEFAULT_TO_EMAIL,
+#             'email':settings.DEFAULT_FROM_EMAIL,
 #             'password1':'1234', 'password2':'1234'})
 #         # Step 2
 #         response = self.client.post(reverse('main:register_step2'),
@@ -284,7 +291,7 @@ class RegistrationTests(TestCase):
 #         self.client.login(username=self.mgr.username, password=self.password)
 #         response = self.client.post(reverse('main:create_user'),
 #             {'first_name': 'fname', 'last_name': 'lname',
-#             'email': settings.DEFAULT_TO_EMAIL, 'username': 'test_create',
+#             'email': settings.DEFAULT_FROM_EMAIL, 'username': 'test_create',
 #             'password1': self.password, 'password2': self.password},
 #             follow=True)
 
@@ -313,7 +320,7 @@ class RegistrationTests(TestCase):
 #         self.client.login(username=self.mgr.username, password=self.password)
 #         response = self.client.post(reverse('main:create_manager'),
 #             {'first_name': 'fname', 'last_name': 'lname',
-#             'email': settings.DEFAULT_TO_EMAIL, 'username': 'test_create_mgr',
+#             'email': settings.DEFAULT_FROM_EMAIL, 'username': 'test_create_mgr',
 #             'password1': self.password, 'password2': self.password},
 #             follow=True)
 
@@ -353,7 +360,7 @@ class RegistrationTests(TestCase):
 
 #     def test_delete(self):
 #         # User to test deleting
-#         del_user = User.objects.create(username='del_user', email=settings.DEFAULT_TO_EMAIL,
+#         del_user = User.objects.create(username='del_user', email=settings.DEFAULT_FROM_EMAIL,
 #             password=self.password)
 #         del_user.profile.update_hotel(self.hotel)
 #         assert isinstance(del_user, User)
