@@ -90,7 +90,13 @@ class HotelUsersOnlyMixin(HotelContextMixin, GroupRequiredMixin, View):
         return super().dispatch(request, *args, **kwargs)
 
 
+class RegistrationContextMixin(object):
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['steps'] = ['User Information', 'Hotel Information', 'Plan Structure',
+            'Payment', 'Pick Phone #', 'Confirmation']
+        return context
 
 
 

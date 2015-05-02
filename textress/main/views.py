@@ -15,7 +15,8 @@ from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
 
 from main.models import Hotel, UserProfile
 from main.forms import UserCreateForm, HotelCreateForm
-from main.mixins import HotelMixin, UserOnlyMixin, HotelUsersOnlyMixin
+from main.mixins import (HotelMixin, UserOnlyMixin, HotelUsersOnlyMixin,
+    RegistrationContextMixin)
 from account.helpers import add_group
 from contact.mixins import NewsletterMixin, TwoFormMixin
 from account.helpers import login_messages
@@ -48,7 +49,7 @@ class HotelDetailView(HotelMixin, DetailView):
 
 ### REGISTRATION VIEWS ###
 
-class AdminCreateView(CreateView):
+class AdminCreateView(RegistrationContextMixin, CreateView):
     """
     Step #1 of Registration
 
@@ -59,7 +60,7 @@ class AdminCreateView(CreateView):
     """
     model = User
     form_class = UserCreateForm
-    template_name = 'biz/register.html'
+    template_name = 'frontend/register.html'
     success_url = reverse_lazy('main:register_step2')
     authenticated_redirect_url = settings.VERIFY_LOGOUT_URL
 
@@ -80,7 +81,6 @@ class AdminCreateView(CreateView):
         messages.info(self.request, login_messages['now_logged_in'])
 
         return HttpResponseRedirect(self.get_success_url())
-
 
 
 class HotelCreateView(LoginRequiredMixin, CreateView):
