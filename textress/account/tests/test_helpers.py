@@ -17,7 +17,6 @@ class HelperTests(TestCase):
         assert isinstance(int(s), int)
         assert len(s) == 10
 
-
     def test_add_group(self):
         user = mommy.make(User)
         # creates a 'hotel_admin' Group
