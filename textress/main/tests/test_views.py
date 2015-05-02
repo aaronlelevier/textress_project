@@ -49,15 +49,17 @@ class BasicTests(TestCase):
         assert isinstance(user, User)        
 
 
-class ViewTests(TestCase):
+class RenderTests(TestCase):
 
     def test_index_get(self):
         response = self.client.get(reverse('main:index'))
         assert response.status_code == 200
 
-    def test_pricing_get(self):
-        response = self.client.get(reverse('main:pricing'))
+    def test_terms(self):
+        response = self.client.get(reverse('main:terms_n_cond'))
         assert response.status_code == 200
+        assert response.context['company']
+        assert response.context['LLC']
 
 
 class RegistrationTests(TestCase):

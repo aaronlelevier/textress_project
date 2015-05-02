@@ -3,10 +3,12 @@ from string import digits
 
 from django.conf import settings
 from django.utils import timezone
+from django.contrib.auth.models import Group
 from django.core.mail import send_mail, EmailMessage, EmailMultiAlternatives
 from django.template.loader import render_to_string
 
 from account.models import AcctStmt
+
 
 login_messages = {
     'now_logged_in': 'You are now logged in',
@@ -34,10 +36,8 @@ def salt(length=7):
     return "".join([random.choice(digits) for x in range(length)])
 
 
-def update_current_acct_stmt(hotel):
-    today = timezone.now().date()
-    return AcctStmt.objects.get_or_create(hotel=hotel,
-        year=today.year, month=today.month)
-
-
-
+def add_group(user, group):
+    group = Group.objects.get(name=group)
+    user.groups.add(group)
+    user.save()
+    return user

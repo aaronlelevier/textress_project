@@ -24,7 +24,7 @@ from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
 from account.decorators import anonymous_required
 from account.forms import (AuthenticationForm, CloseAccountForm,
     CloseAcctConfirmForm)
-from account.helpers import login_messages, update_current_acct_stmt
+from account.helpers import login_messages
 from account.models import AcctStmt, AcctTrans, Pricing
 from account.serializers import PricingSerializer
 from main.models import UserProfile, Subaccount

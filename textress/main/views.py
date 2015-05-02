@@ -16,6 +16,7 @@ from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
 from main.models import Hotel, UserProfile
 from main.forms import UserCreateForm, HotelCreateForm
 from main.mixins import HotelMixin, UserOnlyMixin, HotelUsersOnlyMixin
+from account.helpers import add_group
 from contact.mixins import NewsletterMixin, TwoFormMixin
 from account.helpers import login_messages
 from payment.mixins import HotelUserMixin, HotelContextMixin
@@ -25,26 +26,17 @@ from payment.mixins import HotelUserMixin, HotelContextMixin
 
 class IndexView(NewsletterMixin, FormView):
 
-    template_name = 'biz/index.html'
+    template_name = 'frontend/index.html'
 
 
-class PricingView(NewsletterMixin, FormView):
+class TermsNCondView(TemplateView):
+    template_name = 'frontend/terms_n_cond.html'
 
-    template_name = 'biz/angular.html'
-
-
-### ADMIN PREVIEW VIEWS ###
-
-class AdminPreviewIndexView(TemplateView):
-    '''Static Admin Demo View for Business Site.'''
-
-    template_name = 'admin-preview/index.html'
-
-
-class AdminPreviewBIChartsView(TemplateView):
-    '''Static preview of the B.I. charts.'''
-
-    template_name = 'admin-preview/bi-charts.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['company'] = "Textress"
+        context['LLC'] = "Aronysidoro LLC."
+        return context
 
 
 ### TODO: What is this view being used for? ###
@@ -77,10 +69,8 @@ class AdminCreateView(CreateView):
         cd = form.cleaned_data
 
         # Add User to "Admin" Group
-        hotel_admin = Group.objects.get(name='hotel_admin')
-        user = User.objects.get(username=cd['username'])
-        user.groups.add(hotel_admin)
-        user.save()
+        user = add_group(user=User.objects.get(username=cd['username']),
+            group='hotel_admin')
 
         # Login
         user = auth.authenticate(username=cd['username'], password=cd['password1'])

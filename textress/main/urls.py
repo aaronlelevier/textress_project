@@ -22,15 +22,10 @@ user_patterns = patterns('',
     url(r'^update/(?P<pk>\d+)/$', views.UserUpdateView.as_view(), name='user_update'),
     )
 
-admin_preview_patterns = patterns('',
-    url(r'^$', views.AdminPreviewIndexView.as_view(), name='admin_preview_index'),
-    url(r'^bi-charts/$', views.AdminPreviewBIChartsView.as_view(), name='admin_preview_bi_charts'),
-    )
-
 urlpatterns = patterns('',
     # Biz
     url(r'^$', views.IndexView.as_view(), name='index'),
-    url(r'^pricing/$', views.PricingView.as_view(), name='pricing'),
+    url(r'^terms-and-conditions/$', views.TermsNCondView.as_view(), name='terms_n_cond'),
     # Hotel
     url(r'^hotel/(?P<hotel_slug>[-_\w]+)/(?P<pk>\d+)/$', views.HotelDetailView.as_view(), name='hotel'),
     # Registration
@@ -38,8 +33,6 @@ urlpatterns = patterns('',
     url(r'^manage-users/', include(manage_users_patterns)),
     # Users
     url(r'^users/', include(user_patterns)),
-    # Admin Preview
-    url(r'^admin-preview/', include(admin_preview_patterns)),
     )
 
 

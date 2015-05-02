@@ -4,7 +4,7 @@ from contact import views
 
 
 urlpatterns = patterns('',
-    url(r'^$', views.ComingSoonView.as_view(), name='coming_soon'),
+    url(r'^coming-soon/$', views.ComingSoonView.as_view(), name='coming_soon'),
 
     # # REST
     url(r'^api/contact/$', views.ContactListCreateAPIView.as_view(), name='api_contact'),

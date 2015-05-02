@@ -3,7 +3,7 @@ from django.contrib import admin
 
 from rest_framework.urlpatterns import format_suffix_patterns
 
-from textress.views import (handler404, handler500, TermsView)
+from textress.views import handler404, handler500
 from concierge import views
 from account.views import PricingListAPIView, PricingRetrieveAPIView
 
@@ -51,5 +51,4 @@ urlpatterns += patterns('',
     # Pages
     url(r'^404/$', handler404, name='404'),
     url(r'^500/$', handler500, name='500'),
-    url(r'^info/terms-and-conditions/$', TermsView.as_view(), name='terms'),
 )
