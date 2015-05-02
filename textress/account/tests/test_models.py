@@ -409,23 +409,4 @@ class AcctTransTests(TestCase):
         acct_tran, created = AcctTrans.objects.sms_used(hotel=self.hotel,
             trans_type=self.sms_used)
         assert acct_tran
-        assert created       
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        assert created

@@ -13,7 +13,8 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from model_mommy import mommy
 
-from ..models import Hotel, UserProfile, Subaccount
+from main.models import Hotel, UserProfile, Subaccount
+from main.tests.factory import CREATE_USER_DICT, CREATE_HOTEL_DICT
 from sms.models import PhoneNumber
 from utils import create
 from utils.data import STATES, HOTEL_TYPES
@@ -21,7 +22,7 @@ from utils.data import STATES, HOTEL_TYPES
 import stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-from .factory import create_hotel
+from main.tests.factory import create_hotel
 
 
 def create_admin():
@@ -76,25 +77,9 @@ class RegistrationTests(TestCase):
 
     ### SUCCESSFUL REGISTRATION TESTs ###
 
-    def _register_step1(self):
-        return self.client.post(reverse('main:register_step1'),
-            {'username': self.username, 'first_name': 'Test', 'last_name': 'Test',
-            'email':settings.DEFAULT_FROM_EMAIL, 'password1': self.password,
-            'password2': self.password},
-            follow=True)
-
-    def _register_step2(self):
-        return self.client.post(reverse('main:register_step2'),
-            {'name': 'Test Hotel',
-            'address_phone': '6195105555',
-            'address_line1': '123 Some St.',
-            'address_city': 'San Diego',
-            'address_state': STATES[0][0],
-            'address_zip': '92131'},
-            follow=True)
-
     def test_register_step1(self):
-        response = self._register_step1()
+        response = self.client.post(reverse('main:register_step1'),
+            CREATE_USER_DICT, follow=True)
 
         self.assertRedirects(response, reverse('main:register_step2'))
 
@@ -106,11 +91,13 @@ class RegistrationTests(TestCase):
     def test_register_step2(self):
         # Step 1
         # assert logged in and can access "register step2 form"
-        response = self._register_step1()
+        response = self.client.post(reverse('main:register_step1'),
+            CREATE_USER_DICT)
         self.client.login(username=self.username, password=self.password)
 
         # Step 2
-        response = self._register_step2()
+        response = self.client.post(reverse('main:register_step2'),
+            CREATE_HOTEL_DICT, follow=True)
         self.assertRedirects(response, reverse('register_step3'))
 
         # User set as Admin and Hotel properly linked
@@ -119,32 +106,6 @@ class RegistrationTests(TestCase):
         assert hotel.admin_id == updated_user.id
         assert updated_user.profile.hotel == hotel
 
-#     def test_register_step3(self):
-#         # Plan choice
-#         plan = Plan.objects.get(name="Bronze")
-#         assert isinstance(plan, Plan)
-
-#         # Step 1
-#         response = self.client.post(reverse('main:register_step1'),
-#             {'username':'test', 'first_name': 'Test', 'last_name': 'Test',
-#             'email':settings.DEFAULT_FROM_EMAIL,
-#             'password1':'1234', 'password2':'1234'})
-#         # Step 2
-#         response = self.client.post(reverse('main:register_step2'),
-#             {'name': 'Test Hotel',
-#             'phone': '6195105555',
-#             'address_line1': '123 Some St.',
-#             'address_city': 'San Diego',
-#             'address_state': STATES[0][0],
-#             'address_zip': '92131'}, follow=True)
-
-#         # Step 3
-#         response = self.client.post(reverse('payment:register_step3'),
-#             {'plan': 'Bronze'}, follow=True)
-#         # TODO: This needs a Plan.save() monkey-patch, so it doesn't create a 
-#         #   Twilio Plan each time. Also, tries to save the choice in `request.session`
-#         #   which I need to figure out how to use in Testing
-#         # self.assertRedirects(response, reverse('payment:register_step4'))
 
 
 #     ### FAILING TESTS ###

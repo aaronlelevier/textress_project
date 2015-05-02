@@ -110,8 +110,3 @@ class HotelCardOnlyMixin(object):
             return Card.objects.get(short_pk=self.short_pk)
         except ObjectDoesNotExist:
             raise Http404
-
-
-
-
-

@@ -109,7 +109,7 @@ class TransType(AbstractBase):
 #############
 
 CHARGE_AMOUNTS = [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
-BALANCE_AMOUNTS = [(amt, '${:.2f}'.format(amt/100)) for amt in range(0, 11000, 1000)]
+BALANCE_AMOUNTS = [(100, '${:.2f}'.format(1))] + [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
 
 
 class AcctCostManager(models.Manager):
@@ -153,6 +153,9 @@ class AcctCost(AbstractBase):
 
     class Meta:
         verbose_name = "Account Cost"
+
+    def __str__(self):
+        return "{} : ${:.2f}".format(self.hotel, self.init_amt/100)
 
 
 #############

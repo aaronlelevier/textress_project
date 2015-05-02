@@ -31,36 +31,8 @@ from sms.models import PhoneNumber
 
 ### REGISTRATION VIEWS ###
 
-# class PickPlanView(LoginRequiredMixin, RegistrationContextMixin, CreateView):
-#     """
-#     Step #3 of Registration
-
-#     Pick a Plan, and save the Plan as a `session cookie` before creating
-#     the Stipe Customer/Subscription using the Plan Choice.
-#     """
-#     model = AcctCost
-#     fields = ['init_amt', 'balance_min', 'recharge_amt']
-#     template_name = 'frontend/register.html'
-#     success_url = reverse_lazy('payment:register_step4')
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['step_number'] = 2
-#         context['step'] = context['steps'][context['step_number']]
-#         return context
-
-#     def form_valid(self, form):
-#         '''Add the Hotel Obj to the AcctCost instance b/4 saving.'''
-#         self.object = form.save(commit=False)
-#         self.object.hotel = self.request.user.profile.hotel
-#         self.object.save()
-#         return super().form_valid(form)
-
-
-class RegisterPmtView(AdminOnlyMixin,
-                      AcctCostContextMixin,
-                      StripeMixin,
-                      TemplateView):
+class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin,
+    AcctCostContextMixin, StripeMixin, TemplateView):
     """
     Step #4 of Registration
 
@@ -71,6 +43,12 @@ class RegisterPmtView(AdminOnlyMixin,
     template_name = 'payment/payment.html'
     form_class = StripeForm
     success_url = reverse_lazy('payment:register_success')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['step_number'] = 3
+        context['step'] = context['steps'][context['step_number']]
+        return context
 
     def post(self, request, *args, **kwargs):
         try:
