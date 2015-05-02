@@ -1,0 +1,72 @@
+[
+{
+  "model": "account.pricing",
+  "pk": 3,
+  "fields": {
+    "tier": 0,
+    "desc": "up to 200 SMS per month",
+    "tier_name": "Free",
+    "start": 0,
+    "end": 200,
+    "created": "2015-03-02T14:45:12.537Z",
+    "modified": "2015-03-03T14:29:34.498Z",
+    "price": "0.0000"
+  }
+},
+{
+  "model": "account.pricing",
+  "pk": 4,
+  "fields": {
+    "tier": 1,
+    "desc": "Next   2k SMS per month",
+    "tier_name": "0.0550",
+    "start": 201,
+    "end": 2200,
+    "created": "2015-03-02T14:48:20.743Z",
+    "modified": "2015-03-03T14:31:18.514Z",
+    "price": "0.0550"
+  }
+},
+{
+  "model": "account.pricing",
+  "pk": 5,
+  "fields": {
+    "tier": 2,
+    "desc": "Next   4k SMS per month",
+    "tier_name": "0.0525",
+    "start": 2201,
+    "end": 6200,
+    "created": "2015-03-02T14:51:10.931Z",
+    "modified": "2015-03-03T14:32:48.126Z",
+    "price": "0.0525"
+  }
+},
+{
+  "model": "account.pricing",
+  "pk": 6,
+  "fields": {
+    "tier": 3,
+    "desc": "Next   6k SMS per month",
+    "tier_name": "0.0495",
+    "start": 6201,
+    "end": 12200,
+    "created": "2015-03-02T14:52:40.543Z",
+    "modified": "2015-03-03T14:33:36.054Z",
+    "price": "0.0495"
+  }
+},
+{
+  "model": "account.pricing",
+  "pk": 7,
+  "fields": {
+    "tier": 4,
+    "desc": "remaining SMS",
+    "tier_name": "0.0475",
+    "start": 12201,
+    "end": 999999999,
+    "created": "2015-03-02T14:53:30.321Z",
+    "modified": "2015-03-03T14:34:09.219Z",
+    "price": "0.0475"
+  }
+}
+]

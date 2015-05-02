@@ -15,7 +15,7 @@ from django.utils import timezone
 
 from model_mommy import mommy
 
-from account.models import (TransType, AcctCost, AcctStmt, AcctTrans,
+from account.models import (Dates, TransType, AcctCost, AcctStmt, AcctTrans,
     CHARGE_AMOUNTS, BALANCE_AMOUNTS)
 from account.tests.factory import make_acct_stmts, make_acct_trans
 from concierge.models import Message
@@ -35,6 +35,18 @@ class AbstractBaseTests(TestCase):
         assert tt._today == now.date()
         assert tt._month == now.month
         assert tt._year == now.year
+
+
+class DatesTests(TestCase):
+
+    def test_all_dates(self):
+        dates = Dates()
+        now = timezone.now()
+
+        assert dates._now
+        assert dates._today == now.date()
+        assert dates._year == now.year
+        assert dates._month == now.month
 
 
 class TransTypeTests(TestCase):
