@@ -10,6 +10,7 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 
+# from main.models import Hotel
 from utils import email
 
 
@@ -191,12 +192,12 @@ class Card(AbstractBase):
 
 class ChargeManager(StripeClient, models.Manager):
 
-    def stripe_create(self, card, customer, amount, email, currency='usd'):
+    def stripe_create(self, hotel, card, customer, amount, email, currency='usd'):
         '''
         Create Charge based on Stripe Customer ID. Don't need a card token"
         because only charging existing Customers.
         '''
-        hotel = Hotel.objects.get(customer=customer)
+        # hotel = Hotel.objects.get(customer=customer)
 
         try:
             stripe_charge = self.stripe.Charge.create(customer=customer.id,

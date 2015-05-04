@@ -199,23 +199,16 @@ REST_FRAMEWORK = {
 # BROKER_TRANSPORT = 'redis'
 # CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
+# TWILIO
+PHONE_NUMBER = os.environ['TWILIO_PHONE_NUMBER']
+TWILIO_ACCOUNT_SID = os.environ['TWILIO_ACCOUNT_SID']
+TWILIO_AUTH_TOKEN = os.environ['TWILIO_AUTH_TOKEN']
 
 if DEBUG:
-    # TWILIO
-    # Twilio LIVE account under: pyaaron@gmail.com.
-    PHONE_NUMBER = os.environ['TWILIO_PHONE_NUMBER']
-    TWILIO_ACCOUNT_SID = os.environ['TWILIO_ACCOUNT_SID']
-    TWILIO_AUTH_TOKEN = os.environ['TWILIO_AUTH_TOKEN']
-
     # STRIPE
     STRIPE_SECRET_KEY = os.environ['STRIPE_TEST_SECRET_KEY']
     STRIPE_PUBLIC_KEY = os.environ['STRIPE_TEST_PUBLIC_KEY']
 else:
-    # TWILIO
-    # Twilio LIVE account under: pyaaron@gmail.com.
-    PHONE_NUMBER = os.environ['TWILIO_PHONE_NUMBER']
-    TWILIO_ACCOUNT_SID = os.environ['TWILIO_ACCOUNT_SID']
-    TWILIO_AUTH_TOKEN = os.environ['TWILIO_AUTH_TOKEN']
     # STRIPE
     STRIPE_SECRET_KEY = os.environ['STRIPE_LIVE_SECRET_KEY']
     STRIPE_PUBLIC_KEY = os.environ['STRIPE_LIVE_PUBLIC_KEY']

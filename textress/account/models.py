@@ -433,11 +433,11 @@ class AcctTrans(AbstractBase):
         self.debit, self.credit = self._verify_debit_credit
 
         # Charge C.Card
-        if self.credit:
-            try:
-                Charge.objects.stripe_create(self.hotel.customer)
-            except stripe.error.StripeError:
-                return
+        # if self.credit:
+        #     try:
+        #         Charge.objects.stripe_create(self.hotel.customer)
+        #     except stripe.error.StripeError:
+        #         return
 
         return super().save(*args, **kwargs)
 

@@ -2,7 +2,7 @@ import stripe
 
 from django.conf import settings
 
-from .models import Customer, Card, Charge
+from payment.models import Customer, Card, Charge
 from account.models import TransType, AcctTrans
 
 
@@ -18,15 +18,17 @@ def signup_register_step4(hotel, token, email, amount):
 
         card = Card.objects.stripe_create(customer=customer)
 
-        charge = Charge.objects.stripe_create(card=card,
+        charge = Charge.objects.stripe_create(hotel=hotel, card=card,
             customer=customer, amount=amount, email=email)
             
     except stripe.error.StripeError:
         raise
+
     else:
         # make an AcctTrans record of 'funds_added' here
-        trans_type = AcctTrans.objects.get(name='init_amt')
-        acct_trans = AcctTrans.objects.create(hotel=self.hotel,
+        trans_type = TransType.objects.get(name='init_amt')
+        
+        acct_trans = AcctTrans.objects.create(hotel=hotel,
             trans_type=trans_type, amount=amount)
 
         return customer, card, charge

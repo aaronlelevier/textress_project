@@ -52,6 +52,7 @@ class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin,
 
     def post(self, request, *args, **kwargs):
         try:
+            print('token', request.POST['stripeToken'])
             #DB create
             (customer, card, charge) = signup_register_step4(
                 hotel=self.hotel,

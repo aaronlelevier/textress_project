@@ -1,6 +1,6 @@
 [
 {
-  "pk": 2,
+  "pk": 1,
   "fields": {
     "modified": "2015-01-05T01:13:18.378Z",
     "name": "init_amt",
@@ -10,7 +10,7 @@
   "model": "account.transtype"
 },
 {
-  "pk": 3,
+  "pk": 2,
   "fields": {
     "modified": "2015-01-05T01:13:52.203Z",
     "name": "recharge_amt",
@@ -20,7 +20,7 @@
   "model": "account.transtype"
 },
 {
-  "pk": 4,
+  "pk": 3,
   "fields": {
     "modified": "2014-12-27T13:54:02.052Z",
     "name": "sms_used",
@@ -30,7 +30,7 @@
   "model": "account.transtype"
 },
 {
-  "pk": 5,
+  "pk": 4,
   "fields": {
     "modified": "2015-01-04T23:28:28.339Z",
     "name": "bulk_discount",

@@ -245,12 +245,10 @@ class UserProfile(AbstractBase):
 class SubaccountManager(models.Manager):
 
     def twilio_create(self, hotel):
+        '''User Master sid/auth_token to create a Twilio Subaccount.'''
         client = TwilioRestClient(settings.TWILIO_ACCOUNT_SID,
             settings.TWILIO_AUTH_TOKEN)
-        try:
-            return client.accounts.list(friendly_name=hotel.name)[0]
-        except IndexError:
-            return client.accounts.create(friendly_name=hotel.name)
+        return client.accounts.create(friendly_name=hotel.name)
 
     def get_or_create(self, hotel, *args, **kwargs):
         try:
@@ -272,7 +270,9 @@ class SubaccountManager(models.Manager):
 
 class Subaccount(AbstractBase):
     """
-    Twilio Subaccount to handle API Calls and main entry point for Twilio.
+    Twilio Subaccount
+    -----------------
+    To handle API Calls and main entry point for Twilio.
 
     TODO: When customer successfully pays for Account, create a Subaccount
         with a new PhoneNumber.

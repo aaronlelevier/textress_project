@@ -1,3 +1,4 @@
+{% load stripe_tags %}
 <!DOCTYPE html>
 <html>
 
@@ -18,9 +19,9 @@
         <p>Stripe customer id: {{ hotel.customer }}</p>
         <br>
         <h4>Stripe Plan</h4>
-        <p>{{ plan.description }}</p>
+        <p>Initial Amount Charged: {{ hotel.acct_cost.init_amt|stripe_money }}</p>
         <br>
-        <p><a href="{% url 'accounts:account' %}">Go to Account and finish account setup</a></p>
+        <p><a href="{% url 'account' %}">Go to Account and finish account setup</a></p>
     </div>
 </body>
 
