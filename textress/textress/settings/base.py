@@ -154,7 +154,7 @@ COMPANY_NAME = "Textress"
 # Textress Concierge Settings
 SMS_LIMIT = 50
 # Default Costs for Accounts (Stripe Amounts ~ in cents)
-DEFAULT_MONTHLY_FEE = 500.0
+DEFAULT_MONTHLY_FEE = 0
 DEFAULT_SMS_COST = 5.5
 
 ### Twilio Settings ###

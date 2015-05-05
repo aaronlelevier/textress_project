@@ -51,11 +51,11 @@ def make_acct_stmts(hotel):
 
 def _acct_trans(hotel, trans_type, insert_date, amount=None):
     '''
+    Monkey-patch save() for same reason as AcctStmt.
+    
     'init_amt', 'recharge_amt' are 1000 Stripe Credits.
 
     'sms_used' are b/t -100 ... -10  (for testing purposes)
-
-    Monkey-patch save() for same reason as AcctStmt.
 
     Positive `amount` is a `credit`, else a `debit`
     '''
@@ -121,7 +121,3 @@ def make_acct_trans(hotel):
         insert_date += next_day
 
     return AcctTrans.objects.all()
-
-
-
-

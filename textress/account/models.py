@@ -49,6 +49,9 @@ class AbstractBase(Dates, models.Model):
 ###########
 
 class Pricing(AbstractBase):
+    """Pricing Tiers that gradually decrease in Price as Volumes increase. 
+    Based on monthly volumes."""
+
     tier = models.PositiveIntegerField(_("Tier"))
     tier_name = models.CharField(_("Tier Name"), max_length=55, blank=True,
         help_text="If blank, will be the Tier's Price per SMS")
@@ -67,6 +70,9 @@ class Pricing(AbstractBase):
         return "{0:.4f}".format(self.price)
 
     def save(self, *args, **kwargs):
+        """Default ``tier_name`` with the exception of the 'Free Tier'. Middle 
+        Tiers use the same ``desc``."""
+
         if not self.tier_name:
             self.tier_name = "{0:.4f}".format(self.price)
 
@@ -91,7 +97,11 @@ class TransType(AbstractBase):
     4   sms_used        daily deduction for sms used for that day; cache - sms used during the day to save DB trips
     5   bulk_discount   credit applied from previous months use based on bulk
 
-    TODO: cache - `sms_used` during the day to save DB trips
+    TODO:
+
+        - cache `sms_used` during the day to save DB trips
+
+        - remove "bulk_discount" b/c will apply discounts daily??
     """
     name = models.CharField(_("Name"), unique=True, max_length=50)
     desc = models.CharField(_("Description"), max_length=255)
@@ -117,6 +127,8 @@ class AcctCostManager(models.Manager):
     def get_or_create(self, hotel, **kwargs):
         '''
         Override `get_or_create` to enforce 1 record p/ Hotel.
+
+        Will - get, create, or update the AcctCost record for the Hotel.
         '''
         try:
             acct_cost = AcctCost.objects.get(hotel=hotel)
@@ -136,12 +148,18 @@ class AcctCost(AbstractBase):
 
     Level: 1 record per Hotel
 
-    ** Note: All Amounts in Stripe Amount. 
-        ex- if DB record = 1000, then amount in dollars = 10.00
+    Note:
+
+        - All Amounts in Stripe Amount. 
+            - ex: if DB record = 1000, then amount in dollars = 10.00
+
+        - Used to have a ``per_sms`` static cost here, and I was going to 
+        adjust billing at the end of the month for the ``bulk_discount``.  
+        
+        - NOW: will apply discounts as they happen through "Daily AcctTrans" 
+        Records.
     """
     hotel = models.OneToOneField(Hotel, related_name='acct_cost')
-    per_sms = models.FloatField(_("Per SMS Cost"), blank=True,
-        default=settings.DEFAULT_SMS_COST)
     init_amt = models.PositiveIntegerField(_("Amount to Add"), 
         choices=CHARGE_AMOUNTS, default=CHARGE_AMOUNTS[0][0])
     balance_min = models.PositiveIntegerField(_("Balance Minimum"),
@@ -196,7 +214,7 @@ class AcctStmtManager(models.Manager):
 
         values = {
             'total_sms': total_sms,
-            'monthly_costs': settings.DEFAULT_SMS_COST * total_sms,
+            'monthly_costs': settings.DEFAULT_SMS_COST * total_sms, # TODO: make this a sum() aggregation from AcctTrans
             'balance': self.acct_trans_balance(hotel)
         }
         try:
@@ -216,6 +234,8 @@ class AcctStmt(AbstractBase):
     Monthly usage stats for each hotel.
 
     Level: One record per Hotel per Month.
+
+    Purpose: Hotels will have a: Monthly and Daily view of their Usage.
     """
     # Keys
     hotel = models.ForeignKey(Hotel, related_name='acct_stmt')
@@ -388,7 +408,9 @@ class AcctTransManager(Dates, models.Manager):
 
 class AcctTrans(AbstractBase):
     """
-    Usage Stats per day and Account Deposit records.
+    Account balance transactions per day
+
+    Level: Hotel, Date, TransType
 
     ** Transactions are daily per TransType
 
@@ -431,13 +453,6 @@ class AcctTrans(AbstractBase):
 
         # Verify Debit or Credit
         self.debit, self.credit = self._verify_debit_credit
-
-        # Charge C.Card
-        # if self.credit:
-        #     try:
-        #         Charge.objects.stripe_create(self.hotel.customer)
-        #     except stripe.error.StripeError:
-        #         return
 
         return super().save(*args, **kwargs)
 

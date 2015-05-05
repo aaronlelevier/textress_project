@@ -15,7 +15,7 @@ from django.utils import timezone
 
 from model_mommy import mommy
 
-from account.models import (Dates, TransType, AcctCost, AcctStmt, AcctTrans,
+from account.models import (Dates, Pricing, TransType, AcctCost, AcctStmt, AcctTrans,
     CHARGE_AMOUNTS, BALANCE_AMOUNTS)
 from account.tests.factory import make_acct_stmts, make_acct_trans
 from concierge.models import Message
@@ -49,10 +49,22 @@ class DatesTests(TestCase):
         assert dates._month == now.month
 
 
+class PricingTests(TestCase):
+
+    # NOTE: Am skipping testing save() b/c these are static Pricing Tiers
+    #   that are created once and hardly ever changed.
+
+    fixtures = ['pricing.json']
+
+    def test_fixtures(self):
+        free_price = Pricing.objects.get(tier_name="Free")
+        assert isinstance(free_price, Pricing)
+
+
 class TransTypeTests(TestCase):
 
     # Contains all TransTypes
-    fixtures = ['account.json']
+    fixtures = ['trans_type.json']
 
     def test_types(self):
         init_amt = TransType.objects.get(name='init_amt')
@@ -67,11 +79,7 @@ class TransTypeTests(TestCase):
 
 class AcctCostTests(TestCase):
     '''
-    Hotel can only have 1 AcctCost record.
-    Should update when User changes.
-    init_amt / recharge_amt == 1000-10000
-    balance_min == 0-10000
-    '''
+    Hotel can only have 1 AcctCost record. Can be updated.'''
 
     def setUp(self):
         self.password = '1234'
@@ -82,7 +90,7 @@ class AcctCostTests(TestCase):
         assert created
         assert isinstance(acct_cost, AcctCost)
         assert acct_cost.init_amt == 1000
-        assert acct_cost.balance_min == 0
+        assert acct_cost.balance_min == 100
         assert acct_cost.recharge_amt == 1000
 
         # create new actually modifies original b/c p/ Hotel, singleton obj
@@ -94,24 +102,14 @@ class AcctCostTests(TestCase):
         assert not created
         assert acct_cost == new_acct_cost
         assert len(AcctCost.objects.all()) == 1
-        assert new_acct_cost.balance_min == 2000
-        assert new_acct_cost.recharge_amt == 3000
-
-    def test_per_sms(self):
-        acct_cost, created = AcctCost.objects.get_or_create(hotel=self.hotel)
-        assert acct_cost.per_sms == settings.DEFAULT_SMS_COST
-        
-        # change cost, and check
-        acct_cost.per_sms = 4.75
-        acct_cost.save()
-        new_acct_cost = AcctCost.objects.get(hotel=self.hotel)
-        assert new_acct_cost.per_sms == 4.75
+        assert new_acct_cost.balance_min == BALANCE_AMOUNTS[2][0]
+        assert new_acct_cost.recharge_amt == CHARGE_AMOUNTS[2][0]
 
 
 class AcctStmtTests(TestCase):
 
     # Contains all TransTypes
-    fixtures = ['account.json']
+    fixtures = ['trans_type.json']
 
     def setUp(self):
         self.password = '1234'
@@ -133,10 +131,10 @@ class AcctStmtTests(TestCase):
         self.hotel.admin_id = self.admin.id
         self.hotel.save()
 
-        # Guest
+        # Guests (makes 10)
         self.guest = make_guests(hotel=self.hotel, number=1)[0] #b/c returns a list
 
-        # Messages
+        # Messages (makes 10)
         self.messages = make_messages(
             hotel=self.hotel,
             user=self.admin,
@@ -154,7 +152,10 @@ class AcctStmtTests(TestCase):
 
     def test_get_absolute_url(self):
         assert (self.acct_stmt.get_absolute_url() ==
-                reverse('acct_stmt_detail', kwargs={'pk':self.acct_stmt.pk}))
+                reverse('acct_stmt_detail',
+                    kwargs={'year':self.acct_stmt.year, 'month':self.acct_stmt.month}
+                    )
+                )
 
     ### MANAGER TESTS ###
 
