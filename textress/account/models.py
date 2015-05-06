@@ -48,6 +48,15 @@ class AbstractBase(Dates, models.Model):
 # PRICING #
 ###########
 
+class PricingManager(models.Manager):
+
+    def get_cost(self, units):
+        """Get the cost of units used based upon the current ``Pricing`` 
+        Tier."""
+
+
+
+
 class Pricing(AbstractBase):
     """Pricing Tiers that gradually decrease in Price as Volumes increase. 
     Based on monthly volumes."""
@@ -61,6 +70,8 @@ class Pricing(AbstractBase):
         help_text="Price in $'s. Ex: 0.0525")
     start = models.PositiveIntegerField(_("SMS Start"), help_text="Min SMS per Tier")
     end = models.PositiveIntegerField(_("SMS End"), help_text="Max SMS per Tier")
+
+    objects = PricingManager()
 
     class Meta:
         verbose_name_plural = "Pricing"
@@ -350,21 +361,16 @@ class AcctTransManager(Dates, models.Manager):
         '''
         get_or_create() the `sms_used` record p/Hotel p/Day.
 
-        Return: (acct_tran, created)
+        Return: acct_tran, created
         '''
-        if not trans_type:
-            trans_type = TransType.objects.get(name='sms_used')
-
-        acct_cost = AcctCost.objects.get(hotel=hotel)
-        insert_date = insert_date or self._today
-        sms_used = hotel.messages.filter(insert_date=insert_date).count()
+        sms_used = hotel.messages.filter(insert_date=insert_date).count() # insert_date is a Date Type
         
         values = {
             'sms_used': sms_used,
             'amount': -(settings.DEFAULT_SMS_COST * sms_used)
         }
         if not sms_used:
-            return (None, None)
+            return None, None
         else:
             try:
                 acct_tran = self.get(hotel=hotel, trans_type=trans_type, insert_date=insert_date)
@@ -388,9 +394,9 @@ class AcctTransManager(Dates, models.Manager):
 
         """
         insert_date = kwargs.get('insert_date', self._today)
-        sms_used = hotel.messages.filter(insert_date=insert_date).count()
         
         if trans_type.name == 'sms_used':
+            sms_used = hotel.messages.filter(insert_date=insert_date).count()
             acct_tran, created = self.sms_used(hotel, trans_type, insert_date)
 
             # check if balance < 0, if so charge C.Card, and if fail, suspend Twilio Acct.
@@ -409,13 +415,10 @@ class AcctTransManager(Dates, models.Manager):
 
 class AcctTrans(AbstractBase):
     """
-    Account balance transactions per day
+    Account Transactions per day.
 
-    Level: Hotel, Date, TransType
-
-    ** Transactions are daily per TransType
-
-    :sms_used: 1 transaction p/ day for total sms used
+    :sms_used:
+        1 transaction p/ day for total sms used
 
     :Goal:
         To keep a running balance by day of how much the Hotel 
@@ -428,11 +431,14 @@ class AcctTrans(AbstractBase):
     # Auto
     amount = models.FloatField(_("Amount"), blank=True, null=True,
         help_text="Negative for Usage, Positive for 'Funds Added' records.")
-    sms_used = models.IntegerField(blank=True, null=True, default=0,
+    sms_used = models.IntegerField(blank=True, null=True,
         help_text="NULL unless trans_type=sms_used")
-    insert_date = models.DateField(_("Insert Date"), blank=True, null=True) # auto_now_add=True)
-    debit = models.BooleanField(_("Acct Debit"), blank=True, default=False)
-    credit = models.BooleanField(_("Acct Credit"), blank=True, default=False)
+    insert_date = models.DateField(_("Insert Date"), blank=True, null=True) # auto_now_add=True) # add back in Prod
+
+    # NOTE: debit/credit were for the template filtering, but instead
+    #   just worry about in template only instead of adding more fields
+    # debit = models.BooleanField(_("Acct Debit"), blank=True, default=False)
+    # credit = models.BooleanField(_("Acct Credit"), blank=True, default=False)
 
     objects = AcctTransManager()
 
@@ -440,28 +446,29 @@ class AcctTrans(AbstractBase):
         verbose_name = "Account Transaction"
 
     def __str__(self):
-        return """Date: {self.insert_date} Hotel: {self.hotel} TransType: {self.trans_type} 
+        return """Date: {self.insert_date} Hotel: {self.hotel} TransType: {self.trans_type} \
         Amount: ${amount:.2f}""".format(self=self, amount=self.amount/100.0)
 
     def save(self, *args, **kwargs):
-        # Optional for testing purposes
-        self.insert_date = kwargs.get('insert_date', self._today)
+        # For testing only
+        if not self.insert_date:
+            self.insert_date = timezone.now().date()
 
         # Verify Debit or Credit
-        self.debit, self.credit = self._verify_debit_credit
+        # self.debit, self.credit = self._verify_debit_credit
 
         return super().save(*args, **kwargs)
 
-    @property
-    def _verify_debit_credit(self):
-        if not self.amount:
-            raise InvalidAmtException("Amount cannot equal 0")
-        elif self.amount > 0:
-            self.credit = True
-        else:
-            self.debit = True
+    # @property
+    # def _verify_debit_credit(self):
+    #     if not self.amount:
+    #         raise InvalidAmtException("Amount cannot equal 0")
+    #     elif self.amount > 0:
+    #         self.credit = True
+    #     else:
+    #         self.debit = True
 
-        if not any([self.debit, self.credit]):
-            raise InvalidAmtException("Must be either a Debit or Credit.")
+    #     if not any([self.debit, self.credit]):
+    #         raise InvalidAmtException("Must be either a Debit or Credit.")
 
-        return self.debit, self.credit
+    #     return self.debit, self.credit
