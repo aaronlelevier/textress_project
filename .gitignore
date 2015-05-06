@@ -6,6 +6,7 @@
 .DS_Store
 .coverage
 static/
+htmlcov/
 /__pycache__
 *.ipynb*
 vendor/

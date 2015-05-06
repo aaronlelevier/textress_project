@@ -204,8 +204,9 @@ class AcctStmtManager(models.Manager):
     
     def get_or_create(self, hotel, month=timezone.now().month, year=timezone.now().year):
         """
-        1 Stmt p/Hotel, p/Month, but updated daily upon User request. Will get 
-            the current day's record, or create a new one.
+        1 Stmt p/Hotel, p/Month, but updated daily upon User request.
+
+        Will get, create, or update - current month record.
 
         Return: AcctStmt, created
         """
@@ -296,7 +297,7 @@ class AcctTransManager(Dates, models.Manager):
     def get_queryset(self):
         return AcctTransQuerySet(self.model, self._db)
 
-    def monthly_trans(self, hotel, month, year):
+    def monthly_trans(self, hotel, month=timezone.now().month, year=timezone.now().year):
         return self.get_queryset().monthly_trans(hotel=hotel,
             month=month, year=year)
 
@@ -414,17 +415,12 @@ class AcctTrans(AbstractBase):
 
     ** Transactions are daily per TransType
 
-    :sms_used: 1 transaction p/ day form sms_used for that day
+    :sms_used: 1 transaction p/ day for total sms used
 
-    3 Record types
-    --------------
-    :Usage: Daily record summarized from "concierge.Message" 
-    :Monthly Fee: Monthly Record
-    :General Funds: General funds for per SMS usage cost
-
-    Goal: To keep a running balance by day of how much the Hotel 
-    is using, and also to be able to provide "Alerts" for low account 
-    balances.
+    :Goal:
+        To keep a running balance by day of how much the Hotel 
+        is using, and also to be able to provide "Alerts" for low account 
+        balances.
     """
     # Keys
     hotel = models.ForeignKey(Hotel, related_name='acct_trans')

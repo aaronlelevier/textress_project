@@ -211,7 +211,7 @@ class AcctStmtTests(TestCase):
 class AcctTransTests(TestCase):
 
     # Contains all TransTypes
-    fixtures = ['account.json']
+    fixtures = ['trans_type.json']
 
     def setUp(self):
         self.password = '1234'
@@ -296,9 +296,7 @@ class AcctTransTests(TestCase):
             insert_date__year=self.today.year
             )
         monthly_trans_mgr = AcctTrans.objects.monthly_trans(
-            hotel=self.hotel,
-            month=self.today.month,
-            year=self.today.year
+            hotel=self.hotel
             )
         assert len(monthly_trans) == len(monthly_trans_mgr)
 
