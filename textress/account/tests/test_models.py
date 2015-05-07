@@ -60,6 +60,24 @@ class PricingTests(TestCase):
         free_price = Pricing.objects.get(tier_name="Free")
         assert isinstance(free_price, Pricing)
 
+    def test_get_cost(self):
+        assert Pricing.objects.get_cost(units=200, units_prev=0) == 0
+
+    def test_get_cost_two_tiers(self):
+        units = 300
+        tier = Pricing.objects.get(start__lte=units, end__gte=units)
+        print((units - (tier.start-1)) * tier.price)
+        print(Pricing.objects.get_cost(units=units, units_prev=0))
+        assert (units - (tier.start-1)) * tier.price == Pricing.objects.get_cost(units=units, units_prev=0)
+
+    def test_get_cost_three_tiers(self):
+        units = 2300
+        cost = 100*0.0525 + 2000*0.0550
+        tier = Pricing.objects.get(start__lte=units, end__gte=units)
+        print(cost)
+        print(Pricing.objects.get_cost(units=units, units_prev=0))
+        assert cost == Pricing.objects.get_cost(units=units, units_prev=0)
+
 
 class TransTypeTests(TestCase):
 

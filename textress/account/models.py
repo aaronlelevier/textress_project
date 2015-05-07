@@ -50,11 +50,27 @@ class AbstractBase(Dates, models.Model):
 
 class PricingManager(models.Manager):
 
-    def get_cost(self, units):
+    def get_cost(self, units, units_prev):
         """Get the cost of units used based upon the current ``Pricing`` 
-        Tier."""
+        Tier.
 
-
+        units - current units used this month
+        units_prev - previous units balance calculated for this month
+        """
+        tiers = self.order_by('-end')
+        units_to_expense = units - units_prev
+        cost = 0
+        while units_to_expense > 0:
+            for t in tiers:
+                if units >= t.start:
+                    if units >= t.end:
+                        # -1 b/c tier2 300-201=99 not 100 for ex
+                        units_to_subtract = t.end - (t.start if t.start == 0 else t.start-1)
+                    else:
+                        units_to_subtract = units - (t.start if t.start == 0 else t.start-1)
+                    cost += units_to_subtract * t.price
+                    units_to_expense -= units_to_subtract
+        return cost
 
 
 class Pricing(AbstractBase):
