@@ -380,10 +380,11 @@ class AcctTransManager(Dates, models.Manager):
         Return: acct_tran, created
         '''
         sms_used = hotel.messages.filter(insert_date=insert_date).count() # insert_date is a Date Type
+        sms_used_prev = self.monthly_trans(hotel=hotel).aggregate(Max('sms_used'))
         
         values = {
             'sms_used': sms_used,
-            'amount': -(settings.DEFAULT_SMS_COST * sms_used)
+            'amount': Pricing.objects.get_cost(units=sms_used, units_prev=sms_used_prev)
         }
         if not sms_used:
             return None, None
