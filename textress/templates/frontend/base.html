@@ -53,65 +53,35 @@
                     <div class="col-md-4 col-sm-4">
                         <h2>About Textress</h2>
                         <p>
-                            Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa.
-                            Nulla consequat massa quis enim.
-                            Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu.
-                            In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo.
+                            We are a technology company based in Las Vegas, NV. Our premier offering is Textress Concierge.
                         </p>
                     </div>
                     <!-- end: SLIDING BAR FIRST COLUMN -->
                     <!-- start: SLIDING BAR SECOND COLUMN -->
                     <div class="col-md-4 col-sm-4">
-                        <h2>Recent Works</h2>
-                        <div class="blog-photo-stream margin-bottom-30">
-                            <ul class="list-unstyled">
-                                <li>
-                                    <a href="#"><img alt="" src="{% static 'clipone/frontend/clip-one/assets/images/image01.jpg' %}"></a>
-                                </li>
-                                <li>
-                                    <a href="#"><img alt="" src="{% static 'clipone/frontend/clip-one/assets/images/image02.jpg' %}"></a>
-                                </li>
-                                <li>
-                                    <a href="#"><img alt="" src="{% static 'clipone/frontend/clip-one/assets/images/image03.jpg' %}"></a>
-                                </li>
-                                <li>
-                                    <a href="#"><img alt="" src="{% static 'clipone/frontend/clip-one/assets/images/image04.jpg' %}"></a>
-                                </li>
-                                <li>
-                                    <a href="#"><img alt="" src="{% static 'clipone/frontend/clip-one/assets/images/image05.jpg' %}"></a>
-                                </li>
-                                <li>
-                                    <a href="#"><img alt="" src="{% static 'clipone/frontend/clip-one/assets/images/image06.jpg' %}"></a>
-                                </li>
-                                <li>
-                                    <a href="#"><img alt="" src="{% static 'clipone/frontend/clip-one/assets/images/image07.jpg' %}"></a>
-                                </li>
-                                <li>
-                                    <a href="#"><img alt="" src="{% static 'clipone/frontend/clip-one/assets/images/image08.jpg' %}"></a>
-                                </li>
-                                <li>
-                                    <a href="#"><img alt="" src="{% static 'clipone/frontend/clip-one/assets/images/image09.jpg' %}"></a>
-                                </li>
-                                <li>
-                                    <a href="#"><img alt="" src="{% static 'clipone/frontend/clip-one/assets/images/image10.jpg' %}"></a>
-                                </li>
-                            </ul>
-                        </div>
+                        <h2>Recent Tweets</h2>
+                        <p>
+                            TODO: twitter tag integration for recent-tweets goes here...
+                        </p>
                     </div>
                     <!-- end: SLIDING BAR SECOND COLUMN -->
                     <!-- start: SLIDING BAR THIRD COLUMN -->
                     <div class="col-md-4 col-sm-4">
                         <h2>Contact Us</h2>
                         <address class="margin-bottom-40">
-                            Clip-One
+                            Textress
                             <br>
-                            12345 Street Name, City Name, United States
+                            6795 S Edmond Street
                             <br>
-                            P: (641)-734-4763
+                            3rd Floor, Attn: Aaron Lelever
+                            <br>
+                            Las Vegas, NV 89118
+                            <br>
+                            Ph: +1 (775) 419-4000
                             <br>
                             Email:
-                            <a href="#">
-                                info@example.com
+                            <a href="mailto:sayhello@textress.com">
+                                sayhello@textress.com
                             </a>
                         </address>
                     </div>
@@ -141,9 +111,9 @@
                         <div class="col-sm-6">
                             <!-- start: TOP BAR CALL US -->
                             <div class="callus">
-                                Call Us: (641)-734-4763 - Mail:
+                                Call Us: +1 (775) 419-4000 - Mail:
                                 <a href="#">
-                                    info@example.com
+                                    sayhello@textress.com
                                 </a>
                             </div>
                             <!-- end: TOP BAR CALL US -->
@@ -208,8 +178,8 @@
                         </button>
                         <!-- end: RESPONSIVE MENU TOGGLER -->
                         <!-- start: LOGO -->
-                        <a class="navbar-brand" href="/">
-                            CLIP<i class="clip-clip"></i>ONE
+                        <a class="navbar-brand" href="{% url 'contact:coming_soon' %}">
+                            TEXT<i><img src="{% static 'images/textress_icon.jpg' %}" class="textress-icon"></i>RESS
                         </a>
                         <!-- end: LOGO -->
                     </div>
@@ -299,19 +269,19 @@
                         <ul class="contact">
                             <li>
                                 <p>
-                                    <i class="fa fa-map-marker"></i><strong>Address:</strong> 1234 Street Name, City Name, United States
+                                    <i class="fa fa-map-marker"></i><strong>Address:</strong> 6795 S Edmond Street; 3rd Floor, Attn: Aaron Lelever; Las Vegas, NV 89118
                                 </p>
                             </li>
                             <li>
                                 <p>
-                                    <i class="fa fa-phone"></i><strong>Phone:</strong> (123) 456-7890
+                                    <i class="fa fa-phone"></i><strong>Phone:</strong> +1 (775) 419-4000
                                 </p>
                             </li>
                             <li>
                                 <p>
                                     <i class="fa fa-envelope"></i><strong>Email:</strong>
-                                    <a href="mailto:mail@example.com">
-                                        mail@example.com
+                                    <a href="mailto:sayhello@textress.com">
+                                        sayhello@textress.com
                                     </a>
                                 </p>
                             </li>
@@ -345,14 +315,14 @@
         <div class="footer-copyright">
             <div class="container">
                 <div class="row">
-                    <div class="col-md-1">
-                        <a class="logo" href="index.html">
-                            CLIP<i class="clip-clip"></i>ONE
+                    <div class="col-md-2">
+                        <a class="logo" href="/">
+                            TEXTRESS
                         </a>
                     </div>
-                    <div class="col-md-7">
+                    <div class="col-md-6">
                         <p>
-                            &copy; Copyright 2014 by Clip-One. All Rights Reserved.
+                            &copy; Copyright 2015 Textress. All Rights Reserved.
                         </p>
                     </div>
                     <div class="col-md-4">
