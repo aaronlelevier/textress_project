@@ -30,7 +30,6 @@ class ComingSoonView(CreateView):
         super(ComingSoonView, self).form_valid(form)
         messages.info(self.request, dj_messages['coming_soon'])
         
-        # dispatch to Celery
         obj = Newsletter.objects.get(email=form.cleaned_data['email'])
 
         ## comment out to test w/o redis/rabbitmq

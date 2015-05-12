@@ -1,11 +1,6 @@
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.views.generic import View, TemplateView
 
-from braces.views import GroupRequiredMixin
-
-
-### ERROR PAGES ###
 
 def handler404(request):
     response = render_to_response('error/404.html', {},

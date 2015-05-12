@@ -352,7 +352,6 @@ def create_userprofile(sender, instance=None, created=False, **kwargs):
     if created:
         UserProfile.objects.get_or_create(user=instance)
 
-        # Denormalize Token
 
 @receiver(pre_delete, sender=User)
 def delete_userprofile(sender, instance=None, **kwargs):

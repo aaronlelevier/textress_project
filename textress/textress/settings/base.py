@@ -30,6 +30,7 @@ THIRD_PARTY_APPS = (
     'rest_framework',
     'rest_framework.authtoken',
     'djangular',
+    'django_coverage',
 )
 
 LOCAL_APPS = (
