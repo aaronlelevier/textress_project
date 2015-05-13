@@ -23,23 +23,6 @@ from account.helpers import login_messages
 from payment.mixins import HotelUserMixin, HotelContextMixin
 
 
-### BUSINESS VIEWS ###
-
-class IndexView(NewsletterMixin, FormView):
-
-    template_name = 'frontend/index.html'
-
-
-class TermsNCondView(TemplateView):
-    template_name = 'frontend/terms_n_cond.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['company'] = "Textress"
-        context['LLC'] = "Aronysidoro LLC."
-        return context
-
-
 ### TODO: What is this view being used for? ###
 
 class HotelDetailView(HotelMixin, DetailView):

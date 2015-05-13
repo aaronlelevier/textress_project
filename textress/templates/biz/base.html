@@ -50,6 +50,14 @@
             {% endif %}
         {% endblock django_messages %}
 
+        <div class="row">
+            <div class="text-center">
+                <h2>
+                    TEXT<a href="{% url 'index' %}"><img src="{% static 'images/textress_icon.jpg' %}" class="textress-icon"></a>RESS
+                </h2>
+            </div>
+        </div>
+
         {% block body %}
         {% endblock body %}
 

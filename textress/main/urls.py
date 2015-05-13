@@ -23,9 +23,6 @@ user_patterns = patterns('',
     )
 
 urlpatterns = patterns('',
-    # Biz
-    url(r'^$', views.IndexView.as_view(), name='index'),
-    url(r'^terms-and-conditions/$', views.TermsNCondView.as_view(), name='terms_n_cond'),
     # Hotel
     url(r'^hotel/(?P<hotel_slug>[-_\w]+)/(?P<pk>\d+)/$', views.HotelDetailView.as_view(), name='hotel'),
     # Registration
