@@ -11,6 +11,10 @@ from utils.messages import dj_messages
 from utils.email import Email
 
 
+class PricingView(TemplateView):
+    template_name = 'frontend/pricing.html'
+
+
 class IndexView(CreateView):
     template_name = 'frontend/index.html'
     form_class = NewsletterForm

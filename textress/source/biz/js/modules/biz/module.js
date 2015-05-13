@@ -19,7 +19,7 @@ define([
                 url: '/pricing/',
                 views: {
                     'content@': {
-                        templateUrl: '/source/biz/js/modules/biz/templates/pricing.html',
+                        templateUrl: '/static/biz/js/modules/biz/templates/pricing.html',
                         controller: 'PricingCtrl'
                     }
                 }

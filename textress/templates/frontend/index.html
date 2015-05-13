@@ -128,7 +128,15 @@
         <!-- end: ABOUT US CONTAINER -->
     </section>
 
-    <section class="wrapper padding20">
+    <section class="wrapper padding50" ng-app="Pricing">
+        <div class="container" ng-controller="PricingCtrl">
+            <div class="row">
+                {{ dj_test }}
+            </div>
+        </div>
+    </section>
+
+    <section class="wrapper wrapper-grey padding50">
         <!-- start: BLOG POSTS AND COMMENTS CONTAINER -->
         <div class="container">
             <div class="row">
@@ -157,6 +165,27 @@
     <script src="{% static 'clipone/frontend/clip-one/assets/plugins/stellar.js/jquery.stellar.min.js' %}"></script>
     <script src="{% static 'clipone/frontend/clip-one/assets/plugins/colorbox/jquery.colorbox-min.js' %}"></script>
     <script src="{% static 'clipone/frontend/clip-one/assets/js/index.js' %}"></script>
+
+  <script src="{% static 'vendor/requirejs/require.min.js' %}"></script>
+  <script>
+    requirejs.config({
+        baseUrl: "{% static 'biz/' %}",
+    });
+
+    // obtain requirejs config
+    require(['require', "js/config-require"], function(require, config) {
+
+        // set cache beater (activate in Prod)
+        // config.urlArgs = 'bust=v0.4.0';
+
+        // update global require config
+        window.require.config(config);
+
+        //anguar
+        require(['biz/js/main']);
+    });
+    
+</script>
 {% endblock page_js %}
 
 

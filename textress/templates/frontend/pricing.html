@@ -1,0 +1,42 @@
+{% extends "biz/base.html" %}
+{% load staticfiles %}
+
+
+{% block main_css %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+{% endblock main_css %}
+
+{% block body %}
+    <div ui-view="content"></div>
+{% endblock body %}
+
+
+{% block main_js %}
+  <script src="{% static 'vendor/requirejs/require.min.js' %}"></script>
+  <script>
+    requirejs.config({
+        baseUrl: "{% static 'biz/' %}",
+    });
+
+    // obtain requirejs config
+    require(['require', "js/config-require"], function(require, config) {
+
+        // set cache beater (activate in Prod)
+        // config.urlArgs = 'bust=v0.4.0';
+
+        // update global require config
+        window.require.config(config);
+
+        //anguar
+        require(['biz/js/main']);
+    });
+    
+</script>
+{% endblock main_js %}
+
+
+{% block page_js %}{% endblock page_js %}
+
+
+{% block init_js %}{% endblock init_js %}
+

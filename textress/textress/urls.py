@@ -3,7 +3,7 @@ from django.contrib import admin
 
 from rest_framework.urlpatterns import format_suffix_patterns
 
-from textress.views import IndexView, TermsNCondView, handler404, handler500
+from textress.views import IndexView, TermsNCondView, handler404, handler500, PricingView
 from concierge import views
 from account.views import PricingListAPIView, PricingRetrieveAPIView
 
@@ -50,6 +50,7 @@ urlpatterns += patterns('',
     url(r'api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     # Pages
     url(r'^$', IndexView.as_view(), name='index'),
+    url(r'^pricing/$', PricingView.as_view(), name='pricing'),
     url(r'^terms-and-conditions/$', TermsNCondView.as_view(), name='terms_n_cond'),
     url(r'^404/$', handler404, name='404'),
     url(r'^500/$', handler500, name='500'),
