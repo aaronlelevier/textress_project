@@ -1141,6 +1141,16 @@ body.isMobile .navbar-default {
 	border-color: #b33426;
 	color: #ffffff;
 }
+.circle-icon.circle-grey-one {
+	background-color: #363839;
+	border-color: #1F1F1F;
+	color: #ffffff;
+}
+.circle-icon.circle-grey-two {
+	background-color: #696969;
+	border-color: #444444;
+	color: #ffffff;
+}
 .core-box {
 	display: inline-block;
 	padding-bottom: 50px;
