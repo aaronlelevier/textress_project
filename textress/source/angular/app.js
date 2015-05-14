@@ -1,7 +1,8 @@
-angular.module('phonecatApp', [
+angular.module('homeApp', [
         'ui.router',
         'ngResource',
-        'phonecatApp.controllers'
+        'homeApp.services',
+        'homeApp.controllers'
     ])
     .config(function($interpolateProvider, $httpProvider, $resourceProvider, $locationProvider) {
         // dif brackets from django

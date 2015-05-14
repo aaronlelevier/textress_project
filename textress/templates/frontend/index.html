@@ -19,6 +19,7 @@
 <script src="{% static 'vendor/angular-route/angular-route.min.js' %}"></script>
 <script src="{% static 'vendor/angular-ui-router/release/angular-ui-router.min.js' %}"></script>
 <script src="{% static 'angular/app.js' %}"></script>
+<script src="{% static 'angular/services.js' %}"></script>
 <script src="{% static 'angular/controllers.js' %}"></script>
 <!-- Angular: End -->
 {% endblock head_js %}
@@ -141,16 +142,57 @@
         <!-- end: ABOUT US CONTAINER -->
     </section>
 
-    <section class="wrapper padding50">
-        <div class="container" ng-controller="PhoneListCtrl">
+    <section class="wrapper padding50" id="pricing">
+        <div class="container" ng-controller="PricingCtrl">
             <div class="row">
-                  <ul>
-                    <li ng-repeat="phone in phones">
-                      <span>[[ phone.name ]]</span>
-                      <p>[[ phone.snippet ]]</p>
-                    </li>
-                  </ul>
+                <h2 class="text-center">Pricing</h2>
             </div>
+
+            <div class="row">
+                <div class="col-sm-4">
+                    <h4>Estimated SMS Per Month</h4>
+
+                    <form id="contactForm">
+                        <div class="row">
+                            <div class="form-group">
+                                <div class="col-md-10">
+                                    <label>
+                                        Enter SMS Volume  <span class="symbol required"></span>
+                                    </label>
+                                    <input ng-model="volume" ng-init="" type="number" value="[[ volume ]]" ng-submit="submit_volume(volume)" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+
+                    <h4>Example Volumes</h4>
+                    <ul>
+                        <li ng-repeat="volume in volumes"><a href="" ng-click="submit_volume(volume)">[[ volume ]]</a></li>
+                    </ul>
+                    <h4>SMS Volume: [[ volume ]]</h4>
+                    <h4>Cost: [[ calc_cost() | currency ]]</h4>
+                </div>
+
+                <div class="col-sm-8">
+                    <h3 class="text-center">Cost Table</h3>
+                    <table class="table">
+                        <tr>
+                            <th>Tier</th>
+                            <th>Pricer per SMS</th>
+                            <th>Description</th>
+                            <th>SMS Sent</th>
+                        </tr>
+                        <tr ng-repeat="price in prices">
+                            <td>[[ price.tier_name ]]</td>
+                            <td>[[ price.price ]]</td>
+                            <td>[[ price.desc ]]</td>
+                            <td>[[ price.start ]] - [[ price.end ]]</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
         </div>
     </section>
 
