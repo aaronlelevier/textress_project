@@ -1,6 +1,6 @@
 {% load staticfiles %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" ng-app="phonecatApp">
     <head>
         <base href="/">
         <title>Textress</title>
@@ -24,106 +24,24 @@
 
         {% block page_css %}
         {% endblock page_css %}
+
+        {% block head_js %}
+        <script src="{% static 'vendor/jquery/dist/jquery.min.js' %}"></script>
+        {% endblock head_js %}
     </head>
     <!-- end: HEAD -->
     <body>
         <!-- start: HEADER -->
         <header>
-            <!-- start: SLIDING BAR (SB) -->
-            <div id="slidingbar-area">
-                <div id="slidingbar">
-                    <!-- start: SLIDING BAR FIRST COLUMN -->
-                    <div class="col-md-4 col-sm-4">
-                        <h2>About Textress</h2>
-                        <p>
-                            We are a technology company based in Las Vegas, NV. Our premier offering is Textress Concierge.
-                        </p>
-                    </div>
-                    <!-- end: SLIDING BAR FIRST COLUMN -->
-                    <!-- start: SLIDING BAR SECOND COLUMN -->
-                    <div class="col-md-4 col-sm-4">
-                        <h2>Recent Tweets</h2>
-                        <p>
-                            TODO: twitter tag integration for recent-tweets goes here...
-                        </p>
-                    </div>
-                    <!-- end: SLIDING BAR SECOND COLUMN -->
-                    <!-- start: SLIDING BAR THIRD COLUMN -->
-                    <div class="col-md-4 col-sm-4">
-                        <h2>Contact Us</h2>
-                        <address class="margin-bottom-40">
-                            Textress
-                            <br>
-                            6795 S Edmond Street
-                            <br>
-                            3rd Floor, Attn: Aaron Lelever
-                            <br>
-                            Las Vegas, NV 89118
-                            <br>
-                            Ph: +1 (775) 419-4000
-                            <br>
-                            Email:
-                            <a href="mailto:sayhello@textress.com">
-                                sayhello@textress.com
-                            </a>
-                        </address>
-                    </div>
-                    <!-- end: SLIDING BAR THIRD COLUMN -->
-                </div>
-                <!-- start: SLIDING BAR TOGGLE BUTTON -->
-                <a href="{{ request.path }}#" class="sb_toggle">
-                </a>
-                <!-- end: SLIDING BAR TOGGLE BUTTON -->
-            </div>
-            <!-- end: SLIDING BAR -->
-            <!-- start: TOP BAR -->
-            <div class="clearfix " id="topbar">
-
-                <!-- django messages -->
-                {% if messages %}
-                <div class="row" style="background-color: #363839;">
-                    <div class="container">
-                    {% for message in messages %}
-                        <h4 class="text-center" style="color: white;">{{ message }}</h4>
-                    {% endfor %}</div>
-                </div>
-                {% endif %}
-
+            {% if messages %}
+            <div class="row" style="background-color: #363839;">
                 <div class="container">
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <!-- start: TOP BAR CALL US -->
-                            <div class="callus">
-                                Call Us: +1 (775) 419-4000 - Mail:
-                                <a href="#">
-                                    sayhello@textress.com
-                                </a>
-                            </div>
-                            <!-- end: TOP BAR CALL US -->
-                        </div>
-                        <div class="col-sm-6">
-                            <!-- start: TOP BAR SOCIAL ICONS -->
-                            <div class="social-icons">
-                                <ul>
-                                    <li class="social-twitter tooltips" data-original-title="Twitter" data-placement="bottom">
-                                        <a target="_blank" href="{% static 'clipone/frontend/clip-one/http://www.twitter.com">
-                                            Twitter
-                                        </a>
-                                    </li>
-                                    <li class="social-rss tooltips" data-original-title="RSS" data-placement="bottom">
-                                        <a target="_blank" href="#" >
-                                            RSS
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                            <!-- end: TOP BAR SOCIAL ICONS -->
-                        </div>
-                    </div>
-                </div>
+                {% for message in messages %}
+                    <h4 class="text-center" style="color: white;">{{ message }}</h4>
+                {% endfor %}</div>
             </div>
-            <!-- end: TOP BAR -->
-            <div role="navigation" class="navbar navbar-default navbar-fixed-top space-top">
+            {% endif %}
+            <div role="navigation" class="navbar navbar-default navbar-fixed-top">
                 <!-- start: TOP NAVIGATION CONTAINER -->
                 <div class="container">
                     <div class="navbar-header">
@@ -198,20 +116,13 @@
                             NL Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec hendrerit vehicula est, in consequat.
                         </p>
 
-                        <p>{{ nl_form.form_name }}</p>
+                        <p>{{ form.form_name }}</p>
 
                         <form name="{{ form.form_name }}" method="post" action="" novalidate>
                             {% csrf_token %}
                             <div class="input-group">
-                                <label class="control-label" for="id_email" style="visibility: hidden;"></label>
-                                <input type="email" id="id_email" name="email" placeholder="Email Address" class="form-control" ng-model="email" ng-required="true" required="required">
-                                <span class="input-group-btn">
-                                    <button type="submit" class="btn btn-default" ng-disabled="{{ nl_form.form_name }}.$invalid">
-                                        Go!
-                                    </button> 
-                                </span>
+                                {{ form.as_p }}
                             </div>
-                            <div class="field_error">{{ form.email.errors }}</div>
                         </form>
                     </div>
                 </div>
@@ -311,7 +222,6 @@
 
 
 {% block main_js %}
-<script src="{% static 'vendor/jquery/dist/jquery.min.js' %}"></script>
 <script src="{% static 'clipone/frontend/clip-one/assets/plugins/bootstrap/js/bootstrap.min.js' %}"></script>
 <script src="{% static 'clipone/frontend/clip-one/assets/plugins/jquery.transit/jquery.transit.js' %}"></script>
 <script src="{% static 'clipone/frontend/clip-one/assets/plugins/hover-dropdown/twitter-bootstrap-hover-dropdown.min.js' %}"></script>

@@ -11,6 +11,19 @@
 {% endblock page_css %}
 
 
+{% block head_js %}
+{{ block.super }}
+<!-- Angular -->
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+<script src="{% static 'vendor/angular-resource/angular-resource.min.js' %}"></script>
+<script src="{% static 'vendor/angular-route/angular-route.min.js' %}"></script>
+<script src="{% static 'vendor/angular-ui-router/release/angular-ui-router.min.js' %}"></script>
+<script src="{% static 'angular/app.js' %}"></script>
+<script src="{% static 'angular/controllers.js' %}"></script>
+<!-- Angular: End -->
+{% endblock head_js %}
+
+
 {% block content %}
 <!-- start: MAIN CONTAINER -->
 <div class="main-container">
@@ -128,10 +141,15 @@
         <!-- end: ABOUT US CONTAINER -->
     </section>
 
-    <section class="wrapper padding50" ng-app="Pricing">
-        <div class="container" ng-controller="PricingCtrl">
+    <section class="wrapper padding50">
+        <div class="container" ng-controller="PhoneListCtrl">
             <div class="row">
-                {{ dj_test }}
+                  <ul>
+                    <li ng-repeat="phone in phones">
+                      <span>[[ phone.name ]]</span>
+                      <p>[[ phone.snippet ]]</p>
+                    </li>
+                  </ul>
             </div>
         </div>
     </section>
@@ -166,26 +184,6 @@
     <script src="{% static 'clipone/frontend/clip-one/assets/plugins/colorbox/jquery.colorbox-min.js' %}"></script>
     <script src="{% static 'clipone/frontend/clip-one/assets/js/index.js' %}"></script>
 
-  <script src="{% static 'vendor/requirejs/require.min.js' %}"></script>
-  <script>
-    requirejs.config({
-        baseUrl: "{% static 'biz/' %}",
-    });
-
-    // obtain requirejs config
-    require(['require', "js/config-require"], function(require, config) {
-
-        // set cache beater (activate in Prod)
-        // config.urlArgs = 'bust=v0.4.0';
-
-        // update global require config
-        window.require.config(config);
-
-        //anguar
-        require(['biz/js/main']);
-    });
-    
-</script>
 {% endblock page_js %}
 
 
