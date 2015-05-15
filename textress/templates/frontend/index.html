@@ -29,14 +29,13 @@
 <!-- start: MAIN CONTAINER -->
 <div class="main-container">
 
-    <section class="wrapper wrapper-grey padding50">
-        <!-- start: WORKS CONTAINER -->
+    <section class="wrapper padding50" style="background-image: url('/static/clipone/frontend/clip-one/assets/images/photodune-4043508-3d-modern-office-room-l.jpg')" data-stellar-background-ratio="0.8" data-stellar-vertical-offset="-750">
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
-                    <h1 class="center">SMS for Business</h1>
-                    <hr>
-                    <h3 class="center">
+                    <h1 class="center white"> SMS for Business</h1>
+            <hr>
+                    <h3 class="center white">
                         Fast and friendly communication that drives customer service.
                     </h3>
                 </div>
@@ -142,12 +141,12 @@
         <!-- end: ABOUT US CONTAINER -->
     </section>
 
-    <section class="wrapper padding50" id="pricing">
+    <section class="wrapper padding20" id="pricing" ng-app="homeApp">
         <div class="container" ng-controller="PricingCtrl">
             <div class="row">
                 <h2 class="text-center">Pricing</h2>
             </div>
-
+            <hr>
             <div class="row">
                 <div class="col-sm-4">
                     <h4>Estimated SMS Per Month</h4>
@@ -167,7 +166,7 @@
 
 
                     <h4>Example Volumes</h4>
-                    <ul>
+                    <ul class="list-unstyled">
                         <li ng-repeat="volume in volumes"><a href="" ng-click="submit_volume(volume)">[[ volume ]]</a></li>
                     </ul>
                     <h4>SMS Volume: [[ volume ]]</h4>
@@ -176,7 +175,7 @@
 
                 <div class="col-sm-8">
                     <h3 class="text-center">Cost Table</h3>
-                    <table class="table">
+                    <table class="table table-hover">
                         <tr>
                             <th>Tier</th>
                             <th>Pricer per SMS</th>
@@ -196,7 +195,7 @@
         </div>
     </section>
 
-    <section class="wrapper wrapper-grey padding50">
+    <section class="wrapper wrapper-grey padding20">
         <!-- start: BLOG POSTS AND COMMENTS CONTAINER -->
         <div class="container">
             <div class="row">
