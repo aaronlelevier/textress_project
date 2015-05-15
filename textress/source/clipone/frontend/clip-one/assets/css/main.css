@@ -2228,9 +2228,9 @@ div.testimonial-author p {
 /* ---------------------------------------------------------------------- */
 footer {
 	background: #363839;
-	border-top: 4px solid #1F1F1F;
+	/*border-top: 4px solid #1F1F1F;*/
 	font-size: 0.9em;
-	padding: 40px 0 0;
+	/*padding: 40px 0 0;*/
 	position: relative;
 }
 footer h4 {
@@ -2283,7 +2283,7 @@ div.footer-copyright nav {
 div.footer-copyright {
 	background: #333333;
 	border-top: 1px solid #444444;
-	margin-top: 40px;
+	/*margin-top: 40px;*/
 	padding: 20px 0 20px;
 }
 div.footer-copyright p {

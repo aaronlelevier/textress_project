@@ -5,8 +5,8 @@ from django.views.generic import CreateView, TemplateView
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseRedirect
 
-from contact.forms import NewsletterForm
-from contact.models import Newsletter
+from contact.forms import ContactForm
+from contact.models import Contact
 from utils.messages import dj_messages
 from utils.email import Email
 
@@ -16,11 +16,22 @@ class PricingView(TemplateView):
 
 
 class IndexView(CreateView):
+    '''
+    ContactForm / FAQs Model data 
+
+    TODO
+    ----
+    make google map not scroll or skinnier
+    test CreateView on server side
+    change sent email templates b/c no longer "coming soon"
+    FAQ <section> still needs to be added n data w/ that as well
+    '''
+
     template_name = 'frontend/index.html'
-    form_class = NewsletterForm
-    model = Newsletter
-    fields = ['email']
-    success_url = reverse_lazy('contact:coming_soon')
+    form_class = ContactForm
+    model = Contact
+    fields = ['name', 'email', 'subject', 'message']
+    success_url = reverse_lazy('index')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -29,10 +40,10 @@ class IndexView(CreateView):
         return context
 
     def form_valid(self, form):
-        super(ComingSoonView, self).form_valid(form)
-        messages.info(self.request, dj_messages['coming_soon'])
+        super(IndexView, self).form_valid(form)
+        messages.info(self.request, dj_messages['contact_thanks'])
         
-        obj = Newsletter.objects.get(email=form.cleaned_data['email'])
+        obj = Contact.objects.get(**form.cleaned_data)
         
         email = Email(
             to=obj.email,
