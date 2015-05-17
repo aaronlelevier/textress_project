@@ -1,8 +1,8 @@
-angular.module('homeApp', [
+angular.module('indexApp', [
         'ui.router',
         'ngResource',
-        'homeApp.services',
-        'homeApp.controllers'
+        'indexApp.services',
+        'indexApp.controllers'
     ])
     .config(function($interpolateProvider, $httpProvider, $resourceProvider, $locationProvider) {
         // dif brackets from django

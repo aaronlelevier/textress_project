@@ -1,4 +1,4 @@
-var homeControllers = angular.module('homeApp.controllers', []);
+var homeControllers = angular.module('indexApp.controllers', []);
 
 homeControllers.controller('PhoneListCtrl', function PhoneListCtrl($scope) {
     $scope.phones = [{

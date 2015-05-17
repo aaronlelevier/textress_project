@@ -49,8 +49,8 @@ class IndexView(CreateView):
         
         email = Email(
             to=obj.email,
-            subject='email/coming_soon_subject.txt',
-            html_content='email/coming_soon_email.html'
+            subject='email/contact_subject.txt',
+            html_content='email/contact_email.html'
         )
         email.msg.send()
 
