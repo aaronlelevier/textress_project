@@ -14,6 +14,7 @@ class TimestampBase(models.Model):
 
     class Meta:
         abstract = True
+        
 
 ### CONTACT / EMAIL ###
 

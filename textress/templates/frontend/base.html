@@ -30,7 +30,7 @@
         {% endblock head_js %}
     </head>
     <!-- end: HEAD -->
-    <body>
+    <body {% block angular_app %}{% endblock %}>
         <!-- start: HEADER -->
         <header>
             {% if messages %}

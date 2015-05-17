@@ -10,14 +10,7 @@ from djangular.styling.bootstrap3.forms import (Bootstrap3Form,
 from contact.models import Contact, Newsletter
 
 
-class ContactForm(NgFormValidationMixin, Bootstrap3ModelForm):
-    '''
-    Main ContactForm for Biz Inquiries.
-
-    Have a ``Contact`` button that scrolls to bottom of business page, 
-    and 1 form will be at the bottom of the Single Business Homepage.
-    '''
-    form_name = 'contact_form'
+class ContactForm(Bootstrap3ModelForm):
 
     class Meta:
         model = Contact  

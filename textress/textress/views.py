@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.views.generic import CreateView, TemplateView
+from django.views.generic import CreateView, TemplateView, FormView
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseRedirect
 
@@ -24,7 +24,7 @@ class IndexView(CreateView):
     make google map not scroll or skinnier
     test CreateView on server side
     change sent email templates b/c no longer "coming soon"
-    FAQ <section> still needs to be added n data w/ that as well
+    FAQ <section> still needs to be added n data w/ that as wel
     '''
 
     template_name = 'frontend/index.html'
@@ -33,11 +33,13 @@ class IndexView(CreateView):
     fields = ['name', 'email', 'subject', 'message']
     success_url = reverse_lazy('index')
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['nl_form'] = self.get_form_class()
-        print(context['nl_form'])
-        return context
+    def form_invalid(self, form):
+        """
+        If the form is invalid, re-render the context data with the
+        data-filled form and errors.
+        """
+        messages.info(self.request, dj_messages['contact_not_sent'])
+        return self.render_to_response(self.get_context_data(form=form))
 
     def form_valid(self, form):
         super(IndexView, self).form_valid(form)
