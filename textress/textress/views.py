@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseRedirect
 
 from contact.forms import ContactForm
-from contact.models import Contact
+from contact.models import Contact, Topic
 from utils.messages import dj_messages
 from utils.email import Email
 
@@ -32,6 +32,11 @@ class IndexView(CreateView):
     model = Contact
     fields = ['name', 'email', 'subject', 'message']
     success_url = reverse_lazy('index')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['topics'] = Topic.objects.prefetch_related('qas')
+        return context
 
     def form_invalid(self, form):
         """

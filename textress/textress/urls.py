@@ -11,6 +11,10 @@ from account.views import PricingListAPIView, PricingRetrieveAPIView
 admin.autodiscover()
 
 api_urlpatterns = [
+    # account
+    url(r'^account/pricing/$', PricingListAPIView.as_view(), name='pricing'),
+    url(r'^account/pricing/(?P<pk>\d+)/$', PricingRetrieveAPIView.as_view(), name='pricing'),
+    #concierge
     url(r'^messages/$', views.MessageListCreateAPIView.as_view(), name='api_messages'),
     url(r'^messages/(?P<pk>\d+)/$', views.MessageRetrieveAPIView.as_view(), name='api_messages'),
 
@@ -22,9 +26,6 @@ api_urlpatterns = [
 
     url(r'^users/$', views.UserListCreateAPIView.as_view(), name='api_users'),
     url(r'^users/(?P<pk>\d+)/$', views.UserRetrieveUpdateAPIView.as_view(), name='api_users'),
-
-    url(r'^account/pricing/$', PricingListAPIView.as_view(), name='pricing'),
-    url(r'^account/pricing/(?P<pk>\d+)/$', PricingRetrieveAPIView.as_view(), name='pricing'),
 
     # Receive Twilio Config'd URI
     url(r'^receive/sms_url/$', views.ReceiveSMSView.as_view(), name='receive_sms'),

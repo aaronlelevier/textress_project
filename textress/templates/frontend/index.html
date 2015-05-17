@@ -172,7 +172,6 @@
                         </div>
                     </form>
 
-
                     <h4>Example Volumes</h4>
                     <ul class="list-unstyled">
                         <li ng-repeat="volume in volumes"><a href="" ng-click="submit_volume(volume)">[[ volume ]]</a></li>
@@ -197,6 +196,57 @@
                             <td>[[ price.start ]] - [[ price.end ]]</td>
                         </tr>
                     </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="wrapper wrapper-grey padding50" id="faq">
+        <div class="container">
+            <div class="row">
+                <h2 class="text-center">Frequently Asked Questions</h2>
+                <hr>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <!-- start: FAQ -->
+                    <div class="tabbable tabs-left">
+                        <ul id="myTab3" class="nav nav-tabs tab-teal">
+                            {% for topic in topics %}
+                            <li class="{% if forloop.counter == 1 %}active{% endif %}">
+                                <a href="#{{ topic.slug }}" data-toggle="tab">
+                                    <i class="fa {{ topic.fa_icon }}"></i> {{ topic.name }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="tab-content">
+                            {% for topic in topics %}
+                            <div class="tab-pane {% if forloop.counter == 1 %}active{% endif %}" id="{{ topic.slug }}">
+                                <div id="accordion" class="panel-group accordion accordion-custom accordion-teal">
+
+                                    {% for qa in topic.qas.all %}
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                            <a href="#{{ qa.pk }}" data-parent="#accordion" data-toggle="collapse" class="accordion-toggle collapsed">
+                                                <i class="icon-arrow"></i>
+                                                {{ qa.question }}
+                                            </a></h4>
+                                        </div>
+                                        <div class="panel-collapse collapse" id="{{ qa.pk }}">
+                                            <div class="panel-body">
+                                                {{ qa.answer }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <!-- end: FAQ -->
                 </div>
             </div>
         </div>

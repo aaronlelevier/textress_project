@@ -13,10 +13,6 @@ homeControllers.controller('PhoneListCtrl', function PhoneListCtrl($scope) {
     }];
 });
 
-homeControllers.controller('ContactCtrl', ['$scope', function($scope) {
-    $scope.form_test = "test worked";    
-}]);
-
 homeControllers.controller('PricingCtrl', ['$scope', 'Pricing', function($scope, Pricing) {
     //prices will be from a DRF REST endpoint, so when changed in the DB,
     //they are auto-reflected here
@@ -48,3 +44,14 @@ homeControllers.controller('PricingCtrl', ['$scope', 'Pricing', function($scope,
             return newValue;
         });
 }]);
+
+homeControllers.controller('FAQCtrl', ['$scope', 'FAQ', function($scope, FAQ) {
+    $scope.topics = FAQ.query();
+}]);
+
+
+
+
+
+
+
