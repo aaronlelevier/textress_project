@@ -11,9 +11,6 @@ from account.views import PricingListAPIView, PricingRetrieveAPIView
 admin.autodiscover()
 
 api_urlpatterns = [
-    # account
-    url(r'^account/pricing/$', PricingListAPIView.as_view(), name='pricing'),
-    url(r'^account/pricing/(?P<pk>\d+)/$', PricingRetrieveAPIView.as_view(), name='pricing'),
     #concierge
     url(r'^messages/$', views.MessageListCreateAPIView.as_view(), name='api_messages'),
     url(r'^messages/(?P<pk>\d+)/$', views.MessageRetrieveAPIView.as_view(), name='api_messages'),
@@ -40,19 +37,20 @@ urlpatterns += patterns('',
     url(r'^aronysidoro/', include(admin.site.urls)),
     # Apps
     url(r'', include('account.urls')),
-    url(r'concierge/', include('concierge.urls', namespace='concierge')),
-    url(r'', include('contact.urls', namespace='contact')),
-    url(r'', include('main.urls', namespace='main')),
-    url(r'', include('payment.urls', namespace='payment')),
-    url(r'sms/', include('sms.urls', namespace='sms')),
-    # django-rest-framework
-    url(r'api/', include(api_urlpatterns)),
-    url(r'api/v1/auth/login/', 'rest_framework_jwt.views.obtain_jwt_token'),
-    url(r'api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    # Pages
+
+    # url(r'', include('concierge.urls', namespace='concierge')),
+    # url(r'', include('contact.urls', namespace='contact')),
+    # url(r'', include('main.urls', namespace='main')),
+    # url(r'', include('payment.urls', namespace='payment')),
+    # url(r'', include('sms.urls', namespace='sms')),
+    
+    # url(r'api/', include(api_urlpatterns)),
+    # url(r'api/v1/auth/login/', 'rest_framework_jwt.views.obtain_jwt_token'),
+    # url(r'api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+
+    # Textress Views
     url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^pricing/$', PricingView.as_view(), name='pricing'),
-    url(r'^terms-and-conditions/$', TermsNCondView.as_view(), name='terms_n_cond'),
+    # url(r'^terms-and-conditions/$', TermsNCondView.as_view(), name='terms_n_cond'),
     url(r'^404/$', handler404, name='404'),
     url(r'^500/$', handler500, name='500'),
 )

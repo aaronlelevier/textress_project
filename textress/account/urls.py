@@ -6,20 +6,29 @@ from account.forms import (AuthenticationForm, PasswordResetForm, SetPasswordFor
     PasswordChangeForm)
 
 
+api_patterns = patterns('',
+    url(r'^account/pricing/$', views.PricingListAPIView.as_view(), name='api_pricing'),
+    url(r'^account/pricing/(?P<pk>\d+)/$', views.PricingRetrieveAPIView.as_view(), name='api_pricing'),
+    )
+
+### NOT IN USE: START
 register_patterns = patterns('',
     url(r'^step3/$', views.PickPlanView.as_view(), name='register_step3'),
     )
+
 
 acct_stmt_patterns = patterns('',
     url(r'^$', views.AcctStmtListView.as_view(), name='acct_stmt_list'),
     url(r'^(?P<year>\d+)/(?P<month>\d+)/$', views.AcctStmtDetailView.as_view(), name='acct_stmt_detail'),
     )
 
+
 close_acct_patterns = patterns('',
     url(r'^$', views.CloseAcctView.as_view(), name='close_acct'),
     url(r'^confirm/(?P<slug>[-_\w]+)/$', views.CloseAcctConfirmView.as_view(), name='close_acct_confirm'),
     url(r'^submitted/$', views.CloseAcctSuccessView.as_view(), name='close_acct_success'),
     )
+
 
 account_patterns = patterns('',
     # Main Profile View
@@ -75,10 +84,13 @@ account_patterns = patterns('',
     url(r'^private/$', views.private, name='private'),
     url(r'^login-error/$', views.login_error, name='login_error'),
 )
+### NOT IN USE: END
+
 
 urlpatterns = patterns('',
-    url(r'^account/', include(account_patterns)),
-    url(r'^register/', include(register_patterns)),
-    url(r'^statements/', include(acct_stmt_patterns)),
-    url(r'^close/', include(close_acct_patterns)),
+    url(r'^api/', include(api_patterns)),
+    # url(r'^account/', include(account_patterns)),
+    # url(r'^register/', include(register_patterns)),
+    # url(r'^statements/', include(acct_stmt_patterns)),
+    # url(r'^close/', include(close_acct_patterns)),
     )

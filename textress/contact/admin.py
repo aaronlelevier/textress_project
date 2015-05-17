@@ -1,4 +1,7 @@
+from django import forms
+from django.db import models
 from django.contrib import admin
+from django.forms.widgets import TextInput
 
 from contact.models import Contact, Newsletter, Topic, QA
 
@@ -20,4 +23,7 @@ class TopicAdmin(admin.ModelAdmin):
 
 @admin.register(QA)
 class QAAdmin(admin.ModelAdmin):
-    pass
+    list_display = fields = ('topic', 'order', 'question', 'answer')
+    formfield_overrides = {
+            models.CharField: {'widget': TextInput(attrs={'size':'100'})},
+        }

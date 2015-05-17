@@ -64,12 +64,13 @@ class Topic(TimestampBase):
 class QA(TimestampBase):
     topic = models.ForeignKey(Topic, related_name='qas')
     question = models.CharField(_("Question"), max_length=255, blank=True)
-    answer = models.CharField(_("Answer"), max_length=1000, blank=True)
+    answer = models.TextField(_("Answer"), max_length=1000, blank=True)
     order = models.IntegerField(_("Relative Order"), blank=True, default=0,
         help_text="To be able to manually order QA's.")
 
     class Meta:
         verbose_name = 'QA'
+        ordering = ('topic', 'order',)
 
     def __str__(self):
         return self.question

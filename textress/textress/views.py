@@ -17,14 +17,7 @@ class PricingView(TemplateView):
 
 class IndexView(CreateView):
     '''
-    ContactForm / FAQs Model data 
-
-    TODO
-    ----
-    make google map not scroll or skinnier
-    test CreateView on server side
-    change sent email templates b/c no longer "coming soon"
-    FAQ <section> still needs to be added n data w/ that as wel
+    ContactForm / FAQs Model data
     '''
 
     template_name = 'frontend/index.html'

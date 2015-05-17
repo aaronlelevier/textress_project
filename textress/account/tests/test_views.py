@@ -16,13 +16,27 @@ from django.utils import timezone
 from model_mommy import mommy
 
 from account.models import (AcctStmt, TransType, AcctTrans, AcctCost,
-    CHARGE_AMOUNTS, BALANCE_AMOUNTS)
+    Pricing, CHARGE_AMOUNTS, BALANCE_AMOUNTS)
 from account.tests.factory import make_acct_stmts, make_acct_trans
 from main.models import Hotel
 from main.tests.factory import (create_hotel, make_subaccount,
     CREATE_USER_DICT, CREATE_HOTEL_DICT)
 from payment.models import Customer
 from utils import create
+
+
+class APITests(TestCase):
+
+    fixtures = ['pricing.json']
+
+    def test_pricing(self):
+        response = self.client.get(reverse('api_pricing'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_pricing_get_indiv(self):
+        price = Pricing.objects.first()
+        response = self.client.get(reverse('api_pricing', kwargs={'pk': price.pk}))
+        self.assertEqual(response.status_code, 200)
 
 
 class RegistrationTests(TestCase):
