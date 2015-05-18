@@ -5,7 +5,7 @@ uWSGI
 uwsgi --socket textress.sock --wsgi-file /opt/django/textress.wsgi --chmod-socket=666
 
 # test `ini` file
-uwsgi --ini /opt/django/uwsgi.ini
+uwsgi -H /root/.virtualenvs/textra_17 --ini /opt/django/uwsgi.ini
 
 STOP uWSGI
 ----------

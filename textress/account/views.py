@@ -116,7 +116,7 @@ class PickPlanView(LoginRequiredMixin, RegistrationContextMixin, CreateView):
     success_url = reverse_lazy('payment:register_step4')
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super(PickPlanView, self).get_context_data(**kwargs)
         context['step_number'] = 2
         context['step'] = context['steps'][context['step_number']]
         return context
@@ -126,7 +126,7 @@ class PickPlanView(LoginRequiredMixin, RegistrationContextMixin, CreateView):
         self.object = form.save(commit=False)
         self.object.hotel = self.request.user.profile.hotel
         self.object.save()
-        return super().form_valid(form)
+        return super(PickPlanView, self).form_valid(form)
 
 
 #############
@@ -148,7 +148,7 @@ class AcctStmtListView(AdminOnlyMixin, SetHeadlineMixin, ListView):
         TODO: Make this a daiy job, and not in the View.get()
         '''
         # acct_stmt = update_current_acct_stmt(hotel=self.hotel)
-        return super().get(request, *args, **kwargs)
+        return super(AcctStmtListView, self).get(request, *args, **kwargs)
 
 
 class AcctStmtDetailView(AdminOnlyMixin, TemplateView):
@@ -171,7 +171,7 @@ class AcctStmtDetailView(AdminOnlyMixin, TemplateView):
         ----
         Move get custom `context` logic to a helper method to clean up view.
         '''
-        context = super().get_context_data(**kwargs)
+        context = super(AcctStmtDetailView, self).get_context_data(**kwargs)
 
         # Use All Time Hotel Transactions to get the Balance
         all_trans = AcctTrans.objects.filter(hotel=self.hotel)
@@ -248,7 +248,7 @@ class CloseAcctConfirmView(AdminOnlyMixin, SetHeadlineMixin, FormView):
         '''
         msg = email.close_account_email(self.request.user)
         msg.send()
-        return super().form_valid(form)
+        return super(CloseAcctConfirmView, self).form_valid(form)
 
 
 class CloseAcctSuccessView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
@@ -267,7 +267,7 @@ class CloseAcctSuccessView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
     template_name = 'template.html'
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super(CloseAcctSuccessView, self).get_context_data(**kwargs)
         context['message'] = "Thank you and we hope that we can do Biz again in future."
         return context
 

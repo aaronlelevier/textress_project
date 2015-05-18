@@ -22,7 +22,7 @@ class NewsletterMixin(FormMixin):
     success_url = reverse_lazy('main:index')
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super(NewsletterMixin, self).get_context_data(**kwargs)
         context['nl_form'] = self.get_form_class()
         return context
 
@@ -34,10 +34,10 @@ class HotelMixin(ContextMixin, View):
 
     def dispatch(self, request, *args, **kwargs):
         self.hotel = request.user.profile.hotel
-        return super().dispatch(request, *args, **kwargs)
+        return super(HotelMixin, self).dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super(HotelMixin, self).get_context_data(**kwargs)
         context['hotel'] = self.hotel
         return context
 
@@ -60,7 +60,7 @@ class UserOnlyMixin(HotelContextMixin):
 
         # TODO: add Group Object here for "hotel_manager"
 
-        return super().dispatch(request, *args, **kwargs)
+        return super(UserOnlyMixin, self).dispatch(request, *args, **kwargs)
 
 
 class HotelUsersOnlyMixin(HotelContextMixin, GroupRequiredMixin, View):
@@ -87,13 +87,13 @@ class HotelUsersOnlyMixin(HotelContextMixin, GroupRequiredMixin, View):
                                                 .values_list('id', flat=True)):
                 raise Http404
 
-        return super().dispatch(request, *args, **kwargs)
+        return super(HotelUsersOnlyMixin, self).dispatch(request, *args, **kwargs)
 
 
 class RegistrationContextMixin(object):
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super(RegistrationContextMixin, self).get_context_data(**kwargs)
         context['steps'] = ['User Information', 'Hotel Information', 'Plan Structure',
             'Payment', 'Pick Phone #', 'Confirmation']
         return context

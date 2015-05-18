@@ -58,7 +58,7 @@ class Topic(TimestampBase):
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
-        return super().save(*args, **kwargs)
+        return super(Topic, self).save(*args, **kwargs)
 
 
 class QA(TimestampBase):
@@ -80,5 +80,4 @@ class QA(TimestampBase):
             self.question = random_lorem(5)
         if not self.answer:
             self.answer = random_lorem(20)
-        return super().save(*args, **kwargs)
-
+        return super(QA, self).save(*args, **kwargs)

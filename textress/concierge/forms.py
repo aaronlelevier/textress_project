@@ -14,7 +14,7 @@ class MessageForm(forms.ModelForm):
         fields = ('body',)
 
     def clean(self):
-        cleaned_data = super().clean()
+        cleaned_data = super(MessageForm, self).clean()
         body = cleaned_data.get("body")
 
         try:

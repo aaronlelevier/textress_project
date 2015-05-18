@@ -18,7 +18,7 @@ from main.models import Hotel
 class StripeMixin(object):
     
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super(StripeMixin, self).get_context_data(**kwargs)
         context['publishable_key'] = settings.STRIPE_PUBLIC_KEY
         return context
 
@@ -28,7 +28,7 @@ class StripeMixin(object):
 class AcctCostContextMixin(object):
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super(AcctCostContextMixin, self).get_context_data(**kwargs)
         context['acct_cost'] = self.hotel.acct_cost
         return context
 
@@ -39,7 +39,7 @@ class HotelContextMixin(object):
     '''Add Hotel Obj to Context.'''
     
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super(HotelContextMixin, self).get_context_data(**kwargs)
         context['hotel'] = self.hotel
         return context
 
@@ -57,7 +57,7 @@ class HotelUserMixin(HotelContextMixin):
             # raise Http404
             messages.warning(self.request, "The Hotel associated with this account is not active.")
             
-        return super().dispatch(*args, **kwargs)
+        return super(HotelUserMixin, self).dispatch(*args, **kwargs)
 
 
 class HotelAdminCheckMixin(HotelContextMixin):
@@ -66,7 +66,7 @@ class HotelAdminCheckMixin(HotelContextMixin):
         admin_hotel = get_object_or_404(Hotel, admin_id=self.request.user.id)
         if admin_hotel != self.hotel:
             raise Http404
-        return super().dispatch(*args, **kwargs)
+        return super(HotelAdminCheckMixin, self).dispatch(*args, **kwargs)
 
 
 class AdminOnlyMixin(HotelContextMixin, GroupRequiredMixin, View):
@@ -85,7 +85,7 @@ class AdminOnlyMixin(HotelContextMixin, GroupRequiredMixin, View):
         if request.user.id != self.hotel.admin_id:
             raise Http404
         
-        return super().dispatch(request, *args, **kwargs)
+        return super(AdminOnlyMixin, self).dispatch(request, *args, **kwargs)
 
 
 ### CARD MIXINS ###
@@ -103,7 +103,7 @@ class HotelCardOnlyMixin(object):
                         .values_list('short_pk', flat=True)):
             raise Http404
 
-        return super().dispatch(request, *args, **kwargs)
+        return super(HotelCardOnlyMixin, self).dispatch(request, *args, **kwargs)
 
     def get_object(self):
         try:

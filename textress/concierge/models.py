@@ -129,7 +129,7 @@ class Guest(AbstractBase):
         self.check_in, self.check_out = self.validate_check_in_out(
             self.check_in, self.check_out)
 
-        return super().save(*args, **kwargs)
+        return super(Guest, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse('concierge:guest_detail', kwargs={'pk':self.pk})
@@ -263,7 +263,7 @@ class Message(AbstractBase):
         if not self.insert_date:
             self.insert_date = timezone.now().date()
 
-        return super().save(*args, **kwargs)  
+        return super(Message, self).save(*args, **kwargs)  
 
     def msg_short(self):
         return "{}...".format(' '.join(self.body.split()[:5]))
@@ -356,7 +356,7 @@ class Reply(AbstractBase):
         if not self.hotel.is_textress and self.reserved_letter(self.letter):
             raise forms.ValidationError("{} is a reserved letter, and can't be \
                 configured. Please use a different letter(s).".format(self.letter))
-        return super().save(*args, **kwargs)
+        return super(Reply, self).save(*args, **kwargs)
 
 
 

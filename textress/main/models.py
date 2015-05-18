@@ -24,7 +24,7 @@ from utils import exceptions as excp
 class TwilioClient(object):
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(TwilioClient, self).__init__(*args, **kwargs)
 
         # bring in Twilio and get API key from settings.py
         self.client = TwilioRestClient(settings.TWILIO_ACCOUNT_SID,
@@ -159,7 +159,7 @@ class Hotel(TwilioClient, AbstractBase):
         self.slug = slugify(self.name)
         if self.address_phone:
             self.address_phone = validate_phone(self.address_phone)
-        return super().save(*args, **kwargs)
+        return super(Hotel, self).save(*args, **kwargs)
 
     @property
     def area_code(self):
@@ -225,7 +225,7 @@ class UserProfile(AbstractBase):
         except IndexError:
             self.msg_sign = "-{}".format(self.user.username)
 
-        return super().save(*args, **kwargs)
+        return super(UserProfile, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse('main:user_detail', kwargs={'pk': self.pk})
@@ -286,7 +286,7 @@ class Subaccount(AbstractBase):
     objects = SubaccountManager()
     
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(Subaccount, self).__init__(*args, **kwargs)
 
         # Twilio Client
         self.client = TwilioRestClient(self.sid, self.auth_token)

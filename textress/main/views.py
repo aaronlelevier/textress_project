@@ -48,14 +48,14 @@ class AdminCreateView(RegistrationContextMixin, CreateView):
     authenticated_redirect_url = settings.VERIFY_LOGOUT_URL
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super(AdminCreateView, self).get_context_data(**kwargs)
         context['step_number'] = 0
         context['step'] = context['steps'][context['step_number']]
         return context
 
     def form_valid(self, form):
-        # Call super() so ``User`` object is available
-        super().form_valid(form) 
+        # Call super-override so ``User`` object is available
+        super(AdminCreateView, self).form_valid(form) 
         cd = form.cleaned_data
 
         # Add User to "Admin" Group
@@ -87,14 +87,14 @@ class HotelCreateView(LoginRequiredMixin, RegistrationContextMixin, CreateView):
     success_url = reverse_lazy('register_step3')
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super(HotelCreateView, self).get_context_data(**kwargs)
         context['step_number'] = 1
         context['step'] = context['steps'][context['step_number']]
         return context
 
     def form_valid(self, form):
-        # Call super() so ``Hotel`` object is available
-        super().form_valid(form)
+        # Call super-override so ``Hotel`` object is available
+        super(HotelCreateView, self).form_valid(form)
 
         # User is now this Hotel's Admin
         self.object.set_admin_id(user=self.request.user)
@@ -163,7 +163,7 @@ class UserCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView):
     success_url = reverse_lazy('main:manage_user_list')
 
     def form_valid(self, form):
-        super().form_valid(form)
+        super(UserCreateView, self).form_valid(form)
 
         cd = form.cleaned_data
         self.newuser = User.objects.get(username=cd['username'])
@@ -177,7 +177,7 @@ class ManagerCreateView(UserCreateView):
     "Create Manager Hotel User w/ Manager Permissions"
 
     def form_valid(self, form):
-        super().form_valid(form)
+        super(ManagerCreateView, self).form_valid(form)
 
         hotel_admin = Group.objects.get(name='hotel_manager')
         self.newuser.groups.add(hotel_admin)
@@ -212,10 +212,3 @@ class MgrUserDeleteView(HotelUsersOnlyMixin, DeleteView):
     model = User
     template_name = 'account/account_form.html'
     success_url = reverse_lazy('main:manage_user_list')
-
-
-
-
-
-
-

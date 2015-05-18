@@ -2,6 +2,7 @@ mypkgs:
     pkg.installed:
         - pkgs:
             - python-dev
+            - python3-dev
             - python-virtualenv
             - python-pip
             - libpq-dev

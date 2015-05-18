@@ -70,7 +70,7 @@ class GuestListView(HotelUserMixin, ListView):
     model = Guest
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super(GuestListView, self).get_context_data(**kwargs)
         context['object_list'] = self.model.objects.current().filter(
             hotel=self.hotel)
         return context
@@ -89,7 +89,7 @@ class GuestCreateView(HotelUserMixin, CreateView):
         self.object.hotel = self.hotel
         self.object.save()
         hotel, created = Hotel.objects.get_or_create(guest=self.object)
-        return super().form_valid(form)
+        return super(GuestCreateView, self).form_valid(form)
 
 
 class GuestUpdateView(HotelUserMixin, UpdateView):
@@ -133,18 +133,18 @@ class MessageListView(HotelMixin, FormView):
     def form_valid(self, form):
         cd = form.cleaned_data
         messages.info(self.request, sms_messages['sent'])
-        return super().form_valid(form)
+        return super(MessageListView, self).form_valid(form)
 
     def dispatch(self, request, *args, **kwargs):
         self.hotel = request.user.profile.hotel
         self.guest = get_object_or_404(Guest, pk=self.kwargs['pk'], hotel=self.hotel)
-        return super().dispatch(request, *args, **kwargs)
+        return super(MessageListView, self).dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
         return reverse('concierge:message_list', kwargs={'pk':self.guest.pk})
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super(MessageListView, self).get_context_data(**kwargs)
         context['guest_messages'] = Message.objects.filter(guest=self.guest).order_by('created')
         return context
 
