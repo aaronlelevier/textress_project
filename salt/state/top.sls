@@ -20,7 +20,6 @@ base:
 
     'roles:appserver':
         - uwsgi
-        - supervisord.appserver
 
     'roles:database':
         - postgres
