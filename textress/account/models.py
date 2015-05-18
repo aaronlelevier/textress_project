@@ -106,7 +106,7 @@ class Pricing(AbstractBase):
         if not self.desc:
             self.desc = "Next {0:3g}k SMS per month".format((self.end-self.start+1)/1000)
 
-        return super().save(*args, **kwargs)
+        return super(Pricing, self).save(*args, **kwargs)
 
 
 ##############
@@ -474,7 +474,7 @@ class AcctTrans(AbstractBase):
         # Verify Debit or Credit
         # self.debit, self.credit = self._verify_debit_credit
 
-        return super().save(*args, **kwargs)
+        return super(AcctTrans, self).save(*args, **kwargs)
 
     # @property
     # def _verify_debit_credit(self):

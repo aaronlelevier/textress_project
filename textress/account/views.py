@@ -82,7 +82,7 @@ class AccountView(LoginRequiredMixin, HotelUserMixin, TemplateView):
                 to a Celery Job, can use:
                     `select_related() so only 1 query instead of 2?
         '''
-        context = super().get_context_data(**kwargs)
+        context = super(AccountView, self).get_context_data(**kwargs)
 
         # TODO: 
         # Move PH/Subaccount Creation to Celery n not in View request loop!
