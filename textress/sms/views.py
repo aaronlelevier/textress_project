@@ -37,7 +37,7 @@ class DemoView(FormView):
             except twilio.TwilioRestException:
                 msg = sms_messages['send_failed']
             messages.info(self.request, msg)
-        return super().form_valid(form)
+        return super(DemoView, self).form_valid(form)
 
 
 # class PhoneNumberListView(LoginRequiredMixin,

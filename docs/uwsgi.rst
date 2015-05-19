@@ -7,6 +7,16 @@ uwsgi --socket textress.sock --wsgi-file /opt/django/textress.wsgi --chmod-socke
 # test `ini` file
 uwsgi -H /root/.virtualenvs/textra_17 --ini /opt/django/uwsgi.ini
 
+
+Basict Test
+-----------
+# link on setup
+http://uwsgi-docs.readthedocs.org/en/latest/tutorials/Django_and_nginx.html#basic-test
+
+# run
+uwsgi --http :8000 --wsgi-file test.py
+
+
 STOP uWSGI
 ----------
 uwsgi --stop /tmp/textress-master.pid

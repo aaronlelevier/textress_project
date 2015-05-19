@@ -21,7 +21,7 @@ class DemoForm(forms.ModelForm):
         - create new record (or retrieve the one for the day)
         - check count: if < settings.SMS_LIMIT raise error; else continue
         """
-        cleaned_data = super().clean()
+        cleaned_data = super(DemoForm, self).clean()
 
         # Check SMS sent count for the day
         try:
@@ -37,7 +37,7 @@ class DemoForm(forms.ModelForm):
 class PhoneNumberForm(forms.Form):
 
     def __init__(self, phone_numbers, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(PhoneNumberForm, self).__init__(*args, **kwargs)
 
         # attach PhoneNumbers to Form
         self.phone_numbers = phone_numbers
@@ -54,7 +54,7 @@ class PhoneNumberSelectForm(forms.Form):
 
 
     def __init__(self, request, twilio_hotel, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(PhoneNumberSelectForm, self).__init__(*args, **kwargs)
 
         # attach Available PhoneNumbers to Form
         self.request = request
@@ -74,21 +74,3 @@ class PhoneNumberSelectForm(forms.Form):
 class PhoneNumberAddForm(forms.Form):
     "No fields. Just accept a POST action, and create PhoneNumber Obj."
     pass
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

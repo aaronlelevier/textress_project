@@ -32,7 +32,7 @@ class HotelPhoneNotFound(Exception):
 class DailyLimit(Exception):
 
     def __init__(self, *args, **kwargs):
-        super().__init__("Daily text message limit reached")
+        super(DailyLimit, self).__init__("Daily text message limit reached")
 
 
 # TODO: maybe add cost args to this, so show in error msg
@@ -42,7 +42,8 @@ class ConvertCostException(Exception):
 class CheckOutDateException(Exception):
 
     def __init__(self, check_in, check_out, *args, **kwargs):
-        super().__init__("Check-in Date: {} greater than Check-out Date \
+        super(CheckOutDateException, self).__init__(
+            "Check-in Date: {} greater than Check-out Date \
             {}.".format(str(check_in), str(check_out)))
 
 

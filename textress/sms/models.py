@@ -62,7 +62,7 @@ class Text(models.Model):
     def save(self, *args, **kwargs):
         if not self.body: 
             self.body = get_weather()
-        super().save(*args, **kwargs)
+        super(Text, self).save(*args, **kwargs)
 
 
 ##############
@@ -121,7 +121,7 @@ class DemoCounter(models.Model):
 
     def save(self, *args, **kwargs):
         self.check_limit()
-        super().save(*args, **kwargs)
+        super(DemoCounter, self).save(*args, **kwargs)
 
     def check_limit(self):
         if self.count > settings.SMS_LIMIT:
@@ -226,7 +226,7 @@ class PhoneNumber(TwilioClient, AbstractBase):
         except TwilioRestException as e:
             # TODO: Add logging
             print("{}, {}".format(e.__class__, e))
-        return super().delete(*args, **kwargs)
+        return super(PhoneNumber, self).delete(*args, **kwargs)
 
 
 '''

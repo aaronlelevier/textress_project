@@ -18,7 +18,7 @@ class StripeClient(object):
     '''Stripe is needed for Model Manager Methods.'''
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(StripeClient, self).__init__(*args, **kwargs)
         
         stripe.api_key = settings.STRIPE_SECRET_KEY
         self.stripe = stripe
@@ -44,7 +44,7 @@ class AbstractBase(StripeClient, models.Model):
     def save(self, *args, **kwargs):
         if self.id:
             self.short_pk = self._short_pk
-        return super().save(*args, **kwargs)
+        return super(AbstractBase, self).save(*args, **kwargs)
 
     @property
     def _short_pk(self):
@@ -165,7 +165,7 @@ class Card(AbstractBase):
         if self.exp_month and self.exp_year:
             self.expires = str(self.exp_month) + ' / ' + str(self.exp_year)
 
-        return super().save(*args, **kwargs)
+        return super(Card, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         '''Delete Stripe Card b/4 deleting Model instance.'''
@@ -174,7 +174,7 @@ class Card(AbstractBase):
             stripe_customer = self.stripe.Customer.retrieve(self.customer.id)
             stripe_customer.cards.retrieve(self.id).delete()
 
-        return super().delete(*args, **kwargs)
+        return super(Card, self).delete(*args, **kwargs)
         
     def get_absolute_url(self):
         return reverse('payment:card_detail', kwargs={'pk': self.short_pk})

@@ -45,7 +45,7 @@ class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin,
     success_url = reverse_lazy('payment:register_success')
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super(RegisterPmtView, self).get_context_data(**kwargs)
         context['step_number'] = 3
         context['step'] = context['steps'][context['step_number']]
         return context

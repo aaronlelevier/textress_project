@@ -27,7 +27,7 @@ class IndexView(CreateView):
     success_url = reverse_lazy('index')
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super(IndexView, self).get_context_data(**kwargs)
         context['topics'] = Topic.objects.prefetch_related('qas')
         return context
 
@@ -59,7 +59,7 @@ class TermsNCondView(TemplateView):
     template_name = 'frontend/terms_n_cond.html'
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super(TermsNCondView, self).get_context_data(**kwargs)
         context['company'] = "Textress"
         context['LLC'] = "Aronysidoro LLC."
         return context
