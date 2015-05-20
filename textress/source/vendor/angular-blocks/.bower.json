@@ -1,0 +1,34 @@
+{
+  "name": "angular-blocks",
+  "description": "Template inheritance for Angular JS",
+  "version": "0.1.9",
+  "main": [
+    "dist/angular-blocks.js"
+  ],
+  "ignore": [
+    "components",
+    "test",
+    ".jshintrc",
+    "karma.conf.js",
+    "Gruntfile.js"
+  ],
+  "dependencies": {
+    "jquery": ">1.9",
+    "angular": ">1.0"
+  },
+  "devDependencies": {
+    "angular": "=1.2.6",
+    "angular-mocks": "=1.2.6",
+    "angular-scenario": "=1.2.6"
+  },
+  "homepage": "https://github.com/wmluke/angular-blocks",
+  "_release": "0.1.9",
+  "_resolution": {
+    "type": "version",
+    "tag": "0.1.9",
+    "commit": "c685d28cc78e3073c75dd91a81b6d282c0452c15"
+  },
+  "_source": "git://github.com/wmluke/angular-blocks.git",
+  "_target": "*",
+  "_originalSource": "angular-blocks"
+}
