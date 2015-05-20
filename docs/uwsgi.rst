@@ -4,8 +4,15 @@ uWSGI
 # CWD (working dir) needs to be=> /opt/django
 uwsgi --socket textress.sock --wsgi-file /opt/django/textress.wsgi --chmod-socket=666
 
-# test `ini` file
-uwsgi -H /root/.virtualenvs/textra_17 --ini /opt/django/uwsgi.ini
+TEST
+----
+uwsgi --socket :9000 -H /root/.virtualenvs/textra_17 --no-site --wsgi-file /opt/django/test.py
+
+uwsgi --ini uwsgi.ini
+
+START
+-----
+uwsgi --ini /opt/django/uwsgi.ini
 
 
 Basict Test
@@ -27,7 +34,7 @@ or
 ps ax | grep uwsgi
 
 # stop them
-killall -s INT /usr/local/bin/uwsgi
+killall -s INT uwsgi
 
 
 

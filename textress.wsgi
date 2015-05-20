@@ -7,6 +7,7 @@ import site
 
 # py3
 sys.path.append('/usr/local/lib/python3.4/dist-packages')
+sys.path.append('/root/.virtualenvs/textra_17/lib/python3.4/site-packages')
 
 # project
 sys.path.append('/opt/django')

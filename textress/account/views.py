@@ -34,7 +34,7 @@ from payment.mixins import AdminOnlyMixin, HotelUserMixin, HotelAdminCheckMixin
 from sms.models import PhoneNumber
 from utils import email
 
-from main.tasks import hello_world
+# from main.tasks import hello_world
 
 
 ### ACCOUNT ERROR / REDIRCT ROUTING VIEWS ###
