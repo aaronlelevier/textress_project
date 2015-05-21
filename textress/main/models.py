@@ -197,6 +197,7 @@ class UserProfile(AbstractBase):
     Only 1 Admin per/ Hotel. This is the 1 User that signs up.
 
     TODO:
+        - v0.2 is Users
         - Add Msg. signature field (if blank, populate w/ user.username)
         - FName, LName
     """

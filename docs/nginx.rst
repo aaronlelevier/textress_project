@@ -9,9 +9,18 @@ nginx -t
 # START
 sudo /etc/init.d/nginx start 
 
-# RESTART
+
+RESTART
+-------
+# collectstatic ??
+python /opt/django/textress/manage.py collectstatic
+
 sudo /etc/init.d/nginx restart
 
+
+
+MISC
+----
 # remove default
 rm /etc/init/sites-enabled/default
 

@@ -8,7 +8,6 @@ TEST
 ----
 uwsgi --socket :9000 -H /root/.virtualenvs/textra_17 --no-site --wsgi-file /opt/django/test.py
 
-uwsgi --ini uwsgi.ini
 
 START
 -----
