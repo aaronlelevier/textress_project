@@ -77,7 +77,7 @@ class UserCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):
         return password2
 
     def save(self, commit=True):
-        user = super(UserCreateForm).save(commit=False)
+        user = super(UserCreateForm, self).save(commit=False)
         user.set_password(self.cleaned_data["password1"])
         if commit:
             user.save()

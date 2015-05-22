@@ -36,33 +36,6 @@ def create_admin():
     return admin
 
 
-class BasicTests(TestCase):
-
-    def setUp(self):
-        self.username = 'test'
-        self.password = '1234'
-        self.email = settings.DEFAULT_FROM_EMAIL
-
-    def test_create_user(self):
-        user = User.objects.create(username=self.username,
-                                   email=self.email,
-                                   password=self.password)
-        assert isinstance(user, User)        
-
-
-class RenderTests(TestCase):
-
-    def test_index_get(self):
-        response = self.client.get(reverse('main:index'))
-        assert response.status_code == 200
-
-    def test_terms(self):
-        response = self.client.get(reverse('main:terms_n_cond'))
-        assert response.status_code == 200
-        assert response.context['company']
-        assert response.context['LLC']
-
-
 class RegistrationTests(TestCase):
 
     fixtures = ['main.json', 'payment.json']

@@ -6,7 +6,15 @@ from model_mommy import mommy
 from contact.models import QA
 
 
-class Index(TestCase):
+class TermsNCondTests(TestCase):
+
+    def test_terms(self):
+        response = self.client.get(reverse('terms_n_cond'))
+        assert response.status_code == 200
+        assert response.context['company']
+        assert response.context['LLC']
+
+class IndexTests(TestCase):
 
     def setUp(self):
         qas = mommy.make(QA, _quantity=3)
@@ -19,7 +27,7 @@ class Index(TestCase):
         assert response.context['topics']
 
 
-class Error(TestCase):
+class ErrorPageTests(TestCase):
     
     def test_404(self):
         response = self.client.get(reverse('404'))

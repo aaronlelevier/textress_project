@@ -95,5 +95,5 @@ class RegistrationContextMixin(object):
     def get_context_data(self, **kwargs):
         context = super(RegistrationContextMixin, self).get_context_data(**kwargs)
         context['steps'] = ['User Information', 'Hotel Information', 'Plan Structure',
-            'Payment', 'Pick Phone #', 'Confirmation']
+            'Payment', 'Success']
         return context

@@ -3,7 +3,7 @@ from django.contrib import admin
 
 from rest_framework.urlpatterns import format_suffix_patterns
 
-from textress.views import IndexView, TermsNCondView, handler404, handler500, PricingView
+from textress.views import IndexView, TermsNCondView, handler404, handler500
 from concierge import views
 from account.views import PricingListAPIView, PricingRetrieveAPIView
 
@@ -40,8 +40,8 @@ urlpatterns += patterns('',
 
     # url(r'', include('concierge.urls', namespace='concierge')),
     # url(r'', include('contact.urls', namespace='contact')),
-    # url(r'', include('main.urls', namespace='main')),
-    # url(r'', include('payment.urls', namespace='payment')),
+    url(r'', include('main.urls', namespace='main')),
+    url(r'', include('payment.urls', namespace='payment')),
     # url(r'', include('sms.urls', namespace='sms')),
     
     # url(r'api/', include(api_urlpatterns)),
@@ -50,7 +50,7 @@ urlpatterns += patterns('',
 
     # Textress Views
     url(r'^$', IndexView.as_view(), name='index'),
-    # url(r'^terms-and-conditions/$', TermsNCondView.as_view(), name='terms_n_cond'),
+    url(r'^terms-and-conditions/$', TermsNCondView.as_view(), name='terms_n_cond'),
     url(r'^404/$', handler404, name='404'),
     url(r'^500/$', handler500, name='500'),
 )

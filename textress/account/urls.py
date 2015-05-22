@@ -16,12 +16,10 @@ register_patterns = patterns('',
     url(r'^step3/$', views.PickPlanView.as_view(), name='register_step3'),
     )
 
-
 acct_stmt_patterns = patterns('',
     url(r'^$', views.AcctStmtListView.as_view(), name='acct_stmt_list'),
     url(r'^(?P<year>\d+)/(?P<month>\d+)/$', views.AcctStmtDetailView.as_view(), name='acct_stmt_detail'),
     )
-
 
 close_acct_patterns = patterns('',
     url(r'^$', views.CloseAcctView.as_view(), name='close_acct'),
@@ -29,12 +27,11 @@ close_acct_patterns = patterns('',
     url(r'^submitted/$', views.CloseAcctSuccessView.as_view(), name='close_acct_success'),
     )
 
-
 account_patterns = patterns('',
     # Main Profile View
     url(r'^$', views.AccountView.as_view(), name='account'),
 
-    # Registration Views
+    # Auth Views
     url(r'^login/$',auth_views.login,
         {'template_name': 'cpanel/auth-forms/login.html',
         'authentication_form': AuthenticationForm},
@@ -86,11 +83,10 @@ account_patterns = patterns('',
 )
 ### NOT IN USE: END
 
-
 urlpatterns = patterns('',
     url(r'^api/', include(api_patterns)),
-    # url(r'^account/', include(account_patterns)),
-    # url(r'^register/', include(register_patterns)),
+    url(r'^account/', include(account_patterns)),
+    url(r'^register/', include(register_patterns)),
     # url(r'^statements/', include(acct_stmt_patterns)),
     # url(r'^close/', include(close_acct_patterns)),
     )

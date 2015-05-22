@@ -36,11 +36,14 @@ class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin,
     """
     Step #4 of Registration
 
-    TODO: Add terms-n-cond, disclaimer(ph's puchased are $1 each. Only 1 ph # needed,
-        unless you want to change your phone #, ph # is a separate charge to account.)
+    TODO: 
+        - Add terms-n-cond
+        - disclaimer(ph's puchased are $1 each. Only 1 ph # needed
+        - unless you want to change your phone #, ph # is a separate charge to account.)
+        - register.html - template
     """
 
-    template_name = 'payment/payment.html'
+    template_name = 'payment/payment_test.html'
     form_class = StripeForm
     success_url = reverse_lazy('payment:register_success')
 
@@ -48,6 +51,7 @@ class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin,
         context = super(RegisterPmtView, self).get_context_data(**kwargs)
         context['step_number'] = 3
         context['step'] = context['steps'][context['step_number']]
+        context['publishable_key'] = settings.STRIPE_SECRET_KEY
         return context
 
     def post(self, request, *args, **kwargs):

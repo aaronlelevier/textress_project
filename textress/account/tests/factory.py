@@ -18,10 +18,18 @@ from django.utils import timezone
 
 from model_mommy import mommy
 
+from account.models import CHARGE_AMOUNTS, BALANCE_AMOUNTS
 from main.models import Hotel
 from main.tests.test_models import create_hotel
 from payment.models import Customer
 from utils import create
+
+
+CREATE_ACCTCOST_DICT = {
+    'init_amt': CHARGE_AMOUNTS[0][0],
+    'balance_min': BALANCE_AMOUNTS[0][0],
+    'recharge_amt': CHARGE_AMOUNTS[0][0]
+    }
 
 
 def _randint(a=10, b=100):

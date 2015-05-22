@@ -17,7 +17,8 @@ from model_mommy import mommy
 
 from account.models import (AcctStmt, TransType, AcctTrans, AcctCost,
     Pricing, CHARGE_AMOUNTS, BALANCE_AMOUNTS)
-from account.tests.factory import make_acct_stmts, make_acct_trans
+from account.tests.factory import (make_acct_stmts, make_acct_trans,
+    CREATE_ACCTCOST_DICT)
 from main.models import Hotel
 from main.tests.factory import (create_hotel, make_subaccount,
     CREATE_USER_DICT, CREATE_HOTEL_DICT)
@@ -54,12 +55,9 @@ class RegistrationTests(TestCase):
         # Step 2
         response = self.client.post(reverse('main:register_step2'),
             CREATE_HOTEL_DICT)
-
         # Step 3
-        response = self.client.post(reverse('register_step3'),
-            {'init_amt': CHARGE_AMOUNTS[0][0],
-            'balance_min': BALANCE_AMOUNTS[0][0],
-            'recharge_amt': CHARGE_AMOUNTS[0][0]}, follow=True)
+        response = self.client.post(reverse('register_step3'), # no namespace b/c in "account" app
+            CREATE_ACCTCOST_DICT, follow=True)
         self.assertRedirects(response, reverse('payment:register_step4'))
         # created n linked to Hotel
         acct_cost = AcctCost.objects.all()
