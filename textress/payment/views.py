@@ -1,24 +1,20 @@
-import stripe
-
-from django import forms
 from django.conf import settings
 from django.shortcuts import render, render_to_response, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.template import RequestContext
-from django.utils.html import escape
 from django.contrib import messages
-from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import (ListView, DetailView, CreateView, DeleteView,
+from django.views.generic import (ListView, DetailView, DeleteView, TemplateView,
     FormView, UpdateView)
-from django.views.generic.base import View, TemplateView
 from django.forms.models import model_to_dict
 from django.core.exceptions import ObjectDoesNotExist
+from django.forms.models import model_to_dict
 
+import stripe
 from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
     GroupRequiredMixin)
 
-from payment.models import Customer, Card, Charge
+from payment.models import Card
 from payment.forms import StripeForm
 from payment.helpers import signup_register_step4
 from payment.mixins import (StripeMixin, HotelContextMixin, HotelUserMixin,
@@ -32,7 +28,7 @@ from sms.models import PhoneNumber
 ### REGISTRATION VIEWS ###
 
 class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin,
-    AcctCostContextMixin, StripeMixin, TemplateView):
+    AcctCostContextMixin, StripeMixin, FormView):
     """
     Step #4 of Registration
 
@@ -51,17 +47,15 @@ class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin,
         context = super(RegisterPmtView, self).get_context_data(**kwargs)
         context['step_number'] = 3
         context['step'] = context['steps'][context['step_number']]
-        context['publishable_key'] = settings.STRIPE_SECRET_KEY
         return context
 
-    def post(self, request, *args, **kwargs):
+    def form_valid(self, form):
         try:
-            print('token', request.POST['stripeToken'])
             #DB create
             (customer, card, charge) = signup_register_step4(
-                hotel=self.hotel,
-                token=request.POST['stripeToken'],
-                email=request.POST['stripeEmail'],
+                hotel=self.request.user.profile.hotel,
+                token=form.cleaned_data['stripe_token'],
+                email=self.request.user.email,
                 amount=self.hotel.acct_cost.init_amt)
         except stripe.error.StripeError as e:
             body = e.json_body

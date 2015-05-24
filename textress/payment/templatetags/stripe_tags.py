@@ -9,3 +9,10 @@ def stripe_money(value):
         return '${:.2f}'.format(value/100.0)
     except TypeError:
         return '$0.00'
+
+@register.filter
+def format_phone(value):
+    try:
+        return "({}) {}-{}".format(value[2:5], value[5:8], value[8:])
+    except IndexError:
+        return None

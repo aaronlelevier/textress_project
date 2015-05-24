@@ -6,6 +6,7 @@ from django.views.generic.edit import FormMixin
 from django.http import Http404
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseRedirect
+from django.forms.models import model_to_dict
 
 from braces.views import GroupRequiredMixin
 
@@ -13,6 +14,36 @@ from main.models import Hotel
 from contact.models import Newsletter
 from contact.forms import NewsletterForm
 from payment.mixins import HotelContextMixin
+
+
+class UserContextDataMixin(object):
+    '''
+    Display all fields of user into to start.
+    '''
+    def get_context_data(self, **kwargs):
+        context = super(UserContextDataMixin, self).get_context_data(**kwargs)
+        # populate user in the context w/o the password key
+        user_dict = model_to_dict(self.request.user)
+        user_dict.pop("password", None)
+        context['user_dict'] = user_dict
+        return context
+
+
+class HotelContextDataMixin(object):
+    '''
+    Display all Hotel fields.
+    '''
+    def get_context_data(self, **kwargs):
+        context = super(HotelContextDataMixin, self).get_context_data(**kwargs)
+
+        # get the Hotel object for the User
+        try:
+            hotel_dict = model_to_dict(self.request.user.profile.hotel)
+        except KeyError:
+            raise Http404
+        else:
+            context['hotel_dict'] = hotel_dict
+            return context
 
 
 class NewsletterMixin(FormMixin):
