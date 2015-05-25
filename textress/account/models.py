@@ -13,7 +13,7 @@ import stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 from main.models import Hotel
-from payment.models import Card, Charge
+# from payment.models import Card, Charge
 from utils.exceptions import InvalidAmtException
 
 
@@ -50,8 +50,11 @@ class AbstractBase(Dates, models.Model):
 
 class PricingManager(models.Manager):
 
-    def get_cost(self, units, units_prev):
-        """Get the cost of units used based upon the current ``Pricing`` 
+    def get_cost(self, units, units_prev=0):
+        """
+        Global Monthly Cost Calculator
+        ------------------------------
+        Get the cost of units used based upon the current ``Pricing`` 
         Tier.
 
         units - current units used this month
@@ -125,10 +128,7 @@ class TransType(AbstractBase):
     5   bulk_discount   credit applied from previous months use based on bulk
 
     TODO:
-
         - cache `sms_used` during the day to save DB trips
-
-        - remove "bulk_discount" b/c will apply discounts daily??
     """
     name = models.CharField(_("Name"), unique=True, max_length=50)
     desc = models.CharField(_("Description"), max_length=255)
@@ -209,7 +209,7 @@ class AcctCost(AbstractBase):
 
 class AcctStmtManager(models.Manager):
 
-    def acct_trans_balance(self, hotel):
+    def acct_trans_balance(self, hotel, date):
         """
         Calculate the current balance based on sms_used for today.
 
@@ -219,7 +219,7 @@ class AcctStmtManager(models.Manager):
 
         Return: `balance`
         """
-        sms_used, created = AcctTrans.objects.sms_used(hotel=hotel)
+        sms_used, created = AcctTrans.objects.sms_used(hotel, insert_date=date)
 
         balance = AcctTrans.objects.filter(hotel=hotel).balance()
 
@@ -242,8 +242,8 @@ class AcctStmtManager(models.Manager):
 
         values = {
             'total_sms': total_sms,
-            'monthly_costs': settings.DEFAULT_SMS_COST * total_sms, # TODO: make this a sum() aggregation from AcctTrans
-            'balance': self.acct_trans_balance(hotel)
+            'monthly_costs': 3, #Pricing.objects.get_cost(units=total_sms),
+            'balance': self.acct_trans_balance(hotel, date)
         }
         try:
             acct_stmt = self.get(hotel=hotel, month=month, year=year)
@@ -295,11 +295,6 @@ class AcctStmt(AbstractBase):
 
 class AcctTransQuerySet(models.query.QuerySet):
 
-    '''
-    TODO: finish total_charges() and monthly_charges() to include
-        filters for debit/credit transaction types.
-
-    '''
     def monthly_trans(self, hotel, month, year):
         return (self.filter(hotel=hotel,
                             insert_date__month=month,
@@ -311,12 +306,6 @@ class AcctTransQuerySet(models.query.QuerySet):
 
     def balance(self):
         return self.aggregate(Sum('amount'))['amount__sum']
-
-    def debit(self):
-        return self.filter(debit=True)
-
-    def credit(self):
-        return self.filter(credit=True)
 
 
 class AcctTransManager(Dates, models.Manager):
@@ -336,12 +325,6 @@ class AcctTransManager(Dates, models.Manager):
     def balance(self):
         '''Sum `amount` for any queryset object.'''
         return self.get_queryset().balance()
-
-    def debit(self):
-        return self.get_queryset().debit()
-
-    def credit(self):
-        return self.get_queryset().credit()
 
     def sms_used_max_date(self):
         sms_used = TransType.objects.get(name='sms_used')
@@ -364,8 +347,12 @@ class AcctTransManager(Dates, models.Manager):
         '''
         trans_type = TransType.objects.get(name='recharge_amt')
         amount = self.amount(hotel, trans_type) - balance
+
+        # TODO: need to charge credit card here in order to "recharge"
+        #   the account
         acct_tran = self.create(hotel=hotel, trans_type=trans_type,
             amount=amount)
+        
         return acct_tran
 
     def check_balance(self, hotel):
@@ -379,8 +366,13 @@ class AcctTransManager(Dates, models.Manager):
 
         Return: acct_tran, created
         '''
-        sms_used = hotel.messages.filter(insert_date=insert_date).count() # insert_date is a Date Type
-        sms_used_prev = self.monthly_trans(hotel=hotel).aggregate(Max('sms_used'))
+        trans_type = TransType.objects.get(name='sms_used')
+        
+        # get all hotel messages for the month based on "sent"
+        sms_used = hotel.messages.monthly_all(insert_date).count()
+        # vs. what has been accounted for
+        sms_used_prev = (self.monthly_trans(hotel=hotel)
+                             .aggregate(Max('sms_used'))['sms_used__max'])
         
         values = {
             'sms_used': sms_used,
@@ -452,11 +444,6 @@ class AcctTrans(AbstractBase):
         help_text="NULL unless trans_type=sms_used")
     insert_date = models.DateField(_("Insert Date"), blank=True, null=True) # auto_now_add=True) # add back in Prod
 
-    # NOTE: debit/credit were for the template filtering, but instead
-    #   just worry about in template only instead of adding more fields
-    # debit = models.BooleanField(_("Acct Debit"), blank=True, default=False)
-    # credit = models.BooleanField(_("Acct Credit"), blank=True, default=False)
-
     objects = AcctTransManager()
 
     class Meta:
@@ -471,21 +458,4 @@ class AcctTrans(AbstractBase):
         if not self.insert_date:
             self.insert_date = timezone.now().date()
 
-        # Verify Debit or Credit
-        # self.debit, self.credit = self._verify_debit_credit
-
         return super(AcctTrans, self).save(*args, **kwargs)
-
-    # @property
-    # def _verify_debit_credit(self):
-    #     if not self.amount:
-    #         raise InvalidAmtException("Amount cannot equal 0")
-    #     elif self.amount > 0:
-    #         self.credit = True
-    #     else:
-    #         self.debit = True
-
-    #     if not any([self.debit, self.credit]):
-    #         raise InvalidAmtException("Must be either a Debit or Credit.")
-
-    #     return self.debit, self.credit

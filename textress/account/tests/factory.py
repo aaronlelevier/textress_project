@@ -64,8 +64,6 @@ def _acct_trans(hotel, trans_type, insert_date, amount=None):
     'init_amt', 'recharge_amt' are 1000 Stripe Credits.
 
     'sms_used' are b/t -100 ... -10  (for testing purposes)
-
-    Positive `amount` is a `credit`, else a `debit`
     '''
     global AcctTrans
     AcctTrans.save = models.Model.save
@@ -73,19 +71,15 @@ def _acct_trans(hotel, trans_type, insert_date, amount=None):
     # transaction
     if trans_type.name in ('init_amt', 'recharge_amt'):
         amount = _randint(1000, 1000)
-        credit, debit = True, False
     else:
         amount = _randint(-100, -10)
-        credit, debit = False, True
 
     return AcctTrans.objects.create(
         hotel=hotel,
         trans_type=trans_type,
         amount=amount,
         sms_used=_randint(),
-        insert_date=insert_date,
-        debit=debit,
-        credit=credit
+        insert_date=insert_date
         )
 
 def make_acct_trans(hotel):

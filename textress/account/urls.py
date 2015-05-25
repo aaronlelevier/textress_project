@@ -87,6 +87,6 @@ urlpatterns = patterns('',
     url(r'^api/', include(api_patterns)),
     url(r'^account/', include(account_patterns)),
     url(r'^register/', include(register_patterns)),
-    # url(r'^statements/', include(acct_stmt_patterns)),
+    url(r'^statements/', include(acct_stmt_patterns)),
     # url(r'^close/', include(close_acct_patterns)),
     )

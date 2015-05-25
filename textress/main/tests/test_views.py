@@ -41,7 +41,6 @@ class RegistrationTests(TestCase):
     fixtures = ['main.json', 'payment.json']
 
     def setUp(self):
-        self.factory = RequestFactory()
         create._get_groups_and_perms()
 
         # Login Credentials
@@ -80,81 +79,89 @@ class RegistrationTests(TestCase):
         assert updated_user.profile.hotel == hotel
 
 
+class UserUpdateTest(TestCase):
 
-#     ### FAILING TESTS ###
+    def setUp(self):
+        # create a User through the registration process
+        create._get_groups_and_perms()
+        # Login Credentials
+        self.username = 'test'
+        self.password = '1234'
+        response = self.client.post(reverse('main:register_step1'),
+            CREATE_USER_DICT)
 
-#     def test_register_step2_loggedOut(self):
-#         response = self.client.get(reverse('main:register_step2'), follow=True)
-#         self.assertRedirects(response, '/accounts/login/?next=/register/step2/')
+    def test_update(self):
+        user = User.objects.first()
+        assert isinstance(user, User)
 
 
-# class UserViewTests(TestCase):
+class UserViewTests(TestCase):
 
-#     def setUp(self):
-#         self.password = '1234'
-#         self.hotel = create_hotel()
+    def setUp(self):
+        self.password = '1234'
+        self.hotel = create_hotel()
 
-#         # create "Hotel Manager" Group
-#         create._get_groups_and_perms()
+        # create "Hotel Manager" Group
+        create._get_groups_and_perms()
 
-#         # Manager
-#         self.mgr = mommy.make(User, username='mgr')
-#         self.mgr.groups.add(Group.objects.get(name="hotel_manager"))
-#         self.mgr.set_password(self.password)
-#         self.mgr.save()
-#         self.mgr.profile.update_hotel(hotel=self.hotel)
+        # Manager
+        self.mgr = mommy.make(User, username='mgr')
+        self.mgr.groups.add(Group.objects.get(name="hotel_manager"))
+        self.mgr.set_password(self.password)
+        self.mgr.save()
+        self.mgr.profile.update_hotel(hotel=self.hotel)
 
-#         self.user = mommy.make(User, username='user')
-#         self.user.set_password(self.password)
-#         self.user.save()
-#         self.user.profile.update_hotel(hotel=self.hotel)
+        self.user = mommy.make(User, username='user')
+        self.user.set_password(self.password)
+        self.user.save()
+        self.user.profile.update_hotel(hotel=self.hotel)
 
-#     def test_create(self):
-#         # both have a hotel attr
-#         assert isinstance(self.user.profile.hotel, Hotel)
-#         assert isinstance(self.mgr.profile.hotel, Hotel)
+    def test_create(self):
+        # both have a hotel attr
+        assert isinstance(self.user.profile.hotel, Hotel)
+        assert isinstance(self.mgr.profile.hotel, Hotel)
 
-#         # mgr is a "hotel_manager"
-#         mgr_group = Group.objects.get(name="hotel_manager")
-#         assert mgr_group in self.mgr.groups.all()
+        # mgr is a "hotel_manager"
+        mgr_group = Group.objects.get(name="hotel_manager")
+        assert mgr_group in self.mgr.groups.all()
 
-#     def test_detail(self):
-#         # User Can Login
-#         self.client.login(username=self.user.username, password=self.password)
-#         response = self.client.get(reverse('main:user_detail', kwargs={'pk': self.user.pk}))
-#         assert response.status_code == 200
-#         assert response.context['object'] == self.user
+    def test_detail(self):
+        # User Can Login
+        self.client.login(username=self.user.username, password=self.password)
+        response = self.client.get(reverse('main:user_detail', kwargs={'pk': self.user.pk}))
+        assert response.status_code == 200
+        assert response.context['object'] == self.user
 
-#         # Mgr can't access
-#         self.client.logout()
-#         self.client.login(username=self.mgr.username, password=self.password)
-#         response = self.client.get(reverse('main:user_detail', kwargs={'pk': self.user.pk}))
-#         assert response.status_code == 404
+        # Mgr can't access
+        self.client.logout()
+        self.client.login(username=self.mgr.username, password=self.password)
+        response = self.client.get(reverse('main:user_detail', kwargs={'pk': self.user.pk}))
+        assert response.status_code == 404
 
-#     def test_update(self):
-#         # User can update
-#         fname = self.user.first_name
+    def test_update(self):
+        # User can update
+        fname = self.user.first_name
 
-#         # Mgr can't Access
-#         self.client.login(username=self.mgr.username, password=self.password)
-#         response = self.client.get(reverse('main:user_update', kwargs={'pk': self.user.pk}))
-#         assert response.status_code == 404
+        # Mgr can't Access
+        self.client.login(username=self.mgr.username, password=self.password)
+        response = self.client.get(reverse('main:user_update', kwargs={'pk': self.user.pk}))
+        assert response.status_code == 404
 
-#         # Login n Get
-#         self.client.logout()
-#         self.client.login(username=self.user.username, password=self.password)
-#         response = self.client.get(reverse('main:user_update', kwargs={'pk': self.user.pk}))
-#         assert response.status_code == 200
+        # Login n Get
+        self.client.logout()
+        self.client.login(username=self.user.username, password=self.password)
+        response = self.client.get(reverse('main:user_update', kwargs={'pk': self.user.pk}))
+        assert response.status_code == 200
 
-#         # Post
-#         response = self.client.post(reverse('main:user_update', kwargs={'pk': self.user.pk}),
-#             {'first_name': 'new name', 'last_name': self.user.last_name, 'email': self.user.email},
-#             follow=True)
-#         # User updated n redirects
-#         updated_user = User.objects.get(username=self.user.username)
-#         assert fname != updated_user.first_name
-#         self.assertRedirects(response, reverse('main:user_detail',
-#             kwargs={'pk': updated_user.pk}))
+        # Post
+        response = self.client.post(reverse('main:user_update', kwargs={'pk': self.user.pk}),
+            {'first_name': 'new name', 'last_name': self.user.last_name, 'email': self.user.email},
+            follow=True)
+        # User updated n redirects
+        updated_user = User.objects.get(username=self.user.username)
+        assert fname != updated_user.first_name
+        self.assertRedirects(response, reverse('main:user_detail',
+            kwargs={'pk': updated_user.pk}))
 
 
 

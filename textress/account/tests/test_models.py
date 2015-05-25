@@ -26,18 +26,7 @@ from utils import create
 from utils.exceptions import InvalidAmtException
 
 
-class AbstractBaseTests(TestCase):
-
-    def test_AbstractBase_properties(self):
-        tt = mommy.make(TransType)
-        now = timezone.now()
-
-        assert tt._today == now.date()
-        assert tt._month == now.month
-        assert tt._year == now.year
-
-
-class DatesTests(TestCase):
+class DateTests(TestCase):
 
     def test_all_dates(self):
         dates = Dates()
@@ -47,6 +36,15 @@ class DatesTests(TestCase):
         assert dates._today == now.date()
         assert dates._year == now.year
         assert dates._month == now.month
+
+
+class AbstractBaseTests(TestCase):
+
+    def test_AbstractBase_properties(self):
+        # auto fields work
+        price = mommy.make(Pricing)
+        assert isinstance(price.created, datetime.datetime)
+        assert isinstance(price.modified, datetime.datetime)
 
 
 class PricingTests(TestCase):
@@ -80,8 +78,9 @@ class PricingTests(TestCase):
 
 
 class TransTypeTests(TestCase):
+    # Test contains all TransTypes
+    # This Model is also static and does not change.
 
-    # Contains all TransTypes
     fixtures = ['trans_type.json']
 
     def test_types(self):
@@ -97,7 +96,8 @@ class TransTypeTests(TestCase):
 
 class AcctCostTests(TestCase):
     '''
-    Hotel can only have 1 AcctCost record. Can be updated.'''
+    Hotel can only have 1 AcctCost record. Can be updated.
+    '''
 
     def setUp(self):
         self.password = '1234'
@@ -201,21 +201,20 @@ class AcctStmtTests(TestCase):
             year=self.today.year
             )
 
-        balance = acct_stmt.balance
-        print('balance:', balance)
-        assert balance
+        total_sms = acct_stmt.total_sms
+        assert total_sms
 
-        # Send 1 message, and new balance should change
-        make_messages(hotel=self.hotel, user=self.admin, guest=self.guest, number=100)
+        # Send 1 message, and "total_sms" for AcctStmt will change,
+        # But, "balance" will not unless triggering a re-fill
+        make_messages(hotel=self.hotel, user=self.admin, guest=self.guest, number=1)
         acct_stmt, created = AcctStmt.objects.get_or_create(
             hotel=self.hotel,
             month=self.today.month,
             year=self.today.year
             )
-        new_balance = acct_stmt.balance
-        print('new_balance:', new_balance)
-        assert new_balance
-        assert new_balance > balance
+        new_total_sms = acct_stmt.total_sms
+        assert new_total_sms
+        assert new_total_sms > total_sms
 
     '''
     TODO
@@ -278,32 +277,10 @@ class AcctTransTests(TestCase):
         self.acct_trans = make_acct_trans(hotel=self.hotel)
         self.acct_tran = self.acct_trans[0]
 
-
     ### CREATE TESTS ###
 
     def test_create_acct_cost(self):
         assert self.acct_cost.recharge_amt
-
-
-    ### PROPERTY TESTS ###
-
-    def test_verify_debit_credit(self):
-        # AcctTrans cannot be 0
-        with pytest.raises(InvalidAmtException):
-            self.acct_tran.amount = 0
-            self.acct_tran._verify_debit_credit
-
-        # one is True
-        assert self.acct_tran.debit or self.acct_tran.credit
-
-        if self.acct_tran.debit:
-            (self.acct_tran.debit, self.acct_tran.credit) = (False, True)
-        else:
-            (self.acct_tran.debit, self.acct_tran.credit) = (True, False)
-
-        self.acct_tran.save()
-        assert self.acct_tran.debit or self.acct_tran.credit
-
 
     ### MANAGER TESTS ###
 
@@ -331,14 +308,6 @@ class AcctTransTests(TestCase):
     def test_balance(self):
         assert (AcctTrans.objects.balance() ==
                 AcctTrans.objects.aggregate(Sum('amount'))['amount__sum'])
-
-    def test_debit(self):
-        assert (len(AcctTrans.objects.filter(debit=True)) ==
-                len(AcctTrans.objects.debit()))
-
-    def test_credit(self):
-        assert (len(AcctTrans.objects.filter(credit=True)) ==
-                len(AcctTrans.objects.credit()))
 
     def test_init_amt_mgr(self):
         acct_cost = AcctCost.objects.get(hotel=self.hotel)
