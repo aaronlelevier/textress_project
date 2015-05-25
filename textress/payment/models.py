@@ -62,7 +62,7 @@ class CustomerManager(StripeClient, models.Manager):
         '''Always create the Stripe Customer first. Stripe Card second.'''
         try:
             stripe_customer = self.stripe.Customer.create(card=token,
-                description=email)
+                description=email, email=email)
         except self.stripe.error.InvalidRequestError:
             raise
         else:

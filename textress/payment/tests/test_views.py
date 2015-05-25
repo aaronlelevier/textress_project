@@ -21,7 +21,6 @@ from payment.models import Customer, Card
 from utils import create
 
 
-
 class RegistrationTests(TestCase):
 
     def setUp(self):

@@ -29,6 +29,10 @@
     max-width: 1.75em;
     height: auto;
 }
+.textress-icon-admin {
+    max-width: 1.25em;
+    height: auto;
+}
 .center-img img{
     display:block;
     margin:auto;

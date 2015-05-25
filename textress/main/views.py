@@ -43,7 +43,7 @@ class AdminCreateView(RegistrationContextMixin, CreateView):
     """
     model = User
     form_class = UserCreateForm
-    template_name = 'frontend/register.html'
+    template_name = 'frontend/register/register.html'
     success_url = reverse_lazy('main:register_step2')
     authenticated_redirect_url = settings.VERIFY_LOGOUT_URL
 
@@ -83,7 +83,7 @@ class HotelCreateView(LoginRequiredMixin, RegistrationContextMixin, CreateView):
     """
     model = Hotel
     form_class = HotelCreateForm
-    template_name = 'frontend/register.html'
+    template_name = 'frontend/register/register.html'
     success_url = reverse_lazy('register_step3')
 
     def get_context_data(self, **kwargs):

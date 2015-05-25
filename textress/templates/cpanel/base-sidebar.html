@@ -3,6 +3,7 @@
 
 {% block page_css %}
 <link rel="stylesheet" href="{% static 'clipone/admin/clip-one/assets/plugins/fullcalendar/fullcalendar/fullcalendar.css' %}">
+<link rel="stylesheet" href="{% static 'css/custom.css' %}" type="text/css" id="skin_color">
 {% endblock page_css %}
 
     {% block body %}
@@ -18,8 +19,8 @@
                     </button>
                     <!-- end: RESPONSIVE MENU TOGGLER -->
                     <!-- start: LOGO -->
-                    <a class="navbar-brand" href="{% url 'main:index' %}">
-                        CLIP<i class="clip-clip"></i>ONE
+                    <a class="navbar-brand" href="{% url 'index' %}">
+                        TEXT<i><img src="{% static 'images/textress_icon.jpg' %}" class="textress-icon-admin"></i>RESS
                     </a>
                     <!-- end: LOGO -->
                 </div>

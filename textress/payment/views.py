@@ -39,7 +39,7 @@ class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin,
         - register.html - template
     """
 
-    template_name = 'payment/payment_test.html'
+    template_name = 'frontend/register/payment.html'
     form_class = StripeForm
     success_url = reverse_lazy('payment:register_success')
 
@@ -66,7 +66,7 @@ class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin,
             return HttpResponseRedirect(self.success_url)
 
 
-class RegisterSuccessView(AdminOnlyMixin, TemplateView):
+class RegisterSuccessView(RegistrationContextMixin, AdminOnlyMixin, TemplateView):
     """
     Step #5 of Registration - Success
 
@@ -74,10 +74,15 @@ class RegisterSuccessView(AdminOnlyMixin, TemplateView):
 
     TODO: 
         - create payment conf details Here
-        - send a signup email confirmation
 
     """
     template_name = 'payment/success.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(RegisterSuccessView, self).get_context_data(**kwargs)
+        context['step_number'] = 4
+        context['step'] = context['steps'][context['step_number']]
+        return context
 
 
 ### CARD VIEWS ###

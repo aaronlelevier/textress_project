@@ -113,7 +113,7 @@ class PickPlanView(LoginRequiredMixin, RegistrationContextMixin, CreateView):
     """
     model = AcctCost
     form_class = AcctCostCreateForm
-    template_name = 'frontend/register.html'
+    template_name = 'frontend/register/register.html'
     success_url = reverse_lazy('payment:register_step4')
 
     def get_context_data(self, **kwargs):

@@ -1,0 +1,45 @@
+{% extends "frontend/register/base.html" %}
+{% load staticfiles stripe_tags %}
+
+
+{% block content %}
+
+    {% block form_head %}
+    <div class="main-container">
+        <section class="wrapper padding50">
+            <div class="container">
+    {% endblock form_head %}
+
+    {% block form_body %}
+                <div class="col-md-6">
+                    <div class="row">
+                        <h2 class="StepTitle">{{ step }}</h2>
+                    </div>
+                    <div class="row">
+                        <h3>Payment Confirmation</h3>
+                        <p>Customer ID: {{ hotel.customer.id }}</p>
+                        <p>Confirmation was emailed to: {{ hotel.customer.email }}</p>
+                    </div>
+                    <div class="row">
+                        <h3>Charged</h3>
+                        <p>{{ hotel.acct_cost.init_amt|stripe_money }}</p>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="row">
+                        <h4>Now go to your profile page to finish setting up your account.</h4>
+                        <br>
+                        <a href="{% url 'account' %}"><button class="btn btn-primary">Profile page</button></a>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>
+    {% endblock form_body %}
+
+{% endblock content %}
+
+
+{% block footer %}{% endblock %}

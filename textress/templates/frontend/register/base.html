@@ -1,0 +1,90 @@
+{% extends "frontend/base.html" %}
+{% load staticfiles %}
+
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'clipone/frontend/clip-one/assets/plugins/flex-slider/flexslider.css' %}">
+<link href="{% static 'djangular/css/styles.css' %}" rel="stylesheet" />
+<link href="{% static 'djangular/css/bootstrap3.css' %}" rel="stylesheet" />
+<link href="{% static 'css/djangular-demo.css' %}" rel="stylesheet" />
+{% endblock page_css %}
+
+
+{% block content %}
+
+    {% block form_head %}{% endblock form_head %}
+
+    {% block wizard %}
+                    <div id="wizard" class="swMain">
+                        <ul>
+                        {% for step in steps %}
+                            <li>
+                                <a href="#step-{{ forloop.counter }}">
+                                    <div class="stepNumber">
+                                        {{ forloop.counter }}
+                                    </div>
+                                    <span class="stepDesc"> Step {{ forloop.counter }}
+                                        <br />
+                                        <small>{{ step }}</small> </span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="progress progress-striped active progress-sm">
+                        <div aria-valuemax="100" aria-valuemin="0" role="progressbar" class="progress-bar progress-bar-success step-bar">
+                            <span class="sr-only"> 0% Complete (success)</span>
+                        </div>
+                    </div>
+    {% endblock wizard %}
+
+    {% block form_body %}{% endblock form_body %}
+
+{% endblock content %}
+
+
+{% block footer %}{% endblock %}
+
+
+{% block page_js %}
+<script src="{% static 'clipone/admin/clip-one/assets/plugins/jquery-validation/dist/jquery.validate.min.js' %}"></script>
+<script src="{% static 'clipone/admin/clip-one/assets/plugins/jQuery-Smart-Wizard/js/jquery.smartWizard.js' %}"></script>
+{% endblock page_js %}
+
+
+{% block init_js %}
+<script>
+    jQuery(document).ready(function() {
+        Main.init();
+
+    var FormWizard = function() {
+        var wizardContent = $('#wizard');
+        var wizardForm = $('#form');
+        var initWizard = function() {
+            // function to initiate Wizard Form
+            wizardContent.smartWizard({
+                selected : 0,
+                keyNavigation : false,
+            });
+            var numberOfSteps = 0;
+            animateBar();
+        };
+        var animateBar = function(val) {
+            if (( typeof val == 'undefined') || val == "") {
+                val = {{ step_number|add:"1" }};
+            };
+            numberOfSteps = $('.swMain > ul > li').length;
+            var valueNow = Math.floor(100 / numberOfSteps * val);
+            $('.step-bar').css('width', valueNow + '%');
+        };
+        return {
+            init : function() {
+                initWizard();
+            }
+        };
+    }();
+
+        FormWizard.init();
+    });
+</script>
+{% endblock init_js %}
