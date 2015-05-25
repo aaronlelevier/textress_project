@@ -4,7 +4,10 @@ from main import views
 
 
 register_patterns = patterns('',
-    url(r'^step1/$', views.AdminCreateView.as_view(), name='register_step1'),
+    # Step 1
+    url(r'^step1/$', views.RegisterAdminCreateView.as_view(), name='register_step1'),
+    url(r'^step1/update/(?P<pk>\d+)/$', views.RegisterAdminUpdateView.as_view(), name='register_step1_update'),
+    # Step 2
     url(r'^step2/$', views.HotelCreateView.as_view(), name='register_step2'),
     )
 

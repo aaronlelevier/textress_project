@@ -15,6 +15,10 @@
                     {% csrf_token %}
     {% endblock form_head %}
 
+    {% block wizard %}
+        {{ block.super }}
+    {% endblock wizard %}
+
     {% block form_body %}
                     <div id="step-1">
                         <h2 class="StepTitle">{{ step }}</h2>

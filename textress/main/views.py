@@ -31,16 +31,11 @@ class HotelDetailView(HotelMixin, DetailView):
 
 
 ### REGISTRATION VIEWS ###
-
-class AdminCreateView(RegistrationContextMixin, CreateView):
-    """
-    Step #1 of Registration
-
-    Purpose:
-        - Create a new User
-        - Add them to the "hotel_admin" Group
-        - Log in User
-    """
+class RegisterAdminBaseView(RegistrationContextMixin, View):
+    '''
+    BaseView for Registration Step # 1, and will change based on 
+    Create / Update.
+    '''
     model = User
     form_class = UserCreateForm
     template_name = 'frontend/register/register.html'
@@ -48,14 +43,26 @@ class AdminCreateView(RegistrationContextMixin, CreateView):
     authenticated_redirect_url = settings.VERIFY_LOGOUT_URL
 
     def get_context_data(self, **kwargs):
-        context = super(AdminCreateView, self).get_context_data(**kwargs)
+        context = super(RegisterAdminBaseView, self).get_context_data(**kwargs)
         context['step_number'] = 0
         context['step'] = context['steps'][context['step_number']]
         return context
 
+class RegisterAdminCreateView(RegisterAdminBaseView, CreateView):
+    """
+    Step #1 of Registration - CreateView
+
+    Purpose:
+        - Create a new User
+        - Add them to the "hotel_admin" Group
+        - Log in User
+
+    TODO: if "user.is_authenticated" re-route to UpdateView
+    """
+
     def form_valid(self, form):
         # Call super-override so ``User`` object is available
-        super(AdminCreateView, self).form_valid(form) 
+        super(RegisterAdminCreateView, self).form_valid(form) 
         cd = form.cleaned_data
 
         # Add User to "Admin" Group
@@ -70,6 +77,14 @@ class AdminCreateView(RegistrationContextMixin, CreateView):
         messages.info(self.request, login_messages['now_logged_in'])
 
         return HttpResponseRedirect(self.get_success_url())
+
+
+class RegisterAdminUpdateView(RegisterAdminBaseView, UserOnlyMixin, UpdateView):
+    '''
+    For Registration Update User info only.
+    '''
+    model = User
+    fields = ['first_name', 'last_name', 'email']
 
 
 class HotelCreateView(LoginRequiredMixin, RegistrationContextMixin, CreateView):
