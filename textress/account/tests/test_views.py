@@ -15,6 +15,7 @@ from django.utils import timezone
 
 from model_mommy import mommy
 
+from account.forms import AcctCostForm
 from account.models import (AcctStmt, TransType, AcctTrans, AcctCost,
     Pricing, CHARGE_AMOUNTS, BALANCE_AMOUNTS)
 from account.tests.factory import (make_acct_stmts, make_acct_trans,
@@ -47,7 +48,7 @@ class RegistrationTests(TestCase):
         self.username = CREATE_USER_DICT['username']
         self.password = '1234'
 
-    def test_register_step3(self):
+        # Necessary setup for Step # 3 tets
         # Step 1
         response = self.client.post(reverse('main:register_step1'),
             CREATE_USER_DICT)
@@ -55,6 +56,8 @@ class RegistrationTests(TestCase):
         # Step 2
         response = self.client.post(reverse('main:register_step2'),
             CREATE_HOTEL_DICT)
+
+    def test_register_step3(self):
         # Step 3
         response = self.client.post(reverse('register_step3'), # no namespace b/c in "account" app
             CREATE_ACCTCOST_DICT, follow=True)
@@ -63,6 +66,12 @@ class RegistrationTests(TestCase):
         acct_cost = AcctCost.objects.all()
         assert len(acct_cost) == 1
         assert acct_cost[0].hotel == Hotel.objects.get(name=CREATE_HOTEL_DICT['name'])
+
+        # Step 3 UpdateView
+        # Dave wants to update his choice
+        response = self.client.get(reverse('register_step3_update', kwargs={'pk': acct_cost[0].pk}))
+        self.assertEqual(response.status_code, 200)
+        assert isinstance(response.context['form'], AcctCostForm)
 
 
 class RenderTests(TestCase):

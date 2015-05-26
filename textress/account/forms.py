@@ -22,7 +22,7 @@ from utils import email
 # DEFAULT FORMS #
 #################
 
-class AcctCostCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):
+class AcctCostForm(NgFormValidationMixin, Bootstrap3ModelForm):
     # djangular req
     form_name = 'acct_cost_create_form'
 

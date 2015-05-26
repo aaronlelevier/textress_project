@@ -8,7 +8,8 @@ register_patterns = patterns('',
     url(r'^step1/$', views.RegisterAdminCreateView.as_view(), name='register_step1'),
     url(r'^step1/update/(?P<pk>\d+)/$', views.RegisterAdminUpdateView.as_view(), name='register_step1_update'),
     # Step 2
-    url(r'^step2/$', views.HotelCreateView.as_view(), name='register_step2'),
+    url(r'^step2/$', views.RegisterHotelCreateView.as_view(), name='register_step2'),
+    url(r'^step2/update/(?P<pk>\d+)/$', views.RegisterHotelUpdateView.as_view(), name='register_step2_update'),
     )
 
 manage_users_patterns = patterns('',
@@ -34,6 +35,3 @@ urlpatterns = patterns('',
     # Users
     url(r'^users/', include(user_patterns)),
     )
-
-
-

@@ -79,16 +79,35 @@ class RegisterAdminCreateView(RegisterAdminBaseView, CreateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-class RegisterAdminUpdateView(RegisterAdminBaseView, UserOnlyMixin, UpdateView):
+class RegisterAdminUpdateView(GroupRequiredMixin, RegisterAdminBaseView,
+    UserOnlyMixin, UpdateView):
     '''
     For Registration Update User info only.
     '''
+    group_required = ["hotel_admin"]
     model = User
     form_class = RegisterAdminUpdateForm
     fields = ['first_name', 'last_name', 'email']
 
 
-class HotelCreateView(LoginRequiredMixin, RegistrationContextMixin, CreateView):
+class RegisterHotelBaseView(GroupRequiredMixin, RegistrationContextMixin, View):
+    '''
+    BaseView to support Hotel Create / Update Views for Registration.
+    '''
+    group_required = ["hotel_admin"]
+    model = Hotel
+    form_class = HotelCreateForm
+    template_name = 'frontend/register/register.html'
+    success_url = reverse_lazy('register_step3')
+
+    def get_context_data(self, **kwargs):
+        context = super(RegisterHotelBaseView, self).get_context_data(**kwargs)
+        context['step_number'] = 1
+        context['step'] = context['steps'][context['step_number']]
+        return context
+
+
+class RegisterHotelCreateView(RegisterHotelBaseView, CreateView):
     """
     Step #2 of Registration
 
@@ -97,29 +116,24 @@ class HotelCreateView(LoginRequiredMixin, RegistrationContextMixin, CreateView):
         - Set Hotel to the User's UserProfile Hotel
         - Set User's ID as the Hotel Admin ID of the Hotel
     """
-    model = Hotel
-    form_class = HotelCreateForm
-    template_name = 'frontend/register/register.html'
-    success_url = reverse_lazy('register_step3')
-
-    def get_context_data(self, **kwargs):
-        context = super(HotelCreateView, self).get_context_data(**kwargs)
-        context['step_number'] = 1
-        context['step'] = context['steps'][context['step_number']]
-        return context
 
     def form_valid(self, form):
         # Call super-override so ``Hotel`` object is available
-        super(HotelCreateView, self).form_valid(form)
-
+        super(RegisterHotelCreateView, self).form_valid(form)
         # User is now this Hotel's Admin
         self.object.set_admin_id(user=self.request.user)
         # Link Hotel and User
         self.request.user.profile.update_hotel(hotel=self.object)
+
+        # TODO: move this to Profile Setup section
         # Twilio Subaccount
-        subaccount, created = Subaccount.objects.get_or_create(hotel=self.object)
+        # subaccount, created = Subaccount.objects.get_or_create(hotel=self.object)
 
         return HttpResponseRedirect(self.get_success_url())
+
+
+class RegisterHotelUpdateView(HotelUsersOnlyMixin, RegisterHotelBaseView, UpdateView):
+    pass
 
 
 #########

@@ -6,14 +6,15 @@ from account.forms import (AuthenticationForm, PasswordResetForm, SetPasswordFor
     PasswordChangeForm)
 
 
+register_patterns = patterns('',
+    # Step 3
+    url(r'^step3/$', views.RegisterAcctCostCreateView.as_view(), name='register_step3'),
+    url(r'^step3/update/(?P<pk>\d+)/$', views.RegisterAcctCostUpdateView.as_view(), name='register_step3_update'),
+    )
+
 api_patterns = patterns('',
     url(r'^account/pricing/$', views.PricingListAPIView.as_view(), name='api_pricing'),
     url(r'^account/pricing/(?P<pk>\d+)/$', views.PricingRetrieveAPIView.as_view(), name='api_pricing'),
-    )
-
-### NOT IN USE: START
-register_patterns = patterns('',
-    url(r'^step3/$', views.PickPlanView.as_view(), name='register_step3'),
     )
 
 acct_stmt_patterns = patterns('',

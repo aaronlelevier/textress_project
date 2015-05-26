@@ -35,8 +35,6 @@ class RegistrationTests(TestCase):
         self.username = 'test'
         self.password = '1234'
 
-    ### SUCCESSFUL REGISTRATION TESTs ###
-
     def test_register_step1(self):
         # 1st step to register Admin User, so the Dave see's the normal form
         response = self.client.get(reverse('main:register_step1'))
@@ -53,41 +51,42 @@ class RegistrationTests(TestCase):
 
         # Dave wants to go back and update his email, so he now get's the Update Form
         response = self.client.get(reverse('main:register_step1_update', kwargs={'pk': user.pk}))
+        self.assertEqual(response.status_code, 200)
         assert isinstance(response.context['form'], RegisterAdminUpdateForm)
 
+        # Dave logs out and now can't access the RegisterAdminUpdateView
+        self.client.logout()
+        response = self.client.get(reverse('main:register_step1_update', kwargs={'pk': user.pk}))
+        self.assertNotEqual(response.status_code, 200)
 
+    def test_register_step2(self):
+        # Step 1
+        response = self.client.post(reverse('main:register_step1'),
+            CREATE_USER_DICT)
+        self.client.login(username=self.username, password=self.password)
 
-    # def test_register_step2(self):
-    #     # Step 1
-    #     response = self.client.post(reverse('main:register_step1'),
-    #         {'username':'test', 'first_name': 'Test', 'last_name': 'Test',
-    #         'email':settings.DEFAULT_TO_EMAIL,
-    #         'password1':'1234', 'password2':'1234'})
+        # Step 2
+        # Dave goes to register his Hotel's info
+        response = self.client.get(reverse('main:register_step2'))
+        assert isinstance(response.context['form'], HotelCreateForm)
+        # Dave submits his info
+        response = self.client.post(reverse('main:register_step2'),
+            CREATE_HOTEL_DICT)
+        # Now he goes back to make a change
+        user = User.objects.get(username=CREATE_USER_DICT['username'])
+        hotel = user.profile.hotel
+        response = self.client.get(reverse('main:register_step2_update', kwargs={'pk': hotel.pk}))
+        self.assertEqual(response.status_code, 200)
+        assert isinstance(response.context['form'], HotelCreateForm)
 
-    #     # Tests
-    #     response = self.client.get(reverse('main:register_step2'))
-    #     assert response.status_code == 200
-
-    #     response = self.client.post(reverse('main:register_step2'),
-    #         {'name': 'Test Hotel',
-    #         'phone': '6195105555',
-    #         'address_line1': '123 Some St.',
-    #         'address_city': 'San Diego',
-    #         'address_state': STATES[0][0],
-    #         'address_zip': '92131'}, follow=True)
-
-    #     self.assertRedirects(response, reverse('payment:register_step3'))
-
-    #     hotel = Hotel.objects.get(name='Test Hotel')
-    #     updated_user = User.objects.get(username='test')
-    #     assert hotel.admin_id == updated_user.id
-    #     assert updated_user.profile.hotel == hotel
-
-    # ### FAILING TESTS ###
-
-    # def test_register_step2_loggedOut(self):
-    #     response = self.client.get(reverse('main:register_step2'), follow=True)
-    #     self.assertRedirects(response, '/login/?next=/register/step2/')
+        # Logged out Dave can't access either View
+        self.client.logout()
+        # step 2
+        response = self.client.get(reverse('main:register_step2'))
+        self.assertNotEqual(response.status_code, 200)
+        # step 2 update
+        response = self.client.get(reverse('main:register_step2_update', kwargs={'pk': hotel.pk}))
+        self.assertNotEqual(response.status_code, 200)
 
 
 class UserViewTests(TestCase):

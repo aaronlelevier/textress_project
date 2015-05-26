@@ -23,7 +23,7 @@ from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
 
 from account.decorators import anonymous_required
 from account.forms import (AuthenticationForm, CloseAccountForm,
-    CloseAcctConfirmForm, AcctCostCreateForm)
+    CloseAcctConfirmForm, AcctCostForm)
 from account.helpers import login_messages
 from account.models import AcctCost, AcctStmt, AcctTrans, Pricing
 from account.serializers import PricingSerializer
@@ -103,30 +103,53 @@ class AccountView(LoginRequiredMixin, HotelUserMixin, TemplateView):
 
 ### REGISTRATION VIEWS ###
 
-class PickPlanView(LoginRequiredMixin, RegistrationContextMixin, CreateView):
+class RegisterAcctCostBaseView(GroupRequiredMixin, RegistrationContextMixin, View):
     """
     Step #3 of Registration
 
     Pick a Plan, and save the Plan as a `session cookie` before creating
     the Stipe Customer/Subscription using the Plan Choice.
     """
+    group_required = ["hotel_admin"]
     model = AcctCost
-    form_class = AcctCostCreateForm
+    form_class = AcctCostForm
     template_name = 'frontend/register/register.html'
     success_url = reverse_lazy('payment:register_step4')
 
     def get_context_data(self, **kwargs):
-        context = super(PickPlanView, self).get_context_data(**kwargs)
+        context = super(RegisterAcctCostBaseView, self).get_context_data(**kwargs)
         context['step_number'] = 2
         context['step'] = context['steps'][context['step_number']]
         return context
+
+
+class RegisterAcctCostCreateView(RegisterAcctCostBaseView, CreateView):
 
     def form_valid(self, form):
         '''Add the Hotel Obj to the AcctCost instance b/4 saving.'''
         self.object = form.save(commit=False)
         self.object.hotel = self.request.user.profile.hotel
         self.object.save()
-        return super(PickPlanView, self).form_valid(form)
+        return super(RegisterAcctCostCreateView, self).form_valid(form)
+
+
+class RegisterAcctCostUpdateView(RegisterAcctCostBaseView, UpdateView):    
+    '''
+    AcctCost must belong to the Admin User's Hotel.
+    '''
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            # must call this or else the "object" instance of the Model
+            # will not be available
+            self.object = self.get_object()
+            acct_cost = self.object.hotel == self.request.user.profile.hotel
+        except AttributeError:
+            acct_cost = None
+
+        if not acct_cost:
+            raise Http404
+
+        return super(RegisterAcctCostUpdateView, self).dispatch(request, *args, **kwargs)
 
 
 #############

@@ -95,28 +95,23 @@ class UserOnlyMixin(HotelContextMixin):
 
 
 class HotelUsersOnlyMixin(HotelContextMixin, GroupRequiredMixin, View):
-    '''All User Objects belong to the Hotel Obj only.
+    '''
+    All User Objects belong to the Hotel Obj only.
 
-    Requred: kwargs['pk']
-
-    TODO: Check that a normal `User` can access Views w/ this Mixin.
+    Required: kwargs['pk'] == hotel.pk == self.request.user.profile.hotel.pk
     '''
     group_required = ["hotel_admin", "hotel_manager"]
 
     def dispatch(self, request, *args, **kwargs):
-        "User must be part of their Hotel, and can't be the Admin User."
-        self.hotel = self.request.user.profile.hotel
-        if not self.hotel:
-            raise Http404
+        self.hotel = get_object_or_404(Hotel, pk=kwargs['pk']) 
+        # check that this is the User's Hotel before dispatching
         try:
-            pk = int(kwargs['pk'])
-        except KeyError:
+            user_hotel = self.hotel == self.request.user.profile.hotel
+        except AttributeError:
+            user_hotel = None
+
+        if not user_hotel:
             raise Http404
-        else:
-            if pk not in (User.objects.filter(profile__hotel=self.hotel)
-                                                .exclude(pk=self.hotel.admin_id)
-                                                .values_list('id', flat=True)):
-                raise Http404
 
         return super(HotelUsersOnlyMixin, self).dispatch(request, *args, **kwargs)
 
