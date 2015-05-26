@@ -14,6 +14,7 @@ from django.views.generic import View, ListView, DetailView
 from django.views.generic.base import TemplateView, RedirectView
 from django.views.generic.edit import FormView, CreateView, UpdateView, FormMixin
 from django.db.models import Avg, Max, Min, Sum
+from django.views.generic.edit import ModelFormMixin
 
 from rest_framework.response import Response
 from rest_framework import generics, permissions, mixins
@@ -127,10 +128,14 @@ class RegisterAcctCostCreateView(RegisterAcctCostBaseView, CreateView):
 
     def form_valid(self, form):
         '''Add the Hotel Obj to the AcctCost instance b/4 saving.'''
-        self.object = form.save(commit=False)
-        self.object.hotel = self.request.user.profile.hotel
-        self.object.save()
-        return super(RegisterAcctCostCreateView, self).form_valid(form)
+        # self.object = form.save(commit=False)
+        # self.object.hotel = self.request.user.profile.hotel
+        # self.object.save()
+
+        self.object, created = self.model.objects.get_or_create(
+            hotel=self.request.user.profile.hotel, **form.cleaned_data)
+
+        return super(ModelFormMixin, self).form_valid(form)
 
 
 class RegisterAcctCostUpdateView(RegisterAcctCostBaseView, UpdateView):    
