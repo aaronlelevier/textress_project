@@ -11,18 +11,17 @@ from django.contrib.auth.models import User, Group
 from django.http import Http404
 from django.core.exceptions import ObjectDoesNotExist
 
+import stripe
 from model_mommy import mommy
 
-from ..models import Hotel, UserProfile, Subaccount
-from payment.models import Plan
+from main.forms import UserCreateForm, HotelCreateForm, RegisterAdminUpdateForm
+from main.models import Hotel, UserProfile, Subaccount
+from main.tests.factory import CREATE_USER_DICT, CREATE_HOTEL_DICT, create_hotel
 from sms.models import PhoneNumber
 from utils import create
 from utils.data import STATES, HOTEL_TYPES
 
-import stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
-
-from .factory import create_hotel
 
 
 class RegistrationTests(TestCase):
@@ -30,84 +29,65 @@ class RegistrationTests(TestCase):
     fixtures = ['main.json', 'payment.json']
 
     def setUp(self):
-        self.factory = RequestFactory()
         create._get_groups_and_perms()
+
+        # Login Credentials
+        self.username = 'test'
+        self.password = '1234'
 
     ### SUCCESSFUL REGISTRATION TESTs ###
 
     def test_register_step1(self):
+        # 1st step to register Admin User, so the Dave see's the normal form
+        response = self.client.get(reverse('main:register_step1'))
+        assert isinstance(response.context['form'], UserCreateForm)
+
+        # Dave submits info successfully
         response = self.client.post(reverse('main:register_step1'),
-            {'username':'test', 'first_name': 'Test', 'last_name': 'Test',
-            'email':settings.DEFAULT_TO_EMAIL,
-            'password1':'1234', 'password2':'1234'},
-            follow=True)
-
+            CREATE_USER_DICT, follow=True)
         self.assertRedirects(response, reverse('main:register_step2'))
-
-        user = User.objects.get(username='test')
+        user = User.objects.get(username=CREATE_USER_DICT['username'])
         assert isinstance(user, User)
         assert isinstance(user.profile, UserProfile)
         assert user == User.objects.get(groups__name='hotel_admin')
 
-    def test_register_step2(self):
-        # Step 1
-        response = self.client.post(reverse('main:register_step1'),
-            {'username':'test', 'first_name': 'Test', 'last_name': 'Test',
-            'email':settings.DEFAULT_TO_EMAIL,
-            'password1':'1234', 'password2':'1234'})
-
-        # Tests
-        response = self.client.get(reverse('main:register_step2'))
-        assert response.status_code == 200
-
-        response = self.client.post(reverse('main:register_step2'),
-            {'name': 'Test Hotel',
-            'phone': '6195105555',
-            'address_line1': '123 Some St.',
-            'address_city': 'San Diego',
-            'address_state': STATES[0][0],
-            'address_zip': '92131'}, follow=True)
-
-        self.assertRedirects(response, reverse('payment:register_step3'))
-
-        hotel = Hotel.objects.get(name='Test Hotel')
-        updated_user = User.objects.get(username='test')
-        assert hotel.admin_id == updated_user.id
-        assert updated_user.profile.hotel == hotel
-
-    def test_register_step3(self):
-        # Plan choice
-        plan = Plan.objects.get(name="Bronze")
-        assert isinstance(plan, Plan)
-
-        # Step 1
-        response = self.client.post(reverse('main:register_step1'),
-            {'username':'test', 'first_name': 'Test', 'last_name': 'Test',
-            'email':settings.DEFAULT_TO_EMAIL,
-            'password1':'1234', 'password2':'1234'})
-        # Step 2
-        response = self.client.post(reverse('main:register_step2'),
-            {'name': 'Test Hotel',
-            'phone': '6195105555',
-            'address_line1': '123 Some St.',
-            'address_city': 'San Diego',
-            'address_state': STATES[0][0],
-            'address_zip': '92131'}, follow=True)
-
-        # Step 3
-        response = self.client.post(reverse('payment:register_step3'),
-            {'plan': 'Bronze'}, follow=True)
-        # TODO: This needs a Plan.save() monkey-patch, so it doesn't create a 
-        #   Twilio Plan each time. Also, tries to save the choice in `request.session`
-        #   which I need to figure out how to use in Testing
-        # self.assertRedirects(response, reverse('payment:register_step4'))
+        # Dave wants to go back and update his email, so he now get's the Update Form
+        response = self.client.get(reverse('main:register_step1_update', kwargs={'pk': user.pk}))
+        assert isinstance(response.context['form'], RegisterAdminUpdateForm)
 
 
-    ### FAILING TESTS ###
 
-    def test_register_step2_loggedOut(self):
-        response = self.client.get(reverse('main:register_step2'), follow=True)
-        self.assertRedirects(response, '/accounts/login/?next=/register/step2/')
+    # def test_register_step2(self):
+    #     # Step 1
+    #     response = self.client.post(reverse('main:register_step1'),
+    #         {'username':'test', 'first_name': 'Test', 'last_name': 'Test',
+    #         'email':settings.DEFAULT_TO_EMAIL,
+    #         'password1':'1234', 'password2':'1234'})
+
+    #     # Tests
+    #     response = self.client.get(reverse('main:register_step2'))
+    #     assert response.status_code == 200
+
+    #     response = self.client.post(reverse('main:register_step2'),
+    #         {'name': 'Test Hotel',
+    #         'phone': '6195105555',
+    #         'address_line1': '123 Some St.',
+    #         'address_city': 'San Diego',
+    #         'address_state': STATES[0][0],
+    #         'address_zip': '92131'}, follow=True)
+
+    #     self.assertRedirects(response, reverse('payment:register_step3'))
+
+    #     hotel = Hotel.objects.get(name='Test Hotel')
+    #     updated_user = User.objects.get(username='test')
+    #     assert hotel.admin_id == updated_user.id
+    #     assert updated_user.profile.hotel == hotel
+
+    # ### FAILING TESTS ###
+
+    # def test_register_step2_loggedOut(self):
+    #     response = self.client.get(reverse('main:register_step2'), follow=True)
+    #     self.assertRedirects(response, '/login/?next=/register/step2/')
 
 
 class UserViewTests(TestCase):

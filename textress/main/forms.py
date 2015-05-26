@@ -19,6 +19,9 @@ from concierge.models import validate_phone
 
 
 class UserCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):
+    '''
+    Form used during Registration to Create the Admin User.
+    '''
     # djangular req
     form_name = 'user_create_form'
 
@@ -82,6 +85,18 @@ class UserCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):
         if commit:
             user.save()
         return user
+
+
+class RegisterAdminUpdateForm(NgFormValidationMixin, Bootstrap3ModelForm):
+    '''
+    Form used during Registration to Update the Admin User.
+    '''
+    # djangular req
+    form_name = 'admin_update_form'
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
 
 
 class HotelCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):

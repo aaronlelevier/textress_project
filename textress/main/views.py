@@ -14,7 +14,7 @@ from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
     GroupRequiredMixin, AnonymousRequiredMixin)
 
 from main.models import Hotel, UserProfile, Subaccount
-from main.forms import UserCreateForm, HotelCreateForm
+from main.forms import UserCreateForm, HotelCreateForm, RegisterAdminUpdateForm
 from main.mixins import (HotelMixin, UserOnlyMixin, HotelUsersOnlyMixin,
     RegistrationContextMixin)
 from account.helpers import add_group
@@ -84,6 +84,7 @@ class RegisterAdminUpdateView(RegisterAdminBaseView, UserOnlyMixin, UpdateView):
     For Registration Update User info only.
     '''
     model = User
+    form_class = RegisterAdminUpdateForm
     fields = ['first_name', 'last_name', 'email']
 
 
