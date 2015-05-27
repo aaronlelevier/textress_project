@@ -3,13 +3,15 @@ from django.conf.urls import patterns, url, include
 from contact import views
 
 
-api_patterns = patterns('',
-    # # REST
-    url(r'^contact/$', views.ContactListCreateAPIView.as_view(), name='api_contact'),
-    url(r'^faq/$', views.FAQListAPIView.as_view(), name='api_contact'),
-    url(r'^faq/(?P<pk>\d+)/$', views.FAQRetrieveAPIView.as_view(), name='api_contact'),
-    )
+### NOT IN USE ###
 
-urlpatterns = patterns('',
-    url(r'^api/', include(api_patterns)),
-    )
+# api_patterns = patterns('',
+#     # # REST
+#     url(r'^contact/$', views.ContactListCreateAPIView.as_view(), name='api_contact'),
+#     url(r'^faq/$', views.FAQListAPIView.as_view(), name='api_contact'),
+#     url(r'^faq/(?P<pk>\d+)/$', views.FAQRetrieveAPIView.as_view(), name='api_contact'),
+#     )
+
+# urlpatterns = patterns('',
+#     url(r'^api/', include(api_patterns)),
+#     )

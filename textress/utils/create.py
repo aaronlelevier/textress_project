@@ -15,7 +15,7 @@ from concierge.models import Guest, Message
 
 LOREM_IPSUM = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 
-def random_lorem(words=10):
+def random_lorem(words=5):
     msg = []
     for w in range(words):
         msg.append(random.choice(LOREM_IPSUM.split()))
@@ -73,6 +73,12 @@ def _get_users():
 ##########
 # HOTELS #
 ##########  
+def _generate_ph():
+    n = ''
+    for i in range(10):
+        n += str(random.randrange(0,10))
+    return n
+
 def _get_hotels():
     """Get ALL None 'Test' Hotels."""
     for i in range(5):
@@ -81,8 +87,10 @@ def _get_hotels():
         except ObjectDoesNotExist:
             mommy.make(Hotel,
                 name="Hotel{}".format(str(i)),
-                account_sid=random.randrange(1,999),
-                phone_number_sid=random.randrange(1,999))
+                address_phone=_generate_ph(),
+                twilio_phone_number=_generate_ph(),
+                twilio_sid=random.randrange(1,999),
+                twilio_ph_sid=random.randrange(1,999))
     return Hotel.objects.filter(~Q(name="Test"))
 
 def _phone_numbers():

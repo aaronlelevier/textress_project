@@ -12,7 +12,7 @@ apt-get purge <package>
 grep
 ----
 # look for a string in files
-grep -rl "some string" /path
+grep -rnw 'directory' -e 'pattern'
 
 
 echo

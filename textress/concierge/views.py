@@ -26,11 +26,11 @@ from rest_framework import mixins, generics, status, permissions, viewsets
 from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
     CsrfExemptMixin)
 
-from .models import Message, Guest
-from .helpers import process_incoming_message
-from .forms import MessageForm
-from .permissions import IsHotelObject, IsManagerOrAdmin, IsHotelUser
-from .serializers import (
+from concierge.models import Message, Guest
+from concierge.helpers import process_incoming_message
+from concierge.forms import MessageForm
+from concierge.permissions import IsHotelObject, IsManagerOrAdmin, IsHotelUser
+from concierge.serializers import (
     MessageSerializer,
     GuestMessageSerializer,
     GuestBasicSerializer,

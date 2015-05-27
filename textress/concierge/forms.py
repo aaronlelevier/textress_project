@@ -12,6 +12,9 @@ class MessageForm(forms.ModelForm):
     class Meta:
         model = Message 
         fields = ('body',)
+        widgets = {
+            'body': forms.Textarea(attrs={'cols': 50, 'rows': 4}),
+        }
 
     def clean(self):
         cleaned_data = super(MessageForm, self).clean()
