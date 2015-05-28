@@ -72,11 +72,10 @@
                                 </div>
                                 <div>
                                     <a href="{% url 'main:register_step1_update' user.pk %}">
-                                        <p><button class="btn btn-info btn-xs">edit</button></p>
+                                        <p><button type="button" class="btn btn-info btn-xs">edit</button></p>
                                     </a>
                                 </div>
                             </div>
-
                             <ul class="list-unstyled">
                                 <li><strong>Username:</strong> {{ user }}</li>
                                 <li><strong>Email:</strong> {{ user.email }} </li>
@@ -84,7 +83,16 @@
                             </ul>
                         </div>
                         <div class="row">
-                            <h3>Hotel Info</h3>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <h3 class="pull-right">Hotel Info</h3>
+                                </div>
+                                <div>
+                                    <a href="{% url 'main:register_step2_update' hotel.pk %}">
+                                        <p><button type="button" class="btn btn-info btn-xs">edit</button></p>
+                                    </a>
+                                </div>
+                            </div>
                             <ul class="list-unstyled">
                                 <li><strong>Hotel name:</strong> {{ hotel.name }}</li>
                                 <li><strong>Address</strong></li>
@@ -96,7 +104,16 @@
                             </ul>
                         </div>
                         <div class="row">
-                            <h3>Payment Plan</h3>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <h3 class="pull-right">Payment Plan</h3>
+                                </div>
+                                <div>
+                                    <a href="{% url 'register_step3_update' hotel.acct_cost.pk %}">
+                                        <p><button type="button" class="btn btn-info btn-xs">edit</button></p>
+                                    </a>
+                                </div>
+                            </div>
                             <ul class="list-unstyled">
                                 <li><strong>Initial Payment:</strong> {{ acct_cost.init_amt|stripe_money }}</li>
                                 <li><strong>Balance Minimum:</strong> {{ acct_cost.balance_min|stripe_money }}</li>

@@ -125,12 +125,19 @@ class RegisterAcctCostBaseView(GroupRequiredMixin, RegistrationContextMixin, Vie
 
 
 class RegisterAcctCostCreateView(RegisterAcctCostBaseView, CreateView):
+    '''
+    If AcctCost already exists for the Hotel, re-route to the UpdateView.
+    '''
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            acct_cost = self.request.user.profile.hotel.acct_cost
+        except AttributeError:
+            return super(RegisterAcctCostCreateView, self).dispatch(request, *args, **kwargs)
+        else:
+            return HttpResponseRedirect(reverse('register_step3_update', kwargs={'pk': acct_cost.pk}))
 
     def form_valid(self, form):
         '''Add the Hotel Obj to the AcctCost instance b/4 saving.'''
-        # self.object = form.save(commit=False)
-        # self.object.hotel = self.request.user.profile.hotel
-        # self.object.save()
 
         self.object, created = self.model.objects.get_or_create(
             hotel=self.request.user.profile.hotel, **form.cleaned_data)

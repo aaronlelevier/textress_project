@@ -6,6 +6,7 @@ from django.views.generic import (CreateView, FormView, DetailView,
     ListView, UpdateView, DeleteView)
 from django.views.generic.base import View, ContextMixin, TemplateView
 from django.core.urlresolvers import reverse, reverse_lazy
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.template import RequestContext
@@ -49,7 +50,7 @@ class RegisterAdminBaseView(RegistrationContextMixin, View):
         return context
 
 class RegisterAdminCreateView(RegisterAdminBaseView, CreateView):
-    """
+    '''
     Step #1 of Registration - CreateView
 
     Purpose:
@@ -57,8 +58,15 @@ class RegisterAdminCreateView(RegisterAdminBaseView, CreateView):
         - Add them to the "hotel_admin" Group
         - Log in User
 
-    TODO: if "user.is_authenticated" re-route to UpdateView
-    """
+    If Admin User already exists, re-route to the UpdateView.
+    '''
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            user = User.objects.get(pk=self.request.user.pk)
+        except (AttributeError, ObjectDoesNotExist):
+            return super(RegisterAdminCreateView, self).dispatch(request, *args, **kwargs)
+        else:
+            return HttpResponseRedirect(reverse('main:register_step1_update', kwargs={'pk': user.pk}))
 
     def form_valid(self, form):
         # Call super-override so ``User`` object is available
@@ -116,6 +124,13 @@ class RegisterHotelCreateView(RegisterHotelBaseView, CreateView):
         - Set Hotel to the User's UserProfile Hotel
         - Set User's ID as the Hotel Admin ID of the Hotel
     """
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            hotel = Hotel.objects.get(pk=self.request.user.profile.hotel.pk)
+        except (AttributeError, ObjectDoesNotExist):
+            return super(RegisterHotelCreateView, self).dispatch(request, *args, **kwargs)
+        else:
+            return HttpResponseRedirect(reverse('main:register_step2_update', kwargs={'pk': hotel.pk}))
 
     def form_valid(self, form):
         # Call super-override so ``Hotel`` object is available
@@ -124,10 +139,6 @@ class RegisterHotelCreateView(RegisterHotelBaseView, CreateView):
         self.object.set_admin_id(user=self.request.user)
         # Link Hotel and User
         self.request.user.profile.update_hotel(hotel=self.object)
-
-        # TODO: move this to Profile Setup section
-        # Twilio Subaccount
-        # subaccount, created = Subaccount.objects.get_or_create(hotel=self.object)
 
         return HttpResponseRedirect(self.get_success_url())
 
