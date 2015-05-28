@@ -13,7 +13,7 @@ urlpatterns = patterns('',
     url(r'^aronysidoro/', include(admin.site.urls)),
     # Apps
     url(r'', include('account.urls')),
-    url(r'', include('concierge.urls', namespace='concierge')),
+    # url(r'', include('concierge.urls', namespace='concierge')),
     url(r'', include('main.urls', namespace='main')),
     url(r'', include('payment.urls', namespace='payment')),
     # url(r'', include('sms.urls', namespace='sms')),
