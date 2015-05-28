@@ -63,13 +63,17 @@ class RegistrationTests(TestCase):
             CREATE_ACCTCOST_DICT, follow=True)
         self.assertRedirects(response, reverse('payment:register_step4'))
         # created n linked to Hotel
-        acct_cost = AcctCost.objects.all()
-        assert len(acct_cost) == 1
-        assert acct_cost[0].hotel == Hotel.objects.get(name=CREATE_HOTEL_DICT['name'])
+        hotel = Hotel.objects.get(name=CREATE_HOTEL_DICT['name'])
+        acct_cost = AcctCost.objects.get(hotel=hotel)
+        assert isinstance(acct_cost, AcctCost)
+
+        # Dave tries to view the page again and is redirected to the UpdateView
+        response = self.client.get(reverse('register_step3'), follow=True)
+        self.assertRedirects(response, reverse('register_step3_update', kwargs={'pk': acct_cost.pk}))
 
         # Step 3 UpdateView
         # Dave wants to update his choice
-        response = self.client.get(reverse('register_step3_update', kwargs={'pk': acct_cost[0].pk}))
+        response = self.client.get(reverse('register_step3_update', kwargs={'pk': acct_cost.pk}))
         self.assertEqual(response.status_code, 200)
         assert isinstance(response.context['form'], AcctCostForm)
 

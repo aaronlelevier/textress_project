@@ -50,6 +50,7 @@ class RegistrationTests(TestCase):
     ### SUCCESSFUL REGISTRATION TESTs ###
 
     def test_register_step1(self):
+        # Dave creates a User
         response = self.client.post(reverse('main:register_step1'),
             CREATE_USER_DICT, follow=True)
 
@@ -60,6 +61,10 @@ class RegistrationTests(TestCase):
         assert isinstance(user.profile, UserProfile)
         assert user == User.objects.get(groups__name='hotel_admin')
 
+        # after Dave tries to go back and it takes him to the update URL instead
+        response = self.client.get(reverse('main:register_step1'), follow=True)
+        self.assertRedirects(response, reverse('main:register_step1_update', kwargs={'pk': user.pk}))
+
     def test_register_step2(self):
         # Step 1
         # assert logged in and can access "register step2 form"
@@ -68,6 +73,7 @@ class RegistrationTests(TestCase):
         self.client.login(username=self.username, password=self.password)
 
         # Step 2
+        # Dave creates a Hotel
         response = self.client.post(reverse('main:register_step2'),
             CREATE_HOTEL_DICT, follow=True)
         self.assertRedirects(response, reverse('register_step3'))
@@ -77,6 +83,10 @@ class RegistrationTests(TestCase):
         updated_user = User.objects.get(username='test')
         assert hotel.admin_id == updated_user.id
         assert updated_user.profile.hotel == hotel
+
+        # Dave tries to go back and Edit the Hotel and it takes him to the UpdateView
+        response = self.client.get(reverse('main:register_step2'), follow=True)
+        self.assertRedirects(response, reverse('main:register_step2_update', kwargs={'pk': hotel.pk}))
 
 
 class UserUpdateTest(TestCase):
