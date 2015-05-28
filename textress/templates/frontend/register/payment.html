@@ -131,28 +131,65 @@
                               <input type="text" id="card" class="form-control" data-stripe="number" />
                           </div>
                         </div>
-                        <div class="form-group">
-                            <label class="control-label" for="">Expiration (MM/YYYY)</label>
-                            <div class="row">
-                                <div class="col-xs-2">
-                                    <input type="text" size="2" data-stripe="exp-month" class="form-control" />
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="control-label" for="">Expiration (MM/YYYY)</label>
+                                    <div class="row">
+                                        <div class="col-xs-3" style="padding-right:0;">
+                                            <input type="text" size="2" data-stripe="exp-month" class="form-control" />
+                                        </div>
+                                        <div class="col-xs-1">
+                                            <h2 style="margin-top:0;">/</h2>
+                                        </div>
+                                        <div class="col-xs-4" style="padding-left:5px;">
+                                            <input type="text" size="4" data-stripe="exp-year" class="form-control" />
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-xs-2">
-                                    <input type="text" size="4" data-stripe="exp-year" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="control-label" for="cvc">CVC</label>
+                                    <div class="controls">
+                                        <input type="text" id="cvc" size="4" class="form-control" data-stripe="cvc" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label class="control-label" for="cvc">CVC</label>
-                            <div class="controls">
-                                <input type="text" id="cvc" size="4" class="form-control" data-stripe="cvc" />
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p>By signing up, you are aggreeing to the <a href="{% url 'terms_n_cond' %}">terms and conditions</a></p>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <div class="controls">
+                                        <div class="pull-right">
+                                            <input type="submit" value="Submit" class="btn btn-primary" />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <div class="controls">
-                                <input type="submit" value="Checkout" class="btn btn-primary" />
+
+                        
+
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-12 tab-content">
+                                <div class="row">
+                                    <div class="col-md-11">
+                                        <h4>We don't store any credit card information.  All payments are managed through <a href="https://stripe.com/gallery"><strong>Stripe, Inc.</strong></a></h4>
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <a href="https://stripe.com/gallery">
+                                        <img src="{% static 'images/stripe-payments.png' %}" alt="powered-by-stripe">
+                                    </a>
+                                </div>
                             </div>
                         </div>
+
                     </div>
                 </form>
             </div>

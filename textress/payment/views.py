@@ -76,7 +76,7 @@ class RegisterSuccessView(RegistrationContextMixin, AdminOnlyMixin, TemplateView
         - create payment conf details Here
 
     """
-    template_name = 'payment/success.html'
+    template_name = 'frontend/register/success.html'
 
     def get_context_data(self, **kwargs):
         context = super(RegisterSuccessView, self).get_context_data(**kwargs)

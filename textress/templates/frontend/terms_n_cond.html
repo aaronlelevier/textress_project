@@ -58,7 +58,7 @@
     <br>
     <h4>User content</h4>
 
-    <p>In these terms and conditions, â€œyour user contentâ€ means material (including without limitation text, images, audio material, video material and audio-visual material) that you submit to this website, for whatever purpose.</p>
+    <p>In these terms and conditions, "your user content" means material (including without limitation text, images, audio material, video material and audio-visual material) that you submit to this website, for whatever purpose.</p>
 
     <p>You grant to {{ company_name }} a worldwide, irrevocable, non-exclusive, royalty-free license to use, reproduce, adapt, publish, translate and distribute your user content in any existing or future media.  You also grant to {{ company_name }} the right to sub-license these rights, and the right to bring an action for infringement of these rights.</p>
 
@@ -185,27 +185,27 @@
     <br>
     <h4>Registrations and authorisations</h4>
 
-    <p>{{ company_name }} is registered with [TRADE REGISTER].  You can find the online version of the register at [URL].  {{ company_name }}'s registration number is [NUMBER].</p>
+    <p>{{ company }} is registered with [TRADE REGISTER].  You can find the online version of the register at [URL].  {{ company }}'s registration number is [NUMBER].</p>
 
-    <p>{{ company_name }} is subject to [AUTHORISATION SCHEME], which is supervised by [SUPERVISORY AUTHORITY].</p>
+    <p>{{ company }} is subject to [AUTHORISATION SCHEME], which is supervised by [SUPERVISORY AUTHORITY].</p>
 
-    <p>{{ company_name }} is registered with [PROFESSIONAL BODY].  {{ company_name }}'s professional title is [TITLE] and it has been granted in the United Kingdom.  {{ company_name }} is subject to the [RULES] which can be found at [URL].</p>
+    <p>{{ company }} is registered with [PROFESSIONAL BODY].  {{ company }}'s professional title is [TITLE] and it has been granted in the United Kingdom.  {{ company }} is subject to the [RULES] which can be found at [URL].</p>
 
-    <p>{{ company_name }} subscribes to the following code[s] of conduct: [CODE(S) OF CONDUCT].  [These codes/this code] can be consulted electronically at [URL(S)]. </p>
+    <p>{{ company }} subscribes to the following code[s] of conduct: [CODE(S) OF CONDUCT].  [These codes/this code] can be consulted electronically at [URL(S)]. </p>
 
-    <p>{{ company_name }}'s [TAX] number is [NUMBER].</p>
+    <p>{{ company }}'s [TAX] number is [NUMBER].</p>
 
     
     <br>
-    <h4>{{ company_name }}'s details</h4>
+    <h4>{{ company }}'s details</h4>
 
-    <p>The full name of {{ company_name }} is [FULL NAME].  </p>
+    <p>The full name of {{ company }} is [FULL NAME].  </p>
 
-    <p>{{ company_name }} is registered in Nevada under registration number [NUMBER].</p>  
+    <p>{{ company }} is registered in Nevada under registration number [NUMBER].</p>  
 
-    <p>{{ company_name }}'s [registered] address is [ADDRESS].</p>
+    <p>{{ company }}'s [registered] address is [ADDRESS].</p>
 
-    <p>You can contact {{ company_name }} by email to [EMAIL].</p> -->
+    <p>You can contact {{ company }} by email to [EMAIL].</p> -->
 
 
     <br>
@@ -277,21 +277,14 @@
     <p>If you feel that we are not abiding by this privacy policy, you should contact us immediately via telephone through via <a class="emphasize" href="/"> email</a>.</p>
 
     <br>
+    <h4>Current Version of the Site</h4>
+    <p>The site is in <em>Pre-Alpha</em> version.  At this time, Users may signup for the service, but there are no benefits for signing up as the service cannot be used yet.  Please sign up at your own will.</p>
 
-    <input type="button" value="Back" onclick="goBack()" class="btn btn-success">
+    <br>
+
+    <button type="button" value="Back" onclick="history.back(-1)" class="btn btn-success">Go back</button>
 
     <br>
     <br>
 </div>
 {% endblock body %}
-
-
-{% block js %}
-    <script>
-        function goBack()
-          {
-          window.history.back()
-          }
-    </script>
-{% endblock js %}
-
