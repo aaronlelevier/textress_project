@@ -104,9 +104,20 @@ class RenderTests(TestCase):
 
     ### inherit from - django.contrib.auth.forms
 
+    def test_account(self):
+        # Dave as a logged in User can access his account (profile) view
+        self.client.login(username=self.user.username, password=self.password)
+        response = self.client.get(reverse('account'))
+        self.assertEqual(response.status_code, 200)
+
+        # logged out Dave cannot access it
+        self.client.logout()
+        response = self.client.get(reverse('account'))
+        self.assertEqual(response.status_code, 302)
+
     def test_login(self):
         response = self.client.get(reverse('login'))
-        assert response.status_code == 200
+        self.assertEqual(response.status_code, 200)
         assert response.context['form']
 
     ### 2 views for password change
@@ -114,34 +125,35 @@ class RenderTests(TestCase):
     def test_password_change(self):
         # login required view
         response = self.client.get(reverse('password_change'))
-        assert response.status_code == 302
+        self.assertEqual(response.status_code, 302)
 
         # login
         self.client.login(username=self.user.username, password=self.password)
         response = self.client.get(reverse('password_change'))
-        assert response.status_code == 200
+        self.assertEqual(response.status_code, 200)
         assert response.context['form']
 
     def test_password_change_done(self):
         # login required view
         response = self.client.get(reverse('password_change_done'))
-        assert response.status_code == 302
+        self.assertEqual(response.status_code, 302)
 
         # login
         self.client.login(username=self.user.username, password=self.password)
         response = self.client.get(reverse('password_change_done'))
-        assert response.status_code == 200
+        self.assertEqual(response.status_code, 200)
 
     ### 4 views for password reset
 
     def test_password_reset(self):
         response = self.client.get(reverse('password_reset'))
-        assert response.status_code == 200
+        self.assertEqual(response.status_code, 200)
         assert response.context['form']
+        assert response.context['headline']
 
     def test_password_reset_done(self):
         response = self.client.get(reverse('password_reset_done'))
-        assert response.status_code == 200
+        self.assertEqual(response.status_code, 200)
 
     def test_password_reset_confirm(self):
         # TODO: write an integration for Form test for this
@@ -149,7 +161,7 @@ class RenderTests(TestCase):
 
     def test_password_reset_complete(self):
         response = self.client.get(reverse('password_reset_complete'))
-        assert response.status_code == 200
+        self.assertEqual(response.status_code, 200)
 
 
 class LoginTests(TestCase):

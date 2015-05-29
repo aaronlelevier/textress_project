@@ -40,17 +40,17 @@ account_patterns = patterns('',
 
     ### 2 views for password change - when you are logged in and want to 
     ### change your password
-    url(r'^password_change/$', auth_views.password_change,
+    url(r'^password-change/$', auth_views.password_change,
         {'template_name': 'cpanel/auth-forms/password_change.html',
         'password_change_form': PasswordChangeForm},
         name='password_change'),
 
-    url(r'^password_change/done/$', auth_views.password_change_done,
+    url(r'^password-change/done/$', auth_views.password_change_done,
         {'template_name': 'cpanel/form-success/password_change_done.html'},
         name='password_change_done'),
 
     ### 4 views for password reset when you can't remember your password
-    url(r'^password_reset/$', auth_views.password_reset,
+    url(r'^password-reset/$', auth_views.password_reset,
         {
         'template_name': 'cpanel/auth-forms/password_reset.html',
         'email_template_name': 'email/password_reset.html',
@@ -62,17 +62,17 @@ account_patterns = patterns('',
         },
         name='password_reset'),
 
-    url(r'^password_reset/done/$', auth_views.password_reset_done,
+    url(r'^password-reset/done/$', auth_views.password_reset_done,
         {'template_name': 'cpanel/form-success/password_reset_done.html'},
         name='password_reset_done'),
 
-    url(r'^reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
+    url(r'^password-reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
         auth_views.password_reset_confirm,
         {'template_name':'cpanel/auth-forms/password_reset_confirm.html',
         'set_password_form': SetPasswordForm
         }, name='password_reset_confirm'),
 
-    url(r'^reset/done/$', auth_views.password_reset_complete,
+    url(r'^password-reset/done/$', auth_views.password_reset_complete,
         {'template_name': 'cpanel/form-success/password_reset_complete.html'},
         name='password_reset_complete'),
 
