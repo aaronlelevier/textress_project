@@ -1,3 +1,5 @@
+import datetime
+
 from django.conf import settings
 from django.shortcuts import render, render_to_response, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse, Http404
@@ -47,6 +49,10 @@ class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin,
         context = super(RegisterPmtView, self).get_context_data(**kwargs)
         context['step_number'] = 3
         context['step'] = context['steps'][context['step_number']]
+        # form choices
+        context['months'] = ['<option value="{num:02d}">{num:02d}</option>'.format(num=i) for i in range(1,13)]
+        cur_year = datetime.date.today().year
+        context['years'] = ['<option value="{num}">{num}</option>'.format(num=i) for i in range(cur_year, cur_year+12)]
         return context
 
     def form_valid(self, form):
