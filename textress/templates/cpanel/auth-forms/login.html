@@ -22,7 +22,7 @@
 {% block form_foot %}
     <div class="new-account">
         Don't have an account yet?
-        <a href="#" class="register">
+        <a href="{% url 'main:register_step1' %}" class="register">
             Create an account
         </a>
     </div>
