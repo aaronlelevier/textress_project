@@ -10,9 +10,9 @@ class TermsNCondTests(TestCase):
 
     def test_terms(self):
         response = self.client.get(reverse('terms_n_cond'))
-        assert response.status_code == 200
-        assert response.context['company']
-        assert response.context['LLC']
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, response.context['company'])
+        # self.assertContains(response, response.context['LLC'])
 
 class IndexTests(TestCase):
 

@@ -48,12 +48,13 @@ class RegistrationTests(TestCase):
     def test_register_step4_context(self):
         # Step 4
         response = self.client.get(reverse('payment:register_step4'))
-        self.assertContains(response.context['acct_cost'])
-        self.assertContains(response.context['step'])
-        self.assertContains(response.context['step_number'])
-        self.assertContains(response.context['months'])
-        self.assertContains(response.context['years'])
-        self.assertContains(response.context['PHONE_NUMBER_CHARGE'])
+        assert isinstance(response.context['acct_cost'], AcctCost)
+        assert response.context['months']
+        assert response.context['years']
+        assert response.context['PHONE_NUMBER_CHARGE']
+
+        self.assertContains(response, response.context['step'])
+        self.assertContains(response, response.context['step_number'])
 
 
 class PaymentEmailTests(TestCase):

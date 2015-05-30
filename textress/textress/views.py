@@ -52,12 +52,13 @@ class IndexView(CreateView):
 
 
 class TermsNCondView(TemplateView):
+    
     template_name = 'frontend/terms_n_cond.html'
 
     def get_context_data(self, **kwargs):
         context = super(TermsNCondView, self).get_context_data(**kwargs)
         context['company'] = "Textress"
-        context['LLC'] = "Aronysidoro LLC."
+        # context['LLC'] = "Aronysidoro LLC." # not in use
         return context
 
 
