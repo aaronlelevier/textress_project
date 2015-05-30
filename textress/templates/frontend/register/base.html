@@ -12,6 +12,17 @@
 
 {% block content %}
 
+    {% block beta_msg %}
+    <br>
+    <div class="row">
+        <div class="text-center">
+            <div class="col-md-6 col-md-offset-3">
+                <button type="button" class="btn btn-warning">The site is currently Pre-Alpha.  Users can sign up, but there is not benefit from signing up.</button>
+            </div>
+        </div>
+    </div>
+    {% endblock beta_msg %}
+
     {% block form_head %}{% endblock form_head %}
 
     {% block wizard %}

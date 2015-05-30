@@ -48,10 +48,3 @@ homeControllers.controller('PricingCtrl', ['$scope', 'Pricing', function($scope,
 homeControllers.controller('FAQCtrl', ['$scope', 'FAQ', function($scope, FAQ) {
     $scope.topics = FAQ.query();
 }]);
-
-
-
-
-
-
-

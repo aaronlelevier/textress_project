@@ -157,6 +157,7 @@ SMS_LIMIT = 50
 # Default Costs for Accounts (Stripe Amounts ~ in cents)
 DEFAULT_MONTHLY_FEE = 0
 DEFAULT_SMS_COST = 5.5
+PHONE_NUMBER_CHARGE = 300
 
 ### Twilio Settings ###
 DEFAULT_TO_PH = "+17754194000"

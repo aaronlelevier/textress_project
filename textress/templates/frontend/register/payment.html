@@ -48,6 +48,10 @@
 
 {% block content %}
 
+    {% block beta_msg %}
+        {{ block.super }}
+    {% endblock beta_msg %}
+
     {% block form_head %}
     <div class="main-container">
         <section class="wrapper padding50">
@@ -67,13 +71,15 @@
                     <div class="col-md-6">
                         <div class="row">
                             <div class="row">
-                                <div class="col-md-3">
-                                    <h3 class="pull-right">My Info</h3>
-                                </div>
-                                <div>
-                                    <a href="{% url 'main:register_step1_update' user.pk %}">
-                                        <p><button type="button" class="btn btn-info btn-xs">edit</button></p>
-                                    </a>
+                                <div class="col-md-6">
+                                    <div class="col-md-9">
+                                        <h3 class="pull-right">My Info</h3>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <a href="{% url 'main:register_step1_update' user.pk %}">
+                                            <p><button type="button" class="btn btn-info btn-xs">edit</button></p>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                             <ul class="list-unstyled">
@@ -84,13 +90,15 @@
                         </div>
                         <div class="row">
                             <div class="row">
-                                <div class="col-md-3">
-                                    <h3 class="pull-right">Hotel Info</h3>
-                                </div>
-                                <div>
-                                    <a href="{% url 'main:register_step2_update' hotel.pk %}">
-                                        <p><button type="button" class="btn btn-info btn-xs">edit</button></p>
-                                    </a>
+                                <div class="col-md-6">
+                                    <div class="col-md-9">
+                                        <h3 class="pull-right">Hotel Info</h3>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <a href="{% url 'main:register_step2_update' hotel.pk %}">
+                                            <p><button type="button" class="btn btn-info btn-xs">edit</button></p>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                             <ul class="list-unstyled">
@@ -105,13 +113,15 @@
                         </div>
                         <div class="row">
                             <div class="row">
-                                <div class="col-md-3">
-                                    <h3 class="pull-right">Payment Plan</h3>
-                                </div>
-                                <div>
-                                    <a href="{% url 'register_step3_update' hotel.acct_cost.pk %}">
-                                        <p><button type="button" class="btn btn-info btn-xs">edit</button></p>
-                                    </a>
+                                <div class="col-md-6">
+                                    <div class="col-md-9">
+                                        <h3 class="pull-right">Payment Info</h3>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <a href="{% url 'register_step3_update' hotel.acct_cost.pk %}">
+                                            <p><button type="button" class="btn btn-info btn-xs">edit</button></p>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                             <ul class="list-unstyled">
@@ -122,80 +132,94 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="row" style="margin-bottom:2em">
-                            <span class="payment-errors alert-danger"></span>
-                        </div>
-                        <div class="form-group">
-                          <label class="control-label" for="card">Card</label>
-                          <div class="controls">
-                              <input type="text" id="card" class="form-control" data-stripe="number" />
-                          </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="control-label" for="">Expiration (MM/YYYY)</label>
-                                    <div class="row">
-                                        <div class="col-xs-3" style="padding-right:0;">
-                                            <select data-stripe="exp-month" class="form-control" />
-                                            {% for month in months %}
-                                                {{ month|safe }}
-                                            {% endfor %}
-                                            </select>
-                                        </div>
-                                        <div class="col-xs-1">
-                                            <h2 style="margin-top:0;">/</h2>
-                                        </div>
-                                        <div class="col-xs-4" style="padding-left:5px;">
-                                            <select data-stripe="exp-year" class="form-control" />
-                                            {% for year in years %}
-                                                {{ year|safe }}
-                                            {% endfor %}
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
+                        <div class="col-md-8">
+                            <div class="well" style="padding:0;">
+                                <h4 class="text-center">1. Payment amount</h4>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="control-label" for="cvc">CVC</label>
-                                    <div class="controls">
-                                        <input type="text" id="cvc" size="4" class="form-control" data-stripe="cvc" />
-                                    </div>
-                                </div>
+                            <p><strong>{{ acct_cost.init_amt|stripe_money }}</strong> will be charged today.</p>
+                            <p>This is an initial deposit of funds.  You will be charged per SMS sent, and when purchasing a phone number for the account.  Phone numbers are <strong>{{ PHONE_NUMBER_CHARGE|stripe_money }}</strong>.</p>
+                            <hr>
+                            <div class="well" style="padding:0;">
+                                <h4 class="text-center">2. Payment info</h4>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p>By signing up, you are agreeing to the <a href="{% url 'terms_n_cond' %}">terms and conditions</a></p>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <div class="controls">
-                                        <div class="pull-right">
-                                            <input type="submit" value="Submit" class="btn btn-primary" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                
-                        <hr>
-                        <div class="row">
-                            <div class="col-md-12 tab-content">
-                                <div class="row">
-                                    <div class="col-md-11">
-                                        <h4>We don't store any credit card information.  All payments are managed through <a href="https://stripe.com/gallery"><strong>Stripe, Inc.</strong></a></h4>
-                                    </div>
-                                </div>
-                                <div class="text-center">
-                                    <a href="https://stripe.com/gallery">
-                                        <img src="{% static 'images/stripe-payments.png' %}" alt="powered-by-stripe">
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
 
+                            <div class="row" style="margin-bottom:2em">
+                                <div class="col-md-12">
+                                    <span class="payment-errors alert-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                              <label class="control-label" for="card">Card</label>
+                              <div class="controls">
+                                  <input type="text" id="card" class="form-control" data-stripe="number" />
+                              </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label class="control-label" for="">Expiration (MM/YYYY)</label>
+                                        <div class="row">
+                                            <div class="col-md-5" style="padding-right:0;">
+                                                <select data-stripe="exp-month" class="form-control" />
+                                                {% for month in months %}
+                                                    {{ month|safe }}
+                                                {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="col-xs-1">
+                                                <h2 style="margin-top:0;">/</h2>
+                                            </div>
+                                            <div class="col-md-5" style="padding-left:5px;">
+                                                <select data-stripe="exp-year" class="form-control" />
+                                                {% for year in years %}
+                                                    {{ year|safe }}
+                                                {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="control-label" for="cvc">CVC</label>
+                                        <div class="controls">
+                                            <input type="text" id="cvc" size="4" class="form-control" data-stripe="cvc" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <small>By clicking submit, you are agreeing to the <a href="{% url 'terms_n_cond' %}">terms and conditions</a></small>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <div class="controls">
+                                            <div class="pull-right">
+                                                <input type="submit" value="Submit" class="btn btn-primary" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-12 tab-content">
+                                    <div class="row">
+                                        <div class="col-md-11">
+                                            <p>We don't store any credit card information. All payments information is transferred via secure SSL and processed by <a href="https://stripe.com/gallery"><strong>Stripe, Inc.</strong></a></p>
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <a href="https://stripe.com/gallery">
+                                            <img style="max-width:80%" src="{% static 'images/stripe-payments.png' %}" alt="powered-by-stripe">
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>

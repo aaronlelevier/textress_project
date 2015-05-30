@@ -7,6 +7,10 @@
 
 {% block content %}
 
+    {% block beta_msg %}
+        {{ block.super }}
+    {% endblock beta_msg %}
+
     {% block form_head %}
     <div class="main-container">
         <section class="wrapper padding50">

@@ -53,6 +53,7 @@ class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin,
         context['months'] = ['<option value="{num:02d}">{num:02d}</option>'.format(num=i) for i in range(1,13)]
         cur_year = datetime.date.today().year
         context['years'] = ['<option value="{num}">{num}</option>'.format(num=i) for i in range(cur_year, cur_year+12)]
+        context['PHONE_NUMBER_CHARGE'] = settings.PHONE_NUMBER_CHARGE
         return context
 
     def form_valid(self, form):
