@@ -12,10 +12,10 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.template import RequestContext
 
 from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
-    GroupRequiredMixin, AnonymousRequiredMixin)
+    GroupRequiredMixin, AnonymousRequiredMixin, SetHeadlineMixin)
 
 from main.models import Hotel, UserProfile, Subaccount
-from main.forms import UserCreateForm, HotelCreateForm, RegisterAdminUpdateForm
+from main.forms import UserCreateForm, HotelCreateForm, UserUpdateForm
 from main.mixins import (HotelMixin, UserOnlyMixin, HotelUsersOnlyMixin,
     RegistrationContextMixin)
 from account.helpers import add_group
@@ -94,7 +94,7 @@ class RegisterAdminUpdateView(GroupRequiredMixin, RegisterAdminBaseView,
     '''
     group_required = ["hotel_admin"]
     model = User
-    form_class = RegisterAdminUpdateForm
+    form_class = UserUpdateForm
     fields = ['first_name', 'last_name', 'email']
 
 
@@ -158,15 +158,16 @@ class UserDetailView(UserOnlyMixin, DetailView):
     template_name = 'detail_view.html'
 
 
-class UserUpdateView(UserOnlyMixin, UpdateView):
+class UserUpdateView(SetHeadlineMixin, UserOnlyMixin, UpdateView):
     '''User's UpdateView of themself.'''
-
+    headline = "Update Profile"
     model = User
+    form_class = UserUpdateForm
     fields = ['first_name', 'last_name', 'email']
-    template_name = 'account/account_form.html'
+    template_name = 'cpanel/form.html'
 
     def get_success_url(self):
-        return reverse('main:user_detail', kwargs={'pk': self.object.pk})
+        return reverse('account')
 
 
 ################

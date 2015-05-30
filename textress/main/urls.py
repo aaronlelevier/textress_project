@@ -22,16 +22,12 @@ manage_users_patterns = patterns('',
     )
 
 user_patterns = patterns('',
-    url(r'^(?P<pk>\d+)/$', views.UserDetailView.as_view(), name='user_detail'),
+    # url(r'^(?P<pk>\d+)/$', views.UserDetailView.as_view(), name='user_detail'),
     url(r'^update/(?P<pk>\d+)/$', views.UserUpdateView.as_view(), name='user_update'),
     )
 
 urlpatterns = patterns('',
-    # Hotel
-    url(r'^hotel/(?P<hotel_slug>[-_\w]+)/(?P<pk>\d+)/$', views.HotelDetailView.as_view(), name='hotel'),
-    # Registration
     url(r'^register/', include(register_patterns)),
-    url(r'^manage-users/', include(manage_users_patterns)),
-    # Users
-    url(r'^users/', include(user_patterns)),
+    url(r'^account/user/', include(user_patterns)),
+    # url(r'^manage-users/', include(manage_users_patterns)),
     )

@@ -7,7 +7,7 @@
 {% endblock page_css %}
 
     {% block body %}
-    <body>
+    <body {% block angular_app %}{% endblock %}>
         <!-- start: HEADER -->
         <div class="navbar navbar-inverse navbar-fixed-top">
             <!-- start: TOP NAVIGATION CONTAINER -->
@@ -401,9 +401,18 @@
                             </a>
                         </li>
                         <li>
-                            <a href="{% url 'account' %}"><i class="clip-user-5"></i>
-                                <span class="title"> Manage Users </span><span class="selected"></span>
+                            <a href="javascript:void(0)"><i class="clip-user"></i>
+                                <span class="title"> My Account </span><i class="icon-arrow"></i>
+                                <span class="selected"></span>
                             </a>
+                            <ul class="sub-menu">
+                                <li>
+                                    <a href="{% url 'main:user_update' user.pk %}">
+                                        <span class="title"> My Profile </span>
+                                        <span class="badge badge-new">Me</span>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                         <li>
                             <a href="{% url 'account' %}"><i class="clip-users-2"></i>

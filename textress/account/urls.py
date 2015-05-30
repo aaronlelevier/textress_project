@@ -29,7 +29,7 @@ close_acct_patterns = patterns('',
     )
 
 account_patterns = patterns('',
-    # Main Profile View
+    # User Dashboard View
     url(r'^$', views.AccountView.as_view(), name='account'),
 
     # Auth Views

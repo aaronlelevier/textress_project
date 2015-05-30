@@ -87,7 +87,7 @@ class UserCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):
         return user
 
 
-class RegisterAdminUpdateForm(NgFormValidationMixin, Bootstrap3ModelForm):
+class UserUpdateForm(NgFormValidationMixin, Bootstrap3ModelForm):
     '''
     Form used during Registration to Update the Admin User.
     '''
