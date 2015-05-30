@@ -17,8 +17,9 @@ from account.tests.factory import CREATE_ACCTCOST_DICT
 from main.models import Hotel
 from main.tests.test_models import create_hotel
 from main.tests.factory import CREATE_USER_DICT, CREATE_HOTEL_DICT
-from payment.models import Customer, Card
+from payment.models import Customer, Card, Charge
 from utils import create
+from utils.email import Email
 
 
 class RegistrationTests(TestCase):
@@ -47,8 +48,43 @@ class RegistrationTests(TestCase):
     def test_register_step4_context(self):
         # Step 4
         response = self.client.get(reverse('payment:register_step4'))
-        assert isinstance(response.context['acct_cost'], AcctCost)
+        self.assertContains(response.context['acct_cost'])
+        self.assertContains(response.context['step'])
+        self.assertContains(response.context['step_number'])
+        self.assertContains(response.context['months'])
+        self.assertContains(response.context['years'])
+        self.assertContains(response.context['PHONE_NUMBER_CHARGE'])
 
+
+class PaymentEmailTests(TestCase):
+    
+    def setUp(self):
+        create._get_groups_and_perms()
+        self.username = CREATE_USER_DICT['username']
+        self.password = '1234'
+
+        # Step 1
+        response = self.client.post(reverse('main:register_step1'),
+            CREATE_USER_DICT)
+        self.client.login(username=self.username, password=self.password)
+
+    def test_email(self):
+        user = User.objects.first()
+        customer = mommy.make(Customer, email=user.email)
+        charge = mommy.make(Charge, customer=customer)
+
+        email = Email(
+            to=user.email,
+            from_email=settings.DEFAULT_EMAIL_BILLING,
+            extra_context={
+                'user': user,
+                'customer': customer,
+                'charge': charge
+            },
+            subject='email/payment_subject.txt',
+            html_content='email/payment_email.html'
+        )
+        email.msg.send()
 
 
 # class CardTests(TestCase):

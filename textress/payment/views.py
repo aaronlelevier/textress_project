@@ -25,6 +25,7 @@ from account.models import AcctCost
 from main.models import Hotel
 from main.mixins import RegistrationContextMixin
 from sms.models import PhoneNumber
+from utils.email import Email
 
 
 ### REGISTRATION VIEWS ###
@@ -34,11 +35,9 @@ class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin,
     """
     Step #4 of Registration
 
-    TODO: 
-        - Add terms-n-cond
-        - disclaimer(ph's puchased are $1 each. Only 1 ph # needed
-        - unless you want to change your phone #, ph # is a separate charge to account.)
-        - register.html - template
+    - Dispaly Summary of Info
+    - Process Payment
+    - Send Email Confirmation.
     """
 
     template_name = 'frontend/register/payment.html'
@@ -70,6 +69,20 @@ class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin,
             messages.warning(self.request, err)
             return HttpResponseRedirect(reverse('payment:register_step4'))
         else:
+            # send conf email
+            email = Email(
+                to=self.request.user.email,
+                from_email=settings.DEFAULT_EMAIL_BILLING,
+                extra_context={
+                    'user': self.request.user,
+                    'customer': customer,
+                    'charge': charge
+                },
+                subject='email/payment_subject.txt',
+                html_content='email/payment_email.html'
+            )
+            email.msg.send()
+
             return HttpResponseRedirect(self.success_url)
 
 

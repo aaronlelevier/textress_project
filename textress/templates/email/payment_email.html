@@ -1,0 +1,32 @@
+{% load stripe_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <p>{{ user }},</p>
+
+        <p>Your payment for {{ charge.amount|stripe_money }} has been processed.</p>
+
+        <br>
+        
+        <p>Customer ID: {{ customer.id }}</p>
+        <p>Payment ID: {{ charge.id }}</p>
+        <p>Payment Amount: {{ charge.amount|stripe_money }}</p>
+        <p>Date: {{ charge.created }}</p>
+
+        <br>
+
+        <p>Thank you,</p>
+        <p><em>Textress</em></p>
+        <p>Las Vegas, NV</p>
+        <p>ph: {{ textress_phone }}</p>
+        <p>email: {{ textess_contact_email }}</p>
+    </div>
+</body>
+</html>  

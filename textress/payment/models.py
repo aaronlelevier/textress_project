@@ -163,7 +163,7 @@ class Card(AbstractBase):
                 Card.objects.update_default(customer=self.customer, id_=self.id)
 
         if self.exp_month and self.exp_year:
-            self.expires = str(self.exp_month) + ' / ' + str(self.exp_year)
+            self.expires = "{self.exp_month:02d}/{self.exp_year}".format(self=self)
 
         return super(Card, self).save(*args, **kwargs)
 
@@ -223,7 +223,7 @@ class Charge(AbstractBase):
     # Fields
     id = models.CharField(_("Stripe Charge ID"), primary_key=True, max_length=100)
     amount = models.PositiveIntegerField(_("Stripe Amount"),
-        help_text="Stripe Cost Amount of the Charge. Ex: 2000 ~ $20")
+        help_text="Stripe Cost Amount of the Charge in cents. Ex: 2000 ~ $20")
 
     objects = ChargeManager()
 
