@@ -75,31 +75,10 @@ class AccountView(LoginRequiredMixin, HotelUserMixin, TemplateView):
     """
     template_name = 'cpanel/account.html'
 
-    def get_context_data(self, **kwargs):
-        '''TODO: clean up logic here b/4 produciton
-            move `get_or_create` to a helper method?
-
-            If move PhoneNumber.get_or_create + Subaccount.get_or_create
-                to a Celery Job, can use:
-                    `select_related() so only 1 query instead of 2?
-        '''
-        context = super(AccountView, self).get_context_data(**kwargs)
-
-        # TODO: 
-        # Move PH/Subaccount Creation to Celery n not in View request loop!
-        
-        # Make sure the Hotel has a Phone Number
-        # phone_number, created = PhoneNumber.objects.get_or_create(
-        #     hotel=self.hotel)
-        # context['phone_number'] = phone_number
-
-        # subaccount, created = Subaccount.objects.get_or_create(
-        #     hotel=self.hotel)
-        # context['subaccount'] = subaccount
-
-        context['hotel'] = self.hotel
-
-        return context
+    # def get_context_data(self, **kwargs):
+    #     context = super(AccountView, self).get_context_data(**kwargs)
+    #     context['hotel'] = self.hotel
+    #     return context
 
 
 ### REGISTRATION VIEWS ###

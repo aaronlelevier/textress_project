@@ -47,9 +47,9 @@ class HotelContextMixin(object):
 class HotelUserMixin(HotelContextMixin):
     "User must have a Hotel attr."
     def dispatch(self, *args, **kwargs):
-        self.hotel = self.request.user.profile.hotel
-        if not self.hotel:
-            # raise Http404
+        try:
+            self.hotel = self.request.user.profile.hotel
+        except AttributeError:
             messages.warning(self.request, "No Hotel associated with this account.")
 
         # TODO: Redirect to an alert page that funds need to be added
