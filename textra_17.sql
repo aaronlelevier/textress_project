@@ -1373,6 +1373,7 @@ ALTER TABLE ONLY sms_text ALTER COLUMN id SET DEFAULT nextval('sms_text_id_seq':
 
 COPY account_acctcost (id, created, modified, hotel_id, init_amt, balance_min, recharge_amt) FROM stdin;
 1	2015-05-02 13:47:23.12724-07	2015-05-02 13:47:23.144825-07	2	1000	100	1000
+2	2015-05-22 05:59:44.195274-07	2015-05-30 15:34:39.740815-07	3	1000	100	3000
 \.
 
 
@@ -1380,7 +1381,7 @@ COPY account_acctcost (id, created, modified, hotel_id, init_amt, balance_min, r
 -- Name: account_acctcost_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('account_acctcost_id_seq', 1, true);
+SELECT pg_catalog.setval('account_acctcost_id_seq', 6, true);
 
 
 --
@@ -1404,6 +1405,12 @@ SELECT pg_catalog.setval('account_acctstmt_id_seq', 1, false);
 
 COPY account_accttrans (id, created, modified, hotel_id, trans_type_id, amount, sms_used, insert_date) FROM stdin;
 1	2015-05-04 07:36:23.284312-07	2015-05-04 07:36:23.284347-07	2	1	1000	0	2015-05-04
+2	2015-05-24 07:22:51.130406-07	2015-05-24 07:22:51.130443-07	3	1	1000	\N	2015-05-24
+3	2015-05-24 20:25:40.765261-07	2015-05-24 20:25:40.765301-07	3	1	1000	\N	2015-05-25
+4	2015-05-24 20:27:57.539052-07	2015-05-24 20:27:57.539088-07	3	1	1000	\N	2015-05-25
+5	2015-05-28 07:57:53.206666-07	2015-05-28 07:57:53.206704-07	3	1	1000	\N	2015-05-28
+6	2015-05-29 07:25:43.935941-07	2015-05-29 07:25:43.936039-07	3	1	1000	\N	2015-05-29
+7	2015-05-30 15:59:11.617165-07	2015-05-30 15:59:11.617201-07	3	1	1000	\N	2015-05-30
 \.
 
 
@@ -1411,7 +1418,7 @@ COPY account_accttrans (id, created, modified, hotel_id, trans_type_id, amount, 
 -- Name: account_accttrans_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('account_accttrans_id_seq', 1, true);
+SELECT pg_catalog.setval('account_accttrans_id_seq', 7, true);
 
 
 --
@@ -1420,10 +1427,10 @@ SELECT pg_catalog.setval('account_accttrans_id_seq', 1, true);
 
 COPY account_pricing (id, created, modified, tier, tier_name, "desc", price, start, "end") FROM stdin;
 3	2015-03-02 06:45:12.537-08	2015-03-03 06:29:34.498-08	0	Free	up to 200 SMS per month	0.0000	0	200
-4	2015-03-02 06:48:20.743-08	2015-03-03 06:31:18.514-08	1	0.0550	Next   2k SMS per month	0.0550	201	2200
-5	2015-03-02 06:51:10.931-08	2015-03-03 06:32:48.126-08	2	0.0525	Next   4k SMS per month	0.0525	2201	6200
-6	2015-03-02 06:52:40.543-08	2015-03-03 06:33:36.054-08	3	0.0495	Next   6k SMS per month	0.0495	6201	12200
-7	2015-03-02 06:53:30.321-08	2015-03-03 06:34:09.219-08	4	0.0475	remaining SMS	0.0475	12201	999999999
+4	2015-03-02 06:48:20.743-08	2015-05-29 06:44:52.836647-07	1	1	Next   2k SMS per month	0.0550	201	2200
+5	2015-03-02 06:51:10.931-08	2015-05-29 06:44:59.496538-07	2	2	Next   4k SMS per month	0.0525	2201	6200
+6	2015-03-02 06:52:40.543-08	2015-05-29 06:45:06.081526-07	3	3	Next   6k SMS per month	0.0495	6201	12200
+7	2015-03-02 06:53:30.321-08	2015-05-29 06:45:15.312736-07	4	4	remaining SMS	0.0475	12201	999999999
 \.
 
 
@@ -1604,9 +1611,25 @@ SELECT pg_catalog.setval('auth_permission_id_seq', 97, true);
 --
 
 COPY auth_user (id, password, last_login, is_superuser, username, first_name, last_name, email, is_staff, is_active, date_joined) FROM stdin;
-2	pbkdf2_sha256$15000$HxWnL4k7nhYV$GiTQwyrjO/TePZLr8DDYaFMsOOk8jJMAC++wYQSioeA=	2015-05-01 06:34:48.30963-07	f	Dave			pyaaron@gmail.com	f	t	2015-05-01 05:31:44.887657-07
-3	pbkdf2_sha256$15000$LTAwruTyEihs$AEfhRK+goMw8tRQtlOZ5d6uMHMDjEc35V3RewoikpcU=	2015-05-02 15:53:11.217406-07	f	bobby	Aaron	Lelevier	aaron@textress.com	f	t	2015-05-02 10:39:31.83362-07
-1	pbkdf2_sha256$15000$0SalGU7jbiXK$m2/n8lBisfb0NAgx5p9lqlIl+85EIaWXRGaHKh8OvJQ=	2015-05-17 08:29:05.415883-07	t	aaron			aaron@textress.com	t	t	2015-04-01 06:47:42.203315-07
+13	pbkdf2_sha256$15000$wbBc35amNTgh$eaUoRH8s6JjqvZexpnA7Jer9UpGSYbWRtP70/bEf3ms=	2015-05-27 06:03:00.799109-07	f	User3_hotel_manager				f	t	2015-05-27 06:03:00.799157-07
+14	pbkdf2_sha256$15000$m7IDcnbsohh3$y/UMPzrcPbR5XXHi6hoxPdEJSM53DBXzubMB8NguDSk=	2015-05-27 06:03:00.809879-07	f	User4_hotel_manager				f	t	2015-05-27 06:03:00.809926-07
+15	pbkdf2_sha256$15000$QDV19niqf2ZN$iDxyDlU4Hpsaddlu7bLe7VzW1GtfSQHVUEvTWRkHQWI=	2015-05-27 06:03:00.820784-07	f	User0_				f	t	2015-05-27 06:03:00.820831-07
+16	pbkdf2_sha256$15000$splOtHZzp3c8$ccwyL5/mwfqsvRG1n/PIvHUfCVo/G7iu5QIsbygkqWs=	2015-05-27 06:03:00.826678-07	f	User1_				f	t	2015-05-27 06:03:00.826725-07
+17	pbkdf2_sha256$15000$21680scjGN0H$gZfr80GT/cdtSyQhe4POJES844Tx1Tzpo7dMBjh5jIU=	2015-05-27 06:03:00.832604-07	f	User2_				f	t	2015-05-27 06:03:00.83265-07
+18	pbkdf2_sha256$15000$A2w6VeOzpbUR$wgvHQr4lHzjpCk0cYYhYS380LdKnpRh+NpCQ7Zra/2s=	2015-05-27 06:03:00.83859-07	f	User3_				f	t	2015-05-27 06:03:00.838636-07
+19	pbkdf2_sha256$15000$xWRlKr0NwONH$90VE9Y3hVKnd4a7cdNhLAoolh23gV3iaWuX6I2t7l8o=	2015-05-27 06:03:00.844594-07	f	User4_				f	t	2015-05-27 06:03:00.844642-07
+2	pbkdf2_sha256$15000$XFP3LADtpRps$DhqozWUSK5xpqibepCAc8WolvKoL8HAkJXajqd4BQlU=	2015-05-01 06:34:48.30963-07	f	Dave			pyaaron@gmail.com	f	t	2015-05-01 05:31:44.887657-07
+3	pbkdf2_sha256$15000$5cKZKgfEQ6vh$MQT03UO4JOaE+4lYa3FvoWibG3gGkLHX118g8g+QGEY=	2015-05-02 15:53:11.217406-07	f	bobby	Aaron	Lelevier	aaron@textress.com	f	t	2015-05-02 10:39:31.83362-07
+5	pbkdf2_sha256$15000$uOzrXUKEtCc6$DEofYiHAHp88fHX1ZIUkgzbgQUTM2k2iZgpAZ/yXxJA=	2015-05-27 06:03:00.682999-07	f	User0_hotel_admin				f	t	2015-05-27 06:03:00.683055-07
+6	pbkdf2_sha256$15000$qA2QS1ZyVkZB$QMJFmjx5rvV2mbWGcgTfT1dLajMPdosqJx+zT/8q250=	2015-05-27 06:03:00.719435-07	f	User1_hotel_admin				f	t	2015-05-27 06:03:00.719483-07
+4	pbkdf2_sha256$15000$5NVXJkkUbSsP$SeqQzC+JA2Z6TOTTWzZtSvFIZb2nPCS52C7l7W/bzFM=	2015-05-30 13:09:14.647961-07	f	aaron_test	Aaron	Lelevier	aaron@textress.com	f	t	2015-05-22 05:52:12.463044-07
+7	pbkdf2_sha256$15000$HXb4PGqiKB9h$9w7yXKKRY2sjUXLykogEtIdz1sUYz/gSD3D+BQd/3BI=	2015-05-27 06:03:00.731196-07	f	User2_hotel_admin				f	t	2015-05-27 06:03:00.731245-07
+1	pbkdf2_sha256$15000$IW4I4zOr89db$15IjikynPmmdfqEz1wWfeZiq9GteLIGSp7kNLHqnm4g=	2015-05-30 16:41:32.154103-07	t	aaron			aaron@textress.com	t	t	2015-04-01 06:47:42.203315-07
+8	pbkdf2_sha256$15000$W7LxJswviGDE$07MbVQmbBJ7+AAxgQEQLhJalCKgI50Vv7t2SneMf8ZA=	2015-05-27 06:03:00.742948-07	f	User3_hotel_admin				f	t	2015-05-27 06:03:00.742996-07
+9	pbkdf2_sha256$15000$cHfvwmOPalMt$9NMFvI70lMEvmF9SM73Ns6JbB22/6+n/FtITQWx2gZc=	2015-05-27 06:03:00.754332-07	f	User4_hotel_admin				f	t	2015-05-27 06:03:00.75438-07
+10	pbkdf2_sha256$15000$5W04FeFokK7X$g2EgfpRiABV/y6k/ZUqAJ0Knjz/sIM/lqnO+1k/PTU0=	2015-05-27 06:03:00.765645-07	f	User0_hotel_manager				f	t	2015-05-27 06:03:00.765692-07
+11	pbkdf2_sha256$15000$ktOenG3XSNQH$KRx5y5/QpF2dRD/99F/c6bHhgvACyxc2FYn90wv4jWQ=	2015-05-27 06:03:00.776948-07	f	User1_hotel_manager				f	t	2015-05-27 06:03:00.776995-07
+12	pbkdf2_sha256$15000$FqwVXRAK8ljT$XE5m/y0TQE7vOFm87rr8x11SrFEsNoHD3dYnZYZSBJA=	2015-05-27 06:03:00.788139-07	f	User2_hotel_manager				f	t	2015-05-27 06:03:00.788187-07
 \.
 
 
@@ -1616,6 +1639,17 @@ COPY auth_user (id, password, last_login, is_superuser, username, first_name, la
 
 COPY auth_user_groups (id, user_id, group_id) FROM stdin;
 1	3	1
+2	4	1
+3	5	1
+4	6	1
+5	7	1
+6	8	1
+7	9	1
+8	10	2
+9	11	2
+10	12	2
+11	13	2
+12	14	2
 \.
 
 
@@ -1623,14 +1657,14 @@ COPY auth_user_groups (id, user_id, group_id) FROM stdin;
 -- Name: auth_user_groups_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('auth_user_groups_id_seq', 1, true);
+SELECT pg_catalog.setval('auth_user_groups_id_seq', 12, true);
 
 
 --
 -- Name: auth_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('auth_user_id_seq', 3, true);
+SELECT pg_catalog.setval('auth_user_id_seq', 19, true);
 
 
 --
@@ -1654,6 +1688,22 @@ SELECT pg_catalog.setval('auth_user_user_permissions_id_seq', 1, false);
 
 COPY authtoken_token (key, created, user_id) FROM stdin;
 265ee7a6d516e5c2ebdff4b12734339953f554f3	2015-05-02 10:39:32.001263-07	3
+a1306f4e85ac4d8fd146c502b00ce5974875ba2f	2015-05-22 05:52:12.592787-07	4
+e1f150d006f8651ef0e918e30ee5183ea623a2c3	2015-05-27 06:03:00.691164-07	5
+08ffdce20d941f67c39bdc37577b8b4414bccb5a	2015-05-27 06:03:00.721093-07	6
+449847719a492e99c874f9d8156a241dd965c2dc	2015-05-27 06:03:00.733161-07	7
+eec4386eac32374c3585ba188cbc6942af72bbf0	2015-05-27 06:03:00.744537-07	8
+7b0feae4211f2877d9f5d4c0b8688a88dffd5cba	2015-05-27 06:03:00.755918-07	9
+331f2167817e3d2e85ec570fd1528208781662fc	2015-05-27 06:03:00.767251-07	10
+0d9baeb66f7ff0e382f0cf17249e8c6915c84656	2015-05-27 06:03:00.77851-07	11
+0ac36b261b24d1318b6c978a98708ed01e6b4282	2015-05-27 06:03:00.789697-07	12
+39862a2a384aaaf01d2fdafb5e38187bb1f3ac0a	2015-05-27 06:03:00.800705-07	13
+9d02911160267cb85f432218c623ba7f68b6d8b9	2015-05-27 06:03:00.811456-07	14
+5fe27cca86cdf088a82ae4fb6d5555533ee70d3c	2015-05-27 06:03:00.82238-07	15
+1ad0e7828fc3a27114443c0a07444dc7b81829d0	2015-05-27 06:03:00.828255-07	16
+13672033ef76fbc19941fae3fa5a16fa547595b7	2015-05-27 06:03:00.834246-07	17
+c7c5d9dfd386249512cc86cb0e0a749e473a3dc6	2015-05-27 06:03:00.840157-07	18
+08f2f21327a8b011af49865564caefbe820efd13	2015-05-27 06:03:00.846152-07	19
 \.
 
 
@@ -1662,6 +1712,12 @@ COPY authtoken_token (key, created, user_id) FROM stdin;
 --
 
 COPY concierge_guest (id, created, modified, hidden, hotel_id, name, room_number, phone_number, check_in, check_out, confirmed, stop) FROM stdin;
+1	2015-05-27 06:15:01.818177-07	2015-05-27 06:15:01.818212-07	f	8	Guest0	FWSAQGgiwy	+17754194000	2015-05-27	2015-05-28	f	f
+2	2015-05-27 06:15:01.82353-07	2015-05-27 06:15:01.823568-07	f	7	Guest1	nZPEPbPhEv	+17023012823	2015-05-27	2015-05-28	f	f
+3	2015-05-27 06:15:01.827715-07	2015-05-27 06:15:01.827749-07	f	6	Guest2	njkxrtxmyw	+17026018603	2015-05-27	2015-05-28	f	f
+4	2015-05-27 06:15:01.83195-07	2015-05-27 06:15:01.831984-07	f	5	Guest3	QGTlROxYep	+17026018604	2015-05-27	2015-05-28	f	f
+5	2015-05-27 06:15:01.836151-07	2015-05-27 06:15:01.836185-07	f	4	Guest4	zoJSMyasot	+17026018605	2015-05-27	2015-05-28	f	f
+6	2015-05-27 06:20:02.310256-07	2015-05-27 06:20:02.310294-07	f	3	Dave	123	7025101234	2015-05-27	2015-05-28	f	f
 \.
 
 
@@ -1669,7 +1725,7 @@ COPY concierge_guest (id, created, modified, hidden, hotel_id, name, room_number
 -- Name: concierge_guest_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('concierge_guest_id_seq', 1, false);
+SELECT pg_catalog.setval('concierge_guest_id_seq', 6, true);
 
 
 --
@@ -1816,6 +1872,11 @@ COPY django_admin_log (id, action_time, object_id, object_repr, action_flag, cha
 27	2015-05-17 11:21:13.220748-07	22	laboris pariatur. sint elit, aute	3		16	1
 28	2015-05-17 11:21:16.904807-07	24	sint veniam, cillum labore exercitation	3		16	1
 29	2015-05-17 11:22:21.805816-07	25	How to I get help if I have questions?	2	Changed question and answer.	16	1
+30	2015-05-27 06:20:02.311537-07	6	Dave	1		20	1
+31	2015-05-29 06:44:52.841367-07	4	0.0550	2	Changed tier_name.	23	1
+32	2015-05-29 06:44:59.498264-07	5	0.0525	2	Changed tier_name.	23	1
+33	2015-05-29 06:45:06.085067-07	6	0.0495	2	Changed tier_name.	23	1
+34	2015-05-29 06:45:15.314431-07	7	0.0475	2	Changed tier_name.	23	1
 \.
 
 
@@ -1823,7 +1884,7 @@ COPY django_admin_log (id, action_time, object_id, object_repr, action_flag, cha
 -- Name: django_admin_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('django_admin_log_id_seq', 29, true);
+SELECT pg_catalog.setval('django_admin_log_id_seq', 34, true);
 
 
 --
@@ -1937,8 +1998,10 @@ COPY django_session (session_key, session_data, expire_date) FROM stdin;
 48q379ydn6nthsg8ddrmgh0peosjqccl	MGFlZmE2OTVjYTc2YTE0ODE0YjE2MmE2Zjk0NGNkZDZlZGVmZmZiYTp7Il9hdXRoX3VzZXJfaGFzaCI6IjRjNTVmMDMyOTI3ODI1MzEwOTljYWUzNjkwZjgxYmJlNGMwYmMzOTciLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZCIsIl9hdXRoX3VzZXJfaWQiOjF9	2015-05-19 06:01:24.997052-07
 jdmxvgx01d7cuxyq62v1u0v75geil7s9	YzU4NTQ5NTdkMmE4NzIzYTFiNDdmNzE3ZGYyZTNhYWE4MDUyZWMwYjp7fQ==	2015-05-27 05:23:08.779094-07
 ktq0d5hdmlvzg02j6p7xrkvbqi481fnu	ZjQ0YzM1NWNkZDUzYWUyYjU3MGFiNDA3NjAzMTRhNjlhNmEwN2ZmZDp7Il9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9oYXNoIjoiNGM1NWYwMzI5Mjc4MjUzMTA5OWNhZTM2OTBmODFiYmU0YzBiYzM5NyIsIl9hdXRoX3VzZXJfaWQiOjF9	2015-04-16 03:47:17.565724-07
-a5l0smx47w7ksnasirhby23je7j6cj46	MGFlZmE2OTVjYTc2YTE0ODE0YjE2MmE2Zjk0NGNkZDZlZGVmZmZiYTp7Il9hdXRoX3VzZXJfaGFzaCI6IjRjNTVmMDMyOTI3ODI1MzEwOTljYWUzNjkwZjgxYmJlNGMwYmMzOTciLCJfYXV0aF91c2VyX2JhY2tlbmQiOiJkamFuZ28uY29udHJpYi5hdXRoLmJhY2tlbmRzLk1vZGVsQmFja2VuZCIsIl9hdXRoX3VzZXJfaWQiOjF9	2015-05-31 08:29:05.41813-07
+eothnntuh08bozncm9i1aluy50y730mm	MTM3ZDNhMmRhODE0ZWQxNTQ2MDU4OTljNGM5MTRkM2IyNWQ3MmVjZTp7Il9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9pZCI6NCwiX2F1dGhfdXNlcl9oYXNoIjoiMDAzYTUwM2M1OWYyMjQ5MzZlZmJjZDJkYjJiYmZlMjU4OGVmN2ZjMyJ9	2015-06-13 10:21:38.188128-07
+w5v9160f6dri6d7ymn99g5mfj0fef6no	YzU4NTQ5NTdkMmE4NzIzYTFiNDdmNzE3ZGYyZTNhYWE4MDUyZWMwYjp7fQ==	2015-06-13 16:41:58.266302-07
 g6a4bl4y8epev7mdalzuwam8sfrlwesa	Mjc0MDE5OTdjNmQyNjMxOWNhM2U0YTVkNTUxYzI0NGZiMmY0MmM0OTp7Il9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9oYXNoIjoiZjE3MjA0M2QwNWJkMGNjNDM4NzI3NTcxYjQxMDA4ZTcyYTg3YTRiMyIsIl9hdXRoX3VzZXJfaWQiOjIsIl9tZXNzYWdlcyI6IltbXCJfX2pzb25fbWVzc2FnZVwiLDAsMzAsXCJObyBIb3RlbCBhc3NvY2lhdGVkIHdpdGggdGhpcyBhY2NvdW50LlwiXSxbXCJfX2pzb25fbWVzc2FnZVwiLDAsMzAsXCJObyBIb3RlbCBhc3NvY2lhdGVkIHdpdGggdGhpcyBhY2NvdW50LlwiXSxbXCJfX2pzb25fbWVzc2FnZVwiLDAsMzAsXCJObyBIb3RlbCBhc3NvY2lhdGVkIHdpdGggdGhpcyBhY2NvdW50LlwiXSxbXCJfX2pzb25fbWVzc2FnZVwiLDAsMzAsXCJObyBIb3RlbCBhc3NvY2lhdGVkIHdpdGggdGhpcyBhY2NvdW50LlwiXSxbXCJfX2pzb25fbWVzc2FnZVwiLDAsMzAsXCJObyBIb3RlbCBhc3NvY2lhdGVkIHdpdGggdGhpcyBhY2NvdW50LlwiXSxbXCJfX2pzb25fbWVzc2FnZVwiLDAsMzAsXCJObyBIb3RlbCBhc3NvY2lhdGVkIHdpdGggdGhpcyBhY2NvdW50LlwiXV0ifQ==	2015-05-15 06:31:22.206879-07
+kflajwx6eu0kyevsc1imdze57oc602kn	YzU4NTQ5NTdkMmE4NzIzYTFiNDdmNzE3ZGYyZTNhYWE4MDUyZWMwYjp7fQ==	2015-06-10 06:16:49.466443-07
 1habpflewcx7rc4fnq52h8oqzyc1b595	Y2QxNWEzODAxOTJiZjY2ZGI2Y2Y5OThiM2YzZGE4MjkyNTRiYWM5Mjp7Il9hdXRoX3VzZXJfaWQiOjIsIl9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9oYXNoIjoiZjE3MjA0M2QwNWJkMGNjNDM4NzI3NTcxYjQxMDA4ZTcyYTg3YTRiMyJ9	2015-05-15 06:34:48.312499-07
 d2ej78qt2kgims2pcvnor7sedduesk83	YzU4NTQ5NTdkMmE4NzIzYTFiNDdmNzE3ZGYyZTNhYWE4MDUyZWMwYjp7fQ==	2015-05-16 10:12:27.25661-07
 8aa6ftpfzk99ey3n6ahdfo7v29rtc2qt	YzU4NTQ5NTdkMmE4NzIzYTFiNDdmNzE3ZGYyZTNhYWE4MDUyZWMwYjp7fQ==	2015-05-16 14:53:22.746525-07
@@ -1967,6 +2030,12 @@ SELECT pg_catalog.setval('django_site_id_seq', 1, true);
 
 COPY main_hotel (id, created, modified, hidden, name, address_phone, address_line1, address_city, address_state, address_zip, address_line2, hotel_type, rooms, slug, active, customer_id, admin_id, twilio_sid, twilio_auth_token, twilio_phone_number, twilio_ph_sid) FROM stdin;
 2	2015-05-02 11:49:52.035111-07	2015-05-04 07:36:19.719254-07	f	bobby hotel	+17754194000	6121 Arlington Ash St.	Las Vegas	Alabama	89148			\N	bobby-hotel	t	cus_6B6tROALrJ4hfk	3	AC2dd62548feea9bfe24fa4331bf1b9df5	c07a4042c9585920e71369016d74f470		
+4	2015-05-27 06:15:01.798154-07	2015-05-27 06:15:01.798194-07	f	Hotel0	+15326838300	gpRHTArwzmfevimFlYIvtgpuBkItpDrMVhCPjYeNdxCPVvKSMBdzUXncUsxpKcNxnDDJtcbgqylfGnCfCFHcKhpDPpSIkxBHEDww	TUpYZOpzyEJwQisnQajggHhYVTnhEqVJCAPrgRWLoNszwqrJgmpWlRjPUDdWPEJNCqomydUCxCROQLKddjxHBzXoOFERlJkkiuAJ	Alabama	3581			\N	hotel0	t	\N	\N	995		6097961130	517
+5	2015-05-27 06:15:01.802315-07	2015-05-27 06:15:01.802355-07	f	Hotel1	+13028175547	NKiapMBMGRVZrnuwnMhLYUUrAjoNFUaDKMUIsFNQaVWjnwAypbdbrVhzepbZioZrszNgvFNXGnFoSDyLgbOVWNwNVjbulqYFMtpT	VavXwtiAFIVQZRSiXgqOvEoMaJkUIzgvKEWtAoFYYRfIpjWTEymQRCxXzUbulFWtPCvCHCzXNNUfcPMmtSfeAyQmlydtIqRsLQdp	Alabama	7829			\N	hotel1	t	\N	\N	670		4476205679	232
+6	2015-05-27 06:15:01.805712-07	2015-05-27 06:15:01.805751-07	f	Hotel2	+13988181105	XafZVvjuGESJLbjrcZoXtYvcBPnxBGKKbJAcCHnXmeqqnNkZQhzVwmTEazNaAQrfNTjgXknuLaIuGAfoJVuUKpkhltNYLUejcrub	vbEcBPhQWroVjKooHytPLPtARzWRdfWkCymlpsHLySpHcBGLcIkgouRDrsGJrqJqARTuncJKVStoAiAKJImlizeBcVrYmvHBHLOI	Alabama	3889			\N	hotel2	t	\N	\N	947		5926821762	587
+7	2015-05-27 06:15:01.809001-07	2015-05-27 06:15:01.809035-07	f	Hotel3	+11359531661	ujMMBpUijOHRyKeaqdZgAhKvCpcIGLhKltyYnAhIEOTFAdfeZZbJzXmhCmAICgWShgSlPSXSHgqGrtfnwSvzIvRBqDALtYMdqIdW	geWoQYNKUnDxUPAgEcgCwJktJcndIXIbTqoyEitIkRGXYuxNaxQAOMMmywdjjGdnoiPJQyjwXlYmKjpqEugxMCSpZaFfqGTdYcja	Alabama	1458			\N	hotel3	t	\N	\N	407		0837396494	682
+8	2015-05-27 06:15:01.812492-07	2015-05-27 06:15:01.812531-07	f	Hotel4	+12103193560	OxxXvQBPvailmEGdzrfjwNFBKHieYJsrzpKFnJcOQzemxqzzNmsltaMvOhuKQlkTHyGFFgzxbzUKOJqGOjTfDwKrSsnuKEjNezbB	xCtLMfuiajbBYiJZxBTwrgvWnRRUxJgYhQfGbmuYQnBNckqGpVoXKnoFpEySzXndVSwKggksqZKMzHTrpHkgBflNuOPuaStkpNNf	Alabama	9765			\N	hotel4	t	\N	\N	124		8799587627	22
+3	2015-05-22 05:59:37.472749-07	2015-05-30 15:59:09.306204-07	f	Aaron Test	+17754194000	6121 Arlington Ash St.	Las Vegas	Nevada	89148			\N	aaron-test	t	cus_6Kys7xxfuithl0	4	AC1895100be9ecfbf7178cb29b437f22ec	aa9618b29b1a75264441208633db0993		
 \.
 
 
@@ -1974,7 +2043,7 @@ COPY main_hotel (id, created, modified, hidden, name, address_phone, address_lin
 -- Name: main_hotel_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('main_hotel_id_seq', 2, true);
+SELECT pg_catalog.setval('main_hotel_id_seq', 8, true);
 
 
 --
@@ -1983,6 +2052,7 @@ SELECT pg_catalog.setval('main_hotel_id_seq', 2, true);
 
 COPY main_subaccount (created, modified, hidden, hotel_id, sid, auth_token, active) FROM stdin;
 2015-05-04 06:52:40.339949-07	2015-05-04 07:36:23.268214-07	f	2	AC2dd62548feea9bfe24fa4331bf1b9df5	c07a4042c9585920e71369016d74f470	t
+2015-05-22 05:59:39.216594-07	2015-05-30 15:59:11.598592-07	f	3	AC1895100be9ecfbf7178cb29b437f22ec	aa9618b29b1a75264441208633db0993	t
 \.
 
 
@@ -1992,7 +2062,23 @@ COPY main_subaccount (created, modified, hidden, hotel_id, sid, auth_token, acti
 
 COPY main_userprofile (created, modified, hidden, user_id, hotel_id, msg_sign) FROM stdin;
 2015-05-01 05:31:44.946865-07	2015-05-01 05:31:44.946906-07	f	2	\N	-Dave
-2015-05-02 10:39:32.006543-07	2015-05-02 11:49:52.114489-07	f	3	2	-AL
+2015-05-22 05:52:12.600454-07	2015-05-22 05:59:37.517834-07	f	4	3	-AL
+2015-05-27 06:03:00.709132-07	2015-05-27 06:03:00.709174-07	f	5	\N	-User0_hotel_admin
+2015-05-27 06:03:00.723603-07	2015-05-27 06:03:00.723642-07	f	6	\N	-User1_hotel_admin
+2015-05-27 06:03:00.735506-07	2015-05-27 06:03:00.735542-07	f	7	\N	-User2_hotel_admin
+2015-05-27 06:03:00.746927-07	2015-05-27 06:03:00.746965-07	f	8	\N	-User3_hotel_admin
+2015-05-27 06:03:00.758245-07	2015-05-27 06:03:00.75828-07	f	9	\N	-User4_hotel_admin
+2015-05-27 06:03:00.769593-07	2015-05-27 06:03:00.769628-07	f	10	\N	-User0_hotel_manager
+2015-05-27 06:03:00.780826-07	2015-05-27 06:03:00.780865-07	f	11	\N	-User1_hotel_manager
+2015-05-27 06:03:00.792006-07	2015-05-27 06:03:00.792042-07	f	12	\N	-User2_hotel_manager
+2015-05-27 06:03:00.813683-07	2015-05-27 06:03:00.813721-07	f	14	\N	-User4_hotel_manager
+2015-05-27 06:03:00.830466-07	2015-05-27 06:03:00.830502-07	f	16	\N	-User1_
+2015-05-27 06:03:00.842424-07	2015-05-27 06:03:00.842461-07	f	18	\N	-User3_
+2015-05-27 06:03:00.802896-07	2015-05-27 06:15:01.903224-07	f	13	8	-User3_hotel_manager
+2015-05-27 06:03:00.824535-07	2015-05-27 06:15:01.909136-07	f	15	7	-User0_
+2015-05-27 06:03:00.836456-07	2015-05-27 06:15:01.914971-07	f	17	6	-User2_
+2015-05-27 06:03:00.848367-07	2015-05-27 06:15:01.920779-07	f	19	5	-User4_
+2015-05-02 10:39:32.006543-07	2015-05-27 06:15:01.926625-07	f	3	4	-AL
 \.
 
 
@@ -2001,14 +2087,20 @@ COPY main_userprofile (created, modified, hidden, user_id, hotel_id, msg_sign) F
 --
 
 COPY payment_card (short_pk, created, modified, customer_id, id, brand, last4, exp_month, exp_year, "default", expires) FROM stdin;
-kKrsOhQgzU	2015-05-04 07:26:22.102676-07	2015-05-04 07:36:20.230425-07	cus_6B6jI40d93AiUm	card_15ykWJ2DyompLxkKrsOhQgzU	Visa	4242	12	2018	f	12 / 2018
-kKwxyfUjpO	2015-05-04 07:18:10.470186-07	2015-05-04 07:36:20.240621-07	cus_6B6bZ1aKs5wOXQ	card_15ykON2DyompLxkKwxyfUjpO	Visa	4242	12	2018	f	12 / 2018
-kK6CoBm9en	2015-05-04 07:17:20.918367-07	2015-05-04 07:36:20.24316-07	cus_6B6akNZmnWpQ9C	card_15ykNZ2DyompLxkK6CoBm9en	Visa	4242	12	2019	f	12 / 2019
-kKffhIhDJi	2015-05-04 07:07:04.144029-07	2015-05-04 07:36:20.245171-07	cus_6B6QFcBD3g3vL3	card_15ykDd2DyompLxkKffhIhDJi	Visa	4242	12	2019	f	12 / 2019
-kKMYXRiZQw	2015-05-04 05:26:32.595761-07	2015-05-04 07:36:20.246807-07	cus_6B4oF6rZSPqR5S	card_15yieL2DyompLxkKMYXRiZQw	Visa	4242	12	2018	f	12 / 2018
-kKeodDU1ox	2015-05-04 05:25:10.71467-07	2015-05-04 07:36:20.248415-07	cus_6B4meKpa4hhe00	card_15yid12DyompLxkKeodDU1ox	Visa	4242	12	2018	f	12 / 2018
-kKyde55tqn	2015-05-04 05:20:00.99692-07	2015-05-04 07:36:20.250016-07	cus_6B4hw7WdUBBOXa	card_15yiY12DyompLxkKyde55tqn	Visa	4242	12	2018	f	12 / 2018
-kKFKbUkoXU	2015-05-04 07:36:20.849216-07	2015-05-04 07:36:20.849258-07	cus_6B6tROALrJ4hfk	card_15ykfx2DyompLxkKFKbUkoXU	Visa	4242	12	2019	t	12 / 2019
+kKrsOhQgzU	2015-05-04 07:26:22.102676-07	2015-05-30 15:59:09.755727-07	cus_6B6jI40d93AiUm	card_15ykWJ2DyompLxkKrsOhQgzU	Visa	4242	12	2018	f	12/2018
+kKwxyfUjpO	2015-05-04 07:18:10.470186-07	2015-05-30 15:59:09.760261-07	cus_6B6bZ1aKs5wOXQ	card_15ykON2DyompLxkKwxyfUjpO	Visa	4242	12	2018	f	12/2018
+kK6CoBm9en	2015-05-04 07:17:20.918367-07	2015-05-30 15:59:09.763176-07	cus_6B6akNZmnWpQ9C	card_15ykNZ2DyompLxkK6CoBm9en	Visa	4242	12	2019	f	12/2019
+kKffhIhDJi	2015-05-04 07:07:04.144029-07	2015-05-30 15:59:09.766022-07	cus_6B6QFcBD3g3vL3	card_15ykDd2DyompLxkKffhIhDJi	Visa	4242	12	2019	f	12/2019
+kKMYXRiZQw	2015-05-04 05:26:32.595761-07	2015-05-30 15:59:09.76779-07	cus_6B4oF6rZSPqR5S	card_15yieL2DyompLxkKMYXRiZQw	Visa	4242	12	2018	f	12/2018
+kKeodDU1ox	2015-05-04 05:25:10.71467-07	2015-05-30 15:59:09.770362-07	cus_6B4meKpa4hhe00	card_15yid12DyompLxkKeodDU1ox	Visa	4242	12	2018	f	12/2018
+kKyde55tqn	2015-05-04 05:20:00.99692-07	2015-05-30 15:59:09.776709-07	cus_6B4hw7WdUBBOXa	card_15yiY12DyompLxkKyde55tqn	Visa	4242	12	2018	f	12/2018
+kK2KWn8E5Q	2015-05-30 15:59:10.41555-07	2015-05-30 15:59:10.415592-07	cus_6Kys7xxfuithl0	card_168Iv02DyompLxkK2KWn8E5Q	Visa	4242	5	2015	t	05/2015
+kKce2XWBac	2015-05-29 07:25:42.395779-07	2015-05-30 15:59:09.7245-07	cus_6KTNQoqWQgHDnF	card_167oQO2DyompLxkKce2XWBac	Visa	4242	6	2015	f	06/2015
+kK156gtJJW	2015-05-28 07:57:51.869205-07	2015-05-30 15:59:09.738432-07	cus_6K6fTh8jZSuXkd	card_167SS32DyompLxkK156gtJJW	Visa	4242	12	2019	f	12/2019
+kKLcwmSFu5	2015-05-24 20:27:56.285271-07	2015-05-30 15:59:09.743944-07	cus_6InrB7CeHGFwwW	card_166CFq2DyompLxkKLcwmSFu5	Visa	4242	12	2019	f	12/2019
+kK8Y4VkMkK	2015-05-24 20:25:38.911108-07	2015-05-30 15:59:09.746932-07	cus_6InpdLdqd7sMZu	card_166CDd2DyompLxkK8Y4VkMkK	Visa	4242	12	2017	f	12/2017
+kK8EnKPGhY	2015-05-24 07:22:48.807369-07	2015-05-30 15:59:09.749571-07	cus_6IbCCsGAchLKuf	card_1660032DyompLxkK8EnKPGhY	Visa	4242	12	2018	f	12/2018
+kKFKbUkoXU	2015-05-04 07:36:20.849216-07	2015-05-30 15:59:09.751392-07	cus_6B6tROALrJ4hfk	card_15ykfx2DyompLxkKFKbUkoXU	Visa	4242	12	2019	f	12/2019
 \.
 
 
@@ -2022,6 +2114,12 @@ kKNVDKslTW	2015-05-04 07:17:22.972538-07	2015-05-04 07:17:22.972597-07	card_15yk
 kKihSPQCkD	2015-05-04 07:18:11.843921-07	2015-05-04 07:18:11.843963-07	card_15ykON2DyompLxkKwxyfUjpO	cus_6B6bZ1aKs5wOXQ	ch_15ykOR2DyompLxkKihSPQCkD	1000
 kK6X6HI522	2015-05-04 07:26:23.631766-07	2015-05-04 07:26:23.631825-07	card_15ykWJ2DyompLxkKrsOhQgzU	cus_6B6jI40d93AiUm	ch_15ykWN2DyompLxkK6X6HI522	1000
 kK7jume0pc	2015-05-04 07:36:23.279124-07	2015-05-04 07:36:23.279182-07	card_15ykfx2DyompLxkKFKbUkoXU	cus_6B6tROALrJ4hfk	ch_15ykg22DyompLxkK7jume0pc	1000
+kK1p8SkXSP	2015-05-24 07:22:51.123784-07	2015-05-24 07:22:51.123836-07	card_1660032DyompLxkK8EnKPGhY	cus_6IbCCsGAchLKuf	ch_1660052DyompLxkK1p8SkXSP	1000
+kK5kM7nsR8	2015-05-24 20:25:40.760246-07	2015-05-24 20:25:40.760304-07	card_166CDd2DyompLxkK8Y4VkMkK	cus_6InpdLdqd7sMZu	ch_166CDf2DyompLxkK5kM7nsR8	1000
+kKNiFBzA7K	2015-05-24 20:27:57.533279-07	2015-05-24 20:27:57.533345-07	card_166CFq2DyompLxkKLcwmSFu5	cus_6InrB7CeHGFwwW	ch_166CFs2DyompLxkKNiFBzA7K	1000
+kKtRrfQvAu	2015-05-28 07:57:53.200765-07	2015-05-28 07:57:53.200845-07	card_167SS32DyompLxkK156gtJJW	cus_6K6fTh8jZSuXkd	ch_167SS52DyompLxkKtRrfQvAu	1000
+kKutpJL81g	2015-05-29 07:25:43.921156-07	2015-05-29 07:25:43.92126-07	card_167oQO2DyompLxkKce2XWBac	cus_6KTNQoqWQgHDnF	ch_167oQR2DyompLxkKutpJL81g	1000
+kKFvVImfCV	2015-05-30 15:59:11.609339-07	2015-05-30 15:59:11.609406-07	card_168Iv02DyompLxkK2KWn8E5Q	cus_6Kys7xxfuithl0	ch_168Iv22DyompLxkKFvVImfCV	1000
 \.
 
 
@@ -2038,6 +2136,12 @@ kNZmnWpQ9C	2015-05-04 07:17:19.893552-07	2015-05-04 07:17:19.893645-07	cus_6B6ak
 Z1aKs5wOXQ	2015-05-04 07:18:09.371605-07	2015-05-04 07:18:09.371656-07	cus_6B6bZ1aKs5wOXQ	pyaaron@gmail.com
 I40d93AiUm	2015-05-04 07:26:21.098318-07	2015-05-04 07:26:21.098377-07	cus_6B6jI40d93AiUm	pyaaron@gmail.com
 ROALrJ4hfk	2015-05-04 07:36:19.708684-07	2015-05-04 07:36:19.708743-07	cus_6B6tROALrJ4hfk	pyaaron@gmail.com
+CsGAchLKuf	2015-05-24 07:22:47.725282-07	2015-05-24 07:22:47.725336-07	cus_6IbCCsGAchLKuf	aaron@textress.com
+dLdqd7sMZu	2015-05-24 20:25:37.697106-07	2015-05-24 20:25:37.697161-07	cus_6InpdLdqd7sMZu	aaron@textress.com
+B7CeHGFwwW	2015-05-24 20:27:55.123376-07	2015-05-24 20:27:55.12344-07	cus_6InrB7CeHGFwwW	aaron@textress.com
+Th8jZSuXkd	2015-05-28 07:57:50.790911-07	2015-05-28 07:57:50.791154-07	cus_6K6fTh8jZSuXkd	aaron@textress.com
+QoqWQgHDnF	2015-05-29 07:25:41.201416-07	2015-05-29 07:25:41.202945-07	cus_6KTNQoqWQgHDnF	aaron@textress.com
+7xxfuithl0	2015-05-30 15:59:09.297265-07	2015-05-30 15:59:09.29734-07	cus_6Kys7xxfuithl0	aaron@textress.com
 \.
 
 
