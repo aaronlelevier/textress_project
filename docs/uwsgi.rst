@@ -20,7 +20,7 @@ Basict Test
 http://uwsgi-docs.readthedocs.org/en/latest/tutorials/Django_and_nginx.html#basic-test
 
 # run
-uwsgi --http :8000 --wsgi-file test.py
+uwsgi --http :9000 --wsgi-file test.py
 
 
 STOP uWSGI

@@ -5,8 +5,8 @@ socket = {{ salt['network.ip_addrs']('eth0')[0] }}:9000
 chmod-socket = 666
 master = True
 processes = 4
-no-site= True
-home = /root/.virtualenvs/textra_17
+#no-site= True
+#home = /root/.virtualenvs/textra_17
 
 # chdir to the folder of this config file, plus app/website
 chdir = %dtextress/
