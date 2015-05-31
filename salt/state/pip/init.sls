@@ -7,7 +7,8 @@ python-pip:
 upgrade_pip:
     cmd.run:
         - name: easy_install -U pip
-        - require: python-pip
+        - require: 
+            -pkg: python-pip
 
 /opt/django/requirements.txt:
     file.managed:
