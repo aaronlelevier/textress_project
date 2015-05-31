@@ -1,6 +1,0 @@
-psycopg2
-djangorestframework
-django-coverage
-stripe
-twilio
-xmltodict
