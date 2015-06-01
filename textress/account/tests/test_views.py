@@ -77,6 +77,10 @@ class RegistrationTests(TestCase):
         self.assertEqual(response.status_code, 200)
         assert isinstance(response.context['form'], AcctCostForm)
 
+        # TODO: remove when going Beta
+        # Warning is in the Context
+        self.assertContains(response, 'Textress is currently Pre-Alpha with limited functionality')
+        
 
 class RenderTests(TestCase):
     # Test Rending of view, template path is correct, url

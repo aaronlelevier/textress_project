@@ -104,12 +104,14 @@ class AcctCostTests(TestCase):
         self.hotel = create_hotel()
 
     def test_create(self):
+        # Dave can start with 100 cents ~ or ~ $1 b/c testing that Stripe charges ok
         acct_cost, created = AcctCost.objects.get_or_create(hotel=self.hotel)
         assert created
         assert isinstance(acct_cost, AcctCost)
-        assert acct_cost.init_amt == 1000
-        assert acct_cost.balance_min == 100
-        assert acct_cost.recharge_amt == 1000
+        self.assertEqual(acct_cost.init_amt, 100)
+        self.assertEqual(acct_cost.balance_min, 100)
+        self.assertEqual(acct_cost.recharge_amt, 100)
+
 
         # create new actually modifies original b/c p/ Hotel, singleton obj
         new_acct_cost, created = AcctCost.objects.get_or_create(

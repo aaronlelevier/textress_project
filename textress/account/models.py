@@ -145,7 +145,9 @@ class TransType(AbstractBase):
 # ACCT COST #
 #############
 
-CHARGE_AMOUNTS = [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
+CHARGE_AMOUNTS = [(100, '${:.2f}'.format(1))] + [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
+# replace ``CHARGE_AMOUNTS`` with the below amount choices once Stripe Payments confirmed to work.
+# CHARGE_AMOUNTS = [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
 BALANCE_AMOUNTS = [(100, '${:.2f}'.format(1))] + [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
 
 
