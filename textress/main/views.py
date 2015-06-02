@@ -12,7 +12,8 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.template import RequestContext
 
 from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
-    GroupRequiredMixin, AnonymousRequiredMixin, SetHeadlineMixin)
+    GroupRequiredMixin, AnonymousRequiredMixin, SetHeadlineMixin,
+    FormValidMessageMixin, FormInvalidMessageMixin)
 
 from main.models import Hotel, UserProfile, Subaccount
 from main.forms import UserCreateForm, HotelCreateForm, UserUpdateForm
@@ -22,11 +23,13 @@ from account.helpers import add_group
 from contact.mixins import NewsletterMixin, TwoFormMixin
 from account.helpers import login_messages
 from payment.mixins import HotelUserMixin, HotelContextMixin
+from utils.messages import dj_messages
 
 
 ### Hotel ###
 
-class HotelUpdateView(HotelUsersOnlyMixin, GroupRequiredMixin, SetHeadlineMixin, UpdateView):
+class HotelUpdateView(HotelUsersOnlyMixin, GroupRequiredMixin, SetHeadlineMixin, 
+    FormValidMessageMixin, UpdateView):
     '''
     Will use permissions in templating to only expose this View to Hotel Admins.
     Also, view URL is only accessible by Admins.
@@ -38,11 +41,10 @@ class HotelUpdateView(HotelUsersOnlyMixin, GroupRequiredMixin, SetHeadlineMixin,
     fields = ['name', 'address_phone', 'address_line1', 'address_line2',
         'address_city', 'address_state', 'address_zip']
     template_name = 'cpanel/form.html'
+    form_valid_message = dj_messages['hotel_updated']
 
     def get_success_url(self):
-        return reverse('account')
-
-
+        return reverse('main:hotel_update', kwargs={'pk': self.object.pk})
 
 
 ### REGISTRATION VIEWS ###

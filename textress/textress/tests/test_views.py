@@ -12,7 +12,7 @@ class TermsNCondTests(TestCase):
         response = self.client.get(reverse('terms_n_cond'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, response.context['company'])
-        # self.assertContains(response, response.context['LLC'])
+
 
 class IndexTests(TestCase):
 

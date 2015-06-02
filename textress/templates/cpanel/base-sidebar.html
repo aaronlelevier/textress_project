@@ -1,5 +1,5 @@
 {% extends "cpanel/base.html" %}
-{% load staticfiles %}
+{% load staticfiles user_tags %}
 
 {% block page_css %}
 <link rel="stylesheet" href="{% static 'clipone/admin/clip-one/assets/plugins/fullcalendar/fullcalendar/fullcalendar.css' %}">
@@ -412,6 +412,13 @@
                                         <span class="badge badge-new">Me</span>
                                     </a>
                                 </li>
+                                {% if user|has_group:"hotel_admin" %}
+                                    <li>
+                                        <a href="{% url 'main:hotel_update' user.profile.hotel.pk %}">
+                                            <span class="title"> Hotel Info </span>
+                                        </a>
+                                    </li>
+                                {% endif %}
                             </ul>
                         </li>
                         <li>

@@ -7,6 +7,7 @@ from model_mommy import mommy
 from account import helpers
 from utils import create
 
+
 class HelperTests(TestCase):
 
     def test_login_messages(self):

@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth.models import User, Group
 
 from model_mommy import mommy
 
@@ -25,11 +26,34 @@ CREATE_HOTEL_DICT = {
     'address_zip': '92131'
     }
 
+PASSWORD = '1234'
+
 
 def create_hotel(name="Test"):
     address_data = CREATE_HOTEL_DICT
     address_data['name'] = name
     return Hotel.objects.create(**address_data)
+
+
+def create_hotel_user(hotel_name=CREATE_HOTEL_DICT['name']):
+    '''
+    Default Hotel User with no Admin or Manager permissions.
+    '''
+    hotel = Hotel.objects.get(name=hotel_name)
+    user = mommy.make(User, username='user', password=PASSWORD)
+    return user.profile.update_hotel(hotel)
+
+
+def create_hotel_manager(hotel_name=CREATE_HOTEL_DICT['name']):
+    '''
+    Default Hotel User with no Admin or Manager permissions.
+    '''
+    hotel = Hotel.objects.get(name=hotel_name)
+    user = mommy.make(User, username='manager', password=PASSWORD)
+    manager_group = Group.objects.get(name="hotel_manager")
+    user.groups.add(manager_group)
+    user.save()
+    return user.profile.update_hotel(hotel)
 
 
 def make_subaccount(hotel, live=False):

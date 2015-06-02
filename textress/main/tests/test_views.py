@@ -11,18 +11,18 @@ from django.contrib.auth.models import User, Group
 from django.http import Http404
 from django.core.exceptions import ObjectDoesNotExist
 
+import stripe
 from model_mommy import mommy
 
 from main.models import Hotel, UserProfile, Subaccount
-from main.tests.factory import CREATE_USER_DICT, CREATE_HOTEL_DICT
+from main.tests.factory import create_hotel, CREATE_USER_DICT, CREATE_HOTEL_DICT
 from sms.models import PhoneNumber
 from utils import create
 from utils.data import STATES, HOTEL_TYPES
+from utils.messages import dj_messages
 
-import stripe
+
 stripe.api_key = settings.STRIPE_SECRET_KEY
-
-from main.tests.factory import create_hotel
 
 
 def create_admin():
@@ -95,8 +95,6 @@ class HotelViewTests(TestCase):
         create._get_groups_and_perms()
         
         # Login Credentials
-        self.username = 'test'
-        self.password = '1234'
 
         # requires Admin User and Hotel 
         # Dave
@@ -113,17 +111,34 @@ class HotelViewTests(TestCase):
         # Dave can access HotelUpdateView
         response = self.client.get(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}))
         self.assertEqual(response.status_code, 200)
+        
+        # Logged in Message
+        m = list(response.context['messages'])
+        self.assertEqual(len(m), 1)
+        self.assertEqual(str(m[0]), "You are now logged in")
+
+    def test_update_get_other_users(self):
+        # TODO: Users, Managers, and other Hotel Admins should not be able to access this View.
+        pass
+
 
     def test_update_post(self):
         self.client.login(username=self.username, password=self.password)
+        response = self.client.post(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}))
+
         # Dave changes his street address, and the change is saved in the DB
         CREATE_HOTEL_DICT['address_line1'] = '123 My New Street Name' 
         response = self.client.post(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}),
             CREATE_HOTEL_DICT, follow=True)
         # hotel info updated
-        self.assertRedirects(response, reverse('account'))
+        self.assertRedirects(response, reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}))
         updated_hotel = Hotel.objects.get(admin_id=self.user.pk)
         self.assertNotEqual(self.hotel.address_line1, updated_hotel.address_line1)
+        
+        # success message
+        m = list(response.context['messages'])
+        self.assertEqual(len(m), 1)
+        self.assertEqual(str(m[0]), dj_messages['hotel_updated'])
 
 
 class UserUpdateTest(TestCase):
