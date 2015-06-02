@@ -89,6 +89,43 @@ class RegistrationTests(TestCase):
         self.assertRedirects(response, reverse('main:register_step2_update', kwargs={'pk': hotel.pk}))
 
 
+class HotelViewTests(TestCase):
+
+    def setUp(self):
+        create._get_groups_and_perms()
+        
+        # Login Credentials
+        self.username = 'test'
+        self.password = '1234'
+
+        # requires Admin User and Hotel 
+        # Dave
+        response = self.client.post(reverse('main:register_step1'),
+            CREATE_USER_DICT)
+        # Hotel
+        response = self.client.post(reverse('main:register_step2'),
+            CREATE_HOTEL_DICT)
+        self.user = User.objects.first()
+        self.hotel = self.user.profile.hotel
+
+    def test_update_get(self):
+        self.client.login(username=self.username, password=self.password)
+        # Dave can access HotelUpdateView
+        response = self.client.get(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}))
+        self.assertEqual(response.status_code, 200)
+
+    def test_update_post(self):
+        self.client.login(username=self.username, password=self.password)
+        # Dave changes his street address, and the change is saved in the DB
+        CREATE_HOTEL_DICT['address_line1'] = '123 My New Street Name' 
+        response = self.client.post(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}),
+            CREATE_HOTEL_DICT, follow=True)
+        # hotel info updated
+        self.assertRedirects(response, reverse('account'))
+        updated_hotel = Hotel.objects.get(admin_id=self.user.pk)
+        self.assertNotEqual(self.hotel.address_line1, updated_hotel.address_line1)
+
+
 class UserUpdateTest(TestCase):
 
     def setUp(self):

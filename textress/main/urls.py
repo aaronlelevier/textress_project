@@ -26,8 +26,13 @@ user_patterns = patterns('',
     url(r'^update/(?P<pk>\d+)/$', views.UserUpdateView.as_view(), name='user_update'),
     )
 
+hotel_patterns = patterns('',
+    url(r'^update/(?P<pk>\d+)/$', views.HotelUpdateView.as_view(), name='hotel_update'),
+    )
+
 urlpatterns = patterns('',
     url(r'^register/', include(register_patterns)),
     url(r'^account/user/', include(user_patterns)),
+    url(r'^account/hotel/', include(hotel_patterns)),
     # url(r'^manage-users/', include(manage_users_patterns)),
     )

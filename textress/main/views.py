@@ -24,14 +24,29 @@ from account.helpers import login_messages
 from payment.mixins import HotelUserMixin, HotelContextMixin
 
 
-### TODO: What is this view being used for? ###
+### Hotel ###
 
-class HotelDetailView(HotelMixin, DetailView):
-
+class HotelUpdateView(HotelUsersOnlyMixin, GroupRequiredMixin, SetHeadlineMixin, UpdateView):
+    '''
+    Will use permissions in templating to only expose this View to Hotel Admins.
+    Also, view URL is only accessible by Admins.
+    '''
+    group_required = ["hotel_admin"]
+    headline = "Update Hotel Info"
     model = Hotel
+    form_class = HotelCreateForm
+    fields = ['name', 'address_phone', 'address_line1', 'address_line2',
+        'address_city', 'address_state', 'address_zip']
+    template_name = 'cpanel/form.html'
+
+    def get_success_url(self):
+        return reverse('account')
+
+
 
 
 ### REGISTRATION VIEWS ###
+
 class RegisterAdminBaseView(RegistrationContextMixin, View):
     '''
     BaseView for Registration Step # 1, and will change based on 
