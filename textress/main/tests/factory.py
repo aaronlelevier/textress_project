@@ -35,25 +35,32 @@ def create_hotel(name="Test"):
     return Hotel.objects.create(**address_data)
 
 
-def create_hotel_user(hotel_name=CREATE_HOTEL_DICT['name']):
+def create_hotel_user(hotel, username='user'):
     '''
     Default Hotel User with no Admin or Manager permissions.
+
+    :hotel: Hotel Object
     '''
-    hotel = Hotel.objects.get(name=hotel_name)
-    user = mommy.make(User, username='user', password=PASSWORD)
-    return user.profile.update_hotel(hotel)
+    user = mommy.make(User, username=username, password=PASSWORD)
+    user.set_password("1234")
+    user.save()
+    user.profile.update_hotel(hotel)
+    return User.objects.get(username=username)
 
 
-def create_hotel_manager(hotel_name=CREATE_HOTEL_DICT['name']):
+def create_hotel_manager(hotel, username='manager'):
     '''
     Default Hotel User with no Admin or Manager permissions.
+
+    :hotel: Hotel Object
     '''
-    hotel = Hotel.objects.get(name=hotel_name)
-    user = mommy.make(User, username='manager', password=PASSWORD)
+    user = mommy.make(User, username=username, password=PASSWORD)
     manager_group = Group.objects.get(name="hotel_manager")
     user.groups.add(manager_group)
+    user.set_password("1234")
     user.save()
-    return user.profile.update_hotel(hotel)
+    user.profile.update_hotel(hotel)
+    return User.objects.get(username=username)
 
 
 def make_subaccount(hotel, live=False):

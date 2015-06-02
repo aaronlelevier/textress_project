@@ -15,7 +15,8 @@ import stripe
 from model_mommy import mommy
 
 from main.models import Hotel, UserProfile, Subaccount
-from main.tests.factory import create_hotel, CREATE_USER_DICT, CREATE_HOTEL_DICT
+from main.tests.factory import (CREATE_USER_DICT, CREATE_HOTEL_DICT,
+    create_hotel, create_hotel_user, create_hotel_manager)
 from sms.models import PhoneNumber
 from utils import create
 from utils.data import STATES, HOTEL_TYPES
@@ -95,6 +96,8 @@ class HotelViewTests(TestCase):
         create._get_groups_and_perms()
         
         # Login Credentials
+        self.username = 'test'
+        self.password = '1234'
 
         # requires Admin User and Hotel 
         # Dave
@@ -117,10 +120,29 @@ class HotelViewTests(TestCase):
         self.assertEqual(len(m), 1)
         self.assertEqual(str(m[0]), "You are now logged in")
 
-    def test_update_get_other_users(self):
-        # TODO: Users, Managers, and other Hotel Admins should not be able to access this View.
-        pass
+    def test_update_get_other_user(self):
+        # normal Hotel Users should not be able to access this View.
+        self.client.logout()
+        # User
+        user = create_hotel_user(self.hotel)
+        self.assertEqual(self.hotel, user.profile.hotel)
+        # Login
+        self.client.login(username=user.username, password=self.password)
+        # View
+        response = self.client.get(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}))
+        self.assertEqual(response.status_code, 302)
 
+    def test_update_get_other_manager(self):
+        # Managers should not be able to access this View.
+        self.client.logout()
+        # User
+        user = create_hotel_manager(self.hotel)
+        self.assertEqual(self.hotel, user.profile.hotel)
+        # Login
+        self.client.login(username=user.username, password=self.password)
+        # View
+        response = self.client.get(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}))
+        self.assertEqual(response.status_code, 302)
 
     def test_update_post(self):
         self.client.login(username=self.username, password=self.password)
