@@ -13,45 +13,7 @@ from model_mommy import mommy
 
 from main.models import Hotel
 from main.tests.factory import create_hotel
-from sms.models import Text, DemoCounter, PhoneNumber
-from utils.exceptions import DailyLimit
-
-
-class TextTests(TestCase):
-
-    def test_model_mommy(self):
-        text = mommy.make(Text)
-        self.assertTrue(isinstance(text, Text))
-        self.assertEqual(str(text), text.body)
-        self.assertNotEqual(text.body, None)
-
-
-class DemoCounterTests(TestCase):
-
-    def test_model_mommy(self):
-        delete_all = DemoCounter.objects.delete_all()
-        dc = mommy.make(DemoCounter)
-        assert isinstance(dc, DemoCounter)
-        assert dc.count == 1
-        assert str(dc) == "{0}: {1}".format(dc.day, dc.count)
-
-    def test_check_limit(self):
-        delete_all = DemoCounter.objects.delete_all()
-        # set current count at the limit for the day
-        dc = mommy.make(DemoCounter, count=settings.SMS_LIMIT)
-
-        with pytest.raises(DailyLimit):
-            dc.count += 100
-            dc.check_limit()
-
-    def test_save(self):
-        delete_all = DemoCounter.objects.delete_all()
-        # set current count at the limit for the day
-        dc = mommy.make(DemoCounter, count=settings.SMS_LIMIT)
-
-        with pytest.raises(DailyLimit):
-            dc.count += 100
-            dc.save()
+from sms.models import PhoneNumber
 
 
 class PhoneNumberTests(TestCase):
@@ -136,16 +98,3 @@ class LivePhoneNumberTests(TestCase):
 
         number = test_client.phone_numbers.update(self.ph_sid,
             account_sid=settings.TWILIO_ACCOUNT_SID)
-
-
-
-
-
-
-
-
-
-
-
-
-

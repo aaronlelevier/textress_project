@@ -1,0 +1,80 @@
+{% extends "cpanel/base-sidebar.html" %}
+
+{% block content %}
+<!-- start: PAGE -->
+<div class="main-content">
+    <div class="container">
+        <!-- start: PAGE HEADER -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- start: PAGE TITLE & BREADCRUMB -->
+                <ol class="breadcrumb">
+                    <li>
+                        <i class="clip-home-3"></i>
+                        <a href="{% url 'account' %}">
+                            Home
+                        </a>
+                    </li>
+                    <li class="active">
+                        {{ headline }}
+                    </li>
+                    <li class="search-box">
+                        <form class="sidebar-search">
+                            <div class="form-group">
+                                <input type="text" placeholder="Start Searching...">
+                                <button class="submit">
+                                    <i class="clip-search-3"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </li>
+                </ol>
+
+                {% if messages %}
+                <div class="row" style="background-color: #363839;">
+                    <div class="container">
+                    {% for message in messages %}
+                        <h4 class="text-center" style="color: white;">{{ message }}</h4>
+                    {% endfor %}</div>
+                </div>
+                {% endif %}
+
+                <div class="page-header">
+                    <h1>{{ headline }}</h1>
+                </div>
+                <!-- end: PAGE TITLE & BREADCRUMB -->
+            </div>
+        </div>
+
+    
+        <div class="row">
+            <div class="col-sm-12">
+                <form name="{{ form.form_name }}" method="post" action="">
+                    {% csrf_token %}
+    
+                    {% if form.phone_numbers %}
+                        <table class="table table-hover">
+                            <tr>
+                                <th>Phone Number</th>
+                            </tr>
+                            {% for radio in form.phone_numbers %}
+                                <tr>
+                                    <td>{{ radio }}</td>
+                                </tr>
+                            {% endfor %}
+                            <button class="btn btn-primary next-step btn-block">
+                                    Make Primary <i class="fa fa-arrow-circle-right"></i>
+                                </button>
+                        </table>
+                    {% else %}
+                        <p>No phone numbers on account.</p>
+                    {% endif %}
+                
+                </form>
+            </div>
+        </div>
+        <!-- end: PAGE CONTENT -->
+    </div>
+</div>
+<!-- end: PAGE -->        
+{% endblock content %}

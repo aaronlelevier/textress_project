@@ -28,39 +28,6 @@ class GeneralTests(TestCase):
         assert sms_messages
 
 
-class SendTextTests(TestCase):
-
-    def test_send_text(self):
-        """
-        Twilio API success text using helper method ``send_text``.
-        """
-        text = mommy.make(Text, to=settings.DEFAULT_TO_PH, sent=False)
-        assert isinstance(text, Text)
-        assert text.to
-
-        text = send_text(text)
-        assert text.sent == True
-
-    def test_send_text_fail(self):
-        """
-        Helper method shows:
-            Twilio API raises an Excpetion.
-            sent == False
-        """
-        text = mommy.make(
-            Text,
-            to=settings.DEFAULT_TO_PH,
-            frm=settings.DEFAULT_FROM_PH_BAD,
-            sent=False
-            )
-        assert isinstance(text, Text)
-
-        with pytest.raises(twilio.TwilioRestException):
-            text = send_text(text)
-
-        assert text.sent == False
-
-
 class SendMessageTests(TestCase):
     '''
     test ``sms.helpers.send_message(hotel, to, body)``
@@ -129,9 +96,3 @@ class SendMessageTests(TestCase):
         message = send_message(hotel=self.hotel, to=settings.DEFAULT_TO_PH,
             body='sms.test.test_helpers msg')
         assert message
-
-
-
-
-
-

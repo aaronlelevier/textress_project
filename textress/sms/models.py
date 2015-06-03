@@ -11,7 +11,7 @@ from django.db.models.signals import post_save, pre_delete
 from twilio import TwilioRestException
 from twilio.rest import TwilioRestClient
 
-from .helpers import get_weather
+from sms.helpers import get_weather
 from main.models import Hotel, TwilioClient
 from utils.exceptions import DailyLimit
 
@@ -29,103 +29,6 @@ class AbstractBase(models.Model):
         abstract = True
         ordering = ['-created']
 
-
-########
-# TEXT #
-########
-
-class TextManager(models.Manager):
-
-    def sent(self):
-        return self.filter(sent=True)
-
-    def not_sent(self):
-        return self.filter(sent=False)
-
-
-class Text(models.Model):
-    """
-    Twilio SMS info to send. Default to my ph # for testing, and
-    Yahoo! Weather API - for default test messages.
-    """
-    created = models.DateTimeField(auto_now_add=True)
-    to = models.CharField(_("To"), max_length=12)
-    frm = models.CharField(_("From"), max_length=12, blank=True, default=settings.PHONE_NUMBER)
-    body = models.CharField(_("Body"), max_length=160, blank=True)
-    sent = models.BooleanField(_("Sent"), blank=True, default=True)
-
-    objects = TextManager()
-
-    def __str__(self):
-        return self.body
-
-    def save(self, *args, **kwargs):
-        if not self.body: 
-            self.body = get_weather()
-        super(Text, self).save(*args, **kwargs)
-
-
-##############
-# DEMO COUNTER
-##############
-
-class DemoCounterQuerySet(models.query.QuerySet):
-    def today(self):
-        return self.get(day=now())
-
-
-class DemoCounterManager(models.Manager):
-    '''
-    Goal: To manage that the # of Demo Texts don't go over the Daily Limit.
-    '''
-    def get_queryset(self):
-        return DemoCounterQuerySet(self.model, self._db)
-
-    def delete_all(self):
-        return [ea.delete() for ea in self.all()]
-        
-    def today(self):
-        try:
-            return self.get_queryset().today()
-        except ObjectDoesNotExist as e:
-            raise e
-
-    def create_count(self, *args, **kwargs):
-        # get obj or create new one
-        try:
-            cur_count = self.get_queryset().today()
-        except ObjectDoesNotExist:
-            return self.create()
-        else:
-            # if get() succeeds: raise error if limit reached, else: increment count
-            try:
-                cur_count.count += 1
-                cur_count.save()
-                return cur_count
-            except DailyLimit as e:
-                raise e
-        
-
-class DemoCounter(models.Model):
-    """
-    Limit Demo texts sent daily to 50x per day.
-    Called in clean() method of DemoForm.
-    """
-    day = models.DateField(_("Day"), primary_key=True, auto_now_add=True)
-    count = models.IntegerField(_("Daily Count"), default=1, blank=True)
-
-    objects = DemoCounterManager()
-
-    def __str__(self):
-        return "{0}: {1}".format(self.day, self.count)
-
-    def save(self, *args, **kwargs):
-        self.check_limit()
-        super(DemoCounter, self).save(*args, **kwargs)
-
-    def check_limit(self):
-        if self.count > settings.SMS_LIMIT:
-            raise DailyLimit
 
 ################
 # PHONE NUMBER #
@@ -205,7 +108,7 @@ class PhoneNumberManager(TwilioClient, models.Manager):
 
 class PhoneNumber(TwilioClient, AbstractBase):
     # Keys
-    hotel = models.ForeignKey(Hotel, related_name="phone_number")
+    hotel = models.ForeignKey(Hotel, related_name="phonenumbers")
     # Fields
     sid = models.CharField(_("Twilio Phone # Sid"), primary_key=True, max_length=50)
     phone_number = models.CharField(_("Twilio Phone #"), max_length=12)

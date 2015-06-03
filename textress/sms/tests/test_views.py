@@ -7,48 +7,57 @@ from django.test.client import Client
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils.timezone import now
 
 from model_mommy import mommy
 
+from main.models import Hotel
+from main.tests.factory import (create_hotel, make_subaccount,
+    CREATE_USER_DICT, CREATE_HOTEL_DICT)
+from utils import create
 from sms.models import Text, DemoCounter
 from sms.helpers import sms_messages
 
 
-class ViewTests(TestCase):
+class PhoneNumberTests(TestCase):
 
-    def test_DemoView_bad_number(self):
-        """
-        Extra Message test methods are for example of different working ways
-        to test Django Messages.
-        """
-        response = self.client.post(reverse('sms:demo'),
-            {'to': settings.DEFAULT_TO_PH_BAD},
-            follow=True)
-        m = list(response.context['messages'])
-        assert len(m) != 0
-        self.assertRedirects(response, reverse('sms:demo'))
-        self.assertEqual(m[0].message, sms_messages['send_failed'])
-        assert "SMS failed to send" in m[0].message
-        assert "SMS failed to send" in str(m[0])
+    # TODO: Add fixtures b/c will use actual created Twilio Phone
+    #   numbers to test "context", etc...
 
-    def test_DemoView_post(self):
-        response = self.client.post(reverse('sms:demo'),
-            {'to': settings.DEFAULT_TO_PH},
-            follow=True)
-        m = list(response.context['messages'])
-        assert response.status_code == 200        
-        assert len(m) != 0
-        self.assertEqual(m[0].message, sms_messages['sent'])
+    def setUp(self):
+        create._get_groups_and_perms()
+        self.username = 'test'
+        self.password = '1234'
 
-    def test_DemoView_limit_reached(self):
-        # preset ``dc`` limit reached counter
-        dc = mommy.make(DemoCounter, count=settings.SMS_LIMIT)
+        # Creates a Admin User and Hotel Object - needed to view PhoneNumber Views
+        # Step 1
+        response = self.client.post(reverse('main:register_step1'),
+            CREATE_USER_DICT)
+        self.client.login(username=self.username, password=self.password)
+        # Step 2
+        response = self.client.post(reverse('main:register_step2'),
+            CREATE_HOTEL_DICT)
 
-        # form submission should fail because ``dc`` limit reached for the day
-        response = self.client.post(reverse('sms:demo'),
-            {'to': settings.PHONE_NUMBER})
+    def test_list(self):
+        response = self.client.get(reverse('sms:ph_num_list'))
+        self.assertEqual(response.status_code, 200)
+        assert response.context['headline']
 
-        # ``dc`` counts should be the same, b/c submission failed
-        dc_now = DemoCounter.objects.today()
-        assert dc.count == dc_now.count
+    def test_select(self):
+        response = self.client.get(reverse('sms:ph_num_select'))
+        self.assertEqual(response.status_code, 200)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

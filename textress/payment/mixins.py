@@ -63,6 +63,7 @@ class HotelUserMixin(HotelContextMixin):
 class HotelAdminCheckMixin(HotelContextMixin):
     "Only the Admin for the Hotel can access this page when using this mixin"
     def dispatch(self, *args, **kwargs):
+        self.hotel = self.request.user.profile.hotel
         admin_hotel = get_object_or_404(Hotel, admin_id=self.request.user.id)
         if admin_hotel != self.hotel:
             raise Http404

@@ -75,11 +75,6 @@ class AccountView(LoginRequiredMixin, HotelUserMixin, TemplateView):
     """
     template_name = 'cpanel/account.html'
 
-    # def get_context_data(self, **kwargs):
-    #     context = super(AccountView, self).get_context_data(**kwargs)
-    #     context['hotel'] = self.hotel
-    #     return context
-
 
 ### REGISTRATION VIEWS ###
 
