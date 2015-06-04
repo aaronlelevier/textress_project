@@ -16,8 +16,12 @@ class PhoneNumberForm(forms.Form):
 class PhoneNumberSelectForm(forms.Form):
     "Display 10 Available Twilio PhoneNumber Obj, and add to cookie."
 
-    # PHONES = (('1','A'), ('2', 'B'))
-    # radio = forms.ChoiceField( widget=RadioSelect(), choices=PHONES)
+    # PHONES = (
+    #     ('area_code','Find a phone number based on the area code of the Hotel'),
+    #     ('contains', "Find a phone number starting with certain #'s"),
+    #     ('contains', "Find a phone number mathcing a pattern")
+    #     )
+    # radio = forms.ChoiceField(choices=PHONES)
 
     def __init__(self, request, twilio_hotel, *args, **kwargs):
         super(PhoneNumberSelectForm, self).__init__(*args, **kwargs)
@@ -35,6 +39,10 @@ class PhoneNumberSelectForm(forms.Form):
             self.request.session['phone_number'] = phone_number
             print('form cookie', self.request.session['phone_number'])
             return cleaned_data
+
+
+# class PhoneNumberBuyForm(forms.Form):
+
             
 
 class PhoneNumberAddForm(forms.Form):

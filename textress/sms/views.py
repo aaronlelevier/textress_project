@@ -61,10 +61,10 @@ class PhoneNumberSelectView(PhoneNumberBaseView):
     to a `Confirm Purchase View`.
     """
     group_required = ["hotel_admin"]
-    headline = "Buy a New Phone Number"
-    template_name = 'cpanel/form.html'
+    headline = "Select a Phone Number"
+    template_name = 'cpanel/form_ph_num_buy.html'
     form_class = PhoneNumberSelectForm
-    success_url = reverse_lazy('sms:ph_num_select')
+    success_url = reverse_lazy('sms:ph_num_add')
 
     def get_form_kwargs(self):
         """Needed kwargs to get available phone numbers based on Hotel
@@ -80,16 +80,20 @@ class PhoneNumberSelectView(PhoneNumberBaseView):
         return super(PhoneNumberSelectView, self).form_valid(form)
 
 
-class PhoneNumberAddView(LoginRequiredMixin,
-                         HotelAdminCheckMixin,
-                         FormView):
-    template_name = 'basic_form.html'
+class PhoneNumberAddView(PhoneNumberBaseView):
+    '''
+    Form with no input, just confirms purchasing the ph num.
+    '''
+    group_required = ["hotel_admin"]
+    headline = "Confirm to Purchase a Phone Number"
+    template_name = 'cpanel/form_ph_num_buy.html'
     form_class = PhoneNumberAddForm
-    success_url = reverse_lazy('sms:phone_number_list')
+    success_url = reverse_lazy('sms:ph_num_add')
 
     def get_context_data(self, **kwargs):
         context = super(PhoneNumberAddView, self).get_context_data(**kwargs)
-        context['question'] = "Purchase {} for $1".format(self.request.session['phone_number'])
+        context['question'] = "Purchase {} for ${}".format(
+            self.request.session['phone_number'], settings.PHONE_NUMBER_CHARGE/100)
         context['submit_button'] = "Confirm"
         return context
 
