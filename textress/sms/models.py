@@ -47,7 +47,7 @@ class PhoneNumberQuerySet(models.query.QuerySet):
         try:
             return self.filter(hotel=hotel).get(is_primary=True)
         except ObjectDoesNotExist:
-            raise
+            return
         except MultipleObjectsReturned:
             self.update_primary(hotel, sid=self.order_by('-created')[0].sid)
             return self.primary(hotel)

@@ -1,0 +1,7 @@
+{% load stripe_tags %}
+<div class="row">
+    <div class="col-md-8">
+        <h4>Change primary phone number</h4>
+        <p>Select a different phone number to set it as the primary phone number for use on the account.  All other phone numbers will be saved until they are released.  All active phone numbers on the account cost <strong>{{ ph_num_monthly_cost|stripe_money }}</strong>.</p>
+    </div>
+</div>

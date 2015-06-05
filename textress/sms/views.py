@@ -10,17 +10,17 @@ from django.contrib import messages
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 
 from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
-    GroupRequiredMixin, SetHeadlineMixin)
+    GroupRequiredMixin, SetHeadlineMixin, FormValidMessageMixin)
 
 from sms.models import PhoneNumber
-from sms.forms import (PhoneNumberForm, PhoneNumberSelectForm,
-    PhoneNumberAddForm)
+from sms.forms import PhoneNumberForm, PhoneNumberAddForm
 from payment.mixins import HotelAdminCheckMixin
 from utils.exceptions import DailyLimit
 from utils.hotel import TwilioHotel
 
 
-class PhoneNumberBaseView(GroupRequiredMixin, SetHeadlineMixin, HotelAdminCheckMixin, FormView):
+class PhoneNumberBaseView(GroupRequiredMixin, SetHeadlineMixin, FormValidMessageMixin,
+    HotelAdminCheckMixin, FormView):
     '''All phone number views require the same permissions, and context mixins. 
     Just the attrs are different.'''
     pass
@@ -36,10 +36,13 @@ class PhoneNumberListView(PhoneNumberBaseView):
     template_name = 'sms/ph_num_list.html'
     form_class = PhoneNumberForm
     success_url = reverse_lazy('sms:ph_num_list')
+    form_valid_message = "Primary Phone Number successfully updated"
 
     def get_context_data(self, **kwargs):
         context = super(PhoneNumberListView, self).get_context_data(**kwargs)
         context['phone_numbers'] = self.hotel.phonenumbers.all()
+        context['addit_info'] = render_to_string('cpanel/forms/form_ph_list.html',
+            {'ph_num_monthly_cost': settings.PHONE_NUMBER_MONTHLY_COST})
         return context
 
     def get_form_kwargs(self):
@@ -48,12 +51,9 @@ class PhoneNumberListView(PhoneNumberBaseView):
         PhoneNumber is available to set as "Primary" Ph # for the Hotel.
         """
         kwargs = super(PhoneNumberListView, self).get_form_kwargs()
+        kwargs['hotel'] = self.hotel
         kwargs['phone_numbers'] = self.hotel.phonenumbers.all()
         return kwargs
-
-    def form_valid(self, form):
-        print(form.cleaned_data)
-        return super(PhoneNumberListView, self).form_valid(form)
 
 
 class PhoneNumberAddView(PhoneNumberBaseView):
@@ -61,16 +61,17 @@ class PhoneNumberAddView(PhoneNumberBaseView):
     Form with no input, just confirms purchasing the ph num.
     '''
     group_required = ["hotel_admin"]
-    headline = "Confirm to Purchase a Phone Number"
+    headline = "Purchase a Phone Number"
     template_name = 'cpanel/form.html'
     form_class = PhoneNumberAddForm
     success_url = reverse_lazy('sms:ph_num_list')
+    form_valid_message = "Phone Number successfully purchased"
 
     def get_context_data(self, **kwargs):
         context = super(PhoneNumberAddView, self).get_context_data(**kwargs)
         # context['question'] = "Purchase {} for ${}".format(
         #     self.request.session['phone_number'], settings.PHONE_NUMBER_CHARGE/100)
-        context['addit_info'] = render_to_string("cpanel/form_ph_add.html",
+        context['addit_info'] = render_to_string("cpanel/forms/form_ph_add.html",
             {'amount': settings.PHONE_NUMBER_CHARGE, 'hotel': self.hotel})
         context['submit_button'] = "Confirm"
         return context

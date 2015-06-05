@@ -46,6 +46,9 @@
             </div>
         </div>
 
+        {% if addit_info %}
+            {{ addit_info|safe }}
+        {% endif %}
     
         <div class="row">
             <div class="col-sm-12">
@@ -53,19 +56,12 @@
                     {% csrf_token %}
     
                     {% if form.phone_numbers %}
-                        <table class="table table-hover">
-                            <tr>
-                                <th>Phone Number</th>
-                            </tr>
-                            {% for radio in form.phone_numbers %}
-                                <tr>
-                                    <td>{{ radio }}</td>
-                                </tr>
-                            {% endfor %}
-                            <button class="btn btn-primary next-step btn-block">
-                                    Make Primary <i class="fa fa-arrow-circle-right"></i>
+                        {{ form.as_table }}
+                            <div class="col-sm-offset-10">
+                                <button class="btn btn-primary next-step btn-block" ng-disabled="{{ form.form_name }}.$invalid">
+                                    {% if submit_button %}{{ submit_button }}{% else %}Submit{% endif %} <i class="fa fa-arrow-circle-right"></i>
                                 </button>
-                        </table>
+                            </div>
                     {% else %}
                         <p>No phone numbers on account.</p>
                     {% endif %}

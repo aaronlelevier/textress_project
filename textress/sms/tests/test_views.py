@@ -39,7 +39,9 @@ class PhoneNumberTests(TestCase):
     def test_list(self):
         response = self.client.get(reverse('sms:ph_num_list'))
         self.assertEqual(response.status_code, 200)
+        # Context
         assert response.context['headline']
+        assert response.context['addit_info']
 
     def test_add(self):
         # Dave confirms buy
@@ -48,16 +50,3 @@ class PhoneNumberTests(TestCase):
         # Context
         assert response.context['addit_info']
         assert response.context['submit_button']
-
-
-
-
-
-
-
-
-
-
-
-
-
