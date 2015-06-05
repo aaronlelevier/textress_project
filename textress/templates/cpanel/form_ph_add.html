@@ -1,0 +1,6 @@
+{% load stripe_tags %}
+<div class="row">
+    <div class="col-md-8">
+        <p>Confirm purchase for <strong>{{ amount|stripe_money }}</strong> for your phone number.  The <em>Textress Phone Number</em> will match the local area code of your Hotel.  The area code for your Hotel is <strong>({{ hotel.area_code }})</strong>. If you would like a custom phone number, 800 number, or have some other preference, please contact us at <span><a href="mailto:support@textress.com">Textress Support</a></span>.</p>
+    </div>
+</div>

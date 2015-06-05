@@ -42,15 +42,10 @@ class PhoneNumberTests(TestCase):
         self.assertEqual(response.status_code, 200)
         assert response.context['headline']
 
-    def test_select(self):
-        # Dave can see a list of ph numbers
-        response = self.client.get(reverse('sms:ph_num_select'))
-        self.assertEqual(response.status_code, 200)
-
     def test_add(self):
         # Dave confirms buy
         response = self.client.get(reverse('sms:ph_num_add'))
-
+        self.assertEqual(response.status_code, 200)
 
 
 

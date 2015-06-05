@@ -13,7 +13,7 @@ from djangular.forms import (NgFormValidationMixin, NgDeclarativeFieldsMetaclass
 from djangular.styling.bootstrap3.forms import (Bootstrap3Form,
     Bootstrap3ModelForm, Bootstrap3FormMixin)
 
-from .models import Hotel
+from main.models import Hotel
 from account.helpers import login_messages
 from concierge.models import validate_phone
 

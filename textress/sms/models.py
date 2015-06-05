@@ -59,6 +59,7 @@ class PhoneNumberManager(TwilioClient, models.Manager):
             o.save()
 
     def purchase_number(self, hotel):
+        "Based on ``area_code`` of the Hotel."
         number = None
         while not number:
             numbers = self.client.phone_numbers.search(

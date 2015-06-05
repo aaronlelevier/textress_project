@@ -3,6 +3,7 @@ import twilio
 
 from django.conf import settings
 from django.shortcuts import render
+from django.template.loader import render_to_string
 from django.views.generic import FormView, CreateView
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib import messages
@@ -86,14 +87,16 @@ class PhoneNumberAddView(PhoneNumberBaseView):
     '''
     group_required = ["hotel_admin"]
     headline = "Confirm to Purchase a Phone Number"
-    template_name = 'cpanel/form_ph_num_buy.html'
+    template_name = 'cpanel/form.html'
     form_class = PhoneNumberAddForm
-    success_url = reverse_lazy('sms:ph_num_add')
+    success_url = reverse_lazy('sms:ph_num_list')
 
     def get_context_data(self, **kwargs):
         context = super(PhoneNumberAddView, self).get_context_data(**kwargs)
-        context['question'] = "Purchase {} for ${}".format(
-            self.request.session['phone_number'], settings.PHONE_NUMBER_CHARGE/100)
+        # context['question'] = "Purchase {} for ${}".format(
+        #     self.request.session['phone_number'], settings.PHONE_NUMBER_CHARGE/100)
+        context['addit_info'] = render_to_string("cpanel/form_ph_add.html",
+            {'amount': settings.PHONE_NUMBER_CHARGE, 'hotel': self.hotel})
         context['submit_button'] = "Confirm"
         return context
 

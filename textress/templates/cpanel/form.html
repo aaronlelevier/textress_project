@@ -65,6 +65,10 @@
             </div>
         </div>
 
+        {% if addit_info %}
+            {{ addit_info|safe }}
+        {% endif %}
+
         <div class="row">
             <div class="col-sm-12">
                 <form name="{{ form.form_name }}" method="post" action="" novalidate>
@@ -77,7 +81,7 @@
                             </div>
                             <div class="col-sm-offset-10">
                                 <button class="btn btn-primary next-step btn-block" ng-disabled="{{ form.form_name }}.$invalid">
-                                    Submit <i class="fa fa-arrow-circle-right"></i>
+                                    {% if submit_button %}{{ submit_button }}{% else %}Submit{% endif %} <i class="fa fa-arrow-circle-right"></i>
                                 </button>
                             </div>
                         </div>
