@@ -14,7 +14,6 @@ from main.models import Hotel
 from main.tests.factory import (create_hotel, make_subaccount,
     CREATE_USER_DICT, CREATE_HOTEL_DICT)
 from utils import create
-from sms.models import Text, DemoCounter
 from sms.helpers import sms_messages
 
 
@@ -46,6 +45,9 @@ class PhoneNumberTests(TestCase):
         # Dave confirms buy
         response = self.client.get(reverse('sms:ph_num_add'))
         self.assertEqual(response.status_code, 200)
+        # Context
+        assert response.context['addit_info']
+        assert response.context['submit_button']
 
 
 

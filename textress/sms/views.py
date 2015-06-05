@@ -56,31 +56,6 @@ class PhoneNumberListView(PhoneNumberBaseView):
         return super(PhoneNumberListView, self).form_valid(form)
 
 
-class PhoneNumberSelectView(PhoneNumberBaseView):
-    """
-    Adds a Twilio PhoneNumber Obj. as a cookie, and sends the User
-    to a `Confirm Purchase View`.
-    """
-    group_required = ["hotel_admin"]
-    headline = "Select a Phone Number"
-    template_name = 'cpanel/form_ph_num_buy.html'
-    form_class = PhoneNumberSelectForm
-    success_url = reverse_lazy('sms:ph_num_add')
-
-    def get_form_kwargs(self):
-        """Needed kwargs to get available phone numbers based on Hotel
-        and save it to request.session['cookie']."""
-        kwargs = super(PhoneNumberSelectView, self).get_form_kwargs()
-        kwargs['request'] = self.request
-        kwargs['twilio_hotel'] = TwilioHotel(hotel=self.hotel)
-        return kwargs
-
-    def form_valid(self, form):
-        # TODO: remove in prod, only printing for testing
-        print(form.cleaned_data)
-        return super(PhoneNumberSelectView, self).form_valid(form)
-
-
 class PhoneNumberAddView(PhoneNumberBaseView):
     '''
     Form with no input, just confirms purchasing the ph num.
@@ -102,6 +77,5 @@ class PhoneNumberAddView(PhoneNumberBaseView):
 
     def form_valid(self, form):
         "Purchase Twilio Ph # Obj here, and add to related models."
-        phone_number = PhoneNumber.objects.twilio_create(
-            phone_number=self.request.session['phone_number'], hotel=self.hotel)
+        phone_number, created = PhoneNumber.objects.get_or_create(hotel=self.hotel)
         return super(PhoneNumberAddView, self).form_valid(form)

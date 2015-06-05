@@ -40,11 +40,13 @@ class PhoneNumberTests(TestCase):
         hotel = create_hotel()
         phones = mommy.make(PhoneNumber, hotel=hotel, _quantity=3)
 
-        primary = PhoneNumber.objects.primary()
+        # Need to update the "primary" ph num 1st or else ".primary()"
+        # will return multiple phone numbers
+        primary = PhoneNumber.objects.primary(hotel)
         assert isinstance(primary, PhoneNumber)
         assert primary.is_primary
-
         assert len(PhoneNumber.objects.filter(is_primary=False)) == len(phones) - 1
+
 
 class LivePhoneNumberTests(TestCase):
 
@@ -69,9 +71,11 @@ class LivePhoneNumberTests(TestCase):
         # number = PhoneNumber.objects.purchase_number(self.hotel)
         # assert number
 
+        # Confirm Account Exists
         dave_acct = self.client.accounts.list(friendly_name='Dave Hotel')[0]
         assert dave_acct
 
+        # Confirm that he has a PhoneNumber
         client = TwilioRestClient(dave_acct.sid, dave_acct.auth_token)
         dave_number = client.phone_numbers.get(self.ph_sid)
         assert dave_number

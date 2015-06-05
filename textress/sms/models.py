@@ -3,7 +3,7 @@ from django.conf import settings
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.utils.timezone import now 
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db.utils import IntegrityError
 from django.dispatch import receiver
 from django.db.models.signals import post_save, pre_delete
@@ -36,27 +36,35 @@ class AbstractBase(models.Model):
 
 class PhoneNumberQuerySet(models.query.QuerySet):
 
-    def primary(self):
-        try:
-            return self.get(is_primary=True)
-        except ObjectDoesNotExist:
-            raise 
-
-class PhoneNumberManager(TwilioClient, models.Manager):
-
-    def get_queryset(self):
-        return PhoneNumberQuerySet(self.model, self._db)
-
-    def primary(self):
-        "Return Single Primary PhoneNumber Obj."
-        return self.get_queryset().primary()
-
     def update_primary(self, hotel, sid):
         "Make sure their are no other Primary PhoneNumbers"
         objs = self.filter(hotel=hotel).exclude(sid=sid)
         for o in objs:
             o.is_primary = False
             o.save()
+
+    def primary(self, hotel):
+        try:
+            return self.filter(hotel=hotel).get(is_primary=True)
+        except ObjectDoesNotExist:
+            raise
+        except MultipleObjectsReturned:
+            self.update_primary(hotel, sid=self.order_by('-created')[0].sid)
+            return self.primary(hotel)
+
+
+class PhoneNumberManager(TwilioClient, models.Manager):
+
+    def get_queryset(self):
+        return PhoneNumberQuerySet(self.model, self._db)
+
+    def primary(self, hotel):
+        "Return Single Primary PhoneNumber Obj."
+        return self.get_queryset().primary(hotel)
+
+    def update_primary(self, hotel, sid):
+        "Make sure their are no other Primary PhoneNumbers"
+        return self.get_queryset().update_primary(hotel, sid)
 
     def purchase_number(self, hotel):
         "Based on ``area_code`` of the Hotel."
@@ -85,7 +93,7 @@ class PhoneNumberManager(TwilioClient, models.Manager):
 
     def get_or_create(self, hotel, *args, **kwargs):
         try:
-            db_number = self.get(sid=hotel.twilio_ph_sid)
+            ph_num = self.get(sid=hotel.twilio_ph_sid)
             created = False
         except ObjectDoesNotExist:
             # Buy Twilio Ph#
@@ -95,16 +103,16 @@ class PhoneNumberManager(TwilioClient, models.Manager):
             number = self.update_account_sid(hotel, number)
 
             # Save to DB
-            db_number = self.create(hotel=hotel,
+            ph_num = self.create(hotel=hotel,
                 sid=number.sid,
                 phone_number=number.phone_number,
                 friendly_name=number.friendly_name)
             created = True
 
         # assure there is only 1 Primary Ph #
-        self.update_primary(hotel=hotel, sid=db_number.sid)
+        self.update_primary(hotel=hotel, sid=ph_num.sid)
 
-        return db_number, created
+        return ph_num, created
 
 
 class PhoneNumber(TwilioClient, AbstractBase):
