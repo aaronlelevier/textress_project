@@ -38,6 +38,8 @@ class TwilioClient(object):
 class AbstractBaseQuerySet(models.query.QuerySet):
     
     def current(self):
+        # TODO: create logic on current for must be within the c/i  - c/o dates
+        #   or make a daily job to archive c/o guests to ``hidden=True``
         return self.filter(hidden=False)
 
     def archived(self):

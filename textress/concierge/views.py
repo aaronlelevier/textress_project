@@ -201,13 +201,17 @@ class GuestMessageRetrieveAPIView(generics.RetrieveAPIView):
 
 
 class GuestListCreateAPIView(generics.ListCreateAPIView):
+    '''
+    Returns only Guests from the Users' Hotel. Don't need to filter 
+    for this in the AngJs Service.
+    '''
 
     queryset = Guest.objects.all()
     serializer_class = GuestBasicSerializer
     permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
 
     def list(self, request):
-        guests = Guest.objects.filter(hotel=request.user.profile.hotel)
+        guests = Guest.objects.current().filter(hotel=request.user.profile.hotel)
         serializer = GuestBasicSerializer(guests, many=True)
         return Response(serializer.data)
 

@@ -195,3 +195,9 @@ section.anchor{display: block; position: relative; top: 50px;}
 .login_logo img {
     max-width: 1.75em;
 }
+
+/* href */
+a.no_decoration {
+    text-decoration: none;
+    color: inherit;
+}
