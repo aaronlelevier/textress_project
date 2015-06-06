@@ -98,8 +98,8 @@ def _phone_numbers():
     settings.DEFAULT_TO_PH == +17026018602
     Adds #'s ending in 3,4,5 
     """
-    phone_numbers = [settings.DEFAULT_TO_PH, settings.DEFAULT_TO_PH_2]
-    for i in range(3):
+    phone_numbers = []
+    for i in range(5):
         phone_numbers.append("+1702601860"+str(int(settings.DEFAULT_TO_PH[-1])+i+3))
     return phone_numbers 
 
@@ -116,6 +116,8 @@ def _get_guests():
             hotel=hotels[i],
             phone_number=phone_numbers[i])
     return Guest.objects.all() 
+
+
 
 
 ########

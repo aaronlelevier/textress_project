@@ -4,7 +4,6 @@ from concierge import views
 
 
 api_patterns = patterns('',
-    #concierge
     url(r'^messages/$', views.MessageListCreateAPIView.as_view(), name='api_messages'),
     url(r'^messages/(?P<pk>\d+)/$', views.MessageRetrieveAPIView.as_view(), name='api_messages'),
 

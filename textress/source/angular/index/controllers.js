@@ -1,6 +1,6 @@
-var homeControllers = angular.module('indexApp.controllers', []);
+var indexControllers = angular.module('indexApp.controllers', []);
 
-homeControllers.controller('PhoneListCtrl', function PhoneListCtrl($scope) {
+indexControllers.controller('PhoneListCtrl', function PhoneListCtrl($scope) {
     $scope.phones = [{
         'name': 'Nexus S',
         'snippet': 'Fast just got faster with Nexus S.'
@@ -13,7 +13,7 @@ homeControllers.controller('PhoneListCtrl', function PhoneListCtrl($scope) {
     }];
 });
 
-homeControllers.controller('PricingCtrl', ['$scope', 'Pricing', function($scope, Pricing) {
+indexControllers.controller('PricingCtrl', ['$scope', 'Pricing', function($scope, Pricing) {
     //prices will be from a DRF REST endpoint, so when changed in the DB,
     //they are auto-reflected here
     $scope.prices = Pricing.query();
@@ -45,6 +45,6 @@ homeControllers.controller('PricingCtrl', ['$scope', 'Pricing', function($scope,
         });
 }]);
 
-homeControllers.controller('FAQCtrl', ['$scope', 'FAQ', function($scope, FAQ) {
+indexControllers.controller('FAQCtrl', ['$scope', 'FAQ', function($scope, FAQ) {
     $scope.topics = FAQ.query();
 }]);

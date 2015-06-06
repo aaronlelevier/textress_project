@@ -24,19 +24,14 @@ from rest_framework.response import Response
 from rest_framework import mixins, generics, status, permissions, viewsets
 
 from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
-    CsrfExemptMixin)
+    GroupRequiredMixin, SetHeadlineMixin, FormValidMessageMixin, CsrfExemptMixin)
 
 from concierge.models import Message, Guest
 from concierge.helpers import process_incoming_message
 from concierge.forms import MessageForm
 from concierge.permissions import IsHotelObject, IsManagerOrAdmin, IsHotelUser
-from concierge.serializers import (
-    MessageSerializer,
-    GuestMessageSerializer,
-    GuestBasicSerializer,
-    UserSerializer
-    )
-
+from concierge.serializers import (MessageSerializer, GuestMessageSerializer,
+    GuestBasicSerializer, UserSerializer)
 from sms.helpers import send_text, send_message, sms_messages
 from main.models import Hotel, UserProfile
 from main.views import HotelMixin
@@ -66,12 +61,13 @@ class ReceiveSMSView(CsrfExemptMixin, View):
 # GUEST VIEWS #
 ###############
 
-class GuestListView(HotelUserMixin, ListView):
+class GuestListView(SetHeadlineMixin, HotelUserMixin, ListView):
+    headline = "Guest List"
     model = Guest
 
     def get_context_data(self, **kwargs):
         context = super(GuestListView, self).get_context_data(**kwargs)
-        context['object_list'] = self.model.objects.current().filter(
+        context['guests'] = self.model.objects.current().filter(
             hotel=self.hotel)
         return context
 
