@@ -56,10 +56,6 @@ class MessageSerializer(serializers.ModelSerializer):
             'to_ph', 'from_ph', 'body', 'reason', 'cost', 'read',
             'created', 'modified', 'insert_date', 'hidden')
         read_only_fields = ('created', 'modified',)
-
-    # def create(self, validated_data):
-    #     '''Guest belongs to User's Hotel.'''
-    #     return Message.objects.create(**validated_data)
         
 
 class GuestMessageSerializer(serializers.ModelSerializer):
@@ -71,7 +67,3 @@ class GuestMessageSerializer(serializers.ModelSerializer):
             'check_in', 'check_out', 'created', 'modified', 'hidden',
             'messages')
         read_only_fields = ('created', 'modified',)
-
-
-
-

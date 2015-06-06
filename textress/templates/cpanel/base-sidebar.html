@@ -422,6 +422,31 @@
                             </ul>
                         </li>
 
+                        <li>
+                            <a href="javascript:void(0)"><i class="clip-users-2"></i>
+                                <span class="title"> Manage Guests </span><i class="icon-arrow"></i>
+                                <span class="selected"></span>
+                            </a>
+                            <ul class="sub-menu">
+                                <li>
+                                    <a href="{% url 'concierge:guest_list' %}">
+                                        <span class="title"> Guest List</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'concierge:guest_create' %}">
+                                        <span class="title"> Add a Guest</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'account' %}"><i class="clip-bubble"></i>
+                                <span class="title"> Manage Messages </span><span class="selected"></span>
+                            </a>
+                        </li>
+
                         {% if user|has_group:"hotel_admin" %}
                         <li>
                             <a href="javascript:void(0)"><i class="clip-phone"></i>
@@ -442,17 +467,7 @@
                             </ul>
                         </li>
                         {% endif %}
-
-                        <li>
-                            <a href="{% url 'account' %}"><i class="clip-users-2"></i>
-                                <span class="title"> Manage Guests </span><span class="selected"></span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{% url 'account' %}"><i class="clip-bubble"></i>
-                                <span class="title"> Manage Messages </span><span class="selected"></span>
-                            </a>
-                        </li>
+                        
                     </ul>
                 </div>
             </div>

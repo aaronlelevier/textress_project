@@ -3,7 +3,11 @@ from django.conf import settings
 
 from twilio import twiml, TwilioRestException 
 
-from concierge.models import Message
+from djangular.forms import NgFormValidationMixin
+from djangular.styling.bootstrap3.forms import (Bootstrap3Form,
+    Bootstrap3ModelForm)
+
+from concierge.models import Message, Guest
 from sms.helpers import sms_messages, clean_to, send_message
 
 
@@ -32,23 +36,10 @@ class MessageForm(forms.ModelForm):
         return cleaned_data
 
 
+class GuestForm(NgFormValidationMixin, Bootstrap3ModelForm):
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    form_name = 'guest_form'
+    
+    class Meta:
+        model = Guest
+        fields = ['name', 'room_number', 'phone_number', 'check_in', 'check_out']

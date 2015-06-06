@@ -23,13 +23,13 @@ conciergeControllers.controller('GuestListCtrl', ['$scope', 'Guest', function($s
     };
 }]);
 
-conciergeControllers.controller('MessageCtrl', ['$scope', '$stateParams', '$interval', 'Message', 'GuestMessages',
+conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '$interval', 'Message', 'GuestMessages',
     function($scope, $stateParams, $interval, Message, GuestMessages) {
         $scope.messages = {};
 
         $scope.getGuest = function(GuestMessages, $stateParams, $scope) {
             GuestMessages.get({
-                id: $stateParams.guestId
+                id: 5 //$stateParams.guestId
             }, function(response) {
                 $scope.guest = response;
                 $scope.to = response.phone_number;
@@ -43,9 +43,9 @@ conciergeControllers.controller('MessageCtrl', ['$scope', '$stateParams', '$inte
         // populate initial context without a delay
         $scope.getGuest(GuestMessages, $stateParams, $scope);
 
-        $interval(function() {
-            $scope.getGuest(GuestMessages, $stateParams, $scope);
-        }, 10000);
+        // $interval(function() {
+        //     $scope.getGuest(GuestMessages, $stateParams, $scope);
+        // }, 10000);
 
         $scope.submitMessage = function(body) {
             console.log('Pre create - guest id:', $scope.guest.id);

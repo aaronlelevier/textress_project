@@ -1,8 +1,61 @@
-{% extends "base_test.html" %}
+{% extends "cpanel/base-sidebar.html" %}
+{% load staticfiles %}
 
-{% block main %}
-  <h1>Guest Detail</h1>
-  <p>{{ object }} </p>
-  <p><a href="{% url 'concierge:guest_delete' object.pk %}"><button>Delete</button></a></p>
-  <p><a href="{% url 'concierge:guest_update' object.pk %}"><button>Update</button></a></p>
-{% endblock main %}
+
+{% block head_js %}
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular.min.js"></script>
+    <script src="{% static 'vendor/angular-resource/angular-resource.min.js' %}"></script>
+    <script src="{% static 'vendor/angular-route/angular-route.min.js' %}"></script>
+    <script src="{% static 'vendor/angular-ui-router/release/angular-ui-router.min.js' %}"></script>
+    <script src="{% static 'angular/concierge/app.js' %}"></script>
+    <script src="{% static 'angular/concierge/services.js' %}"></script>
+    <script src="{% static 'angular/concierge/controllers.js' %}"></script>
+    <script src="{% static 'angular/config.js' %}"></script>
+{% endblock head_js %}
+
+
+{% block angular_app %}
+    ng-app="conciergeApp"
+{% endblock %}
+
+
+{% block content %}
+
+    {% block page_header %}
+        {{ block.super }}
+    {% endblock page_header %}
+
+        <!-- start: PAGE CONTENT -->
+
+        <div class="row">
+            <div class="col-md-8">
+                <h4>Main Guest page. Guest Detail with SMS</h4>
+            </div>
+        </div>
+
+        <br>
+    
+        <div class="row" ng-controller="GuestMessageCtrl" id="guestMessageCtrl" ng-cloak>
+            <div class="col-md-6">
+                <table class="table table-hover">
+                    <tr>
+                        <th>Field</th>
+                        <th>Value</th>
+                    </tr>
+                    <tr ng-repeat="(key, value) in guest">
+                        <td> [[ key ]] </td> <td> [[ value ]] </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <!-- TODO:
+                    Form for Angular to send SMS with
+                    List of messages for both: Guest / Users in Descending order by "created"
+                -->
+            </div>
+        </div>
+        <!-- end: PAGE CONTENT -->
+    </div>
+</div>
+<!-- end: PAGE -->        
+{% endblock content %}

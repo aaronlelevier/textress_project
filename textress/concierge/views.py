@@ -8,7 +8,7 @@ from twilio import twiml, TwilioRestException
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404
-from django.views.generic import View, FormView, DetailView, ListView
+from django.views.generic import View, FormView, DetailView, ListView, TemplateView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist
@@ -28,7 +28,7 @@ from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
 
 from concierge.models import Message, Guest
 from concierge.helpers import process_incoming_message
-from concierge.forms import MessageForm
+from concierge.forms import MessageForm, GuestForm
 from concierge.permissions import IsHotelObject, IsManagerOrAdmin, IsHotelUser
 from concierge.serializers import (MessageSerializer, GuestMessageSerializer,
     GuestBasicSerializer, UserSerializer)
@@ -61,52 +61,75 @@ class ReceiveSMSView(CsrfExemptMixin, View):
 # GUEST VIEWS #
 ###############
 
-class GuestListView(SetHeadlineMixin, HotelUserMixin, ListView):
+class GuestBaseView(SetHeadlineMixin, HotelUserMixin, View):
+    headline = "Guest View"
+    model = Guest
+
+
+class GuestListView(GuestBaseView, ListView):
+    '''
+    Angular View. Angular controlls all context for this View.
+    '''
     headline = "Guest List"
+
+
+class GuestDetailView(GuestBaseView, DetailView):
+    '''
+    TODO
+    ----
+    Will contain Guest Details, and a Message Form powered by 
+    Angular for sending/receiving SMS through Websockets w/o page 
+    updates needed.
+    '''
+    
+    def get_headline(self):
+        return u"{} Detail".format(self.object)
+
+
+class GuestCreateView(GuestBaseView, CreateView):
+    
+    headline = "Add a Guest"
+    template_name = 'cpanel/form.html'
     model = Guest
-
-    def get_context_data(self, **kwargs):
-        context = super(GuestListView, self).get_context_data(**kwargs)
-        context['guests'] = self.model.objects.current().filter(
-            hotel=self.hotel)
-        return context
-
-
-class GuestDetailView(HotelUserMixin, DetailView):
-    model = Guest
-
-
-class GuestCreateView(HotelUserMixin, CreateView):
-    model = Guest
+    form_class = GuestForm
     fields = ['name', 'room_number', 'phone_number', 'check_in', 'check_out']
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.hotel = self.hotel
         self.object.save()
-        hotel, created = Hotel.objects.get_or_create(guest=self.object)
+        # hotel, created = Hotel.objects.get_or_create(guest=self.object)
         return super(GuestCreateView, self).form_valid(form)
 
 
-class GuestUpdateView(HotelUserMixin, UpdateView):
+class GuestUpdateView(GuestBaseView, UpdateView):
     '''
     TODO
     ----
     Add Js ph # prettifier
     '''
+    headline = "Update Guest"
+    template_name = 'cpanel/form.html'
     model = Guest
+    form_class = GuestForm
     fields = ['name', 'room_number', 'phone_number', 'check_in', 'check_out']
 
 
-class GuestDeleteView(HotelUserMixin, View):
+class GuestDeleteView(GuestBaseView, TemplateView):
     '''Hide only. Don't `delete` any guest records b/c don't want to
-    delete the related `Messages`.'''
+    delete the related `Messages`.
 
-    template_name = 'concierge/guest_delete.html'
+    TODO:
+    change to a form view w/ delete context for button color, etc...
+    and to better handle than a plain: get/post 
+    '''
 
-    def get(self, request, *args, **kwargs):
-        self.object = Guest.objects.get(pk=kwargs['pk'])
-        return render(request, self.template_name, {'object': self.object})
+    headline = "Delete Guest"
+    template_name = 'cpanel/form.html'
+
+    # def get(self, request, *args, **kwargs):
+    #     self.object = Guest.objects.get(pk=kwargs['pk'])
+    #     return render(request, self.template_name, {'object': self.object})
 
     def post(self, request, *args, **kwargs):
         self.object = Guest.objects.get(pk=kwargs['pk'])
