@@ -80,8 +80,8 @@
                                 {{ register_link|safe }}
                             </div>
                             <div class="col-sm-offset-10">
-                                <button class="btn btn-primary next-step btn-block" ng-disabled="{{ form.form_name }}.$invalid">
-                                    {% if submit_button %}{{ submit_button }}{% else %}Submit{% endif %} <i class="fa fa-arrow-circle-right"></i>
+                                <button class="btn btn-{% if btn_color %}{{ btn_color }}{% else %}primary{% endif %} next-step btn-block" ng-disabled="{{ form.form_name }}.$invalid">
+                                    {% if btn_text %}{{ btn_text }}{% else %}Submit{% endif %} <i class="fa fa-arrow-circle-right"></i>
                                 </button>
                             </div>
                         </div>

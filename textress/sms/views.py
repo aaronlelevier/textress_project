@@ -4,7 +4,7 @@ import twilio
 from django.conf import settings
 from django.shortcuts import render
 from django.template.loader import render_to_string
-from django.views.generic import FormView, CreateView
+from django.views.generic import FormView, CreateView, DeleteView
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib import messages
 from django.http import HttpResponse, Http404, HttpResponseRedirect
@@ -73,10 +73,37 @@ class PhoneNumberAddView(PhoneNumberBaseView):
         #     self.request.session['phone_number'], settings.PHONE_NUMBER_CHARGE/100)
         context['addit_info'] = render_to_string("cpanel/forms/form_ph_add.html",
             {'amount': settings.PHONE_NUMBER_CHARGE, 'hotel': self.hotel})
-        context['submit_button'] = "Confirm"
+        context['btn_text'] = "Confirm"
         return context
 
     def form_valid(self, form):
         "Purchase Twilio Ph # Obj here, and add to related models."
         phone_number, created = PhoneNumber.objects.get_or_create(hotel=self.hotel)
         return super(PhoneNumberAddView, self).form_valid(form)
+
+
+class PhoneNumberDeleteView(PhoneNumberBaseView, DeleteView):
+    '''
+    Admin confirms to Delete PhoneNumber here before deleting.
+    '''
+    group_required = ["hotel_admin"]
+    headline = "Delete Phone Number"
+    template_name = 'cpanel/form.html'
+    form_class = PhoneNumberAddForm # empty form here w/ no fields, just confirming delete
+    success_url = reverse_lazy('sms:ph_num_list')
+    model = PhoneNumber
+    pk_url_kwarg = 'sid'
+
+    def get_context_data(self, **kwargs):
+        # custom context to display Delete wanted by user
+        context = super(PhoneNumberDeleteView, self).get_context_data(**kwargs)
+        context['addit_info'] = render_to_string('cpanel/forms/form_ph_delete.html',
+            {'ph': self.object})
+        # Submit Button Context
+        context['btn_color'] = 'danger'
+        context['btn_text'] = 'Delete'
+        return context
+    
+    def get_form_valid_message(self):
+        # dynamic msg success to show which ph num was deleted
+        return u"{0} deleted!".format(self.object.friendly_name)

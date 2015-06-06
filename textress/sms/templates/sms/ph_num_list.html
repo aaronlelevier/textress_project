@@ -54,14 +54,30 @@
             <div class="col-sm-12">
                 <form name="{{ form.form_name }}" method="post" action="">
                     {% csrf_token %}
-    
                     {% if form.phone_numbers %}
-                        {{ form.as_table }}
-                            <div class="col-sm-offset-10">
-                                <button class="btn btn-primary next-step btn-block" ng-disabled="{{ form.form_name }}.$invalid">
-                                    {% if submit_button %}{{ submit_button }}{% else %}Submit{% endif %} <i class="fa fa-arrow-circle-right"></i>
-                                </button>
-                            </div>
+                        <table class="table table-hover">
+                            <tr>
+                                <th>Primary</th>
+                                <th>Phone Number</th>
+                                <th>Delete</th>
+                            </tr>
+                            <tr>
+                                {% for ph in phone_numbers %}
+                                    <td><input checked="checked" type="radio" id="id_phone_numbers_{{forloop.counter0}}" name="phone_numbers" value="{{ ph.sid }}"></td>
+                                    <td>{{ ph.friendly_name }}</td>
+                                    <td>
+                                        <a href="{% url 'sms:ph_num_delete' ph.sid %}">
+                                            <button type="button" class="btn btn-danger btn-xs">Delete</button>
+                                        </a>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        </table>
+                        <div>
+                            <button class="btn btn-success next-step" ng-disabled="{{ form.form_name }}.$invalid">
+                                Update primary number <i class="fa fa-arrow-circle-right"></i>
+                            </button>
+                        </div>
                     {% else %}
                         <p>No phone numbers on account.</p>
                     {% endif %}

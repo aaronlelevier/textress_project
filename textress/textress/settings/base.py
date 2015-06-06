@@ -224,7 +224,7 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 NOSE_ARGS = [
     '--with-coverage',
-    '--cover-package=textress,account,contact,payment,utils',
+    '--cover-package=textress,account,contact,payment,sms,utils',
 ]
 
 if 'test' in sys.argv:

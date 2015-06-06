@@ -6,6 +6,7 @@ from sms import views
 phone_patters = patterns('',
     url(r'^$', views.PhoneNumberListView.as_view(), name='ph_num_list'),
     url(r'^add/$', views.PhoneNumberAddView.as_view(), name='ph_num_add'),
+    url(r'^delete/(?P<sid>[\w\d]+)/$', views.PhoneNumberDeleteView.as_view(), name='ph_num_delete'),
     )
 
 urlpatterns = patterns('',

@@ -1,0 +1,14 @@
+[
+{
+  "pk": "PNab1d5d0de9ba35e7b149a6e3640b6d18",
+  "fields": {
+    "created": "2015-06-05T14:35:32.084Z",
+    "phone_number": "+17752344330",
+    "is_primary": true,
+    "friendly_name": "(775) 234-4330",
+    "modified": "2015-06-05T14:35:32.084Z",
+    "hotel": 3
+  },
+  "model": "sms.phonenumber"
+}
+]

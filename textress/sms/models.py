@@ -44,6 +44,9 @@ class PhoneNumberQuerySet(models.query.QuerySet):
             o.save()
 
     def primary(self, hotel):
+        '''
+        Returns the single "primary" PhoneNumber object.
+        '''
         try:
             return self.filter(hotel=hotel).get(is_primary=True)
         except ObjectDoesNotExist:
