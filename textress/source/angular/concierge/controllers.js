@@ -29,7 +29,7 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
 
         $scope.getGuest = function(GuestMessages, $stateParams, $scope) {
             GuestMessages.get({
-                id: 5 //$stateParams.guestId
+                id: 1 //$stateParams.guestId
             }, function(response) {
                 $scope.guest = response;
                 $scope.to = response.phone_number;

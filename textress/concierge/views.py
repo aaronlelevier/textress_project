@@ -47,6 +47,8 @@ class ReceiveSMSView(CsrfExemptMixin, View):
 
     def post(self, request, *args, **kwargs):
         resp = twiml.Response()
+        
+        print(request.POST)
 
         # if a msg is returned, attach and reply to Guest
         msg = process_incoming_message(data=request.POST)
@@ -176,6 +178,8 @@ class MessageDetailView(HotelMixin, DetailView):
 # REST #
 ########
 
+### MESSAGE ###
+
 class MessageListCreateAPIView(generics.ListCreateAPIView):
     
     queryset = Message.objects.all()
@@ -200,6 +204,8 @@ class MessageRetrieveAPIView(generics.RetrieveAPIView):
     serializer_class = MessageSerializer
     permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
 
+
+### GUEST ###
 
 class GuestMessageListAPIView(generics.ListAPIView):
     """Filter for Guests for the User's Hotel only."""
@@ -248,6 +254,8 @@ class GuestRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
     serializer_class = GuestBasicSerializer
     permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
 
+
+### USER ###
 
 class UserListCreateAPIView(generics.ListCreateAPIView):
 

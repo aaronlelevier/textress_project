@@ -39,19 +39,42 @@
             <div class="col-md-6">
                 <table class="table table-hover">
                     <tr>
-                        <th>Field</th>
-                        <th>Value</th>
+                        <th>Name</th>
+                        <td>[[ guest.name ]]</td>
                     </tr>
-                    <tr ng-repeat="(key, value) in guest">
-                        <td> [[ key ]] </td> <td> [[ value ]] </td>
+                    <tr>
+                        <th>Phone Number</th>
+                        <td>[[ guest.phone_number ]]</td>
                     </tr>
                 </table>
             </div>
+
             <div class="col-md-6">
-                <!-- TODO:
-                    Form for Angular to send SMS with
-                    List of messages for both: Guest / Users in Descending order by "created"
-                -->
+                <form ng-submit="submitMessage(body)">
+                    <div class="form-group">
+                        <input placeholder="Enter message here..." name="messageForm" type="text" class="form-control new-message-input" ng-model="body"></input>
+                    </div>
+
+                    <div class="pull-right">
+                        <input class="btn btn-success" type="submit" id="submit" value="Send" />
+                    </div>
+                </form>
+
+                <br>
+
+                <h5>Will send this message:</h5><span><em>[[ body ]]</em></span>
+
+                <br>
+
+                <h5>Incoming Messages</h5>
+                <ul id="messages"></ul>
+
+                <h5>Outgoing Messages</h5>
+                <div class="messages" id="messages-target">
+                  <div class="message-container" ng-repeat="message in messages">
+                    <div class="message-body"><em>[[ message.created | date:'medium' ]]</em> -- [[ message.body | limitTo : 30 ]]</div>
+                  </div>
+                </div>
             </div>
         </div>
         <!-- end: PAGE CONTENT -->
