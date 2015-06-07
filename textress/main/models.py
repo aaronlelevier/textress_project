@@ -89,9 +89,9 @@ class HotelManager(models.Manager):
         return HotelQuerySet(self.model, self._db)
 
     def textress(self):
-        return self.get(name="Textress Hotel")
+        return self.get(name=settings.TEXTRESS_HOTEL)
 
-    def get_by_phone(self, address_phone):
+    def get_by_phone(self, ph_num):
         '''
         TODO
         ----
@@ -100,11 +100,11 @@ class HotelManager(models.Manager):
         removed.
         '''
         try:
-            return self.get(address_phone=address_phone)
+            return self.get(address_phone=ph_num)
         except ObjectDoesNotExist:
             # TODO: Change to a Celery request to delete the `PhoneNumber`
             # method: PhoneNumber.objects.delete(phone_number=address_phone)
-            return self.get(name="Textress Hotel")
+            return self.get(name=settings.TEXTRESS_HOTEL)
           
 
 class Hotel(TwilioClient, AbstractBase):
@@ -117,7 +117,7 @@ class Hotel(TwilioClient, AbstractBase):
     """
     # Required
     name = models.CharField(_("Hotel Name"), unique=True, max_length=100)
-    address_phone = models.CharField(_("Contact Phone Number"), max_length=12,
+    address_phone = models.CharField(_("Contact Phone Number"), unique=True, max_length=12,
         help_text="10-digit phone number. i.e.: 7025101234")
     address_line1 = models.CharField(_("Address Line 1"), max_length=100)
     address_city = models.CharField(_("City"), max_length=100)
@@ -172,8 +172,7 @@ class Hotel(TwilioClient, AbstractBase):
         return self.name == "Textress Hotel"
 
     def get_absolute_url(self):
-        return reverse('main:hotel',
-            kwargs={'hotel_slug':self.slug, 'pk':self.pk})
+        return reverse('main:hotel_update', kwargs={'pk':self.pk})
 
     def set_admin_id(self, user):
         self.admin_id = user.id

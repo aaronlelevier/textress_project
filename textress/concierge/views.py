@@ -129,10 +129,6 @@ class GuestDeleteView(GuestBaseView, TemplateView):
     headline = "Delete Guest"
     template_name = 'cpanel/form.html'
 
-    # def get(self, request, *args, **kwargs):
-    #     self.object = Guest.objects.get(pk=kwargs['pk'])
-    #     return render(request, self.template_name, {'object': self.object})
-
     def post(self, request, *args, **kwargs):
         self.object = Guest.objects.get(pk=kwargs['pk'])
         self.object.hide()

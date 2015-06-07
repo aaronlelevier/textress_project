@@ -19,7 +19,7 @@ CREATE_USER_DICT = {
 
 CREATE_HOTEL_DICT = {
     'name': 'Test Hotel',
-    'address_phone': '6195105555',
+    'address_phone': '7025105555',
     'address_line1': '123 Some St.',
     'address_city': 'San Diego',
     'address_state': STATES[0][0],

@@ -149,6 +149,7 @@ DEFAULT_EMAIL_NOREPLY = 'noreply@textress.com'
 
 ### OTHER CONTACT INFO ###
 TEXTRESS_PHONE_NUMBER = os.environ['T17_PHONE_NUMBER']
+TEXTRESS_HOTEL = 'Aaron Test'
 
 COMPANY_NAME = "Textress"
 
@@ -224,7 +225,7 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 NOSE_ARGS = [
     '--with-coverage',
-    '--cover-package=textress,account,contact,payment,sms,utils',
+    '--cover-package=account,concierge,contact,main,payment,sms,textress,utils',
 ]
 
 if 'test' in sys.argv:

@@ -37,17 +37,3 @@ def process_incoming_message(data):
     db_message = Message.objects.receive_message(guest, data)
 
     return Reply.objects.process_reply(guest, hotel, data['Body'])
-
-
-
-
-
-
-
-
-
-
-
-
-
-

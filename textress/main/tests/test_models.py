@@ -11,23 +11,57 @@ from django.utils import timezone
 
 from model_mommy import mommy
 
-from .factory import create_hotel
-
-from ..models import Hotel, UserProfile, Subaccount
-
-from utils import create
+from main.models import Hotel, UserProfile, Subaccount
+from main.tests.factory import create_hotel
 from payment.models import Customer
+from utils import create
 from utils.data import STATES
+
+
+class HotelManagerTests(TestCase):
+
+    fixtures = ['users.json', 'main.json', 'sms.json', 'payment.json']
+
+    def setUp(self):
+        create._get_groups_and_perms()
+        self.password = '1234'
+
+        # set User "aaron_test" from fixtures as an attr on this class
+        self.user = User.objects.get(username='aaron_test')
+        # b/c passwords are stored as a hash in json fixtures
+        self.user.set_password(self.password)
+        self.user.save()
+
+        self.username = self.user.username
+        self.hotel = self.user.profile.hotel
+
+        # Phone
+        self.ph_num = self.hotel.phonenumbers.primary(hotel=self.hotel)
+
+    def test_get_by_phone(self):
+        hotel = Hotel.objects.get_by_phone(self.hotel.address_phone)
+        self.assertTrue(isinstance(hotel, Hotel))
+
+    def test_get_by_phone_fail(self):
+        # should return the Textres Hotel default object
+        hotel = Hotel.objects.get_by_phone('1') #invalid ph num
+        self.assertEqual(hotel, Hotel.objects.get(name=settings.TEXTRESS_HOTEL))
+
+    def test_textress(self):
+        # default Hotel object
+        hotel = Hotel.objects.textress()
+        self.assertTrue(isinstance(hotel, Hotel))
+        self.assertEqual(hotel.name, settings.TEXTRESS_HOTEL)
 
 
 class HotelTests(TestCase):
 
-    fixtures = ['main.json']
+    fixtures = ['users.json', 'main.json', 'sms.json', 'payment.json']
 
     def setUp(self):
         self.password = '1234'
-        self.hotel = create_hotel()
-        self.dave_hotel = Hotel.objects.get(name='Dave Hotel')
+        self.hotel = Hotel.objects.first()
+        self.dave_hotel = Hotel.objects.get(name=settings.TEXTRESS_HOTEL)
 
         self.user = User.objects.create_user('Test', settings.DEFAULT_FROM_EMAIL, self.password)
         self.user.set_password(self.password)
@@ -36,24 +70,15 @@ class HotelTests(TestCase):
         self.user_profile.update_hotel(self.dave_hotel)
 
     def test_create(self):
-        assert isinstance(self.hotel, Hotel)
-        assert isinstance(self.dave_hotel, Hotel)
-        assert isinstance(self.user, User)
+        self.assertNotEqual(self.hotel.name, self.dave_hotel.name)
+        self.assertTrue(isinstance(self.dave_hotel, Hotel))
+        self.assertTrue(isinstance(self.user, User))
 
     def test_twilio_client(self):
         assert isinstance(self.dave_hotel._client, TwilioRestClient)
 
     def test_area_code(self):
-        assert self.hotel.area_code == '702'
-
-    def test_clean_phone(self):
-        clean_phone = self.hotel._clean_phone(self.hotel.address_phone)
-        assert clean_phone == self.hotel.address_phone
-
-    def test_get_absolute_url(self):
-        self.client.login(username=self.user.username, password=self.password)
-        response = self.client.get(self.dave_hotel.get_absolute_url())
-        assert response.status_code == 200
+        assert self.hotel.area_code == '210'
 
     def test_set_admin_id(self):
         self.hotel.admin_id = None
@@ -164,31 +189,3 @@ class SubaccountTests(TestCase):
 
         # the DB instance is created, but the Twilio Instance is not
         assert len(self.client.accounts.list(friendly_name=hotel.name)) == 2
-
-    # # Commented out b/c makes a live Twilio Subaccount ea. time
-    # def test_twilio_create_create(self):
-    #     # Create Subaccount
-    #     sub, created = Subaccount.objects.get_or_create(self.hotel)
-    #     assert isinstance(sub, Subaccount)
-    #     assert created
-    #     assert len(self.client.accounts.list(friendly_name=self.hotel.name)) == 1
-
-    #     # indempotent
-    #     sub, created = Subaccount.objects.get_or_create(self.hotel)
-    #     assert isinstance(sub, Subaccount)
-    #     assert not created
-    #     assert len(self.client.accounts.list(friendly_name=self.hotel.name)) == 1
-
-
-    ### Model Tests ###
-
-
-
-
-
-
-
-
-
-
-

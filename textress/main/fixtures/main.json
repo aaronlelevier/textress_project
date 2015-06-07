@@ -1,192 +1,166 @@
 [
 {
   "fields": {
-    "customer": "cus_6B6tROALrJ4hfk",
-    "slug": "bobby-hotel",
-    "admin_id": 3,
-    "address_phone": "+17754194000",
-    "twilio_phone_number": "",
-    "rooms": null,
-    "address_line1": "6121 Arlington Ash St.",
-    "name": "bobby hotel",
-    "address_state": "Alabama",
-    "hidden": false,
-    "twilio_ph_sid": "",
-    "hotel_type": "",
-    "address_zip": 89148,
-    "twilio_auth_token": "c07a4042c9585920e71369016d74f470",
-    "address_city": "Las Vegas",
-    "active": true,
-    "modified": "2015-05-04T14:36:19.719Z",
-    "created": "2015-05-02T18:49:52.035Z",
-    "address_line2": "",
-    "twilio_sid": "AC2dd62548feea9bfe24fa4331bf1b9df5"
-  },
-  "pk": 2,
-  "model": "main.hotel"
-},
-{
-  "fields": {
-    "customer": "cus_6Kys7xxfuithl0",
-    "slug": "aaron-test",
-    "admin_id": 4,
-    "address_phone": "+17754194000",
-    "twilio_phone_number": "+17752344330",
-    "rooms": null,
     "address_line1": "622 Arlington Ash St.",
-    "name": "Aaron Test",
-    "address_state": "Nevada",
+    "address_zip": 89148,
+    "twilio_sid": "AC1895100be9ecfbf7178cb29b437f22ec",
     "hidden": false,
+    "created": "2015-05-22T12:59:37.472Z",
+    "active": true,
     "twilio_ph_sid": "PNab1d5d0de9ba35e7b149a6e3640b6d18",
     "hotel_type": "",
-    "address_zip": 89148,
-    "twilio_auth_token": "aa9618b29b1a75264441208633db0993",
-    "address_city": "Las Vegas",
-    "active": true,
-    "modified": "2015-06-05T14:35:32.094Z",
-    "created": "2015-05-22T12:59:37.472Z",
+    "rooms": null,
+    "address_phone": "+17754194000",
     "address_line2": "",
-    "twilio_sid": "AC1895100be9ecfbf7178cb29b437f22ec"
+    "slug": "aaron-test",
+    "name": "Aaron Test",
+    "customer": "cus_6Kys7xxfuithl0",
+    "address_state": "Nevada",
+    "address_city": "Las Vegas",
+    "modified": "2015-06-05T14:35:32.094Z",
+    "twilio_phone_number": "+17752344330",
+    "twilio_auth_token": "aa9618b29b1a75264441208633db0993",
+    "admin_id": 4
   },
   "pk": 3,
   "model": "main.hotel"
 },
 {
   "fields": {
-    "customer": null,
-    "slug": "hotel0",
-    "admin_id": null,
-    "address_phone": "+15326838300",
-    "twilio_phone_number": "6097961130",
-    "rooms": null,
     "address_line1": "gpRHTArwzmfevimFlYIvtgpuBkItpDrMVhCPjYeNdxCPVvKSMBdzUXncUsxpKcNxnDDJtcbgqylfGnCfCFHcKhpDPpSIkxBHEDww",
-    "name": "Hotel0",
-    "address_state": "Alabama",
+    "address_zip": 3581,
+    "twilio_sid": "995",
     "hidden": false,
+    "created": "2015-05-27T13:15:01.798Z",
+    "active": true,
     "twilio_ph_sid": "517",
     "hotel_type": "",
-    "address_zip": 3581,
-    "twilio_auth_token": "",
-    "address_city": "TUpYZOpzyEJwQisnQajggHhYVTnhEqVJCAPrgRWLoNszwqrJgmpWlRjPUDdWPEJNCqomydUCxCROQLKddjxHBzXoOFERlJkkiuAJ",
-    "active": true,
-    "modified": "2015-05-27T13:15:01.798Z",
-    "created": "2015-05-27T13:15:01.798Z",
+    "rooms": null,
+    "address_phone": "+15326838300",
     "address_line2": "",
-    "twilio_sid": "995"
+    "slug": "hotel0",
+    "name": "Hotel0",
+    "customer": null,
+    "address_state": "Alabama",
+    "address_city": "TUpYZOpzyEJwQisnQajggHhYVTnhEqVJCAPrgRWLoNszwqrJgmpWlRjPUDdWPEJNCqomydUCxCROQLKddjxHBzXoOFERlJkkiuAJ",
+    "modified": "2015-05-27T13:15:01.798Z",
+    "twilio_phone_number": "6097961130",
+    "twilio_auth_token": "",
+    "admin_id": null
   },
   "pk": 4,
   "model": "main.hotel"
 },
 {
   "fields": {
-    "customer": null,
-    "slug": "hotel1",
-    "admin_id": null,
-    "address_phone": "+13028175547",
-    "twilio_phone_number": "4476205679",
-    "rooms": null,
     "address_line1": "NKiapMBMGRVZrnuwnMhLYUUrAjoNFUaDKMUIsFNQaVWjnwAypbdbrVhzepbZioZrszNgvFNXGnFoSDyLgbOVWNwNVjbulqYFMtpT",
-    "name": "Hotel1",
-    "address_state": "Alabama",
+    "address_zip": 7829,
+    "twilio_sid": "670",
     "hidden": false,
+    "created": "2015-05-27T13:15:01.802Z",
+    "active": true,
     "twilio_ph_sid": "232",
     "hotel_type": "",
-    "address_zip": 7829,
-    "twilio_auth_token": "",
-    "address_city": "VavXwtiAFIVQZRSiXgqOvEoMaJkUIzgvKEWtAoFYYRfIpjWTEymQRCxXzUbulFWtPCvCHCzXNNUfcPMmtSfeAyQmlydtIqRsLQdp",
-    "active": true,
-    "modified": "2015-05-27T13:15:01.802Z",
-    "created": "2015-05-27T13:15:01.802Z",
+    "rooms": null,
+    "address_phone": "+13028175547",
     "address_line2": "",
-    "twilio_sid": "670"
+    "slug": "hotel1",
+    "name": "Hotel1",
+    "customer": null,
+    "address_state": "Alabama",
+    "address_city": "VavXwtiAFIVQZRSiXgqOvEoMaJkUIzgvKEWtAoFYYRfIpjWTEymQRCxXzUbulFWtPCvCHCzXNNUfcPMmtSfeAyQmlydtIqRsLQdp",
+    "modified": "2015-05-27T13:15:01.802Z",
+    "twilio_phone_number": "4476205679",
+    "twilio_auth_token": "",
+    "admin_id": null
   },
   "pk": 5,
   "model": "main.hotel"
 },
 {
   "fields": {
-    "customer": null,
-    "slug": "hotel2",
-    "admin_id": null,
-    "address_phone": "+13988181105",
-    "twilio_phone_number": "5926821762",
-    "rooms": null,
     "address_line1": "XafZVvjuGESJLbjrcZoXtYvcBPnxBGKKbJAcCHnXmeqqnNkZQhzVwmTEazNaAQrfNTjgXknuLaIuGAfoJVuUKpkhltNYLUejcrub",
-    "name": "Hotel2",
-    "address_state": "Alabama",
+    "address_zip": 3889,
+    "twilio_sid": "947",
     "hidden": false,
+    "created": "2015-05-27T13:15:01.805Z",
+    "active": true,
     "twilio_ph_sid": "587",
     "hotel_type": "",
-    "address_zip": 3889,
-    "twilio_auth_token": "",
-    "address_city": "vbEcBPhQWroVjKooHytPLPtARzWRdfWkCymlpsHLySpHcBGLcIkgouRDrsGJrqJqARTuncJKVStoAiAKJImlizeBcVrYmvHBHLOI",
-    "active": true,
-    "modified": "2015-05-27T13:15:01.805Z",
-    "created": "2015-05-27T13:15:01.805Z",
+    "rooms": null,
+    "address_phone": "+13988181105",
     "address_line2": "",
-    "twilio_sid": "947"
+    "slug": "hotel2",
+    "name": "Hotel2",
+    "customer": null,
+    "address_state": "Alabama",
+    "address_city": "vbEcBPhQWroVjKooHytPLPtARzWRdfWkCymlpsHLySpHcBGLcIkgouRDrsGJrqJqARTuncJKVStoAiAKJImlizeBcVrYmvHBHLOI",
+    "modified": "2015-05-27T13:15:01.805Z",
+    "twilio_phone_number": "5926821762",
+    "twilio_auth_token": "",
+    "admin_id": null
   },
   "pk": 6,
   "model": "main.hotel"
 },
 {
   "fields": {
-    "customer": null,
-    "slug": "hotel3",
-    "admin_id": null,
-    "address_phone": "+11359531661",
-    "twilio_phone_number": "0837396494",
-    "rooms": null,
     "address_line1": "ujMMBpUijOHRyKeaqdZgAhKvCpcIGLhKltyYnAhIEOTFAdfeZZbJzXmhCmAICgWShgSlPSXSHgqGrtfnwSvzIvRBqDALtYMdqIdW",
-    "name": "Hotel3",
-    "address_state": "Alabama",
+    "address_zip": 1458,
+    "twilio_sid": "407",
     "hidden": false,
+    "created": "2015-05-27T13:15:01.809Z",
+    "active": true,
     "twilio_ph_sid": "682",
     "hotel_type": "",
-    "address_zip": 1458,
-    "twilio_auth_token": "",
-    "address_city": "geWoQYNKUnDxUPAgEcgCwJktJcndIXIbTqoyEitIkRGXYuxNaxQAOMMmywdjjGdnoiPJQyjwXlYmKjpqEugxMCSpZaFfqGTdYcja",
-    "active": true,
-    "modified": "2015-05-27T13:15:01.809Z",
-    "created": "2015-05-27T13:15:01.809Z",
+    "rooms": null,
+    "address_phone": "+11359531661",
     "address_line2": "",
-    "twilio_sid": "407"
+    "slug": "hotel3",
+    "name": "Hotel3",
+    "customer": null,
+    "address_state": "Alabama",
+    "address_city": "geWoQYNKUnDxUPAgEcgCwJktJcndIXIbTqoyEitIkRGXYuxNaxQAOMMmywdjjGdnoiPJQyjwXlYmKjpqEugxMCSpZaFfqGTdYcja",
+    "modified": "2015-05-27T13:15:01.809Z",
+    "twilio_phone_number": "0837396494",
+    "twilio_auth_token": "",
+    "admin_id": null
   },
   "pk": 7,
   "model": "main.hotel"
 },
 {
   "fields": {
-    "customer": null,
-    "slug": "hotel4",
-    "admin_id": null,
-    "address_phone": "+12103193560",
-    "twilio_phone_number": "8799587627",
-    "rooms": null,
     "address_line1": "OxxXvQBPvailmEGdzrfjwNFBKHieYJsrzpKFnJcOQzemxqzzNmsltaMvOhuKQlkTHyGFFgzxbzUKOJqGOjTfDwKrSsnuKEjNezbB",
-    "name": "Hotel4",
-    "address_state": "Alabama",
+    "address_zip": 9765,
+    "twilio_sid": "124",
     "hidden": false,
+    "created": "2015-05-27T13:15:01.812Z",
+    "active": true,
     "twilio_ph_sid": "22",
     "hotel_type": "",
-    "address_zip": 9765,
-    "twilio_auth_token": "",
-    "address_city": "xCtLMfuiajbBYiJZxBTwrgvWnRRUxJgYhQfGbmuYQnBNckqGpVoXKnoFpEySzXndVSwKggksqZKMzHTrpHkgBflNuOPuaStkpNNf",
-    "active": true,
-    "modified": "2015-05-27T13:15:01.812Z",
-    "created": "2015-05-27T13:15:01.812Z",
+    "rooms": null,
+    "address_phone": "+12103193560",
     "address_line2": "",
-    "twilio_sid": "124"
+    "slug": "hotel4",
+    "name": "Hotel4",
+    "customer": null,
+    "address_state": "Alabama",
+    "address_city": "xCtLMfuiajbBYiJZxBTwrgvWnRRUxJgYhQfGbmuYQnBNckqGpVoXKnoFpEySzXndVSwKggksqZKMzHTrpHkgBflNuOPuaStkpNNf",
+    "modified": "2015-05-27T13:15:01.812Z",
+    "twilio_phone_number": "8799587627",
+    "twilio_auth_token": "",
+    "admin_id": null
   },
   "pk": 8,
   "model": "main.hotel"
 },
 {
   "fields": {
-    "hidden": false,
     "modified": "2015-05-01T12:31:44.946Z",
-    "hotel": null,
+    "hidden": false,
     "created": "2015-05-01T12:31:44.946Z",
+    "hotel": null,
     "msg_sign": "-Dave"
   },
   "pk": 2,
@@ -194,10 +168,10 @@
 },
 {
   "fields": {
-    "hidden": false,
     "modified": "2015-05-27T13:15:01.926Z",
-    "hotel": 4,
+    "hidden": false,
     "created": "2015-05-02T17:39:32.006Z",
+    "hotel": 4,
     "msg_sign": "-AL"
   },
   "pk": 3,
@@ -205,10 +179,10 @@
 },
 {
   "fields": {
-    "hidden": false,
     "modified": "2015-05-22T12:59:37.517Z",
-    "hotel": 3,
+    "hidden": false,
     "created": "2015-05-22T12:52:12.600Z",
+    "hotel": 3,
     "msg_sign": "-AL"
   },
   "pk": 4,
@@ -216,10 +190,10 @@
 },
 {
   "fields": {
-    "hidden": false,
     "modified": "2015-05-27T13:03:00.709Z",
-    "hotel": null,
+    "hidden": false,
     "created": "2015-05-27T13:03:00.709Z",
+    "hotel": null,
     "msg_sign": "-User0_hotel_admin"
   },
   "pk": 5,
@@ -227,10 +201,10 @@
 },
 {
   "fields": {
-    "hidden": false,
     "modified": "2015-05-27T13:03:00.723Z",
-    "hotel": null,
+    "hidden": false,
     "created": "2015-05-27T13:03:00.723Z",
+    "hotel": null,
     "msg_sign": "-User1_hotel_admin"
   },
   "pk": 6,
@@ -238,10 +212,10 @@
 },
 {
   "fields": {
-    "hidden": false,
     "modified": "2015-05-27T13:03:00.735Z",
-    "hotel": null,
+    "hidden": false,
     "created": "2015-05-27T13:03:00.735Z",
+    "hotel": null,
     "msg_sign": "-User2_hotel_admin"
   },
   "pk": 7,
@@ -249,10 +223,10 @@
 },
 {
   "fields": {
-    "hidden": false,
     "modified": "2015-05-27T13:03:00.746Z",
-    "hotel": null,
+    "hidden": false,
     "created": "2015-05-27T13:03:00.746Z",
+    "hotel": null,
     "msg_sign": "-User3_hotel_admin"
   },
   "pk": 8,
@@ -260,10 +234,10 @@
 },
 {
   "fields": {
-    "hidden": false,
     "modified": "2015-05-27T13:03:00.758Z",
-    "hotel": null,
+    "hidden": false,
     "created": "2015-05-27T13:03:00.758Z",
+    "hotel": null,
     "msg_sign": "-User4_hotel_admin"
   },
   "pk": 9,
@@ -271,10 +245,10 @@
 },
 {
   "fields": {
-    "hidden": false,
     "modified": "2015-05-27T13:03:00.769Z",
-    "hotel": null,
+    "hidden": false,
     "created": "2015-05-27T13:03:00.769Z",
+    "hotel": null,
     "msg_sign": "-User0_hotel_manager"
   },
   "pk": 10,
@@ -282,10 +256,10 @@
 },
 {
   "fields": {
-    "hidden": false,
     "modified": "2015-05-27T13:03:00.780Z",
-    "hotel": null,
+    "hidden": false,
     "created": "2015-05-27T13:03:00.780Z",
+    "hotel": null,
     "msg_sign": "-User1_hotel_manager"
   },
   "pk": 11,
@@ -293,10 +267,10 @@
 },
 {
   "fields": {
-    "hidden": false,
     "modified": "2015-05-27T13:03:00.792Z",
-    "hotel": null,
+    "hidden": false,
     "created": "2015-05-27T13:03:00.792Z",
+    "hotel": null,
     "msg_sign": "-User2_hotel_manager"
   },
   "pk": 12,
@@ -304,10 +278,10 @@
 },
 {
   "fields": {
-    "hidden": false,
     "modified": "2015-05-27T13:15:01.903Z",
-    "hotel": 8,
+    "hidden": false,
     "created": "2015-05-27T13:03:00.802Z",
+    "hotel": 8,
     "msg_sign": "-User3_hotel_manager"
   },
   "pk": 13,
@@ -315,10 +289,10 @@
 },
 {
   "fields": {
-    "hidden": false,
     "modified": "2015-05-27T13:03:00.813Z",
-    "hotel": null,
+    "hidden": false,
     "created": "2015-05-27T13:03:00.813Z",
+    "hotel": null,
     "msg_sign": "-User4_hotel_manager"
   },
   "pk": 14,
@@ -326,10 +300,10 @@
 },
 {
   "fields": {
-    "hidden": false,
     "modified": "2015-05-27T13:15:01.909Z",
-    "hotel": 7,
+    "hidden": false,
     "created": "2015-05-27T13:03:00.824Z",
+    "hotel": 7,
     "msg_sign": "-User0_"
   },
   "pk": 15,
@@ -337,10 +311,10 @@
 },
 {
   "fields": {
-    "hidden": false,
     "modified": "2015-05-27T13:03:00.830Z",
-    "hotel": null,
+    "hidden": false,
     "created": "2015-05-27T13:03:00.830Z",
+    "hotel": null,
     "msg_sign": "-User1_"
   },
   "pk": 16,
@@ -348,10 +322,10 @@
 },
 {
   "fields": {
-    "hidden": false,
     "modified": "2015-05-27T13:15:01.914Z",
-    "hotel": 6,
+    "hidden": false,
     "created": "2015-05-27T13:03:00.836Z",
+    "hotel": 6,
     "msg_sign": "-User2_"
   },
   "pk": 17,
@@ -359,10 +333,10 @@
 },
 {
   "fields": {
-    "hidden": false,
     "modified": "2015-05-27T13:03:00.842Z",
-    "hotel": null,
+    "hidden": false,
     "created": "2015-05-27T13:03:00.842Z",
+    "hotel": null,
     "msg_sign": "-User3_"
   },
   "pk": 18,
@@ -370,10 +344,10 @@
 },
 {
   "fields": {
-    "hidden": false,
     "modified": "2015-05-27T13:15:01.920Z",
-    "hotel": 5,
+    "hidden": false,
     "created": "2015-05-27T13:03:00.848Z",
+    "hotel": 5,
     "msg_sign": "-User4_"
   },
   "pk": 19,
@@ -381,10 +355,10 @@
 },
 {
   "fields": {
-    "hidden": false,
     "modified": "2015-06-02T15:05:26.978Z",
-    "hotel": 3,
+    "hidden": false,
     "created": "2015-06-02T15:04:40.817Z",
+    "hotel": 3,
     "msg_sign": "-user"
   },
   "pk": 20,
@@ -393,25 +367,13 @@
 {
   "fields": {
     "hidden": false,
-    "hotel": 3,
-    "active": true,
     "auth_token": "aa9618b29b1a75264441208633db0993",
+    "hotel": 3,
+    "created": "2015-05-22T12:59:39.216Z",
     "modified": "2015-05-30T22:59:11.598Z",
-    "created": "2015-05-22T12:59:39.216Z"
+    "active": true
   },
   "pk": "AC1895100be9ecfbf7178cb29b437f22ec",
-  "model": "main.subaccount"
-},
-{
-  "fields": {
-    "hidden": false,
-    "hotel": 2,
-    "active": true,
-    "auth_token": "c07a4042c9585920e71369016d74f470",
-    "modified": "2015-05-04T14:36:23.268Z",
-    "created": "2015-05-04T13:52:40.339Z"
-  },
-  "pk": "AC2dd62548feea9bfe24fa4331bf1b9df5",
   "model": "main.subaccount"
 }
 ]

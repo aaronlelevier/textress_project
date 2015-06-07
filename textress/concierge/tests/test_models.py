@@ -18,10 +18,8 @@ from django.utils import timezone
 
 from model_mommy import mommy
 
-from .factory import make_guests, make_messages
-
-from ..models import Message, Guest, Hotel, Reply
-
+from concierge.models import Message, Guest, Hotel, Reply
+from concierge.tests.factory import make_guests, make_messages
 from main.tests.factory import create_hotel
 from utils import create
 from utils.exceptions import (CheckOutDateException, PhoneNumberInUse,
@@ -112,7 +110,6 @@ class GuestManagerTests(TestCase):
         assert len(Guest.objects.current()) == 2
         assert len(Guest.objects.archived()) == 1
 
-
     def test_get_by_hotel_phone(self):
         guest = Guest.objects.get_by_hotel_phone(self.hotel, self.guest.phone_number)
         assert isinstance(guest, Guest)
@@ -120,7 +117,6 @@ class GuestManagerTests(TestCase):
     def test_get_by_hotel_phone_fail(self):
         with pytest.raises(ObjectDoesNotExist):
             Guest.objects.get_by_hotel_phone(self.hotel, 'wrong_num')
-
 
     def test_get_by_phone(self):
         guest = Guest.objects.get_by_phone(self.hotel, self.guest.phone_number)
