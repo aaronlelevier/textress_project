@@ -3,6 +3,16 @@
 {% block body_tag %}class="error-full-page"{% endblock %}
 
 {% block body %}
+
+    {% if messages %}
+        <div class="row" style="background-color: #363839;">
+            <div class="container">
+            {% for message in messages %}
+                <h4 class="text-center" style="color: white;">{{ message }}</h4>
+            {% endfor %}</div>
+        </div>
+    {% endif %}
+                                    
     <div class="container">
         <div class="row">
             <!-- start: 404 -->

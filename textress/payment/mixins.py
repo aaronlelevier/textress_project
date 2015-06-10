@@ -11,6 +11,7 @@ from braces.views import LoginRequiredMixin, GroupRequiredMixin
 
 from payment.models import Card
 from main.models import Hotel
+from utils import dj_messages
 
 
 ### STRIPE MIXINS ###
@@ -50,12 +51,13 @@ class HotelUserMixin(HotelContextMixin):
         try:
             self.hotel = self.request.user.profile.hotel
         except AttributeError:
-            messages.warning(self.request, "No Hotel associated with this account.")
+            messages.warning(self.request, dj_messages['no_hotel'])
+            raise Http404
 
         # TODO: Redirect to an alert page that funds need to be added
         if self.hotel and not self.hotel.active:
-            # raise Http404
-            messages.warning(self.request, "The Hotel associated with this account is not active.")
+            messages.warning(self.request, dj_messages['hotel_not_active'])
+            raise Http404
             
         return super(HotelUserMixin, self).dispatch(*args, **kwargs)
 

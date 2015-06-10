@@ -28,7 +28,7 @@ from concierge import views, serializers
 from concierge.tests.factory import make_guests, make_messages
 from main.models import Hotel, UserProfile
 from main.tests.factory import create_hotel
-from utils import create
+from utils import create, dj_messages
 
 from main.tests.factory import create_hotel
 
@@ -52,36 +52,44 @@ class GlobalTests(TestCase):
 
 class GuestViewTests(TestCase):
 
+    fixtures = ['users.json', 'main.json', 'sms.json', 'concierge.json', 'payment.json']
+
     def setUp(self):
+        create._get_groups_and_perms()
+        self.password = '1234'
 
-        self.password = "1234"
-
-        # User0
-        self.user = mommy.make(User, username="Test")
+        # set User "aaron_test" from fixtures as an attr on this class
+        self.user = User.objects.get(username='aaron_test')
+        # b/c passwords are stored as a hash in json fixtures
         self.user.set_password(self.password)
         self.user.save()
 
-        self.hotel = create_hotel(name="Test")
-        self.user.profile.update_hotel(hotel=self.hotel)
+        self.username = self.user.username
+        self.hotel = self.user.profile.hotel
+        self.ph_num = self.hotel.phonenumbers.primary(hotel=self.hotel)
+        self.guest = Guest.objects.filter(hotel=self.hotel).first()
 
     def test_list(self):
-        self.client.login(username=self.user.username, password=self.password)
-
-        guest = mommy.make(Guest, hotel=self.hotel)
+        # Dave is not logged in, so get's a 302 response
         response = self.client.get(reverse('concierge:guest_list'))
-        assert response.status_code == 200
+        self.assertEqual(response.status_code, 404)
+        # Error Message
+        m = list(response.context['messages'])
+        self.assertEqual(len(m), 1)
+        self.assertEqual(str(m[0]), dj_messages['no_hotel'])
+
+        # Dave now tries Logged-In        
+        self.client.login(username=self.username, password=self.password)
+        response = self.client.get(reverse('concierge:guest_list'))
+        self.assertEqual(response.status_code, 200)
         assert response.context['object_list']
 
     def test_detail(self):
         self.client.login(username=self.user.username, password=self.password)
-
-        # Now 1 guest
-        guest = mommy.make(Guest, hotel=self.hotel)
-
-        # Get Guest's details\
-        response = self.client.get(reverse('concierge:guest_detail', kwargs={'pk': guest.pk}))
-        assert response.status_code == 200
-        assert response.context['object'] == guest
+        # Get Guest's details
+        response = self.client.get(reverse('concierge:guest_detail', kwargs={'pk': self.guest.pk}))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['object'], self.guest)
 
     def test_create(self):
         # No guests
@@ -90,7 +98,7 @@ class GuestViewTests(TestCase):
         # Login n Create One
         self.client.login(username=self.user.username, password=self.password)
         response = self.client.post(reverse('concierge:guest_create'),
-            {'hotel':self.user.profile.hotel, 'name': 'Test Guest',
+            {'hotel':self.user.profile.hotel,'name': 'Test Guest',
             'room_number': number(5), 'phone_number': number(),
             'check_in': today(), 'check_out': today()},
             follow=True)
@@ -106,8 +114,14 @@ class GuestViewTests(TestCase):
         # No guests
         (g.delete() for g in Guest.objects.all())
 
-        guest = mommy.make(Guest, name='Test Guest', hotel=self.hotel)
-        assert guest.name == 'Test Guest'
+        # Create a single Guest
+        response = self.client.post(reverse('concierge:guest_create'),
+            {'hotel':self.user.profile.hotel,'name': 'Test Guest',
+            'room_number': number(5), 'phone_number': number(),
+            'check_in': today(), 'check_out': today()},
+            follow=True)
+        guest = Guest.objects.first()
+        self.assertEqual(guest.name, 'Test Guest')
 
         # update in View
         response = self.client.post(reverse('concierge:guest_update', kwargs={'pk':guest.pk}),
@@ -117,21 +131,23 @@ class GuestViewTests(TestCase):
             follow=True)
 
         # Modified Guest
-        guest = Guest.objects.first()
-        assert guest.name == 'Test Guest New'
         self.assertRedirects(response, reverse('concierge:guest_detail', kwargs={'pk': guest.pk}))
+        new_guest = Guest.objects.first()
+        self.assertNotEqual(guest.name, new_guest.name)
 
     def test_delete(self):
         self.client.login(username=self.user.username, password=self.password)
-        guest = mommy.make(Guest, hotel=self.hotel)
-        assert isinstance(guest, Guest)
-        assert guest.hidden == False
+        guest = Guest.objects.first()
+        self.assertTrue(isinstance(guest, Guest))
+        self.assertFalse(guest.hidden)
+
         # Hide
         response = self.client.post(reverse('concierge:guest_delete', kwargs={'pk': guest.pk}),
             {}, follow=True)
-        updated_guest = Guest.objects.get(pk=guest.pk)
-        assert updated_guest.hidden == True
         self.assertRedirects(response, reverse('concierge:guest_list'))
+        # hide guest worked
+        updated_guest = Guest.objects.get(pk=guest.pk)
+        self.assertTrue(updated_guest.hidden)
 
 
 ########

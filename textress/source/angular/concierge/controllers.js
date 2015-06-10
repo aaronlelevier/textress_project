@@ -23,13 +23,14 @@ conciergeControllers.controller('GuestListCtrl', ['$scope', 'Guest', function($s
     };
 }]);
 
-conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '$interval', 'Message', 'GuestMessages',
-    function($scope, $stateParams, $interval, Message, GuestMessages) {
+conciergeControllers.controller('GuestMessageCtrl',
+    ['$scope', '$stateParams', '$interval', 'Message', 'GuestMessages', 'GuestUser',
+    function($scope, $stateParams, $interval, Message, GuestMessages, GuestUser) {
         $scope.messages = {};
 
         $scope.getGuest = function(GuestMessages, $stateParams, $scope) {
             GuestMessages.get({
-                id: 1 //$stateParams.guestId
+                id: GuestUser.id //$stateParams.guestId
             }, function(response) {
                 $scope.guest = response;
                 $scope.to = response.phone_number;

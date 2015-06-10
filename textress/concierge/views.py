@@ -38,6 +38,7 @@ from main.views import HotelMixin
 from payment.views import HotelUserMixin
 from utils.exceptions import (DailyLimit, NotHotelGuestException,
     HotelGuestNotFoundException)
+from utils import EmptyForm, DeleteButtonMixin
 
 
 class ReceiveSMSView(CsrfExemptMixin, View):
@@ -114,20 +115,23 @@ class GuestUpdateView(GuestBaseView, UpdateView):
     template_name = 'cpanel/form.html'
     model = Guest
     form_class = GuestForm
-    fields = ['name', 'room_number', 'phone_number', 'check_in', 'check_out']
+    fields = ['name', 'room_number', 'phone_number', 'check_in', 'check_out']      
 
 
-class GuestDeleteView(GuestBaseView, TemplateView):
-    '''Hide only. Don't `delete` any guest records b/c don't want to
-    delete the related `Messages`.
-
-    TODO:
-    change to a form view w/ delete context for button color, etc...
-    and to better handle than a plain: get/post 
+class GuestDeleteView(GuestBaseView, DeleteButtonMixin, TemplateView):
     '''
-
+    Hide only. Don't `delete` any guest records b/c don't want to
+    delete the related `Messages`.
+    '''
     headline = "Delete Guest"
     template_name = 'cpanel/form.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(GuestDeleteView, self).get_context_data(**kwargs)
+        self.object = Guest.objects.get(pk=kwargs['pk'])
+        context['addit_info'] = "<div><h4>Are you sure that you want to delete \
+        {}?</h4></div>".format(self.object)
+        return context
 
     def post(self, request, *args, **kwargs):
         self.object = Guest.objects.get(pk=kwargs['pk'])

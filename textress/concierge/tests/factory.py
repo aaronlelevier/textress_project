@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from model_mommy import mommy
 
-from ..models import Message, Guest
+from concierge.models import Message, Guest
 
 
 def make_guests(hotel, number=10):
