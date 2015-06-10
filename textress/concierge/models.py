@@ -45,6 +45,22 @@ class GuestManager(AbstractBaseManager, models.Manager):
 
     def get_by_hotel_phone(self, hotel, phone_number):
         return self.get_queryset().get_by_hotel_phone(hotel, phone_number)
+
+    def get_or_create_unknown_guest(self, hotel, phone_number, name="Unknown Guest"):
+        '''
+        Return: Unknown Guest Object, or create one if it doesn't exist.
+        '''
+        try:
+            return self.get(hotel=hotel, phone_number=phone_number)
+        except ObjectDoesNotExist:
+            return self.create(
+                hotel=hotel,
+                name="Unknown Guest",
+                room_number='0',
+                phone_number=phone_number,
+                check_in=timezone.today(),
+                check_in=timezone.today()
+                )
     
     def get_by_phone(self, hotel, phone_number):
         '''Resolve Hotel Guest in this order:
@@ -62,7 +78,7 @@ class GuestManager(AbstractBaseManager, models.Manager):
                             .archived()
                             .get_by_hotel_phone(hotel, phone_number))
             except ObjectDoesNotExist:
-                return (self.get(hotel=hotel, name="Unknown Guest"))
+                return self.get_or_create_unknown_guest(hotel, phone_number)
 
 
 class Guest(AbstractBase):

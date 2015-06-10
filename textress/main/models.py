@@ -169,7 +169,7 @@ class Hotel(TwilioClient, AbstractBase):
 
     @property
     def is_textress(self):
-        return self.name == "Textress Hotel"
+        return self.name == settings.TEXTRESS_HOTEL
 
     def get_absolute_url(self):
         return reverse('main:hotel_update', kwargs={'pk':self.pk})

@@ -49,7 +49,7 @@ class ReceiveSMSView(CsrfExemptMixin, View):
     def post(self, request, *args, **kwargs):
         resp = twiml.Response()
         
-        print(request.POST)
+        print("request.POST:", request.POST)
 
         # if a msg is returned, attach and reply to Guest
         msg = process_incoming_message(data=request.POST)
