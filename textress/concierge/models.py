@@ -59,7 +59,7 @@ class GuestManager(AbstractBaseManager, models.Manager):
                 room_number='0',
                 phone_number=phone_number,
                 check_in=timezone.today(),
-                check_in=timezone.today()
+                check_out=timezone.today()
                 )
     
     def get_by_phone(self, hotel, phone_number):

@@ -31,6 +31,7 @@ THIRD_PARTY_APPS = (
     'rest_framework.authtoken',
     'djangular',
     'django_coverage',
+    'ws4redis',
 )
 
 LOCAL_APPS = (
@@ -218,6 +219,17 @@ else:
     STRIPE_PUBLIC_KEY = os.environ['STRIPE_LIVE_PUBLIC_KEY']
 
 TWILIO_RESOURCE_URI = "www.twilio.com/2010-01-01/Accounts/"+TWILIO_ACCOUNT_SID
+
+# DJANGO-WEBSOCKET-REDIS
+WEBSOCKET_URL = '/ws/'
+
+# WS4REDIS_CONNECTION = {
+#     'host': 'redis.example.com',
+#     'port': 16379,
+#     'db': 17,
+#     'password': '',
+# }
+
 
 ### TESTS ###
 
