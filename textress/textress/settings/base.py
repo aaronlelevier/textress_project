@@ -67,6 +67,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.request',
     'django.contrib.messages.context_processors.messages',
     'django.core.context_processors.static',
+    # ws4redis
+    'ws4redis.context_processors.default',
     )
 
 
@@ -199,7 +201,7 @@ REST_FRAMEWORK = {
 #     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=14)
 # }
 
-# Celery
+# CELERY
 # BROKER_URL = 'redis://127.0.0.1:6379/0'
 # BROKER_TRANSPORT = 'redis'
 # CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
@@ -220,15 +222,59 @@ else:
 
 TWILIO_RESOURCE_URI = "www.twilio.com/2010-01-01/Accounts/"+TWILIO_ACCOUNT_SID
 
-# DJANGO-WEBSOCKET-REDIS
+
+### REDIS ###
+
+SESSION_ENGINE = 'redis_sessions.session'
+
+SESSION_REDIS_PREFIX = 'session'
+
+
+### DJANGO-WEBSOCKET-REDIS ###
+
 WEBSOCKET_URL = '/ws/'
 
-# WS4REDIS_CONNECTION = {
-#     'host': 'redis.example.com',
-#     'port': 16379,
-#     'db': 17,
-#     'password': '',
-# }
+# This setting is required to override the Django's main loop, when running in
+# development mode, such as ./manage runserver
+WSGI_APPLICATION = 'ws4redis.django_runserver.application'
+
+# URL that distinguishes websocket connections from normal requests
+WEBSOCKET_URL = '/ws/'
+
+# Set the number of seconds each message shall persited
+WS4REDIS_EXPIRE = 3600
+
+WS4REDIS_HEARTBEAT = '--heartbeat--'
+
+WS4REDIS_PREFIX = 'demo'
+
+
+### LOGGING ###
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '[%(asctime)s %(module)s] %(levelname)s: %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+
 
 
 ### TESTS ###
