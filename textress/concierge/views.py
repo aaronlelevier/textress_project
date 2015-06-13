@@ -5,7 +5,7 @@ from collections import OrderedDict
 import twilio
 from twilio import twiml, TwilioRestException 
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import View, FormView, DetailView, ListView, TemplateView
@@ -26,6 +26,9 @@ from rest_framework import mixins, generics, status, permissions, viewsets
 from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
     GroupRequiredMixin, SetHeadlineMixin, FormValidMessageMixin, CsrfExemptMixin)
 
+from ws4redis.redis_store import RedisMessage
+from ws4redis.publisher import RedisPublisher
+
 from concierge.models import Message, Guest
 from concierge.helpers import process_incoming_message
 from concierge.forms import MessageForm, GuestForm
@@ -41,7 +44,9 @@ from utils.exceptions import (DailyLimit, NotHotelGuestException,
 from utils import EmptyForm, DeleteButtonMixin
 
 
-class ReceiveSMSView(CsrfExemptMixin, View):
+class ReceiveSMSView(CsrfExemptMixin, TemplateView):
+
+    template_name = 'blank.html'
 
     def get(self, request, *args, **kwargs):
         return render(request, 'blank.html', content_type="text/xml")
@@ -58,6 +63,22 @@ class ReceiveSMSView(CsrfExemptMixin, View):
 
         return render(request, 'blank.html', {'resp': str(resp)},
             content_type='text/xml')
+
+    ###  New Logic ###
+    def get_context_data(self, **kwargs):
+        context = super(ReceiveSMSView, self).get_context_data(**kwargs)
+        context.update(groups=Group.objects.all())
+        return context
+
+    @csrf_exempt
+    def dispatch(self, *args, **kwargs):
+        return super(ReceiveSMSView, self).dispatch(*args, **kwargs)
+
+    # def post(self, request, *args, **kwargs):
+    #     redis_publisher = RedisPublisher(facility='foobar', groups=[request.POST.get('group')])
+    #     message = RedisMessage(request.POST.get('message'))
+    #     redis_publisher.publish_message(message)
+    #     return HttpResponse('OK')
 
 
 ###############
@@ -84,9 +105,24 @@ class GuestDetailView(GuestBaseView, DetailView):
     Angular for sending/receiving SMS through Websockets w/o page 
     updates needed.
     '''
-    
     def get_headline(self):
         return u"{} Detail".format(self.object)
+
+    def get_context_data(self, **kwargs):
+        context = super(GuestDetailView, self).get_context_data(**kwargs)
+        context.update(groups=Group.objects.all())
+        return context
+
+    @csrf_exempt
+    def dispatch(self, *args, **kwargs):
+        return super(GuestDetailView, self).dispatch(*args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        redis_publisher = RedisPublisher(facility='foobar', groups=[request.POST.get('group')])
+        message = RedisMessage(request.POST.get('message'))
+        redis_publisher.publish_message(message)
+        return HttpResponse('OK')
+
 
 
 class GuestCreateView(GuestBaseView, CreateView):

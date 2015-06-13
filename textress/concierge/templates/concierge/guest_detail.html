@@ -62,11 +62,11 @@
             <div class="col-md-6">
                 <form ng-submit="submitMessage(body)">
                     <div class="form-group">
-                        <input placeholder="Enter message here..." name="messageForm" type="text" class="form-control new-message-input" ng-model="body"></input>
+                        <input placeholder="Enter message here..." name="messageForm" type="text" class="form-control new-message-input" ng-model="body" id="text_message"></input>
                     </div>
 
                     <div>
-                        <button class="btn btn-success btn-xs btn-block" type="submit" id="submit"/>
+                        <button class="btn btn-success btn-xs btn-block" type="submit" id="send_message"/>
                             Send
                         </button>
                     </div>
@@ -79,6 +79,12 @@
                 <br>
 
                 <h5>Incoming Messages</h5>
+                    <div class="row">
+                        <div class="col-xs-12 col-md-11 col-lg-10">
+                            {% block introduction %}{% endblock introduction %}
+                            <pre id="billboard" style="overflow-y: auto; height: 10em; margin-top: 1em;"></pre>
+                        </div>
+                    </div>
                 <ul id="messages"></ul>
 
                 <h5>Outgoing Messages</h5>
@@ -94,3 +100,38 @@
 </div>
 <!-- end: PAGE -->        
 {% endblock content %}
+
+
+{% block page_js %}
+<script src="{{ STATIC_URL }}js/ws4redis.js" type="text/javascript"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    var ws4redis = WS4Redis({
+        uri: '{{ WEBSOCKET_URI }}foobar?subscribe-broadcast&publish-broadcast&echo',
+        receive_message: receiveMessage,
+        heartbeat_msg: {{ WS4REDIS_HEARTBEAT }}
+    });
+    var billboard = $('#billboard');
+
+    // send message though the Websocket to the server
+    $("#text_message").keydown(function(event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            ws4redis.send_message($('#text_message').val());
+        }
+    });
+
+    $('#send_message').click(function() {
+        ws4redis.send_message($('#text_message').val());
+    });
+
+    // receive a message though the Websocket from the server
+    function receiveMessage(msg) {
+        billboard.append('<br/>' + msg);
+        billboard.scrollTop(billboard.scrollTop() + 25);
+    }
+
+    console.log($_POST);
+});
+</script>
+{% endblock page_js %}

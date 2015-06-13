@@ -44,9 +44,9 @@ conciergeControllers.controller('GuestMessageCtrl',
         // populate initial context without a delay
         $scope.getGuest(GuestMessages, $stateParams, $scope);
 
-        $interval(function() {
-            $scope.getGuest(GuestMessages, $stateParams, $scope);
-        }, 10000);
+        // $interval(function() {
+        //     $scope.getGuest(GuestMessages, $stateParams, $scope);
+        // }, 10000);
 
         $scope.submitMessage = function(body) {
             console.log('Pre create - guest id:', $scope.guest.id);
