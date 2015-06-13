@@ -56,6 +56,16 @@ class ReceiveSMSView(CsrfExemptMixin, TemplateView):
         
         print("request.POST:", request.POST)
 
+        # ws4redis publish
+        '''
+        TODO: 
+            Make a function to return the Hotel Object, so I can get the Hotel.group_name,
+            and use the Group_Chat.
+        '''
+        redis_publisher = RedisPublisher(facility='foobar', broadcast=True)
+        message = RedisMessage(request.POST['Body'])
+        redis_publisher.publish_message(message)
+
         # if a msg is returned, attach and reply to Guest
         msg = process_incoming_message(data=request.POST)
         if msg:
@@ -65,10 +75,10 @@ class ReceiveSMSView(CsrfExemptMixin, TemplateView):
             content_type='text/xml')
 
     ###  New Logic ###
-    def get_context_data(self, **kwargs):
-        context = super(ReceiveSMSView, self).get_context_data(**kwargs)
-        context.update(groups=Group.objects.all())
-        return context
+    # def get_context_data(self, **kwargs):
+    #     context = super(ReceiveSMSView, self).get_context_data(**kwargs)
+    #     context.update(groups=Group.objects.all())
+    #     return context
 
     @csrf_exempt
     def dispatch(self, *args, **kwargs):
@@ -117,11 +127,11 @@ class GuestDetailView(GuestBaseView, DetailView):
     def dispatch(self, *args, **kwargs):
         return super(GuestDetailView, self).dispatch(*args, **kwargs)
 
-    def post(self, request, *args, **kwargs):
-        redis_publisher = RedisPublisher(facility='foobar', groups=[request.POST.get('group')])
-        message = RedisMessage(request.POST.get('message'))
-        redis_publisher.publish_message(message)
-        return HttpResponse('OK')
+    # def post(self, request, *args, **kwargs):
+    #     redis_publisher = RedisPublisher(facility='foobar', groups=[request.POST.get('group')])
+    #     message = RedisMessage(request.POST.get('message'))
+    #     redis_publisher.publish_message(message)
+    #     return HttpResponse('OK')
 
 
 
