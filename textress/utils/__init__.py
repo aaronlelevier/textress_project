@@ -1,6 +1,7 @@
 import re
 
 from django import forms
+from django.contrib.auth.models import Group
 from django.utils.translation import ugettext, ugettext_lazy as _
 
 from .forms import EmptyForm
@@ -22,3 +23,10 @@ def validate_phone(phone):
     else:
         phone = "+1"+re_phone
     return phone
+
+
+def add_group(user, group):
+    group = Group.objects.get(name=group)
+    user.groups.add(group)
+    user.save()
+    return user

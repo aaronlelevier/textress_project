@@ -19,10 +19,10 @@ from main.models import Hotel, UserProfile, Subaccount
 from main.forms import UserCreateForm, HotelCreateForm, UserUpdateForm
 from main.mixins import (HotelMixin, UserOnlyMixin, HotelUsersOnlyMixin,
     RegistrationContextMixin)
-from account.helpers import add_group
 from contact.mixins import NewsletterMixin, TwoFormMixin
 from account.helpers import login_messages
 from payment.mixins import HotelUserMixin, HotelContextMixin
+from utils import add_group
 from utils.messages import dj_messages
 
 
@@ -213,7 +213,10 @@ class MgrUserDetailView(HotelUsersOnlyMixin, DetailView):
 
 
 class UserCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView):
-    "Create a Normal Hotel User w/ no permissions."
+    """
+    Create a Normal Hotel User w/ no permissions.
+    Auto-add all created Users to the Group of the Hotel
+    """
 
     group_required = ["hotel_admin", "hotel_manager"]
     model = User

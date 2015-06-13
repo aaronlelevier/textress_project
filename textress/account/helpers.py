@@ -34,10 +34,3 @@ login_messages = {
 
 def salt(length=7):
     return "".join([random.choice(digits) for x in range(length)])
-
-
-def add_group(user, group):
-    group = Group.objects.get(name=group)
-    user.groups.add(group)
-    user.save()
-    return user

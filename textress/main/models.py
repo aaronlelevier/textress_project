@@ -1,4 +1,6 @@
 import re
+import random
+import string
 
 from django.db import models
 from django.conf import settings
@@ -17,7 +19,7 @@ from rest_framework.authtoken.models import Token
 
 from payment.models import Customer
 from utils.data import STATES, HOTEL_TYPES
-from utils import validate_phone
+from utils import validate_phone, add_group
 from utils import exceptions as excp
 
 
@@ -133,6 +135,7 @@ class Hotel(TwilioClient, AbstractBase):
     slug = models.SlugField(_("Slug"), max_length=125, unique=True, blank=True)
     active = models.BooleanField(blank=True, default=True,
         help_text="Deactivate Hotel here when they run out of funds to send SMS.")
+    group_name = models.CharField(blank=True, max_length=100)
     # Stripe
     customer = models.ForeignKey(Customer, blank=True, null=True,
         help_text="Stripe Customer Id")
@@ -159,6 +162,7 @@ class Hotel(TwilioClient, AbstractBase):
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
+        self.group_name = self.slug + '_' + ''.join([str(random.choice(string.digits)) for x in range(10)])
         if self.address_phone:
             self.address_phone = validate_phone(self.address_phone)
         return super(Hotel, self).save(*args, **kwargs)
@@ -221,6 +225,10 @@ class UserProfile(AbstractBase):
             A. Take 1st letter of FName, Lname. i.e. Bob Cohen == -BC
             B. Use username. i.e. bobby == -bobby
         """
+        # Auto-Join to group of the Hotel for ``ws4redis`` Group Messaging.
+        if self.hotel:
+            add_group(self.user, self.hotel.group_name)
+
         try:
             self.msg_sign = "-{}{}".format(self.user.first_name[0].upper(),
                 self.user.last_name[0].upper())
