@@ -17,7 +17,12 @@
           .module('conciergeApp.services')
           .factory('GuestUser', function() {
             return {
-              id: "{{ object.id|default:''}}",
+              id: "{{ object.id|default:'' }}",
+            }
+          })
+          .factory('CurrentUser', function() {
+            return {
+                id: "{{ user.id|default:'' }}",
             }
           });
     </script>
@@ -78,21 +83,21 @@
 
                 <br>
 
-                <h5>Incoming Messages</h5>
-                    <div class="row">
-                        <div class="col-xs-12 col-md-11 col-lg-10">
-                            {% block introduction %}{% endblock introduction %}
-                            <pre id="billboard" style="overflow-y: auto; height: 10em; margin-top: 1em;"></pre>
-                        </div>
-                    </div>
-                <ul id="messages"></ul>
-
-                <h5>Outgoing Messages</h5>
-                <div class="messages" id="messages-target">
-                  <div class="message-container" ng-repeat="message in messages">
-                    <div class="message-body"><em>[[ message.created | date:'medium' ]]</em> -- [[ message.body | limitTo : 30 ]]</div>
-                  </div>
-                </div>
+                <h3>Messages</h3>
+                
+                <ul class="list-unstyled" ng-repeat="message in messages">
+                    <li class="message-body" id="messages">
+                        <!-- <div ng-switch on="message"> -->
+                            <div ng-if="message.user !== null ">
+                                <h5>[[ message.body | limitTo : 100 ]] <small>[[ message.created | date:'medium' ]]</small> User: [[ message.user ]] / Guest: [[ message.guest ]]</h5>
+                            </div>
+                            <div ng-if="message.user === null " style="background-color:yellow;">
+                                <h5>[[ message.body | limitTo : 100 ]] <small>[[ message.created | date:'medium' ]]</small> User: [[ message.user ]] / Guest: [[ message.guest ]]</h5>
+                            </div>
+                        <!-- </div> -->
+                    </li>
+                </ul>
+                
             </div>
         </div>
         <!-- end: PAGE CONTENT -->
@@ -107,27 +112,27 @@
 <script type="text/javascript">
 jQuery(document).ready(function($) {
     var ws4redis = WS4Redis({
-        uri: '{{ WEBSOCKET_URI }}foobar?subscribe-broadcast&publish-broadcast&echo',
+        uri: '{{ WEBSOCKET_URI }}foobar?subscribe-broadcast&publish-broadcast', //&echo',
         receive_message: receiveMessage,
         heartbeat_msg: {{ WS4REDIS_HEARTBEAT }}
     });
     var billboard = $('#billboard');
 
     // send message though the Websocket to the server
+    // by ``keydown`` or ``click``
     $("#text_message").keydown(function(event) {
         if (event.keyCode === 13) {
-            event.preventDefault();
+            // event.preventDefault();
             ws4redis.send_message($('#text_message').val());
         }
     });
-
     $('#send_message').click(function() {
         ws4redis.send_message($('#text_message').val());
     });
 
     // receive a message though the Websocket from the server
     function receiveMessage(msg) {
-        billboard.append('<br/>' + msg);
+        $('<li>' + msg + ' ' + msg.created + '</li>').prependTo('#messages');
         billboard.scrollTop(billboard.scrollTop() + 25);
     }
 });

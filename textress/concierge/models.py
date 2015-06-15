@@ -270,6 +270,8 @@ class Message(AbstractBase):
                 self.cost = msg['price']
                 self.reason = msg['error_code']
                 self.received = True
+                # add User to note the message was sent by a User, not a Guest
+                # self.user = 
             except TwilioRestException as e:
                 self.reason = e.__dict__['msg']
 
