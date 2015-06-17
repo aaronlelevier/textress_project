@@ -3,6 +3,7 @@
 
 
 {% block head_js %}
+    {{ block.super }}
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular.min.js"></script>
     <script src="{% static 'vendor/angular-resource/angular-resource.min.js' %}"></script>
     <script src="{% static 'vendor/angular-route/angular-route.min.js' %}"></script>
@@ -50,7 +51,7 @@
 
         <br>
     
-        <div class="row" ng-controller="GuestMessageCtrl" id="guestMessageCtrl" ng-cloak>
+        <div class="row" ng-controller="GuestMessageCtrl" id="GuestMessageCtrl" ng-cloak>
             <div class="col-md-6">
                 <table class="table table-hover">
                     <tr>
@@ -130,9 +131,9 @@ jQuery(document).ready(function($) {
         ws4redis.send_message($('#text_message').val());
     });
 
-    // receive a message though the Websocket from the server
-    function receiveMessage(msg) {
-        $('<li>' + msg + ' ' + msg.created + '</li>').prependTo('#messages');
+    function receiveMessage(message) {
+        angular.element('#GuestMessageCtrl').scope().getMessage(message);
+        angular.element('#GuestMessageCtrl').scope().$apply(); 
         billboard.scrollTop(billboard.scrollTop() + 25);
     }
 });

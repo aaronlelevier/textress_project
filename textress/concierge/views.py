@@ -16,6 +16,7 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt, csrf_protect, ensure_csrf_cookie
 from django.http import HttpResponse
 from django.utils import timezone
+from django.forms.models import model_to_dict
 
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
@@ -52,24 +53,24 @@ class ReceiveSMSView(CsrfExemptMixin, TemplateView):
         return render(request, 'blank.html', content_type="text/xml")
 
     def post(self, request, *args, **kwargs):
-        resp = twiml.Response()
-        
-        print("request.POST:", request.POST)
-
-        # ws4redis publish
         '''
         TODO: 
             Make a function to return the Hotel Object, so I can get the Hotel.group_name,
             and use the Group_Chat.
         '''
-        redis_publisher = RedisPublisher(facility='foobar', broadcast=True)
-        message = RedisMessage(request.POST['Body'])
-        redis_publisher.publish_message(message)
+        # must return this to confirm SMS received for Twilio API
+        resp = twiml.Response()
 
         # if a msg is returned, attach and reply to Guest
-        msg = process_incoming_message(data=request.POST)
-        if msg:
-            resp.message(msg)
+        msg, reply, hotel = process_incoming_message(data=request.POST)
+        if reply:
+            resp.message(reply)
+
+        # convert to JSON, and publish to Redis
+        redis_publisher = RedisPublisher(facility='foobar', broadcast=True)
+        msg = JSONRenderer().render(model_to_dict(msg))
+        msg = RedisMessage(msg)
+        redis_publisher.publish_message(msg)
 
         return render(request, 'blank.html', {'resp': str(resp)},
             content_type='text/xml')

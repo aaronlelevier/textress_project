@@ -24,6 +24,12 @@ def process_incoming_message(data):
     with a standard "HNF" `Reply`
 
     `Guest` resolve before receiving `Message`
+
+    Return:
+
+    - msg - b/c will be converted to JSON and sent to client thro Redis
+    - reply - auto-reply to guest TODO: [need to move out of `ReceiveSMSView code]
+    - hotel - used for group messaging by Hotel.group_name
     '''
     hotel = Hotel.objects.get_by_phone(data['To'])
     
@@ -34,6 +40,8 @@ def process_incoming_message(data):
             body=login_messages['hotel_not_found'])
 
     # save message to DB
-    db_message = Message.objects.receive_message(guest, data)
+    msg = Message.objects.receive_message(guest, data)
 
-    return Reply.objects.process_reply(guest, hotel, data['Body'])
+    reply = Reply.objects.process_reply(guest, hotel, data['Body'])
+
+    return msg, reply, hotel

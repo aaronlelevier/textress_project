@@ -24,8 +24,8 @@ conciergeControllers.controller('GuestListCtrl', ['$scope', 'Guest', function($s
 }]);
 
 conciergeControllers.controller('GuestMessageCtrl',
-    ['$scope', '$stateParams', 'Message', 'GuestMessages', 'GuestUser', 'CurrentUser',
-    function($scope, $stateParams, Message, GuestMessages, GuestUser, CurrentUser) {
+    ['$scope', '$stateParams', '$timeout', 'Message', 'GuestMessages', 'GuestUser', 'CurrentUser',
+    function($scope, $stateParams, $timeout, Message, GuestMessages, GuestUser, CurrentUser) {
         $scope.messages = {};
 
         $scope.user_id = CurrentUser.id;
@@ -50,6 +50,7 @@ conciergeControllers.controller('GuestMessageCtrl',
 
         $scope.submitMessage = function(body) {
             console.log('Pre create - guest id:', $scope.guest.id);
+            $scope.body = null;
 
             var message = new Message({
                 to_ph: $scope.to,
@@ -59,12 +60,42 @@ conciergeControllers.controller('GuestMessageCtrl',
             });
 
             message.$save(function() {
+                console.log('$save unshift:', message)
                 $scope.messages.unshift(message);
-                $scope.body = null;
+                // moved to top to clear faster, so User isn't waiting
+                // $scope.body = null; 
 
                 // Guest submitted to save
                 console.log('Post create - guest:', $scope.guest)
             });
+        }
+
+        // set flag to not call getMsg() on page load using $timeout.
+        // ref: http://stackoverflow.com/questions/16947771/how-do-i-ignore-the-initial-load-when-watching-model-changes-in-angularjs
+        var initializing = true;
+
+        $scope.getMessage = function(message) {
+
+            var gm = function(Message, $stateParams, $scope, message) {
+                console.log(message);
+                message = JSON.parse(message);
+                console.log(typeof(message));
+                var a = message;
+                console.log(a.sid);
+
+                Message.get({
+                    id: message.id //$stateParams.guestId
+                }, function(response) {
+                    // test
+                    console.log('getMessage:', response);
+                    $scope.messages.unshift(response);
+                });
+            }
+            if (initializing) {
+                $timeout(function() { initializing = false; });
+            } else {
+                gm(Message, $stateParams, $scope, message);
+            }
         }
     }
 ]);
