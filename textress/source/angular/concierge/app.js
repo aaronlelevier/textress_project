@@ -3,5 +3,6 @@ angular.module('conciergeApp', [
         'ngResource',
         'conciergeApp.services',
         'conciergeApp.controllers',
+        'conciergeFilters',
         'config'
     ]);

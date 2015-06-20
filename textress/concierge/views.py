@@ -46,6 +46,9 @@ from utils import EmptyForm, DeleteButtonMixin
 
 
 class ReceiveSMSView(CsrfExemptMixin, TemplateView):
+    '''
+    Main SMS Receiving endpoint for url to be configured on Twilio.
+    '''
 
     template_name = 'blank.html'
 
@@ -53,11 +56,6 @@ class ReceiveSMSView(CsrfExemptMixin, TemplateView):
         return render(request, 'blank.html', content_type="text/xml")
 
     def post(self, request, *args, **kwargs):
-        '''
-        TODO: 
-            Make a function to return the Hotel Object, so I can get the Hotel.group_name,
-            and use the Group_Chat.
-        '''
         # must return this to confirm SMS received for Twilio API
         resp = twiml.Response()
 
@@ -75,21 +73,9 @@ class ReceiveSMSView(CsrfExemptMixin, TemplateView):
         return render(request, 'blank.html', {'resp': str(resp)},
             content_type='text/xml')
 
-    ###  New Logic ###
-    # def get_context_data(self, **kwargs):
-    #     context = super(ReceiveSMSView, self).get_context_data(**kwargs)
-    #     context.update(groups=Group.objects.all())
-    #     return context
-
     @csrf_exempt
     def dispatch(self, *args, **kwargs):
         return super(ReceiveSMSView, self).dispatch(*args, **kwargs)
-
-    # def post(self, request, *args, **kwargs):
-    #     redis_publisher = RedisPublisher(facility='foobar', groups=[request.POST.get('group')])
-    #     message = RedisMessage(request.POST.get('message'))
-    #     redis_publisher.publish_message(message)
-    #     return HttpResponse('OK')
 
 
 ###############

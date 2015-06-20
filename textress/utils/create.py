@@ -70,6 +70,20 @@ def _get_users():
     return User.objects.filter(~Q(username="Test"))
 
 
+def add_user_to_hotel_group():
+    ### Make a Group for each Hotel, and add all Users to that Group that belong to that Hotel
+    from django.contrib.auth.models import User, Group
+    from main.models import Hotel
+
+    hotels = Hotel.objects.all()
+    for h in hotels:
+        g, created = Group.objects.get_or_create(name=h.group_name)
+        for up in h.userprofile_set.all():
+            user = up.user
+            user.groups.add(g)
+            user.save()
+
+
 ##########
 # HOTELS #
 ##########  
