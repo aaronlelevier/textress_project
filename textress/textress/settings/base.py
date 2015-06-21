@@ -22,6 +22,7 @@ DEFAULT_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.sitemaps',
     'django.contrib.flatpages',
+    'django.contrib.postgres',
 )
 
 THIRD_PARTY_APPS = (
@@ -52,15 +53,6 @@ AUTHENTICATION_BACKENDS = (
 )
 
 
-### [TODO: will this be replaced by Redis ??]
-# For Cache templates and inc 
-# TEMPLATE_LOADERS = (
-#     ('django.template.loaders.cached.Loader', (
-#         'django.template.loaders.filesystem.Loader',
-#         'django.template.loaders.app_directories.Loader',
-#     )),
-# )
-
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
     'django.core.context_processors.i18n',
@@ -71,7 +63,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'ws4redis.context_processors.default',
     )
 
-
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -80,12 +71,28 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
 )
 
 ROOT_URLCONF = 'textress.urls'
 
-WSGI_APPLICATION = 'textress.wsgi.application'
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
 
+WSGI_APPLICATION = 'textress.wsgi.application'
 
 DATABASES = {
     'default': {
@@ -95,9 +102,7 @@ DATABASES = {
         'PASSWORD': os.environ['T17_DB_PASSWORD'], 
         'HOST': 'localhost',                      
         'PORT': '5432',                      
-        'OPTIONS': {
-            'autocommit': True,
-            },
+        'OPTIONS': {},
     }
 }
 
@@ -113,14 +118,9 @@ USE_L10N = True
 
 USE_TZ = True
 
-
-SITE =  "textress.com"
-SITE_NAME = 'Textress'
-SITE_URL = "localhost:8000/"
-
-TEMPLATE_DIRS = (
-    os.path.join(BASE_DIR, 'templates'),
-    )
+# TEMPLATE_DIRS = (
+#     os.path.join(BASE_DIR, 'templates'),
+#     )
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'source'),
@@ -129,6 +129,11 @@ STATICFILES_DIRS = (
 STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+
+SITE =  "textress.com"
+SITE_NAME = 'Textress'
+SITE_URL = "localhost:8000/"
 
 
 ### STATIC ACCOUNT URLS ###

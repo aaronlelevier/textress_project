@@ -124,13 +124,12 @@ class Hotel(TwilioClient, AbstractBase):
     address_line1 = models.CharField(_("Address Line 1"), max_length=100)
     address_city = models.CharField(_("City"), max_length=100)
     address_state = models.CharField(_("State"), max_length=25, choices=STATES, default=STATES[0][0])
-    address_zip = models.PositiveIntegerField(_("Zipcode"), max_length=5,
-        help_text="5-digit zipcode. i.e.: 89109")
+    address_zip = models.PositiveIntegerField(_("Zipcode"), help_text="5-digit zipcode. i.e.: 89109")
     # Optional
     address_line2 = models.CharField(_("Address Line 2"), max_length=100, blank=True)
     hotel_type = models.CharField(_("Hotel Type"), max_length=100, choices=HOTEL_TYPES,
         default='', blank=True)
-    rooms = models.IntegerField(_("Rooms"), max_length=5, blank=True, null=True)
+    rooms = models.IntegerField(_("Rooms"), blank=True, null=True)
     # Auto
     slug = models.SlugField(_("Slug"), max_length=125, unique=True, blank=True)
     active = models.BooleanField(blank=True, default=True,

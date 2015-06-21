@@ -144,9 +144,9 @@ class Card(AbstractBase):
     # Fields
     id = models.CharField(_("Stripe Card ID"), primary_key=True, max_length=100)
     brand = models.CharField(_("Brand"), max_length=25)
-    last4 = models.PositiveIntegerField(_("Last 4"), max_length=4)
-    exp_month = models.PositiveIntegerField(_("Exp Month"), max_length=2)
-    exp_year = models.PositiveIntegerField(_("Exp Year"), max_length=4)
+    last4 = models.PositiveIntegerField(_("Last 4"))
+    exp_month = models.PositiveIntegerField(_("Exp Month"))
+    exp_year = models.PositiveIntegerField(_("Exp Year"))
     # Semi-Auto Fields
     default = models.BooleanField(_("Default"), blank=True, default=True)
     # Auto Fields
