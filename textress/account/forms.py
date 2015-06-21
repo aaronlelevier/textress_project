@@ -13,9 +13,8 @@ from djangular.forms import NgFormValidationMixin
 from djangular.styling.bootstrap3.forms import (Bootstrap3Form,
     Bootstrap3ModelForm)
 
-from account.helpers import login_messages, salt
 from account.models import AcctCost
-from utils import email
+from utils import email, login_messages, salt
 
 
 #################

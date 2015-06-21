@@ -8,7 +8,7 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.utils.text import slugify
 from django.dispatch import receiver
 from django.db.models.signals import post_save, pre_delete
@@ -161,9 +161,15 @@ class Hotel(TwilioClient, AbstractBase):
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
+
+        # Hotel Group
         self.group_name = self.slug + '_' + ''.join([str(random.choice(string.digits)) for x in range(10)])
+        g, created = Group.objects.get_or_create(name=self.group_name)
+
+        # Always use Twilio phone formatting
         if self.address_phone:
             self.address_phone = validate_phone(self.address_phone)
+
         return super(Hotel, self).save(*args, **kwargs)
 
     @property

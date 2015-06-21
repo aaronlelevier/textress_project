@@ -343,19 +343,29 @@ class AcctTransManager(Dates, models.Manager):
 
     def recharge(self, hotel, balance):
         '''
-        `recharge_amt` ex: self.amount = 1000
-                           current balance = -25
-                           recharge = 1000-(-25) = 1025
-        '''
-        trans_type = TransType.objects.get(name='recharge_amt')
-        amount = self.amount(hotel, trans_type) - balance
+        Should only occur if the ``balance`` is less than the ``recharge_amt`` 
+        for the Hotel.
 
-        # TODO: need to charge credit card here in order to "recharge"
-        #   the account
-        acct_tran = self.create(hotel=hotel, trans_type=trans_type,
-            amount=amount)
+        :ex: 
+            acct_cost.balance_min = 100
+            current balance = -25
+            recharge_amt - current balance = 1000-(-25) = 1025
+
+        :Return:
+            acct_tran, created
+        '''
+        if balance > hotel.acct_cost.balance_min:
+            return None, False
+        else:
+            trans_type = TransType.objects.get(name='recharge_amt')
+            amount = self.amount(hotel, trans_type) - balance
+
+            # TODO: need to charge credit card here in order to "recharge"
+            #   the account
+            acct_tran = self.create(hotel=hotel, trans_type=trans_type,
+                amount=amount)
         
-        return acct_tran
+            return acct_tran, True
 
     def check_balance(self, hotel):
         balance = AcctTrans.objects.filter(hotel=hotel).balance()

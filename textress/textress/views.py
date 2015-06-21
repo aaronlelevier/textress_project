@@ -19,7 +19,6 @@ class IndexView(CreateView):
     template_name = 'frontend/index.html'
     form_class = ContactForm
     model = Contact
-    fields = ['name', 'email', 'subject', 'message']
     success_url = reverse_lazy('index')
 
     def get_context_data(self, **kwargs):

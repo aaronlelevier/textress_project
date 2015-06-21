@@ -9,14 +9,17 @@ from django.contrib.auth.models import User
 
 from model_mommy import mommy
 
-from account.helpers import login_messages
 from main.tests.factory import create_hotel
+from utils import create, login_messages
 
 
 class AuthTests(TestCase):
 
     def setUp(self):
-        self.password = '123456'
+        # Groups
+        create._get_groups_and_perms()
+        # User
+        self.password = '1234'
         self.user = User.objects.create_user('Bobby',
             settings.DEFAULT_FROM_EMAIL, self.password)
         # add Hotel

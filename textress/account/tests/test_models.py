@@ -1,6 +1,5 @@
 import datetime
 import pytest
-from unittest.mock import MagicMock
 
 from django.db import models
 from django.db.models import Avg, Max, Min, Sum
@@ -341,8 +340,12 @@ class AcctTransTests(TestCase):
 
     def test_recharge(self):
         old_balance = AcctTrans.objects.filter(hotel=self.hotel).balance()
+        print('old_balance:', old_balance)
+        recharge_amt, created = AcctTrans.objects.recharge(self.hotel, old_balance)
+        # the balance of credits is higher than the acct_cost.balance_min, so no recharge occurs
+        self.assertIsNone(recharge_amt)
 
-        recharge_amt = AcctTrans.objects.recharge(self.hotel, old_balance)
+        # TODO: finish fixing test and logic here.
 
         print('recharge_amt:', recharge_amt.amount)
         assert recharge_amt.amount
@@ -355,7 +358,7 @@ class AcctTransTests(TestCase):
         print('self.hotel.acct_cost.recharge_amt:', self.hotel.acct_cost.recharge_amt)
         print('recharge_amt.amount:', recharge_amt.amount)
         print('old_balance:', old_balance, 'new_balance:', new_balance)
-        assert old_balance < new_balance
+        self.assertTrue(old_balance < new_balance)
 
     def sms_used_mgr_no_messages(self):
         # Remove all Messages for today, so shouldn't be creating a `sms_used` AcctTrans record

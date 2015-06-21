@@ -14,8 +14,8 @@ from djangular.styling.bootstrap3.forms import (Bootstrap3Form,
     Bootstrap3ModelForm, Bootstrap3FormMixin)
 
 from main.models import Hotel
-from account.helpers import login_messages
 from concierge.models import validate_phone
+from utils import login_messages
 
 
 class UserCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):

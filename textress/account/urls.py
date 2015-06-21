@@ -2,8 +2,8 @@ from django.conf.urls import patterns, include, url
 from django.contrib.auth import views as auth_views
 
 from account import views
-from account.forms import (AuthenticationForm, PasswordResetForm, SetPasswordForm,
-    PasswordChangeForm)
+from account.forms import (AuthenticationForm, PasswordResetForm,
+    SetPasswordForm, PasswordChangeForm)
 
 
 register_patterns = patterns('',
@@ -82,12 +82,11 @@ account_patterns = patterns('',
     url(r'^private/$', views.private, name='private'),
     url(r'^login-error/$', views.login_error, name='login_error'),
 )
-### NOT IN USE: END
 
 urlpatterns = patterns('',
     url(r'^api/', include(api_patterns)),
     url(r'^account/', include(account_patterns)),
     url(r'^register/', include(register_patterns)),
-    # url(r'^statements/', include(acct_stmt_patterns)),
-    # url(r'^close/', include(close_acct_patterns)),
+    url(r'^statements/', include(acct_stmt_patterns)),
+    url(r'^close/', include(close_acct_patterns)),
     )

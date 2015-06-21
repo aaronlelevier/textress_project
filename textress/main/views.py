@@ -20,10 +20,8 @@ from main.forms import UserCreateForm, HotelCreateForm, UserUpdateForm
 from main.mixins import (HotelMixin, UserOnlyMixin, HotelUsersOnlyMixin,
     RegistrationContextMixin)
 from contact.mixins import NewsletterMixin, TwoFormMixin
-from account.helpers import login_messages
 from payment.mixins import HotelUserMixin, HotelContextMixin
-from utils import add_group
-from utils.messages import dj_messages
+from utils import add_group, dj_messages, login_messages
 
 
 ### Hotel ###

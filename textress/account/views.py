@@ -25,7 +25,6 @@ from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
 from account.decorators import anonymous_required
 from account.forms import (AuthenticationForm, CloseAccountForm,
     CloseAcctConfirmForm, AcctCostForm)
-from account.helpers import login_messages
 from account.models import AcctCost, AcctStmt, AcctTrans, Pricing
 from account.serializers import PricingSerializer
 from main.mixins import RegistrationContextMixin
@@ -33,10 +32,8 @@ from main.models import UserProfile, Subaccount
 from main.forms import UserCreateForm
 from payment.mixins import AdminOnlyMixin, HotelUserMixin, HotelAdminCheckMixin
 from sms.models import PhoneNumber
-from utils import email
+from utils import email, login_messages
 
-
-# from main.tasks import hello_world
 
 ### ACCOUNT ERROR / REDIRCT ROUTING VIEWS ###
 
@@ -67,11 +64,9 @@ def verify_logout(request):
 
 class AccountView(LoginRequiredMixin, HotelUserMixin, TemplateView):
     """
-    Main Account (profile) View.
+    cpanel Account Dashboard
 
-    First time this is dispatched, make sure:
-    - Hotel has a subaccount_sid
-    - Assign a Twilio Ph #
+    - will use Paypal style *account not 100% setup* if setup needed. i.e. ph num.
     """
     template_name = 'cpanel/account.html'
 
