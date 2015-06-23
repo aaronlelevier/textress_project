@@ -3,11 +3,12 @@ import datetime
 from django.db import models
 from django.db.models import Avg, Max, Min, Sum
 from django.conf import settings
-from django.utils.translation import ugettext, ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.translation import ugettext, ugettext_lazy as _
 
 import stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -357,13 +358,14 @@ class AcctTransManager(Dates, models.Manager):
         if balance > hotel.acct_cost.balance_min:
             return None, False
         else:
-            trans_type = TransType.objects.get(name='recharge_amt')
-            amount = self.amount(hotel, trans_type) - balance
+            amount = hotel.acct_cost.recharge_amt - balance
 
             # TODO: need to charge credit card here in order to "recharge"
             #   the account
-            acct_tran = self.create(hotel=hotel, trans_type=trans_type,
-                amount=amount)
+
+            # should I set ``trans_type`` as a global VAR b/c doesn't change?
+            trans_type = get_object_or_404(TransType, name='recharge_amt')
+            acct_tran = self.create(hotel=hotel, trans_type=trans_type, amount=amount)
         
             return acct_tran, True
 

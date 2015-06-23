@@ -339,17 +339,17 @@ class AcctTransTests(TestCase):
         assert AcctTrans.objects.sms_used_on_date(date=max_date)
 
     def test_recharge(self):
+        # ``recharge()`` returns None if it is not triggered
         old_balance = AcctTrans.objects.filter(hotel=self.hotel).balance()
         print('old_balance:', old_balance)
         recharge_amt, created = AcctTrans.objects.recharge(self.hotel, old_balance)
-        # the balance of credits is higher than the acct_cost.balance_min, so no recharge occurs
         self.assertIsNone(recharge_amt)
 
-        # TODO: finish fixing test and logic here.
-
-        print('recharge_amt:', recharge_amt.amount)
+        # the balance of credits is higher than the acct_cost.balance_min, so no recharge occurs
+        # set balance=0 b/c min balance is 100, so this will trigger a recharge
+        recharge_amt, created = AcctTrans.objects.recharge(self.hotel, balance=0)
+        print('recharge w/ balance=0:', recharge_amt.amount)
         assert recharge_amt.amount
-
         assert recharge_amt
         assert recharge_amt.trans_type == self.recharge_amt
 
