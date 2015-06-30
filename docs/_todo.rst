@@ -84,9 +84,12 @@ dribble
 codrops
 
 
+June 30
+-------
+use Error messages to redirect to the relevant page, i.e. payment.mixins.HotelUserMixin
 
+add "logged in" msg to Dashboard cpanel home view
 
+add "account" button to biz home page when logged in
 
-
-
-
+make sure login/logout is working as expected

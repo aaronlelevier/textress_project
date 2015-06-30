@@ -193,7 +193,7 @@ class MessageAPITests(APITestCase):
 
     def test_get(self):
         self.client.login(username=self.admin.username, password=self.password)
-        response = self.client.get(reverse('api_messages'))
+        response = self.client.get(reverse('concierge:api_messages'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_message_required_objects(self):
@@ -223,7 +223,7 @@ class MessageAPITests(APITestCase):
     def test_get_message_pk(self):
         message = Message.objects.filter(guest=self.guest)[0]
         self.client.login(username=self.admin.username, password=self.password)
-        response = self.client.get(reverse('api_messages', kwargs={'pk': message.pk}))
+        response = self.client.get(reverse('concierge:api_messages', kwargs={'pk': message.pk}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
@@ -261,7 +261,7 @@ class GuestMessageAPITests(APITestCase):
 
     def test_get(self):
         self.client.login(username=self.admin.username, password=self.password)
-        response = self.client.get(reverse('api_guest_messages'))
+        response = self.client.get(reverse('concierge:api_guest_messages'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     # TODO: Test other guests can't be rendered
@@ -299,19 +299,19 @@ class GuestAPITests(APITestCase):
 
     def test_get_list(self):
         self.client.login(username=self.admin.username, password=self.password)
-        response = self.client.get(reverse('api_guests'))
+        response = self.client.get(reverse('concierge:api_guests'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_create(self):
         self.client.login(username=self.admin.username, password=self.password)
-        response = self.client.post(reverse('api_guests'), self.data)
+        response = self.client.post(reverse('concierge:api_guests'), self.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     # /api/guests/<pk>/
 
     def test_get_guest_pk(self):
         self.client.login(username=self.admin.username, password=self.password)
-        response = self.client.get(reverse('api_guests', kwargs={'pk': self.guest.pk}))
+        response = self.client.get(reverse('concierge:api_guests', kwargs={'pk': self.guest.pk}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update(self):
@@ -319,7 +319,7 @@ class GuestAPITests(APITestCase):
         self.data = serializers.GuestBasicSerializer(self.guest).data
         self.data.update({'name': 'changed'})
 
-        response = self.client.get(reverse('api_guests', kwargs={'pk': self.guest.pk}), self.data)
+        response = self.client.get(reverse('concierge:api_guests', kwargs={'pk': self.guest.pk}), self.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
@@ -351,12 +351,12 @@ class UserAPITests(APITestCase):
 
     def test_can_get_users(self):
         self.client.login(username=self.admin.username, password=self.password)
-        response = self.client.get(reverse('api_users'))
+        response = self.client.get(reverse('concierge:api_users'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_can_create_user(self):
         self.client.login(username=self.admin.username, password=self.password)
-        response = self.client.post(reverse('api_users'), self.data)
+        response = self.client.post(reverse('concierge:api_users'), self.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     # /api/users/<pk>/
@@ -365,7 +365,7 @@ class UserAPITests(APITestCase):
         user = mommy.make(User)
         user.profile.update_hotel(self.hotel)
         self.client.login(username=self.admin.username, password=self.password)
-        response = self.client.get(reverse('api_users', kwargs={'pk': user.pk}))
+        response = self.client.get(reverse('concierge:api_users', kwargs={'pk': user.pk}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_can_update(self):
@@ -375,14 +375,6 @@ class UserAPITests(APITestCase):
         self.data = serializers.UserSerializer(user).data
         self.data.update({'first_name': 'changed'})
 
-        response = self.client.get(reverse('api_users', kwargs={'pk': user.pk}), self.data)
+        response = self.client.get(reverse('concierge:api_users', kwargs={'pk': user.pk}), self.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-
-
-
-
-
-
-
-
+        

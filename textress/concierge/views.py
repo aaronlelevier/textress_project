@@ -128,7 +128,6 @@ class GuestCreateView(GuestBaseView, CreateView):
     template_name = 'cpanel/form.html'
     model = Guest
     form_class = GuestForm
-    fields = ['name', 'room_number', 'phone_number', 'check_in', 'check_out']
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
@@ -147,8 +146,7 @@ class GuestUpdateView(GuestBaseView, UpdateView):
     headline = "Update Guest"
     template_name = 'cpanel/form.html'
     model = Guest
-    form_class = GuestForm
-    fields = ['name', 'room_number', 'phone_number', 'check_in', 'check_out']      
+    form_class = GuestForm      
 
 
 class GuestDeleteView(GuestBaseView, DeleteButtonMixin, TemplateView):
