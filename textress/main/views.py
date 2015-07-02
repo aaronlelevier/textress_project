@@ -178,7 +178,7 @@ class UserUpdateView(SetHeadlineMixin, UserOnlyMixin, UpdateView):
     headline = "Update Profile"
     model = User
     form_class = UserUpdateForm
-    fields = ['first_name', 'last_name', 'email']
+    # fields = ['first_name', 'last_name', 'email']
     template_name = 'cpanel/form.html'
 
     def get_success_url(self):

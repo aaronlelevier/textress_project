@@ -84,12 +84,7 @@ class UserOnlyMixin(HotelContextMixin):
         if request.user.pk != pk:
             raise Http404
 
-        self.user = (User.objects.select_related('user_profile',
-                                                 'hotel')
-                                                 .get(pk=pk))
-        self.hotel = self.user.profile.hotel
-
-        # TODO: add Group Object here for "hotel_manager"
+        self.hotel = self.request.user.profile.hotel
 
         return super(UserOnlyMixin, self).dispatch(request, *args, **kwargs)
 

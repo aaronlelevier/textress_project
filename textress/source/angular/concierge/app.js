@@ -1,6 +1,6 @@
 angular.module('conciergeApp', [
-        'ui.router',
         'ngResource',
+        'ui.router',
         'conciergeApp.services',
         'conciergeApp.controllers',
         'conciergeFilters',

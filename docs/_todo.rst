@@ -84,7 +84,7 @@ dribble
 codrops
 
 
-June 30
+July 2
 -------
 use Error messages to redirect to the relevant page, i.e. payment.mixins.HotelUserMixin
 

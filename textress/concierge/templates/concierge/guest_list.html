@@ -16,13 +16,14 @@
 
 
 {% block head_js %}
+    {{ block.super }}
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular.min.js"></script>
     <script src="{% static 'vendor/angular-resource/angular-resource.min.js' %}"></script>
-    <script src="{% static 'vendor/angular-route/angular-route.min.js' %}"></script>
     <script src="{% static 'vendor/angular-ui-router/release/angular-ui-router.min.js' %}"></script>
     <script src="{% static 'angular/concierge/app.js' %}"></script>
     <script src="{% static 'angular/concierge/services.js' %}"></script>
     <script src="{% static 'angular/concierge/controllers.js' %}"></script>
+    <script src="{% static 'angular/concierge/filters.js' %}"></script>
     <script src="{% static 'angular/config.js' %}"></script>
 {% endblock head_js %}
 
@@ -81,7 +82,7 @@
                     <tr ng-repeat="guest in guests | orderBy:predicate:reverse">
                         <td><a href="/guests/detail/[[ guest.id ]]/">[[ guest.name ]]</a></td>
                         <td>[[ guest.room_number ]]</td>
-                        <td>[[ guest.phone_number ]]</td>
+                        <td>[[ guest.phone_number | ph ]]</td>
                         <td>[[ guest.check_in ]]</td>
                         <td>[[ guest.check_out ]]</td>
                         <td class="text-center">0</td>
