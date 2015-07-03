@@ -1,3 +1,11 @@
+July 2
+------
+use Error messages to redirect to the relevant page, i.e. payment.mixins.HotelUserMixin
+
+add "account" button to biz home page when logged in
+
+make sure login/logout is working as expected
+
 4-15-15
 -------
 finish the end of the django/postgres SaltStack tutorial, and check if it works
@@ -82,14 +90,3 @@ ng-infinite scroll
 dribble
 
 codrops
-
-
-July 2
--------
-use Error messages to redirect to the relevant page, i.e. payment.mixins.HotelUserMixin
-
-add "logged in" msg to Dashboard cpanel home view
-
-add "account" button to biz home page when logged in
-
-make sure login/logout is working as expected

@@ -20,7 +20,8 @@ from rest_framework.response import Response
 from rest_framework import generics, permissions, mixins
 
 from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
-    GroupRequiredMixin, SetHeadlineMixin, AnonymousRequiredMixin)
+    GroupRequiredMixin, SetHeadlineMixin, AnonymousRequiredMixin,
+    StaticContextMixin)
 
 from account.decorators import anonymous_required
 from account.forms import (AuthenticationForm, CloseAccountForm,
@@ -62,12 +63,14 @@ def verify_logout(request):
 
 ### ACCOUNT VIEWS ###
 
-class AccountView(LoginRequiredMixin, HotelUserMixin, TemplateView):
+class AccountView(LoginRequiredMixin, HotelUserMixin, SetHeadlineMixin, StaticContextMixin, TemplateView):
     """
     cpanel Account Dashboard
 
     - will use Paypal style *account not 100% setup* if setup needed. i.e. ph num.
     """
+    headline = 'Demo Dashboard'
+    static_context = {'headline_small': 'overview &amp; stats'}
     template_name = 'cpanel/account.html'
 
 

@@ -36,6 +36,10 @@ class AuthTests(TestCase):
                         'password': self.password}, follow=True)
         self.assertRedirects(response, reverse('account'))
         assert response.context['user'].username == self.user.username
+        # login success message rendered
+        m = list(response.context['messages'])
+        self.assertEqual(len(m), 1)
+        self.assertEqual(str(m[0]), login_messages['now_logged_in'])
 
     def test_logout(self):
         self.client.login(username=self.user.username, password=self.password)
