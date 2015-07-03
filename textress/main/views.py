@@ -11,14 +11,18 @@ from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.template import RequestContext
 
+from rest_framework.response import Response
+from rest_framework import permissions, generics
 from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
     GroupRequiredMixin, AnonymousRequiredMixin, SetHeadlineMixin,
     FormValidMessageMixin, FormInvalidMessageMixin)
 
+from concierge.permissions import IsHotelObject, IsManagerOrAdmin, IsHotelUser
 from main.models import Hotel, UserProfile, Subaccount
 from main.forms import UserCreateForm, HotelCreateForm, UserUpdateForm
 from main.mixins import (HotelMixin, UserOnlyMixin, HotelUsersOnlyMixin,
     RegistrationContextMixin)
+from main.serializers import UserSerializer
 from contact.mixins import NewsletterMixin, TwoFormMixin
 from payment.mixins import HotelUserMixin, HotelContextMixin
 from utils import add_group, dj_messages, login_messages
@@ -173,10 +177,10 @@ class UserDetailView(UserOnlyMixin, DetailView):
 
 class UserUpdateView(SetHeadlineMixin, UserOnlyMixin, UpdateView):
     '''User's UpdateView of themself.'''
+
     headline = "Update Profile"
     model = User
     form_class = UserUpdateForm
-    # fields = ['first_name', 'last_name', 'email']
     template_name = 'cpanel/form.html'
 
     def get_success_url(self):
@@ -192,7 +196,7 @@ class MgrUserListView(GroupRequiredMixin, HotelUserMixin, ListView):
     Admin or Managers to `view/add/edit/delete.'''
 
     group_required = ["hotel_admin", "hotel_manager"]
-    template_name = 'list_view.html'
+    template_name = 'main/user_list.html'
     
     def get_queryset(self):
         return (User.objects.select_related('userprofile')
@@ -200,7 +204,7 @@ class MgrUserListView(GroupRequiredMixin, HotelUserMixin, ListView):
                             .exclude(pk=self.hotel.admin_id))
 
 
-class MgrUserDetailView(HotelUsersOnlyMixin, DetailView):
+class MgrUserDetailView(DetailView): # HotelUsersOnlyMixin
     '''Admin or Managers detail view of the User.'''
 
     group_required = ["hotel_admin", "hotel_manager"]
@@ -217,7 +221,7 @@ class UserCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView):
     group_required = ["hotel_admin", "hotel_manager"]
     model = User
     form_class = UserCreateForm
-    template_name = 'main/hotel_form.html'
+    template_name = 'cpanel/form.html'
     success_url = reverse_lazy('main:manage_user_list')
 
     def form_valid(self, form):
@@ -244,17 +248,19 @@ class ManagerCreateView(UserCreateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-class MgrUserUpdateView(HotelUsersOnlyMixin, UpdateView):
-    '''User's UpdateView of themself.
+class MgrUserUpdateView(SetHeadlineMixin, HotelUsersOnlyMixin, UpdateView):
+    '''
+    Manager+ view of Users.
 
     TODO: 
         -Add a FormSet, so that Mgrs' can in the same view adjust
             Group Status to "hotel_manager" or take it away.
         - also be able to view Group.
     '''
+    headline = "Update Profile"
     model = User
-    fields = ['first_name', 'last_name', 'email']
-    template_name = 'account/account_form.html'
+    form_class = UserUpdateForm
+    template_name = 'cpanel/form.html'
 
     def get_success_url(self):
         return reverse('main:manage_user_detail', kwargs={'pk': self.object.pk})
@@ -270,3 +276,34 @@ class MgrUserDeleteView(HotelUsersOnlyMixin, DeleteView):
     model = User
     template_name = 'account/account_form.html'
     success_url = reverse_lazy('main:manage_user_list')
+
+
+##################
+# REST API VIEWS #
+##################
+
+### USER ###
+
+class UserListCreateAPIView(generics.ListCreateAPIView):
+
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelUser)
+
+    def list(self, request):
+        users = User.objects.filter(profile__hotel=request.user.profile.hotel)
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
+
+    def perform_update(self, serializer):
+        user = serializer.save()
+        user_profile = user.profile
+        user_profile.update_hotel(hotel=self.request.profile.hotel)
+
+
+class UserRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
+
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelUser)
+

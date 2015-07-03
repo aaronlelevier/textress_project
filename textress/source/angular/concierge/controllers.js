@@ -1,16 +1,6 @@
 var conciergeControllers = angular.module('conciergeApp.controllers', ['conciergeApp.services']);
 
-conciergeControllers.controller('ConciergeCtrl', ['$scope', function($scope) {
-    $scope.twoTimesTwo = 2 * 2;
-}]);
-
-conciergeControllers.controller('StatsCtrl', ['$scope', 'Message', function($scope, Message) {
-    $scope.messages = Message.query();
-}]);
-
 conciergeControllers.controller('GuestListCtrl', ['$scope', 'Guest', function($scope, Guest) {
-    // test
-    $scope.twoTimesTwo = 2 * 2;
     // live
     $scope.guests = Guest.query();
 

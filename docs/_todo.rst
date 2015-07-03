@@ -1,6 +1,18 @@
 2015-07-03
 ----------
+:Next: 
+    - add tests for: MgrUserUpdateView
+    - make a summary of all data for the User, and add tests for: MgrUserDetailView
+    - use TDD to finish "manage-user" views
+
 Manage other Users Views
+
+- ``MgrUserListView``
+
+    - Add to "base-sidebar.html"
+    - Check if View renders?
+    - Will be an Angular App / View
+
 
 2015-07-02
 ----------

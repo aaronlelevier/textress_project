@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
-from .models import Guest, Message
+from concierge.models import Guest, Message
 
 
 ### SUPPORT SERIALIZERS ###
@@ -30,14 +30,6 @@ class MessageBasicSerializer(serializers.ModelSerializer):
 
 
 ### PRODUCTION SERIALIZERS ###
-
-class UserSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name')
-        read_only_fields = ('id', 'username',)
-
 
 class MessageSerializer(serializers.ModelSerializer):
     

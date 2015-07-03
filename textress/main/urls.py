@@ -3,6 +3,11 @@ from django.conf.urls import patterns, include, url
 from main import views
 
 
+api_patterns = patterns('',
+    url(r'^users/$', views.UserListCreateAPIView.as_view(), name='api_users'),
+    url(r'^users/(?P<pk>\d+)/$', views.UserRetrieveUpdateAPIView.as_view(), name='api_users'),
+    )
+
 register_patterns = patterns('',
     # Step 1
     url(r'^step1/$', views.RegisterAdminCreateView.as_view(), name='register_step1'),
@@ -31,8 +36,9 @@ hotel_patterns = patterns('',
     )
 
 urlpatterns = patterns('',
+    url(r'^api/', include(api_patterns)),
     url(r'^register/', include(register_patterns)),
     url(r'^account/user/', include(user_patterns)),
     url(r'^account/hotel/', include(hotel_patterns)),
-    # url(r'^account/manage-users/', include(manage_users_patterns)),
+    url(r'^account/manage-users/', include(manage_users_patterns)),
     )

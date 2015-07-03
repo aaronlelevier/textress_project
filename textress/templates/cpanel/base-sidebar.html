@@ -442,6 +442,32 @@
                         </li>
 
                         <li>
+                            <a href="javascript:void(0)"><i class="clip-users-2"></i>
+                                <span class="title"> Manage Users </span><i class="icon-arrow"></i>
+                                <span class="selected"></span>
+                            </a>
+                            <ul class="sub-menu">
+                                <li>
+                                    <a href="{% url 'main:manage_user_list' %}">
+                                        <span class="title"> User List</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'main:create_user' %}">
+                                        <span class="title"> Add a User</span>
+                                    </a>
+                                </li>
+                                {% if user|has_group:"hotel_admin" %}
+                                <li>
+                                    <a href="{% url 'main:create_manager' %}">
+                                        <span class="title"> Add a Manager</span>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </li>
+
+                        <li>
                             <a href="{% url 'account' %}"><i class="clip-bubble"></i>
                                 <span class="title"> Manage Messages </span><span class="selected"></span>
                             </a>

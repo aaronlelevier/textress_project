@@ -7,7 +7,4 @@ angular.module('conciergeApp.services', ['ngResource'])
     })
     .factory('GuestMessages', function($resource) {
         return $resource('/api/guest-messages/:id');
-    })
-    .factory('User', function($resource) {
-        return $resource('/api/users/:id');
     });

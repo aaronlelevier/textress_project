@@ -35,7 +35,7 @@ from concierge.helpers import process_incoming_message
 from concierge.forms import MessageForm, GuestForm
 from concierge.permissions import IsHotelObject, IsManagerOrAdmin, IsHotelUser
 from concierge.serializers import (MessageSerializer, GuestMessageSerializer,
-    GuestBasicSerializer, UserSerializer)
+    GuestBasicSerializer)
 from sms.helpers import send_text, send_message, sms_messages
 from main.models import Hotel, UserProfile
 from main.views import HotelMixin
@@ -113,13 +113,6 @@ class GuestDetailView(GuestBaseView, DetailView):
     @csrf_exempt
     def dispatch(self, *args, **kwargs):
         return super(GuestDetailView, self).dispatch(*args, **kwargs)
-
-    # def post(self, request, *args, **kwargs):
-    #     redis_publisher = RedisPublisher(facility='foobar', groups=[request.POST.get('group')])
-    #     message = RedisMessage(request.POST.get('message'))
-    #     redis_publisher.publish_message(message)
-    #     return HttpResponse('OK')
-
 
 
 class GuestCreateView(GuestBaseView, CreateView):
@@ -284,30 +277,3 @@ class GuestRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
     queryset = Guest.objects.all()
     serializer_class = GuestBasicSerializer
     permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
-
-
-### USER ###
-
-class UserListCreateAPIView(generics.ListCreateAPIView):
-
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin,)
-
-    def list(self, request):
-        users = User.objects.filter(profile__hotel=request.user.profile.hotel)
-        serializer = UserSerializer(users, many=True)
-        return Response(serializer.data)
-
-    def perform_update(self, serializer):
-        user = serializer.save()
-        user_profile = user.profile
-        user_profile.update_hotel(hotel=self.request.profile.hotel)
-
-
-class UserRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
-
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelUser)
-
