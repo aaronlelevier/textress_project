@@ -19,7 +19,7 @@
                     </button>
                     <!-- end: RESPONSIVE MENU TOGGLER -->
                     <!-- start: LOGO -->
-                    <a class="navbar-brand" href="{% url 'index' %}">
+                    <a class="navbar-brand" href="{% url 'account' %}">
                         TEXT<i><img src="{% static 'images/textress-logo.gif' %}" class="textress-icon-admin"></i>RESS
                     </a>
                     <!-- end: LOGO -->
@@ -350,17 +350,17 @@
                                         <i class="clip-user-2"></i>
                                         &nbsp;My Profile
                                     </a>
-                                </li>
-                                    <a href="#">
+                                <li>
+                                    <a href="{% url 'account' %}">
                                         <i class="clip-bubble-4"></i>
-                                        &nbsp;My Messages (3)
+                                        &nbsp;My Messages
                                     </a>
                                 </li>
                                 <li class="divider"></li>
                                 <li>
-                                    <a href="{% url 'login' %}">
+                                    <a href="{% url 'logout' %}">
                                         <i class="clip-exit"></i>
-                                        &nbsp;Log Out
+                                        &nbsp;Logout
                                     </a>
                                 </li>
                             </ul>
