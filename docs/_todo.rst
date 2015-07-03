@@ -2,9 +2,6 @@ July 2
 ------
 use Error messages to redirect to the relevant page, i.e. payment.mixins.HotelUserMixin
 
-add "account" button to biz home page when logged in
-
-make sure login/logout is working as expected
 
 4-15-15
 -------
@@ -32,7 +29,6 @@ steps needed:
         /etc/nginx/sites-available/textress
     :links:
         /etc/nginx/sites-enabled/textress
-
     :file:
         django.conf
     :notes:

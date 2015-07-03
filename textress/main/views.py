@@ -36,8 +36,6 @@ class HotelUpdateView(HotelUsersOnlyMixin, GroupRequiredMixin, SetHeadlineMixin,
     headline = "Update Hotel Info"
     model = Hotel
     form_class = HotelCreateForm
-    fields = ['name', 'address_phone', 'address_line1', 'address_line2',
-        'address_city', 'address_state', 'address_zip']
     template_name = 'cpanel/form.html'
     form_valid_message = dj_messages['hotel_updated']
 
