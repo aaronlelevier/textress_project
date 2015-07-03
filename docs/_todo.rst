@@ -1,5 +1,9 @@
-July 2
-------
+2015-07-03
+----------
+Manage other Users Views
+
+2015-07-02
+----------
 use Error messages to redirect to the relevant page, i.e. payment.mixins.HotelUserMixin
 
 

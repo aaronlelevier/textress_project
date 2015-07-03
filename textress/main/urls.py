@@ -34,5 +34,5 @@ urlpatterns = patterns('',
     url(r'^register/', include(register_patterns)),
     url(r'^account/user/', include(user_patterns)),
     url(r'^account/hotel/', include(hotel_patterns)),
-    # url(r'^manage-users/', include(manage_users_patterns)),
+    # url(r'^account/manage-users/', include(manage_users_patterns)),
     )
