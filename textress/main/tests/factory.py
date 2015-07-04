@@ -30,41 +30,37 @@ PASSWORD = '1234'
 
 
 def create_hotel(name="Test"):
+    '''
+    Standard test Hotel.
+    '''
     address_data = CREATE_HOTEL_DICT
     address_data['name'] = name
     return Hotel.objects.create(**address_data)
 
 
-def create_hotel_user(hotel, username='user'):
+def create_hotel_user(hotel, username='user', group=None):
     '''
-    Default Hotel User with no Admin or Manager permissions.
-
-    :hotel: Hotel Object
+    Handle making Admin, Manager, and Users with 1 Func.
     '''
     user = mommy.make(User, username=username, password=PASSWORD)
-    user.set_password("1234")
+
+    if group:
+        g = Group.objects.get(name=group)
+        user.groups.add(g)
+    
+    user.set_password(PASSWORD)
     user.save()
     user.profile.update_hotel(hotel)
-    return User.objects.get(username=username)
 
-
-def create_hotel_manager(hotel, username='manager'):
-    '''
-    Default Hotel User with no Admin or Manager permissions.
-
-    :hotel: Hotel Object
-    '''
-    user = mommy.make(User, username=username, password=PASSWORD)
-    manager_group = Group.objects.get(name="hotel_manager")
-    user.groups.add(manager_group)
-    user.set_password("1234")
-    user.save()
-    user.profile.update_hotel(hotel)
     return User.objects.get(username=username)
 
 
 def make_subaccount(hotel, live=False):
     '''
+    TODO
+    ----
+    Find out how to incorporate this method because not currently being used.
+
     If not "live", override Subaccount.save() so don't create a 
     live Twilio Subaccount.
     '''

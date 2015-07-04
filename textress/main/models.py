@@ -242,6 +242,14 @@ class UserProfile(AbstractBase):
 
         return super(UserProfile, self).save(*args, **kwargs)
 
+    @property
+    def is_admin(self):
+        return 'hotel_admin' in [g.name for g in self.user.groups.all()]
+
+    @property
+    def is_manager(self):
+        return 'hotel_manager' in [g.name for g in self.user.groups.all()]
+
     def get_absolute_url(self):
         return reverse('main:user_detail', kwargs={'pk': self.pk})
 
@@ -287,7 +295,7 @@ class Subaccount(AbstractBase):
     """
     Twilio Subaccount
     -----------------
-    To handle API Calls and main entry point for Twilio.
+    To handle API Calls and main entry point for Twilio per Hotel.
 
     TODO: When customer successfully pays for Account, create a Subaccount
         with a new PhoneNumber.

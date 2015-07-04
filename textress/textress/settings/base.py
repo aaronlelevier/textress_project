@@ -139,6 +139,7 @@ LOGIN_SUCCESS_URL = '/account/'
 
 ### EMAIL ###
 DEFAULT_FROM_EMAIL = 'sayhello@textress.com'
+DEFAULT_TO_EMAIL = DEFAULT_FROM_EMAIL
 DEFAULT_EMAIL_SAYHELLO = 'sayhello@textress.com'
 DEFAULT_EMAIL_ADMIN = 'admin@textress.com'
 DEFAULT_EMAIL_SUPPORT = 'support@textress.com'

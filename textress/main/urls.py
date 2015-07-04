@@ -4,8 +4,11 @@ from main import views
 
 
 api_patterns = patterns('',
+    # User
     url(r'^users/$', views.UserListCreateAPIView.as_view(), name='api_users'),
     url(r'^users/(?P<pk>\d+)/$', views.UserRetrieveUpdateAPIView.as_view(), name='api_users'),
+    # Hotel
+    url(r'^hotels/(?P<pk>\d+)/$', views.HotelRetrieveUpdateAPIView.as_view(), name='api_hotel'),
     )
 
 register_patterns = patterns('',
@@ -19,7 +22,6 @@ register_patterns = patterns('',
 
 manage_users_patterns = patterns('',
     url(r'^$', views.MgrUserListView.as_view(), name='manage_user_list'),
-    url(r'^(?P<pk>\d+)/$', views.MgrUserDetailView.as_view(), name='manage_user_detail'),
     url(r'^update/(?P<pk>\d+)/$', views.MgrUserUpdateView.as_view(), name='manage_user_update'),
     url(r'^delete/(?P<pk>\d+)/$', views.MgrUserDeleteView.as_view(), name='manage_user_delete'),
     url(r'^create-user/$', views.UserCreateView.as_view(), name='create_user'),

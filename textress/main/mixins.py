@@ -91,14 +91,36 @@ class UserOnlyMixin(HotelContextMixin):
 
 class HotelUsersOnlyMixin(HotelContextMixin, GroupRequiredMixin, View):
     '''
-    All User Objects belong to the Hotel Obj only.
+    Users must belong to the Hotel of the requesting User.
 
-    Required: kwargs['pk'] == hotel.pk == self.request.user.profile.hotel.pk
+    Requesting User must be a: Admin/Manager
+    '''
+    group_required = ["hotel_admin", "hotel_manager"]
+
+    def dispatch(self, request, *args, **kwargs):
+        user = get_object_or_404(User, pk=kwargs['pk']) 
+        # check that this is the User's Hotel before dispatching
+        try:
+            self.hotel = user.profile.hotel
+            user_hotel = self.hotel == self.request.user.profile.hotel
+        except AttributeError:
+            user_hotel = None
+
+        if not user_hotel:
+            raise Http404
+
+        return super(HotelUsersOnlyMixin, self).dispatch(request, *args, **kwargs)
+
+
+class MyHotelOnlyMixin(HotelContextMixin, GroupRequiredMixin, View):
+    '''
+    Hotel Obj. must be the User's Hotel.
     '''
     group_required = ["hotel_admin", "hotel_manager"]
 
     def dispatch(self, request, *args, **kwargs):
         self.hotel = get_object_or_404(Hotel, pk=kwargs['pk']) 
+        
         # check that this is the User's Hotel before dispatching
         try:
             user_hotel = self.hotel == self.request.user.profile.hotel
@@ -108,7 +130,7 @@ class HotelUsersOnlyMixin(HotelContextMixin, GroupRequiredMixin, View):
         if not user_hotel:
             raise Http404
 
-        return super(HotelUsersOnlyMixin, self).dispatch(request, *args, **kwargs)
+        return super(MyHotelOnlyMixin, self).dispatch(request, *args, **kwargs)
 
 
 class RegistrationContextMixin(object):

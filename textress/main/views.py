@@ -21,8 +21,8 @@ from concierge.permissions import IsHotelObject, IsManagerOrAdmin, IsHotelUser
 from main.models import Hotel, UserProfile, Subaccount
 from main.forms import UserCreateForm, HotelCreateForm, UserUpdateForm
 from main.mixins import (HotelMixin, UserOnlyMixin, HotelUsersOnlyMixin,
-    RegistrationContextMixin)
-from main.serializers import UserSerializer
+    MyHotelOnlyMixin, RegistrationContextMixin)
+from main.serializers import UserSerializer, HotelSerializer
 from contact.mixins import NewsletterMixin, TwoFormMixin
 from payment.mixins import HotelUserMixin, HotelContextMixin
 from utils import add_group, dj_messages, login_messages
@@ -112,7 +112,6 @@ class RegisterAdminUpdateView(GroupRequiredMixin, RegisterAdminBaseView,
     group_required = ["hotel_admin"]
     model = User
     form_class = UserUpdateForm
-    fields = ['first_name', 'last_name', 'email']
 
 
 class RegisterHotelBaseView(GroupRequiredMixin, RegistrationContextMixin, View):
@@ -160,7 +159,7 @@ class RegisterHotelCreateView(RegisterHotelBaseView, CreateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-class RegisterHotelUpdateView(HotelUsersOnlyMixin, RegisterHotelBaseView, UpdateView):
+class RegisterHotelUpdateView(MyHotelOnlyMixin, RegisterHotelBaseView, UpdateView):
     pass
 
 
@@ -191,25 +190,17 @@ class UserUpdateView(SetHeadlineMixin, UserOnlyMixin, UpdateView):
 # MANAGE USERS #
 ################
 
-class MgrUserListView(GroupRequiredMixin, HotelUserMixin, ListView):
-    '''List all Users for a Hotel, except for the Admin, for the 
-    Admin or Managers to `view/add/edit/delete.'''
+class MgrUserListView(GroupRequiredMixin, HotelUserMixin, TemplateView):
+    '''
+    Angular View. So can be a TemplateView since the Object List is 
+    generated from a REST Endpoint.
+
+    List all Users for a Hotel, except for the Admin, for the 
+    Admin or Managers to `view/add/edit/delete.
+    '''
 
     group_required = ["hotel_admin", "hotel_manager"]
     template_name = 'main/user_list.html'
-    
-    def get_queryset(self):
-        return (User.objects.select_related('userprofile')
-                            .filter(profile__hotel=self.hotel)
-                            .exclude(pk=self.hotel.admin_id))
-
-
-class MgrUserDetailView(DetailView): # HotelUsersOnlyMixin
-    '''Admin or Managers detail view of the User.'''
-
-    group_required = ["hotel_admin", "hotel_manager"]
-    model = User
-    template_name = 'detail_view.html'
 
 
 class UserCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView):
@@ -250,7 +241,7 @@ class ManagerCreateView(UserCreateView):
 
 class MgrUserUpdateView(SetHeadlineMixin, HotelUsersOnlyMixin, UpdateView):
     '''
-    Manager+ view of Users.
+    Manager/Admin view of Users.
 
     TODO: 
         -Add a FormSet, so that Mgrs' can in the same view adjust
@@ -263,7 +254,7 @@ class MgrUserUpdateView(SetHeadlineMixin, HotelUsersOnlyMixin, UpdateView):
     template_name = 'cpanel/form.html'
 
     def get_success_url(self):
-        return reverse('main:manage_user_detail', kwargs={'pk': self.object.pk})
+        return reverse('main:manage_user_list')
 
 
 class MgrUserDeleteView(HotelUsersOnlyMixin, DeleteView):
@@ -274,8 +265,11 @@ class MgrUserDeleteView(HotelUsersOnlyMixin, DeleteView):
     '''
 
     model = User
-    template_name = 'account/account_form.html'
+    template_name = 'cpanel/form.html'
     success_url = reverse_lazy('main:manage_user_list')
+
+    def get_success_url(self):
+        return reverse('main:manage_user_list')
 
 
 ##################
@@ -307,3 +301,11 @@ class UserRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
     permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelUser)
 
+
+### HOTEL ###
+
+class HotelRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
+
+    queryset = Hotel.objects.all()
+    serializer_class = HotelSerializer
+    # permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelUser)

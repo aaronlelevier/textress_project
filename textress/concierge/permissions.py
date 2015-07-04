@@ -30,9 +30,9 @@ class IsHotelObject(permissions.BasePermission):
 
 
 class IsManagerOrAdmin(permissions.BasePermission):
-    '''Must be a Manager or Admin to access any REST 
-    EndPoint.'''
-
+    '''
+    Must be a Manager or Admin to access any REST EndPoint.
+    '''
     def has_permission(self, request, view):
         return (request.user.groups.filter(name__in=["hotel_admin",
                                                      "hotel_manager"]))
