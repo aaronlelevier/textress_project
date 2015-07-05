@@ -12,7 +12,7 @@ from django.utils import timezone
 from model_mommy import mommy
 
 from main.models import Hotel, UserProfile, Subaccount
-from main.tests.factory import create_hotel
+from main.tests.factory import create_hotel, create_hotel_user
 from payment.models import Customer
 from utils import create
 from utils.data import STATES
@@ -105,11 +105,15 @@ class HotelTests(TestCase):
         assert hotel.twilio_auth_token
 
     def test_is_textress(self):
-        textress = create_hotel('Textress Hotel')
-        assert textress.is_textress
+        textress, created = Hotel.objects.get_or_create(name=settings.TEXTRESS_HOTEL)
+        self.assertTrue(textress.is_textress)
         
 
 class UserProfileTests(TestCase):
+
+    def setUp(self):
+        create._get_groups_and_perms()
+        self.hotel = create_hotel()
 
     def test_create(self):
         user = mommy.make(User, first_name='Test', last_name='Test')
@@ -134,7 +138,15 @@ class UserProfileTests(TestCase):
         assert len(user_profiles) == 1
 
         user_profiles = UserProfile.objects.archived()
-        assert len(user_profiles) == 0    
+        assert len(user_profiles) == 0
+
+    def test_is_admin(self):
+        admin = create_hotel_user(self.hotel, group='hotel_admin')
+        self.assertTrue(admin.profile.is_admin)
+
+    def test_is_manager(self):
+        mgr = create_hotel_user(self.hotel, group='hotel_manager')
+        self.assertTrue(mgr.profile.is_manager)
 
 
 class SubaccountTests(TestCase):
@@ -174,18 +186,18 @@ class SubaccountTests(TestCase):
         assert isinstance(self.client, TwilioRestClient)
 
     def test_get(self):
-        hotel = create_hotel(name='sub_test_865')
+        hotel = Hotel.objects.first()
 
         # Get
         sub = Subaccount.objects.create(
             hotel=hotel,
             sid=self.test_sid,
             auth_token=self.test_auth_token)
-        assert isinstance(sub, Subaccount)
+        self.assertIsInstance(sub, Subaccount)
 
         sub_2, created = Subaccount.objects.get_or_create(hotel=hotel)
-        assert not created
-        assert sub == sub_2
+        self.assertFalse(created)
+        self.assertEqual(sub, sub_2)
 
         # the DB instance is created, but the Twilio Instance is not
-        assert len(self.client.accounts.list(friendly_name=hotel.name)) == 2
+        self.assertEqual(len(self.client.accounts.list(friendly_name=hotel.name)), 0)

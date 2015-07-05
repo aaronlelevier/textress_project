@@ -19,8 +19,8 @@ Manage other Users Views
 use Error messages to redirect to the relevant page, i.e. payment.mixins.HotelUserMixin
 
 
-4-15-15
--------
+2015-04-15
+----------
 finish the end of the django/postgres SaltStack tutorial, and check if it works
 
 link
