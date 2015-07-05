@@ -115,14 +115,14 @@ class UserViewTests(TestCase):
         # User Can Login
         self.client.login(username=self.user.username, password=self.password)
         response = self.client.get(reverse('main:user_update', kwargs={'pk': self.user.pk}))
-        assert response.status_code == 200
+        self.assertEqual(response.status_code, 200)
         assert response.context['object'] == self.user
 
         # Mgr can't access
         self.client.logout()
         self.client.login(username=self.mgr.username, password=self.password)
         response = self.client.get(reverse('main:user_update', kwargs={'pk': self.user.pk}))
-        assert response.status_code == 404
+        self.assertEqual(response.status_code, 403)
 
     def test_update(self):
         # User can update
@@ -131,13 +131,13 @@ class UserViewTests(TestCase):
         # Mgr can't Access
         self.client.login(username=self.mgr.username, password=self.password)
         response = self.client.get(reverse('main:user_update', kwargs={'pk': self.user.pk}))
-        assert response.status_code == 404
+        self.assertEqual(response.status_code, 403)
 
         # Login n Get
         self.client.logout()
         self.client.login(username=self.user.username, password=self.password)
         response = self.client.get(reverse('main:user_update', kwargs={'pk': self.user.pk}))
-        assert response.status_code == 200
+        self.assertEqual(response.status_code, 200)
 
         # Post
         response = self.client.post(reverse('main:user_update', kwargs={'pk': self.user.pk}),
@@ -145,7 +145,7 @@ class UserViewTests(TestCase):
             follow=True)
         # User updated n redirects
         updated_user = User.objects.get(username=self.user.username)
-        assert fname != updated_user.first_name
+        self.assertNotEqual(fname, updated_user.first_name)
         self.assertRedirects(response, reverse('account'))
 
 

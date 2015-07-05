@@ -284,6 +284,7 @@ NOSE_ARGS = [
 ]
 
 if 'test' in sys.argv:
+    LOGGING = None
     DEBUG = True
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.sqlite3',

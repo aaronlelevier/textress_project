@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import re
 
 from django import forms
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import Group
 from django.utils.translation import ugettext, ugettext_lazy as _
 
@@ -30,7 +31,7 @@ def validate_phone(phone):
     try:
         re_phone = re.search(r'\d{10}$', phone).group()
     except AttributeError:
-        raise forms.ValidationError(error_messages['invalid_ph'])
+        raise ValidationError(error_messages['invalid_ph'])
     else:
         phone = "+1"+re_phone
     return phone

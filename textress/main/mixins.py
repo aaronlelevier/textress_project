@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.views.generic.base import View, ContextMixin
 from django.views.generic.edit import FormMixin
 from django.http import Http404
+from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseRedirect
 from django.forms.models import model_to_dict
@@ -16,55 +17,57 @@ from contact.forms import NewsletterForm
 from payment.mixins import HotelContextMixin
 
 
-class UserContextDataMixin(object):
-    '''
-    Display all fields of user into to start.
-    '''
-    def get_context_data(self, **kwargs):
-        context = super(UserContextDataMixin, self).get_context_data(**kwargs)
-        # populate user in the context w/o the password key
-        user_dict = model_to_dict(self.request.user)
-        user_dict.pop("password", None)
-        context['user_dict'] = user_dict
-        return context
+# class UserContextDataMixin(object):
+#     '''
+#     Pass the User as a Dict Obj into the Context.
+#     '''
+#     def get_context_data(self, **kwargs):
+#         context = super(UserContextDataMixin, self).get_context_data(**kwargs)
+#         # populate user in the context w/o the password key
+#         user_dict = model_to_dict(self.request.user)
+#         user_dict.pop("password", None)
+#         context['user_dict'] = user_dict
+#         return context
 
 
-class HotelContextDataMixin(object):
-    '''
-    Display all Hotel fields.
-    '''
-    def get_context_data(self, **kwargs):
-        context = super(HotelContextDataMixin, self).get_context_data(**kwargs)
+# class HotelContextDataMixin(object):
+#     '''
+#     Display all Hotel fields.
+#     '''
+#     def get_context_data(self, **kwargs):
+#         context = super(HotelContextDataMixin, self).get_context_data(**kwargs)
 
-        # get the Hotel object for the User
-        try:
-            hotel_dict = model_to_dict(self.request.user.profile.hotel)
-        except KeyError:
-            raise Http404
-        else:
-            context['hotel_dict'] = hotel_dict
-            return context
+#         # get the Hotel object for the User
+#         try:
+#             hotel_dict = model_to_dict(self.request.user.profile.hotel)
+#         except KeyError:
+#             raise Http404
+#         else:
+#             context['hotel_dict'] = hotel_dict
+#             return context
 
 
-class NewsletterMixin(FormMixin):
+# class NewsletterMixin(FormMixin):
 
-    form_class = NewsletterForm
-    # will most likely be overwritten in the inheriting view
-    success_url = reverse_lazy('main:index')
+#     form_class = NewsletterForm
+#     # will most likely be overwritten in the inheriting view
+#     success_url = reverse_lazy('main:index')
 
-    def get_context_data(self, **kwargs):
-        context = super(NewsletterMixin, self).get_context_data(**kwargs)
-        context['nl_form'] = self.get_form_class()
-        return context
+#     def get_context_data(self, **kwargs):
+#         context = super(NewsletterMixin, self).get_context_data(**kwargs)
+#         context['nl_form'] = self.get_form_class()
+#         return context
 
 
 class HotelMixin(ContextMixin, View):
-    '''
-    TODO: remove this view b/c replaced by other Hotel Mixins ??
-    '''
+    '''Adds the User's Hotel.'''
 
     def dispatch(self, request, *args, **kwargs):
-        self.hotel = request.user.profile.hotel
+        try:
+            self.hotel = request.user.profile.hotel
+        except AttributeError:
+            return Http404
+
         return super(HotelMixin, self).dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -82,7 +85,7 @@ class UserOnlyMixin(HotelContextMixin):
     def dispatch(self, request, *args, **kwargs):
         pk = int(kwargs['pk'])
         if request.user.pk != pk:
-            raise Http404
+            raise PermissionDenied
 
         self.hotel = self.request.user.profile.hotel
 
@@ -91,7 +94,7 @@ class UserOnlyMixin(HotelContextMixin):
 
 class HotelUsersOnlyMixin(HotelContextMixin, GroupRequiredMixin, View):
     '''
-    Users must belong to the Hotel of the requesting User.
+    Users must belong to the Hotel of the User record that they are requesting.
 
     Requesting User must be a: Admin/Manager
     '''
@@ -107,7 +110,7 @@ class HotelUsersOnlyMixin(HotelContextMixin, GroupRequiredMixin, View):
             user_hotel = None
 
         if not user_hotel:
-            raise Http404
+            raise PermissionDenied
 
         return super(HotelUsersOnlyMixin, self).dispatch(request, *args, **kwargs)
 
@@ -128,7 +131,7 @@ class MyHotelOnlyMixin(HotelContextMixin, GroupRequiredMixin, View):
             user_hotel = None
 
         if not user_hotel:
-            raise Http404
+            raise PermissionDenied
 
         return super(MyHotelOnlyMixin, self).dispatch(request, *args, **kwargs)
 

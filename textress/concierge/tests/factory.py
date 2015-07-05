@@ -64,6 +64,4 @@ def make_messages(hotel, user, guest, insert_date=timezone.now().date(), number=
                 )
 
     return Message.objects.filter(hotel=hotel)
-
-
-
+    

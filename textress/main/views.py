@@ -20,7 +20,7 @@ from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
 from concierge.permissions import IsHotelObject, IsManagerOrAdmin, IsHotelUser
 from main.models import Hotel, UserProfile, Subaccount
 from main.forms import UserCreateForm, HotelCreateForm, UserUpdateForm
-from main.mixins import (HotelMixin, UserOnlyMixin, HotelUsersOnlyMixin,
+from main.mixins import (UserOnlyMixin, HotelUsersOnlyMixin,
     MyHotelOnlyMixin, RegistrationContextMixin)
 from main.serializers import UserSerializer, HotelSerializer
 from contact.mixins import NewsletterMixin, TwoFormMixin
@@ -107,7 +107,7 @@ class RegisterAdminCreateView(RegisterAdminBaseView, CreateView):
 class RegisterAdminUpdateView(GroupRequiredMixin, RegisterAdminBaseView,
     UserOnlyMixin, UpdateView):
     '''
-    For Registration Update User info only.
+    For Registration Update of Admin User info only.
     '''
     group_required = ["hotel_admin"]
     model = User
@@ -174,7 +174,7 @@ class UserDetailView(UserOnlyMixin, DetailView):
     template_name = 'detail_view.html'
 
 
-class UserUpdateView(SetHeadlineMixin, UserOnlyMixin, UpdateView):
+class UserUpdateView(SetHeadlineMixin, LoginRequiredMixin, UserOnlyMixin, UpdateView):
     '''User's UpdateView of themself.'''
 
     headline = "Update Profile"

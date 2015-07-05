@@ -38,7 +38,7 @@ from concierge.serializers import (MessageSerializer, GuestMessageSerializer,
     GuestBasicSerializer)
 from sms.helpers import send_text, send_message, sms_messages
 from main.models import Hotel, UserProfile
-from main.views import HotelMixin
+from main.mixins import HotelMixin
 from payment.views import HotelUserMixin
 from utils.exceptions import (DailyLimit, NotHotelGuestException,
     HotelGuestNotFoundException)
@@ -89,18 +89,18 @@ class GuestBaseView(SetHeadlineMixin, HotelUserMixin, View):
 
 class GuestListView(GuestBaseView, ListView):
     '''
-    Angular View. Angular controlls all context for this View.
+    Angular View
+    ------------
+    Lists all Guests w/ links for Detail, Update, Delete.
     '''
     headline = "Guest List"
 
 
 class GuestDetailView(GuestBaseView, DetailView):
     '''
-    TODO
-    ----
-    Will contain Guest Details, and a Message Form powered by 
-    Angular for sending/receiving SMS through Websockets w/o page 
-    updates needed.
+    Angular View
+    ------------
+    Guest Message View to Send/Receive SMS from.
     '''
     def get_headline(self):
         return u"{} Detail".format(self.object)
@@ -126,7 +126,6 @@ class GuestCreateView(GuestBaseView, CreateView):
         self.object = form.save(commit=False)
         self.object.hotel = self.hotel
         self.object.save()
-        # hotel, created = Hotel.objects.get_or_create(guest=self.object)
         return super(GuestCreateView, self).form_valid(form)
 
 
