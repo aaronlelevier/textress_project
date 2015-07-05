@@ -254,20 +254,20 @@ class ManageUsersTests(TestCase):
         response = self.client.get(reverse('main:manage_user_list'))
         self.assertEqual(response.status_code, 302)
 
-
     ### CREATE USER ###
 
     def test_create_user_get(self):
         # mgr can access
         self.client.login(username=self.mgr.username, password=self.password)
         response = self.client.get(reverse('main:create_user'))
-        assert response.status_code == 200
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNotNone(response.context['headline'])
 
         # normal user cannot
         self.client.logout()
         self.client.login(username=self.user.username, password=self.password)
         response = self.client.get(reverse('main:create_user'))
-        assert response.status_code == 302
+        self.assertEqual(response.status_code, 302)
 
     def test_create_user_post(self):
         # mgr can access
@@ -283,20 +283,20 @@ class ManageUsersTests(TestCase):
         assert isinstance(new_user, User)
         self.assertRedirects(response, reverse('main:manage_user_list'))
 
-
     ### CREATE MGR ###
 
     def test_create_mgr_get(self):
         # mgr can access
         self.client.login(username=self.mgr.username, password=self.password)
         response = self.client.get(reverse('main:create_manager'))
-        assert response.status_code == 200
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNotNone(response.context['headline'])
 
         # normal user cannot
         self.client.logout()
         self.client.login(username=self.user.username, password=self.password)
         response = self.client.get(reverse('main:create_manager'))
-        assert response.status_code == 302
+        self.assertEqual(response.status_code, 302)
 
     def test_create_mgr_post(self):
         # mgr can access

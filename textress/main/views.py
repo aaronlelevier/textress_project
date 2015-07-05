@@ -17,7 +17,8 @@ from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
     GroupRequiredMixin, AnonymousRequiredMixin, SetHeadlineMixin,
     FormValidMessageMixin, FormInvalidMessageMixin)
 
-from concierge.permissions import IsHotelObject, IsManagerOrAdmin, IsHotelUser
+from concierge.permissions import (IsHotelObject, IsManagerOrAdmin, IsHotelUser,
+    IsHotelOfUser)
 from main.models import Hotel, UserProfile, Subaccount
 from main.forms import UserCreateForm, HotelCreateForm, UserUpdateForm
 from main.mixins import (UserOnlyMixin, HotelUsersOnlyMixin,
@@ -65,6 +66,7 @@ class RegisterAdminBaseView(RegistrationContextMixin, View):
         context['step_number'] = 0
         context['step'] = context['steps'][context['step_number']]
         return context
+
 
 class RegisterAdminCreateView(RegisterAdminBaseView, CreateView):
     '''
@@ -203,12 +205,13 @@ class MgrUserListView(GroupRequiredMixin, HotelUserMixin, TemplateView):
     template_name = 'main/user_list.html'
 
 
-class UserCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView):
+class UserCreateView(SetHeadlineMixin, LoginRequiredMixin, GroupRequiredMixin, CreateView):
     """
     Create a Normal Hotel User w/ no permissions.
     Auto-add all created Users to the Group of the Hotel
     """
 
+    headline = "Add a User"
     group_required = ["hotel_admin", "hotel_manager"]
     model = User
     form_class = UserCreateForm
@@ -228,6 +231,8 @@ class UserCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView):
 
 class ManagerCreateView(UserCreateView):
     "Create Manager Hotel User w/ Manager Permissions"
+
+    headline = "Add a Manager"
 
     def form_valid(self, form):
         super(ManagerCreateView, self).form_valid(form)
@@ -278,7 +283,7 @@ class MgrUserDeleteView(HotelUsersOnlyMixin, DeleteView):
 
 ### USER ###
 
-class UserListCreateAPIView(generics.ListCreateAPIView):
+class UserListAPIView(generics.ListAPIView):
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -289,13 +294,8 @@ class UserListCreateAPIView(generics.ListCreateAPIView):
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
 
-    def perform_update(self, serializer):
-        user = serializer.save()
-        user_profile = user.profile
-        user_profile.update_hotel(hotel=self.request.profile.hotel)
 
-
-class UserRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
+class UserRetrieveAPIView(generics.RetrieveAPIView):
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -304,8 +304,8 @@ class UserRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
 
 ### HOTEL ###
 
-class HotelRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
+class HotelRetrieveAPIView(generics.RetrieveAPIView):
 
     queryset = Hotel.objects.all()
     serializer_class = HotelSerializer
-    # permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelUser)
+    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelOfUser)

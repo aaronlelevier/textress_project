@@ -102,6 +102,7 @@ def bad_ph_error(to):
     return "'{}' is not a valid phone #.\
             Please enter a 10 digit phone #.".format(to)
 
+
 def clean_to(obj, cleaned_data):
     """
     Check that it's a valid ph.

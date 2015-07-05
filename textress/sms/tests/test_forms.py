@@ -8,8 +8,7 @@ from django.core.urlresolvers import reverse
 
 from model_mommy import mommy
 
-from sms.models import Text, DemoCounter
-from sms.forms import DemoForm
+from sms.forms import PhoneNumberForm, PhoneNumberAddForm
 from sms.helpers import sms_messages, bad_ph_error
 from utils.exceptions import DailyLimit
 

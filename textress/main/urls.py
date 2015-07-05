@@ -5,10 +5,10 @@ from main import views
 
 api_patterns = patterns('',
     # User
-    url(r'^users/$', views.UserListCreateAPIView.as_view(), name='api_users'),
-    url(r'^users/(?P<pk>\d+)/$', views.UserRetrieveUpdateAPIView.as_view(), name='api_users'),
+    url(r'^users/$', views.UserListAPIView.as_view(), name='api_users'),
+    url(r'^users/(?P<pk>\d+)/$', views.UserRetrieveAPIView.as_view(), name='api_users'),
     # Hotel
-    url(r'^hotels/(?P<pk>\d+)/$', views.HotelRetrieveUpdateAPIView.as_view(), name='api_hotel'),
+    url(r'^hotels/(?P<pk>\d+)/$', views.HotelRetrieveAPIView.as_view(), name='api_hotel'),
     )
 
 register_patterns = patterns('',

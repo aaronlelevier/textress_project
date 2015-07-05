@@ -12,7 +12,6 @@ from django.contrib.auth.models import User, Group
 
 from model_mommy import mommy
 
-from sms.models import Text
 from sms.helpers import send_text, get_weather, sms_messages, send_message
 from main.models import Hotel
 from main.tests.test_models import create_hotel

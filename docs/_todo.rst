@@ -1,5 +1,11 @@
 2015-07-03
 ----------
+:Next:
+    - confirm all "Manage User Views" work, tested, render, etc
+    
+
+2015-07-03
+----------
 :Next: 
     - add tests for: MgrUserUpdateView
     - make a summary of all data for the User, and add tests for: MgrUserDetailView

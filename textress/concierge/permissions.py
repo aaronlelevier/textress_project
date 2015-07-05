@@ -45,6 +45,12 @@ class IsHotelUser(permissions.BasePermission):
         return obj.profile.hotel == request.user.profile.hotel
 
 
+class IsHotelOfUser(permissions.BasePermission):
+    '''The Hotel Obj. is the User's Hotel.'''
+
+    def has_object_permission(self, request, view, obj):
+        return obj == request.user.profile.hotel
+
 
 
 

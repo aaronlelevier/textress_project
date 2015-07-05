@@ -1,6 +1,5 @@
 import os
 import random
-from twilio.rest import TwilioRestClient
 
 from django.conf import settings
 from django.test import TestCase, LiveServerTestCase, RequestFactory
@@ -10,12 +9,21 @@ from django.contrib.auth.models import User, Group
 from django.utils import timezone
 
 from model_mommy import mommy
+from twilio.rest import TwilioRestClient
 
-from main.models import Hotel, UserProfile, Subaccount
+from main.models import TwilioClient, Hotel, UserProfile, Subaccount
 from main.tests.factory import create_hotel, create_hotel_user
 from payment.models import Customer
 from utils import create
 from utils.data import STATES
+
+
+class TwilioClientTests(TestCase):
+
+    def test_client(self):
+        tc = TwilioClient()
+        self.assertIsInstance(tc, TwilioClient)
+        self.assertIsInstance(tc.client, TwilioRestClient)
 
 
 class HotelManagerTests(TestCase):
