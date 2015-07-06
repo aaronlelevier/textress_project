@@ -17,48 +17,6 @@ from contact.forms import NewsletterForm
 from payment.mixins import HotelContextMixin
 
 
-# class UserContextDataMixin(object):
-#     '''
-#     Pass the User as a Dict Obj into the Context.
-#     '''
-#     def get_context_data(self, **kwargs):
-#         context = super(UserContextDataMixin, self).get_context_data(**kwargs)
-#         # populate user in the context w/o the password key
-#         user_dict = model_to_dict(self.request.user)
-#         user_dict.pop("password", None)
-#         context['user_dict'] = user_dict
-#         return context
-
-
-# class HotelContextDataMixin(object):
-#     '''
-#     Display all Hotel fields.
-#     '''
-#     def get_context_data(self, **kwargs):
-#         context = super(HotelContextDataMixin, self).get_context_data(**kwargs)
-
-#         # get the Hotel object for the User
-#         try:
-#             hotel_dict = model_to_dict(self.request.user.profile.hotel)
-#         except KeyError:
-#             raise Http404
-#         else:
-#             context['hotel_dict'] = hotel_dict
-#             return context
-
-
-# class NewsletterMixin(FormMixin):
-
-#     form_class = NewsletterForm
-#     # will most likely be overwritten in the inheriting view
-#     success_url = reverse_lazy('main:index')
-
-#     def get_context_data(self, **kwargs):
-#         context = super(NewsletterMixin, self).get_context_data(**kwargs)
-#         context['nl_form'] = self.get_form_class()
-#         return context
-
-
 class HotelMixin(ContextMixin, View):
     '''Adds the User's Hotel.'''
 
@@ -136,10 +94,12 @@ class MyHotelOnlyMixin(HotelContextMixin, GroupRequiredMixin, View):
         return super(MyHotelOnlyMixin, self).dispatch(request, *args, **kwargs)
 
 
+### REGISTRATION MIXINS ###
+
 class RegistrationContextMixin(object):
 
     def get_context_data(self, **kwargs):
         context = super(RegistrationContextMixin, self).get_context_data(**kwargs)
         context['steps'] = ['User Information', 'Hotel Information', 'Plan Structure',
-            'Payment', 'Success']
+            'Payment', 'Payment Success']
         return context

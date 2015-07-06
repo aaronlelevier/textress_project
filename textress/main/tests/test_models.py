@@ -115,6 +115,10 @@ class HotelTests(TestCase):
     def test_is_textress(self):
         textress, created = Hotel.objects.get_or_create(name=settings.TEXTRESS_HOTEL)
         self.assertTrue(textress.is_textress)
+
+    def test_registration_complete(self):
+        # TODO
+        pass
         
 
 class UserProfileTests(TestCase):

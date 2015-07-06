@@ -1,9 +1,11 @@
 dj_messages = {
+    # Admin
+    'alter_admin_fail': "Cannot alter Hotel Admin record.",
+    # Contact
     'coming_soon': "Thank you for your interest. We'll be in touch when we get closer to launch!",
     'contact_thanks': "Thank you for contacting us.  We look forward to speaking with you.",
     'contact_not_sent': "Contact email not sent, please check the errors below",
     'hotel_updated': "Hotel info successfully updated",
-
     # Hotel
     'no_hotel': "No Hotel associated with this account.",
     'hotel_not_active': "The Hotel associated with this account is not active.",

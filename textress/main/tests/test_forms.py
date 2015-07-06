@@ -233,9 +233,6 @@ class ManageUsersTests(TestCase):
         assert Group.objects.get(name="hotel_manager") in new_user.groups.all()
         self.assertRedirects(response, reverse('main:manage_user_list'))
 
-
-    # NEXT: Add tests for "Update" from Mgr point of view
-
     def test_update(self):
         # User can update
         fname = self.user.first_name
@@ -259,30 +256,3 @@ class ManageUsersTests(TestCase):
         updated_user = User.objects.get(username=self.user.username)
         assert fname != updated_user.first_name
         self.assertRedirects(response, reverse('main:manage_user_list'))
-
-    def test_delete(self):
-        # User to test deleting
-        del_user = User.objects.create(username='del_user', email=settings.DEFAULT_TO_EMAIL,
-            password=self.password)
-        del_user.profile.update_hotel(self.hotel)
-        assert isinstance(del_user, User)
-        assert del_user.profile.hotel == self.hotel
-
-        # User can't access
-        self.client.login(username=self.user.username, password=self.password)
-        response = self.client.get(reverse('main:manage_user_delete', kwargs={'pk': del_user.pk}))
-        assert response.status_code == 302
-
-        # Mgr Only can Access
-        self.client.logout()
-        self.client.login(username=self.mgr.username, password=self.password)
-        response = self.client.get(reverse('main:manage_user_delete', kwargs={'pk': del_user.pk}))
-        assert response.status_code == 200
-
-        # Post
-        response = self.client.post(reverse('main:manage_user_delete', kwargs={'pk': del_user.pk}),
-            follow=True)
-        # User updated n redirects
-        self.assertRedirects(response, reverse('main:manage_user_list'))
-        with pytest.raises(ObjectDoesNotExist):
-            updated_del_user = User.objects.get(username=del_user.username)

@@ -6,7 +6,7 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.core.urlresolvers import reverse
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User, Group
 from django.utils.text import slugify
@@ -19,8 +19,7 @@ from rest_framework.authtoken.models import Token
 
 from payment.models import Customer
 from utils.data import STATES, HOTEL_TYPES
-from utils import validate_phone, add_group
-from utils import exceptions as excp
+from utils import validate_phone, add_group, dj_messages, exceptions as excp
 
 
 class TwilioClient(object):
@@ -250,6 +249,19 @@ class UserProfile(AbstractBase):
     def is_manager(self):
         return 'hotel_manager' in [g.name for g in self.user.groups.all()]
 
+    @property
+    def registration_complete(self):
+        '''
+        Return: a Bool if setup is Registration is Complete.
+        '''
+        try:
+            if self.profile.hotel.customer:
+                return True
+            else:
+                return False    
+        except AttributeError:
+            return False
+
     def get_absolute_url(self):
         return reverse('main:user_detail', kwargs={'pk': self.pk})
 
@@ -259,6 +271,14 @@ class UserProfile(AbstractBase):
     def update_hotel(self, hotel):
         self.hotel = hotel
         return self.save()
+
+    def hide(self):
+        '''
+        A Mgr+ can delete any User for their Hotel except the Admin.
+        '''
+        if self.is_admin:
+            raise ValidationError(dj_messages['alter_admin_fail'])
+        return super(UserProfile, self).hide()
 
 
 ##############

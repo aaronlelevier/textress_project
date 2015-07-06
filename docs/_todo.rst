@@ -1,3 +1,14 @@
+2015-07-06
+----------
+:Next:
+    - Payment Tests: Focus on componenet based tests, and only test ea. component 1x
+    - finish main.tests.test_models.test_registration_complete
+    - use 'registration_complete' attr in view to: 
+        - redirect from "success page in get()", 
+    - use "account valid" or some logic, to redirect users to a "make payment, etc... view"
+    if their account is not in good standing
+
+
 2015-07-03
 ----------
 :Next:

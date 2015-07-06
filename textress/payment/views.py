@@ -30,8 +30,8 @@ from utils.email import Email
 
 ### REGISTRATION VIEWS ###
 
-class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin,
-    AcctCostContextMixin, StripeMixin, FormView):
+class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin, AcctCostContextMixin,
+    StripeMixin, FormView):
     """
     Step #4 of Registration
 
@@ -82,21 +82,22 @@ class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin,
                 html_content='email/payment_email.html'
             )
             email.msg.send()
-
             return HttpResponseRedirect(self.success_url)
 
 
 class RegisterSuccessView(RegistrationContextMixin, AdminOnlyMixin, TemplateView):
     """
-    Step #5 of Registration - Success
+    Step #5 of Registration - Payment Success
 
-    Confirmation Details: User account, Hotel, Stripe
+    Confirmation Details: User, Hotel, Customer(Stripe)
 
-    TODO: 
-        - create payment conf details Here
-
+    If the User hasn't completed all steps, redirect to Step4 to display needed 
+    steps b/4 they can complete Payment.
     """
     template_name = 'frontend/register/success.html'
+
+    def get(self, request, *args, **kwargs):
+
 
     def get_context_data(self, **kwargs):
         context = super(RegisterSuccessView, self).get_context_data(**kwargs)

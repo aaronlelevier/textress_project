@@ -6,9 +6,9 @@ from django.conf import settings
 from django.test import TestCase, LiveServerTestCase, RequestFactory
 from django.test.client import Client
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.contrib.auth.models import User, Group
 from django.http import Http404
-from django.core.exceptions import ObjectDoesNotExist
 
 import stripe
 from model_mommy import mommy
@@ -227,7 +227,6 @@ class UserViewTests(TestCase):
         self.assertRedirects(response, reverse('account'))
 
 
-
 class ManageUsersTests(TestCase):
 
     def setUp(self):
@@ -341,28 +340,20 @@ class ManageUsersTests(TestCase):
         self.assertRedirects(response, reverse('main:manage_user_list'))
 
     def test_delete(self):
-        # User to test deleting
-        del_user = User.objects.create(username='del_user', email=settings.DEFAULT_FROM_EMAIL,
-            password=self.password)
-        del_user.profile.update_hotel(self.hotel)
-        assert isinstance(del_user, User)
-        assert del_user.profile.hotel == self.hotel
-
-        # User can't access
-        self.client.login(username=self.user.username, password=self.password)
-        response = self.client.get(reverse('main:manage_user_delete', kwargs={'pk': del_user.pk}))
-        assert response.status_code == 302
-
-        # Mgr Only can Access
-        self.client.logout()
+        # get
         self.client.login(username=self.mgr.username, password=self.password)
-        response = self.client.get(reverse('main:manage_user_delete', kwargs={'pk': del_user.pk}))
-        assert response.status_code == 200
-
-        # Post
-        response = self.client.post(reverse('main:manage_user_delete', kwargs={'pk': del_user.pk}),
-            follow=True)
-        # User updated n redirects
+        response = self.client.get(reverse('main:manage_user_delete', kwargs={'pk': self.user.pk}))
+        self.assertEqual(response.status_code, 200)
+        # delete => only hides
+        self.assertFalse(self.user.profile.hidden)
+        response = self.client.post(reverse('main:manage_user_delete', kwargs={'pk': self.user.pk}), follow=True)
         self.assertRedirects(response, reverse('main:manage_user_list'))
-        with pytest.raises(ObjectDoesNotExist):
-            updated_del_user = User.objects.get(username=del_user.username)
+        self.user = User.objects.get(pk=self.user.pk)
+        self.assertTrue(self.user.profile.hidden)
+
+    def test_delete_admin(self):
+        # UserProfile.hide() for an "Admin" will raise a ValidationError b/c can't hide Admin.
+        self.client.login(username=self.mgr.username, password=self.password)
+        with self.assertRaises(ValidationError):
+            response = self.client.post(reverse('main:manage_user_delete',
+                kwargs={'pk': self.admin.pk}), follow=True)

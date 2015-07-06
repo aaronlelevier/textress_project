@@ -26,7 +26,8 @@ from main.mixins import (UserOnlyMixin, HotelUsersOnlyMixin,
 from main.serializers import UserSerializer, HotelSerializer
 from contact.mixins import NewsletterMixin, TwoFormMixin
 from payment.mixins import HotelUserMixin, HotelContextMixin
-from utils import add_group, dj_messages, login_messages
+from utils import (add_group, dj_messages, login_messages, EmptyForm,
+    DeleteButtonMixin)
 
 
 ### Hotel ###
@@ -262,19 +263,22 @@ class MgrUserUpdateView(SetHeadlineMixin, HotelUsersOnlyMixin, UpdateView):
         return reverse('main:manage_user_list')
 
 
-class MgrUserDeleteView(HotelUsersOnlyMixin, DeleteView):
-    '''A Mgr can delete any User for their Hotel except the AdminUser.
-
-    TODO: This should be a "hide" not a "delete"
-        add django-braces - GroupRequiredMixin
+class MgrUserDeleteView(SetHeadlineMixin, DeleteButtonMixin, HotelUsersOnlyMixin,
+    GroupRequiredMixin, UpdateView):
     '''
-
-    model = User
+    A Mgr+ can delete any User for their Hotel except the AdminUser.
+    '''
+    headline = "User Delete View"
+    groups = ['hotel_admin', 'hotel_manager']
+    model = UserProfile
+    # form = EmptyForm
+    fields = []
     template_name = 'cpanel/form.html'
     success_url = reverse_lazy('main:manage_user_list')
 
-    def get_success_url(self):
-        return reverse('main:manage_user_list')
+    def form_valid(self, form):
+        self.object.hide()
+        return super(MgrUserDeleteView, self).form_valid(form)
 
 
 ##################
@@ -287,7 +291,7 @@ class UserListAPIView(generics.ListAPIView):
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelUser)
+    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin)
 
     def list(self, request):
         users = User.objects.filter(profile__hotel=request.user.profile.hotel)

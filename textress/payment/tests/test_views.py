@@ -15,8 +15,8 @@ from model_mommy import mommy
 from account.models import AcctCost
 from account.tests.factory import CREATE_ACCTCOST_DICT
 from main.models import Hotel
-from main.tests.test_models import create_hotel
-from main.tests.factory import CREATE_USER_DICT, CREATE_HOTEL_DICT
+from main.tests.factory import (CREATE_USER_DICT, CREATE_HOTEL_DICT, PASSWORD,
+    create_hotel, create_hotel_user)
 from payment.models import Customer, Card, Charge
 from utils import create
 from utils.email import Email
@@ -62,11 +62,10 @@ class PaymentEmailTests(TestCase):
     def setUp(self):
         create._get_groups_and_perms()
         self.username = CREATE_USER_DICT['username']
-        self.password = '1234'
+        self.password = PASSWORD
 
-        # Step 1
-        response = self.client.post(reverse('main:register_step1'),
-            CREATE_USER_DICT)
+        self.hotel = create_hotel()
+        self.user = create_hotel_user(self.hotel)
         self.client.login(username=self.username, password=self.password)
 
     def test_email(self):
