@@ -97,23 +97,27 @@
                                     <div class="col-md-3">
                                         {% if hotel %}
                                             <a href="{% url 'main:register_step2_update' hotel.pk %}">
-                                        {% else #}
-                                            <a href="{% url 'main:register_step2' %}">
-                                        {% endif %}
                                             <p><button type="button" class="btn btn-info btn-xs">edit</button></p>
                                         </a>
+                                        {% else #}
+                                            <a href="{% url 'main:register_step2' %}">
+                                            <p><button type="button" class="btn btn-warning btn-xs">create now</button></p>
+                                        </a>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
-                            <ul class="list-unstyled">
-                                <li><strong>Hotel name:</strong> {{ hotel.name }}</li>
-                                <li><strong>Address</strong></li>
-                                <li>{{ hotel.address_line1 }}</li>
-                                <li>{{ hotel.address_line2 }}</li>
-                                <li>{{ hotel.address_city }}, {{ hotel.address_state }} {{ hotel.address_zip }}</li>
-                                <li><strong>Phone</strong></li>
-                                <li>{{ hotel.address_phone|format_phone }}</li>
-                            </ul>
+                            {% if hotel %}
+                                <ul class="list-unstyled">
+                                    <li><strong>Hotel name:</strong> {{ hotel.name }}</li>
+                                    <li><strong>Address</strong></li>
+                                    <li>{{ hotel.address_line1 }}</li>
+                                    <li>{{ hotel.address_line2 }}</li>
+                                    <li>{{ hotel.address_city }}, {{ hotel.address_state }} {{ hotel.address_zip }}</li>
+                                    <li><strong>Phone</strong></li>
+                                    <li>{{ hotel.address_phone|format_phone }}</li>
+                                </ul>
+                            {% endif %}
                         </div>
                         <div class="row">
                             <div class="row">
@@ -122,21 +126,25 @@
                                         <h3 class="pull-right">Payment Info</h3>
                                     </div>
                                     <div class="col-md-3">
-                                        {% if hotel and hotel.acct_cost %}
+                                        {% if acct_cost %}
                                             <a href="{% url 'register_step3_update' hotel.acct_cost.pk %}">
-                                        {% else %}
-                                            <a href="{% url 'register_step3' %}">
-                                        {% endif %}
                                             <p><button type="button" class="btn btn-info btn-xs">edit</button></p>
                                         </a>
+                                        {% else %}
+                                            <a href="{% url 'register_step3' %}">
+                                            <p><button type="button" class="btn btn-warning btn-xs">complete now</button></p>
+                                        </a>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
-                            <ul class="list-unstyled">
-                                <li><strong>Initial Payment:</strong> {{ acct_cost.init_amt|stripe_money }}</li>
-                                <li><strong>Balance Minimum:</strong> {{ acct_cost.balance_min|stripe_money }}</li>
-                                <li><strong>Recharge Amount:</strong> {{ acct_cost.recharge_amt|stripe_money }}</li>
-                            </ul>
+                            {% if acct_cost %}
+                                <ul class="list-unstyled">
+                                    <li><strong>Initial Payment:</strong> {{ acct_cost.init_amt|stripe_money }}</li>
+                                    <li><strong>Balance Minimum:</strong> {{ acct_cost.balance_min|stripe_money }}</li>
+                                    <li><strong>Recharge Amount:</strong> {{ acct_cost.recharge_amt|stripe_money }}</li>
+                                </ul>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="col-md-6">

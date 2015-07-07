@@ -1,16 +1,21 @@
 2015-07-07
 ----------
+:Next:
+    - Refactor "Http404" errors to "PermissionDenied" errors
+
+        - display a more meaningful. ex- "No Hotel registered, create a Hotel for your Account."
+        - Make sublcasses of "PermissionDenied" exceptions that generate "django messages" and raise 
+        the error to display the "403.html" page.
+
+    - move "Mixin" locations based on Model Obj of that App.
+
+    - continue Payment Logic / testing
 
 
 2015-07-06
 ----------
 :Next:
     - Payment Tests: Focus on componenet based tests, and only test ea. component 1x
-    - finish main.tests.test_models.test_registration_complete
-    - use 'registration_complete' attr in view to: 
-        - redirect from "success page in get()", 
-    - use "account valid" or some logic, to redirect users to a "make payment, etc... view"
-    if their account is not in good standing
 
 
 2015-07-03
