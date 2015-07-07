@@ -79,14 +79,14 @@ class HotelTests(TestCase):
 
     def test_create(self):
         self.assertNotEqual(self.hotel.name, self.dave_hotel.name)
-        self.assertTrue(isinstance(self.dave_hotel, Hotel))
-        self.assertTrue(isinstance(self.user, User))
+        self.assertIsInstance(self.dave_hotel, Hotel)
+        self.assertIsInstance(self.user, User)
 
     def test_twilio_client(self):
-        assert isinstance(self.dave_hotel._client, TwilioRestClient)
+        self.assertIsInstance(self.dave_hotel._client, TwilioRestClient)
 
     def test_area_code(self):
-        assert self.hotel.area_code == '210'
+        self.assertEqual(self.hotel.area_code, '210')
 
     def test_set_admin_id(self):
         self.hotel.admin_id = None
@@ -97,28 +97,32 @@ class HotelTests(TestCase):
 
     def test_update_customer(self):
         customer = mommy.make(Customer)
-        assert isinstance(customer, Customer)
+        self.assertIsInstance(customer, Customer)
 
         hotel = self.hotel.update_customer(customer)
-        assert self.hotel.customer == customer
+        self.assertEqual(self.hotel.customer, customer)
 
     def test_update_twilio(self):
         hotel = create_hotel(name='no twilio sid')
-        assert isinstance(hotel, Hotel)
-        assert not hotel.twilio_sid
-        assert not hotel.twilio_auth_token
+        self.assertIsInstance(hotel, Hotel)
+        self.assertIsNone(hotel.twilio_sid)
+        self.assertIsNone(hotel.twilio_auth_token)
 
         hotel.update_twilio(sid='abc', auth_token='def')
-        assert hotel.twilio_sid
-        assert hotel.twilio_auth_token
+        self.assertIsNotNone(hotel.twilio_sid)
+        self.assertIsNotNone(hotel.twilio_auth_token)
 
     def test_is_textress(self):
         textress, created = Hotel.objects.get_or_create(name=settings.TEXTRESS_HOTEL)
         self.assertTrue(textress.is_textress)
 
     def test_registration_complete(self):
-        # TODO
-        pass
+        # Fails b/c existing Hotel doesn't have a Customer
+        self.assertFalse(self.hotel.registration_complete)
+        # Passes w/ Customer
+        customer = mommy.make(Customer)
+        self.hotel = self.hotel.update_customer(customer)
+        self.assertTrue(self.hotel.registration_complete)
         
 
 class UserProfileTests(TestCase):

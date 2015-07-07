@@ -140,10 +140,10 @@ class Hotel(TwilioClient, AbstractBase):
     admin_id = models.IntegerField(_("Hotel Admin ID"),unique=True, blank=True, null=True,
         help_text="1 Hotel Admin User per Hotel")
     # Denormalized Fields
-    twilio_sid = models.CharField(_("Twilio Sid"), max_length=100, blank=True)
-    twilio_auth_token = models.CharField(_("Twilio Auth Token"), max_length=100, blank=True)
-    twilio_phone_number = models.CharField(_("Twilio Phone Number"), max_length=12, blank=True)
-    twilio_ph_sid = models.CharField(_("Twilio Phone Number Sid"), max_length=100, blank=True)
+    twilio_sid = models.CharField(_("Twilio Sid"), max_length=100, blank=True, null=True)
+    twilio_auth_token = models.CharField(_("Twilio Auth Token"), max_length=100, blank=True, null=True)
+    twilio_phone_number = models.CharField(_("Twilio Phone Number"), max_length=12, blank=True, null=True)
+    twilio_ph_sid = models.CharField(_("Twilio Phone Number Sid"), max_length=100, blank=True, null=True)
 
     objects = HotelManager()
 
@@ -161,7 +161,7 @@ class Hotel(TwilioClient, AbstractBase):
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
 
-        # Hotel Group
+        # Hotel Group [Anonymous Group name to be used w/ ``ws4redis`` Group Messaging]
         self.group_name = self.slug + '_' + ''.join([str(random.choice(string.digits)) for x in range(10)])
         g, created = Group.objects.get_or_create(name=self.group_name)
 
@@ -179,26 +179,41 @@ class Hotel(TwilioClient, AbstractBase):
     def is_textress(self):
         return self.name == settings.TEXTRESS_HOTEL
 
+    @property
+    def registration_complete(self):
+        '''
+        A valid ``Customer``(Stripe) means the Admin User payed during Registration. 
+        And, ``active=True`` b/c Hotel is in good standing w/ Funds.
+        '''
+        if self.customer and self.active:
+            return True
+        else:
+            return False
+
     def get_absolute_url(self):
         return reverse('main:hotel_update', kwargs={'pk':self.pk})
 
     def set_admin_id(self, user):
         self.admin_id = user.id
-        return self.save()
+        self.save()
+        return self
 
     def update_customer(self, customer):
         self.customer = customer
-        return self.save()
+        self.save()
+        return self
 
     def update_twilio(self, sid, auth_token):
         self.twilio_sid = sid
         self.twilio_auth_token = auth_token
-        return self.save()
+        self.save()
+        return self
 
     def update_twilio_phone(self, ph_sid, phone_number):
         self.twilio_ph_sid = ph_sid
         self.twilio_phone_number = phone_number
-        return self.save()
+        self.save()
+        return self
 
 
 class UserProfile(AbstractBase):
@@ -248,19 +263,6 @@ class UserProfile(AbstractBase):
     @property
     def is_manager(self):
         return 'hotel_manager' in [g.name for g in self.user.groups.all()]
-
-    @property
-    def registration_complete(self):
-        '''
-        Return: a Bool if setup is Registration is Complete.
-        '''
-        try:
-            if self.profile.hotel.customer:
-                return True
-            else:
-                return False    
-        except AttributeError:
-            return False
 
     def get_absolute_url(self):
         return reverse('main:user_detail', kwargs={'pk': self.pk})
