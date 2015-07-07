@@ -97,6 +97,11 @@ class RegisterSuccessView(RegistrationContextMixin, AdminOnlyMixin, TemplateView
     template_name = 'frontend/register/success.html'
 
     def get(self, request, *args, **kwargs):
+        # Only allow if Payment is complete
+        if self.hotel.registration_complete:
+            return super(RegisterSuccessView, self).get(request, *args, **kwargs)
+        else:
+            return HttpResponseRedirect(reverse('payment:register_step4'))
 
 
     def get_context_data(self, **kwargs):

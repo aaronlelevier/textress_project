@@ -56,6 +56,25 @@ class RegistrationTests(TestCase):
         self.assertContains(response, response.context['step'])
         self.assertContains(response, response.context['step_number'])
 
+    def test_register_success(self):
+        # valid Customer, so can access
+        customer = mommy.make(Customer)
+        hotel = Hotel.objects.first()
+        hotel = hotel.update_customer(customer)
+        response = self.client.get(reverse('payment:register_success'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_register_success_fail(self):
+        # random Admin User who hasn't paid gets redirected
+        # Users
+        hotel_b = create_hotel(name='hotel_b')
+        admin_b = create_hotel_user(hotel=hotel_b, username='admin_b', group='hotel_admin')
+        hotel_b = hotel_b.set_admin_id(user=admin_b)
+
+        self.client.login(username=admin_b.username, password=self.password)
+        response = self.client.get(reverse('payment:register_success'))
+        self.assertRedirects(response, reverse('payment:register_step4'))
+
 
 class PaymentEmailTests(TestCase):
     

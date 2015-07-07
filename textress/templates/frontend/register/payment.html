@@ -95,7 +95,11 @@
                                         <h3 class="pull-right">Hotel Info</h3>
                                     </div>
                                     <div class="col-md-3">
-                                        <a href="{% url 'main:register_step2_update' hotel.pk %}">
+                                        {% if hotel %}
+                                            <a href="{% url 'main:register_step2_update' hotel.pk %}">
+                                        {% else #}
+                                            <a href="{% url 'main:register_step2' %}">
+                                        {% endif %}
                                             <p><button type="button" class="btn btn-info btn-xs">edit</button></p>
                                         </a>
                                     </div>
@@ -118,7 +122,11 @@
                                         <h3 class="pull-right">Payment Info</h3>
                                     </div>
                                     <div class="col-md-3">
-                                        <a href="{% url 'register_step3_update' hotel.acct_cost.pk %}">
+                                        {% if hotel and hotel.acct_cost %}
+                                            <a href="{% url 'register_step3_update' hotel.acct_cost.pk %}">
+                                        {% else %}
+                                            <a href="{% url 'register_step3' %}">
+                                        {% endif %}
                                             <p><button type="button" class="btn btn-info btn-xs">edit</button></p>
                                         </a>
                                     </div>
