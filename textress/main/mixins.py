@@ -11,25 +11,18 @@ from django.forms.models import model_to_dict
 
 from braces.views import GroupRequiredMixin
 
+from main.helpers import get_user_hotel
 from main.models import Hotel
 from contact.models import Newsletter
 from contact.forms import NewsletterForm
-from payment.mixins import HotelContextMixin
+from utils import dj_messages
 
 
-class HotelMixin(ContextMixin, View):
-    '''Adds the User's Hotel.'''
-
-    def dispatch(self, request, *args, **kwargs):
-        try:
-            self.hotel = request.user.profile.hotel
-        except AttributeError:
-            return Http404
-
-        return super(HotelMixin, self).dispatch(request, *args, **kwargs)
-
+class HotelContextMixin(object):
+    '''Add Hotel Obj to Context.'''
+    
     def get_context_data(self, **kwargs):
-        context = super(HotelMixin, self).get_context_data(**kwargs)
+        context = super(HotelContextMixin, self).get_context_data(**kwargs)
         context['hotel'] = self.hotel
         return context
 
@@ -92,6 +85,73 @@ class MyHotelOnlyMixin(HotelContextMixin, GroupRequiredMixin, View):
             raise PermissionDenied
 
         return super(MyHotelOnlyMixin, self).dispatch(request, *args, **kwargs)
+
+
+### HOTEL MIXINS ###
+
+class HotelObjectMixin(object):
+    '''
+    Enforces in DetailViews where the ``object`` has a ``hotel`` Attr 
+    that it belongs to the User's Hotel.
+    '''
+    def get(self, request, *args, **kwargs):
+        hotel = get_user_hotel(request.user)
+        self.object = self.get_object()
+        
+        if hotel != self.object.hotel:
+            raise PermissionDenied
+
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
+
+
+class HotelUserMixin(HotelContextMixin):
+    '''
+    User must have belong to a Hotel, and the Hotel must be in good standing. 
+    If the Hotel has no $$, then active=False.
+    '''
+    def dispatch(self, *args, **kwargs):
+        try:
+            self.hotel = self.request.user.profile.hotel
+        except AttributeError:
+            messages.warning(self.request, dj_messages['no_hotel'])
+            raise PermissionDenied
+
+        # TODO: Redirect to an alert page that funds need to be added
+        if self.hotel and not self.hotel.active:
+            messages.warning(self.request, dj_messages['hotel_not_active'])
+            raise Http404
+            
+        return super(HotelUserMixin, self).dispatch(*args, **kwargs)
+
+
+class HotelAdminCheckMixin(HotelContextMixin):
+    "Only the Admin for the Hotel can access this page when using this mixin"
+    def dispatch(self, *args, **kwargs):
+        self.hotel = self.request.user.profile.hotel
+        admin_hotel = get_object_or_404(Hotel, admin_id=self.request.user.id)
+        if admin_hotel != self.hotel:
+            raise Http404
+        return super(HotelAdminCheckMixin, self).dispatch(*args, **kwargs)
+
+
+class AdminOnlyMixin(HotelContextMixin, GroupRequiredMixin, View):
+    '''Only the Admin of the Hotel can access.'''
+    
+    group_required = "hotel_admin"
+    
+    def dispatch(self, request, *args, **kwargs):
+        # Login Required
+        if not request.user.is_authenticated():
+            return redirect_to_login(request.get_full_path())
+
+        self.hotel = self.request.user.profile.hotel
+        
+        # test only Admin allowed
+        if request.user.id != self.hotel.admin_id:
+            raise Http404
+        
+        return super(AdminOnlyMixin, self).dispatch(request, *args, **kwargs)
 
 
 ### REGISTRATION MIXINS ###

@@ -16,14 +16,15 @@ import stripe
 from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
     GroupRequiredMixin)
 
+from account.mixins import AcctCostContextMixin
+from account.models import AcctCost
+from main.models import Hotel
+from main.mixins import (RegistrationContextMixin, HotelContextMixin, HotelUserMixin,
+    HotelAdminCheckMixin, AdminOnlyMixin)
 from payment.models import Card
 from payment.forms import StripeForm
 from payment.helpers import signup_register_step4
-from payment.mixins import (StripeMixin, HotelContextMixin, HotelUserMixin,
-    HotelAdminCheckMixin, AdminOnlyMixin, HotelCardOnlyMixin, AcctCostContextMixin)
-from account.models import AcctCost
-from main.models import Hotel
-from main.mixins import RegistrationContextMixin
+from payment.mixins import StripeMixin, HotelCardOnlyMixin
 from sms.models import PhoneNumber
 from utils.email import Email
 

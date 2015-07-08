@@ -15,8 +15,8 @@ from .mixins import DeleteButtonMixin
 __all__ = [
     'DeleteButtonMixin',
     'dj_messages',
-    'EmptyForm',
     'login_messages',
+    'EmptyForm',
     'salt'
 ]
 

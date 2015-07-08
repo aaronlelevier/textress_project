@@ -1,3 +1,17 @@
+2015-07-08
+----------
+:mixins:
+    run tests for: account/concierge/main/payment .. views
+    finish: 
+        - payment.mixin tests
+        - main.mixin tests - for mixins moved to 'main' app
+
+:model_mommy:
+    - RemovedInDjango19Warning
+
+:concierge:
+    - tests need refactoring, currently (14) test fails
+
 2015-07-07
 ----------
 :Next:

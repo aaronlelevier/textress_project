@@ -12,9 +12,9 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
     GroupRequiredMixin, SetHeadlineMixin, FormValidMessageMixin)
 
+from main.mixins import HotelAdminCheckMixin
 from sms.models import PhoneNumber
 from sms.forms import PhoneNumberForm, PhoneNumberAddForm
-from payment.mixins import HotelAdminCheckMixin
 from utils.exceptions import DailyLimit
 from utils.hotel import TwilioHotel
 

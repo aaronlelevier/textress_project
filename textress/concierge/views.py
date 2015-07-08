@@ -38,8 +38,7 @@ from concierge.serializers import (MessageSerializer, GuestMessageSerializer,
     GuestBasicSerializer)
 from sms.helpers import send_text, send_message, sms_messages
 from main.models import Hotel, UserProfile
-from main.mixins import HotelMixin
-from payment.views import HotelUserMixin
+from main.mixins import HotelUserMixin, HotelObjectMixin
 from utils.exceptions import (DailyLimit, NotHotelGuestException,
     HotelGuestNotFoundException)
 from utils import EmptyForm, DeleteButtonMixin
@@ -166,7 +165,7 @@ class GuestDeleteView(GuestBaseView, DeleteButtonMixin, TemplateView):
 # MESSAGE VIEWS #
 #################
 
-class MessageListView(HotelMixin, FormView):
+class MessageListView(HotelUserMixin, FormView):
     """
     All Messages for 1 Guest.
     A Form at the bottom to send new Messages.
@@ -193,7 +192,7 @@ class MessageListView(HotelMixin, FormView):
         return context
 
 
-class MessageDetailView(HotelMixin, DetailView):
+class MessageDetailView(HotelObjectMixin, DetailView):
     model = Message
 
 

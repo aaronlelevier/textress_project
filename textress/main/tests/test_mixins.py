@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.http import Http404
-from django.test import TestCase, RequestFactory
+from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.core.exceptions import PermissionDenied
 
@@ -30,6 +30,17 @@ class HotelMixinTests(TestCase):
             )
         self.message = self.messages[0]
 
+        # Hotel 2
+        self.hotel_b = create_hotel(name='hotel_b')
+        self.user_b = create_hotel_user(self.hotel_b, username='user_b')
+        self.messages_b = make_messages(
+            hotel=self.hotel_b,
+            user=self.user_b,
+            guest=self.guest,
+            number=1
+            )
+        self.message_b = self.messages_b[0]
+
     def test_hotel_mixin_auth(self):
         # Logged In - Dave has Access
         self.client.login(username=self.user.username, password=PASSWORD)
@@ -37,10 +48,9 @@ class HotelMixinTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_hotel_mixin_non_auth(self):
-        # Logged Out - Dave can't access the View
-        with self.assertRaises(AttributeError):
-            # AttributeError: type object 'Http404' has no attribute 'get'
-            self.client.get(reverse('concierge:message_detail', kwargs={'pk':self.message.pk}))
+        self.client.logout()
+        with self.assertRaises(PermissionDenied):
+            self.client.get(reverse('concierge:message_detail', kwargs={'pk':self.message_b.pk}))
 
 
 class UserOnlyMixinTests(TestCase):

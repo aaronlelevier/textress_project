@@ -22,10 +22,9 @@ from concierge.permissions import (IsHotelObject, IsManagerOrAdmin, IsHotelUser,
 from main.models import Hotel, UserProfile, Subaccount
 from main.forms import UserCreateForm, HotelCreateForm, UserUpdateForm
 from main.mixins import (UserOnlyMixin, HotelUsersOnlyMixin,
-    MyHotelOnlyMixin, RegistrationContextMixin)
+    MyHotelOnlyMixin, RegistrationContextMixin, HotelUserMixin, HotelContextMixin)
 from main.serializers import UserSerializer, HotelSerializer
 from contact.mixins import NewsletterMixin, TwoFormMixin
-from payment.mixins import HotelUserMixin, HotelContextMixin
 from utils import (add_group, dj_messages, login_messages, EmptyForm,
     DeleteButtonMixin)
 
