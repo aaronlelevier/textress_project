@@ -192,7 +192,7 @@ class UserUpdateView(SetHeadlineMixin, LoginRequiredMixin, UserOnlyMixin, Update
 # MANAGE USERS #
 ################
 
-class MgrUserListView(GroupRequiredMixin, HotelUserMixin, TemplateView):
+class MgrUserListView(SetHeadlineMixin, GroupRequiredMixin, HotelUserMixin, TemplateView):
     '''
     Angular View. So can be a TemplateView since the Object List is 
     generated from a REST Endpoint.
@@ -200,7 +200,7 @@ class MgrUserListView(GroupRequiredMixin, HotelUserMixin, TemplateView):
     List all Users for a Hotel, except for the Admin, for the 
     Admin or Managers to `view/add/edit/delete.
     '''
-
+    headline = 'User List'
     group_required = ["hotel_admin", "hotel_manager"]
     template_name = 'main/user_list.html'
 

@@ -17,7 +17,7 @@ conciergeControllers.controller('GuestMessageCtrl',
     ['$scope', '$stateParams', '$timeout', 'Message', 'GuestMessages', 'GuestUser', 'CurrentUser',
     function($scope, $stateParams, $timeout, Message, GuestMessages, GuestUser, CurrentUser) {
         $scope.messages = {};
-
+        $scope.modal_msg = 0;
         $scope.user_id = CurrentUser.id;
 
         // Guest (single)

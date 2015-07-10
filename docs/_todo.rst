@@ -1,5 +1,21 @@
 2015-07-08
 ----------
+:Next:
+    :styling:
+        - Message Detail Page 
+            - add styling and correct links
+        - User Profile Page 
+            - (make this share w/ the "Manage User Profile" page)
+        - Avatars - instead of pics for Users
+        - Guests - have a default empty Guest Pic
+        - Message
+            - display time stamp below like iOS
+            - change color to blue to match color scheme
+            
+
+
+2015-07-08
+----------
 :mixins:
     run tests for: account/concierge/main/payment .. views
     finish: 

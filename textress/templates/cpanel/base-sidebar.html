@@ -467,12 +467,6 @@
                             </ul>
                         </li>
 
-                        <li>
-                            <a href="{% url 'account' %}"><i class="clip-bubble"></i>
-                                <span class="title"> Manage Messages </span><span class="selected"></span>
-                            </a>
-                        </li>
-
                         {% if user|has_group:"hotel_admin" %}
                         <li>
                             <a href="javascript:void(0)"><i class="clip-phone"></i>
@@ -501,6 +495,10 @@
             {% block page_header %}
                 <!-- start: PAGE -->
                 <div class="main-content">
+
+                    {% block modal %}
+                    {% endblock modal %}
+                    
                     <div class="container">
                         <!-- start: PAGE HEADER -->
                         <div class="row">

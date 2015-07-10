@@ -167,8 +167,9 @@ class GuestDeleteView(GuestBaseView, DeleteButtonMixin, TemplateView):
 
 class MessageListView(HotelUserMixin, FormView):
     """
-    All Messages for 1 Guest.
-    A Form at the bottom to send new Messages.
+    Angular View
+
+    Group Messages by Guest
     """
     form_class = MessageForm
     template_name = 'concierge/conversation_detail.html'
@@ -192,8 +193,17 @@ class MessageListView(HotelUserMixin, FormView):
         return context
 
 
-class MessageDetailView(HotelObjectMixin, DetailView):
+class MessageDetailView(SetHeadlineMixin, HotelObjectMixin, DetailView):
+
+    headline = "Message Detail"
     model = Message
+    # template_name = 'cpanel/detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(MessageDetailView, self).get_context_data(**kwargs)
+        context['obj'] = model_to_dict(self.object)
+        return context
+
 
 
 ########

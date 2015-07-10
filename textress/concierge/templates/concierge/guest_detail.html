@@ -81,19 +81,37 @@
                 <br>
 
                 <h3>Messages</h3>
-                
-                <ul class="list-unstyled" ng-repeat="message in messages">
-                    <li class="message-body" id="messages">
-                        <!-- <div ng-switch on="message"> -->
-                            <div ng-if="message.user !== null ">
-                                <h5>[[ message.body | limitTo : 100 ]] <small>[[ message.created | date:'medium' ]]</small> User: [[ message.user ]] / Guest: [[ message.guest ]]</h5>
-                            </div>
-                            <div ng-if="message.user === null " style="background-color:yellow;">
-                                <h5>[[ message.body | limitTo : 100 ]] <small>[[ message.created | date:'medium' ]]</small> User: [[ message.user ]] / Guest: [[ message.guest ]]</h5>
-                            </div>
-                        <!-- </div> -->
-                    </li>
-                </ul>
+
+                <ol class="discussion" ng-repeat="message in messages">
+                    <div ng-if="message.user !== null ">
+                        <a href="/message/detail/[[message.id]]/" class="no_decoration">
+                            <li class="other">
+                                <div class="avatar">
+                                    <img alt="" src="{% static 'clipone/admin/clip-one/assets/images/avatar-4.jpg' %}">
+                                </div>
+                                <div class="messages">
+                                    <h4>[[ message.body | limitTo : 100 ]]</h4> 
+                                    <small>[[ message.created | date:'medium' ]]</small>
+                                    <p> User: [[ message.user ]] / Guest: [[ message.guest ]]</p>
+                                </div>
+                            </li>
+                        </a>
+                    </div>
+                    <div ng-if="message.user === null ">
+                        <a href="/message/detail/[[message.id]]/" class="no_decoration">
+                            <li class="self">
+                                <div class="avatar">
+                                    <img alt="" src="{% static 'clipone/admin/clip-one/assets/images/avatar-1.jpg' %}">
+                                </div>
+                                <div class="messages">
+                                    <h4>[[ message.body | limitTo : 100 ]]</h4> 
+                                    <small>[[ message.created | date:'medium' ]]</small>
+                                    <p> User: [[ message.user ]] / Guest: [[ message.guest ]]</p>
+                                </div>
+                            </li>
+                        </a>
+                    </div>
+                </ol>
                 
             </div>
         </div>
