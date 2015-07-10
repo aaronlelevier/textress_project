@@ -6,9 +6,6 @@
         - payment.mixin tests
         - main.mixin tests - for mixins moved to 'main' app
 
-:model_mommy:
-    - RemovedInDjango19Warning
-
 :concierge:
     - tests need refactoring, currently (14) test fails
 

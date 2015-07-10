@@ -48,9 +48,9 @@ class HotelMixinTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_hotel_mixin_non_auth(self):
-        self.client.logout()
-        with self.assertRaises(PermissionDenied):
-            self.client.get(reverse('concierge:message_detail', kwargs={'pk':self.message_b.pk}))
+        self.client.login(username=self.user.username, password=PASSWORD)
+        response = self.client.get(reverse('concierge:message_detail', kwargs={'pk':self.message_b.pk}))
+        self.assertEqual(response.status_code, 403)
 
 
 class UserOnlyMixinTests(TestCase):
@@ -67,6 +67,8 @@ class UserOnlyMixinTests(TestCase):
         response = self.client.get(reverse('main:user_update', kwargs={'pk': self.user.pk}))
         self.assertEqual(response.status_code, 403)
 
+    ### HotelObjectMixin ###
+    
     def test_get_right_user(self):
         # wrong user can't access another User's Update View
         self.client.login(username=self.user.username, password=PASSWORD)
