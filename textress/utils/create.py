@@ -136,11 +136,10 @@ def _get_guests():
     return Guest.objects.all() 
 
 
-
-
 ########
 # MAIN #
 ######## 
+
 def create_main():
     """
     15 Users

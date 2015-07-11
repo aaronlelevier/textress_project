@@ -65,6 +65,11 @@ def create_hotel_user(hotel, username='user', group=None):
 
     return User.objects.get(username=username)
 
+    
+def create_superuser():
+    hotel = create_hotel(address_phone='7754194000')
+    superuser = create_hotel_user(hotel, username='admin')
+
 
 def make_subaccount(hotel, live=False):
     '''

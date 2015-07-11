@@ -1,6 +1,9 @@
 2015-07-08
 ----------
 :Next:
+    :form_styling:
+        - add a red * for required to all "django-angular" forms
+        - Date fields need a ``Date Picker``
     :styling:
         - Message Detail Page 
             - add styling and correct links
@@ -11,7 +14,7 @@
         - Message
             - display time stamp below like iOS
             - change color to blue to match color scheme
-            
+
 
 
 2015-07-08

@@ -81,7 +81,7 @@ class ReceiveSMSView(CsrfExemptMixin, TemplateView):
 # GUEST VIEWS #
 ###############
 
-class GuestBaseView(SetHeadlineMixin, HotelUserMixin, View):
+class GuestBaseView(SetHeadlineMixin, LoginRequiredMixin, HotelUserMixin, View):
     headline = "Guest View"
     model = Guest
 
