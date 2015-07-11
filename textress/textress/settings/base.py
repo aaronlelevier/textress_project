@@ -42,6 +42,7 @@ LOCAL_APPS = (
     'concierge',
     'account',
     'payment',
+    'utils',
 )
 
 INSTALLED_APPS = DEFAULT_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -88,7 +89,7 @@ WSGI_APPLICATION = 'textress.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', 
-        'NAME': os.environ['T17_DB_NAME'],                     
+        'NAME': os.environ['T17_DB_NAME'],
         'USER': os.environ['T17_DB_USER'],
         'PASSWORD': os.environ['T17_DB_PASSWORD'], 
         'HOST': 'localhost',                      

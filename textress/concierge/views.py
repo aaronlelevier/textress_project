@@ -32,7 +32,7 @@ from ws4redis.publisher import RedisPublisher
 
 from concierge.models import Message, Guest
 from concierge.helpers import process_incoming_message
-from concierge.forms import MessageForm, GuestForm
+from concierge.forms import GuestForm
 from concierge.permissions import IsHotelObject, IsManagerOrAdmin, IsHotelUser
 from concierge.serializers import (MessageSerializer, GuestMessageSerializer,
     GuestBasicSerializer)
@@ -159,51 +159,6 @@ class GuestDeleteView(GuestBaseView, DeleteButtonMixin, TemplateView):
         self.object = Guest.objects.get(pk=kwargs['pk'])
         self.object.hide()
         return HttpResponseRedirect(reverse('concierge:guest_list'))
-
-
-#################
-# MESSAGE VIEWS #
-#################
-
-class MessageListView(HotelUserMixin, FormView):
-    """
-    Angular View
-
-    Group Messages by Guest
-    """
-    form_class = MessageForm
-    template_name = 'concierge/conversation_detail.html'
-
-    def form_valid(self, form):
-        cd = form.cleaned_data
-        messages.info(self.request, sms_messages['sent'])
-        return super(MessageListView, self).form_valid(form)
-
-    def dispatch(self, request, *args, **kwargs):
-        self.hotel = request.user.profile.hotel
-        self.guest = get_object_or_404(Guest, pk=self.kwargs['pk'], hotel=self.hotel)
-        return super(MessageListView, self).dispatch(request, *args, **kwargs)
-
-    def get_success_url(self):
-        return reverse('concierge:message_list', kwargs={'pk':self.guest.pk})
-
-    def get_context_data(self, **kwargs):
-        context = super(MessageListView, self).get_context_data(**kwargs)
-        context['guest_messages'] = Message.objects.filter(guest=self.guest).order_by('created')
-        return context
-
-
-# class MessageDetailView(SetHeadlineMixin, HotelObjectMixin, DetailView):
-
-#     headline = "Message Detail"
-#     model = Message
-#     # template_name = 'cpanel/detail.html'
-
-#     def get_context_data(self, **kwargs):
-#         context = super(MessageDetailView, self).get_context_data(**kwargs)
-#         context['obj'] = model_to_dict(self.object)
-#         return context
-
 
 
 ########

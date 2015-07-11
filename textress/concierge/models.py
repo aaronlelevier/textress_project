@@ -82,9 +82,6 @@ class GuestManager(AbstractBaseManager, models.Manager):
 
 
 class Guest(AbstractBase):
-    """
-    TODO: Change `phone_number` to `unique=True` for production.
-    """
     # Keys
     hotel = models.ForeignKey(Hotel)
     # Fields
@@ -92,7 +89,7 @@ class Guest(AbstractBase):
         help_text="Full name of the Guest as you would like to call them.",
         max_length=110)
     room_number = models.CharField(_("Room Number"), max_length=10)
-    phone_number = models.CharField(_("Phone Number"), db_index=True, max_length=12,
+    phone_number = models.CharField(_("Phone Number"), unique=True, max_length=12,
         help_text="10 Digit Phone Number. Example: 7025101234")
     check_in = models.DateField(_("Check-in Date"), blank=True,
         help_text="If left blank, Check-in Date will be today.")
