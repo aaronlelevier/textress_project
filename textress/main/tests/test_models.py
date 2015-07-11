@@ -5,6 +5,7 @@ from django.conf import settings
 from django.test import TestCase, LiveServerTestCase, RequestFactory
 from django.test.client import Client
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User, Group
 from django.utils import timezone
 
@@ -12,7 +13,7 @@ from model_mommy import mommy
 from twilio.rest import TwilioRestClient
 
 from main.models import TwilioClient, Hotel, UserProfile, Subaccount
-from main.tests.factory import create_hotel, create_hotel_user
+from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
 from payment.models import Customer
 from utils import create
 from utils.data import STATES
@@ -64,36 +65,31 @@ class HotelManagerTests(TestCase):
 
 class HotelTests(TestCase):
 
-    fixtures = ['users.json', 'main.json', 'sms.json', 'payment.json']
+    # fixtures = ['users.json', 'main.json', 'sms.json', 'payment.json']
 
     def setUp(self):
-        self.password = '1234'
-        self.hotel = Hotel.objects.first()
-        self.dave_hotel = Hotel.objects.get(name=settings.TEXTRESS_HOTEL)
-
-        self.user = User.objects.create_user('Test', settings.DEFAULT_FROM_EMAIL, self.password)
-        self.user.set_password(self.password)
-        self.user.save()
-        self.user_profile = self.user.profile
-        self.user_profile.update_hotel(self.dave_hotel)
+        self.password = PASSWORD
+        self.hotel = create_hotel()
+        self.dave_hotel = create_hotel()
+        self.user = create_hotel_user(self.hotel)
 
     def test_create(self):
-        self.assertNotEqual(self.hotel.name, self.dave_hotel.name)
-        self.assertIsInstance(self.dave_hotel, Hotel)
+        self.assertIsInstance(self.hotel, Hotel)
         self.assertIsInstance(self.user, User)
+        self.assertNotEqual(self.hotel.name, self.dave_hotel.name)
 
     def test_twilio_client(self):
-        self.assertIsInstance(self.dave_hotel._client, TwilioRestClient)
+        self.assertIsInstance(self.hotel._client, TwilioRestClient)
 
     def test_area_code(self):
-        self.assertEqual(self.hotel.area_code, '210')
+        self.assertEqual(self.hotel.area_code, self.hotel.address_phone[2:5])
 
     def test_set_admin_id(self):
         self.hotel.admin_id = None
-        assert not self.hotel.admin_id
+        self.assertIsNone(self.hotel.admin_id)
 
         hotel = self.hotel.set_admin_id(self.user)
-        assert self.hotel.admin_id == self.user.pk
+        self.assertEqual(self.hotel.admin_id, self.user.pk)
 
     def test_update_customer(self):
         customer = mommy.make(Customer)
@@ -108,12 +104,18 @@ class HotelTests(TestCase):
         self.assertIsNone(hotel.twilio_sid)
         self.assertIsNone(hotel.twilio_auth_token)
 
-        hotel.update_twilio(sid='abc', auth_token='def')
+        sid = 'abc'
+        hotel = hotel.update_twilio(sid='abc', auth_token='def')
         self.assertIsNotNone(hotel.twilio_sid)
         self.assertIsNotNone(hotel.twilio_auth_token)
+        self.assertEqual(hotel.twilio_sid, sid)
 
     def test_is_textress(self):
-        textress, created = Hotel.objects.get_or_create(name=settings.TEXTRESS_HOTEL)
+        try:
+            textress = Hotel.objects.get(name=settings.TEXTRESS_HOTEL)
+        except ObjectDoesNotExist:
+            textress = mommy.make(Hotel, name=settings.TEXTRESS_HOTEL,
+                address_phone=create._generate_ph())
         self.assertTrue(textress.is_textress)
 
     def test_registration_complete(self):

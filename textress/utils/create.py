@@ -1,6 +1,5 @@
 import random
-import stripe
-from model_mommy import mommy
+import string
 
 from django.conf import settings
 from django.contrib.auth.models import Group, Permission, User
@@ -8,6 +7,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
+
+import stripe
+from model_mommy import mommy
 
 from main.models import Hotel, UserProfile
 from concierge.models import Guest, Message
@@ -87,11 +89,13 @@ def add_user_to_hotel_group():
 ##########
 # HOTELS #
 ##########  
-def _generate_ph():
-    n = ''
-    for i in range(10):
-        n += str(random.randrange(0,10))
-    return n
+def _generate_ph(numbers=10):
+    return ''.join([random.choice(string.digits) for x in range(numbers)])
+
+
+def _generate_name(letters=10):
+    return ''.join([random.choice(string.ascii_letters) for x in range(letters)])
+
 
 def _get_hotels():
     """Get ALL None 'Test' Hotels."""

@@ -41,16 +41,9 @@ class HotelMixinTests(TestCase):
             )
         self.message_b = self.messages_b[0]
 
-    def test_hotel_mixin_auth(self):
-        # Logged In - Dave has Access
-        self.client.login(username=self.user.username, password=PASSWORD)
-        response = self.client.get(reverse('concierge:message_detail', kwargs={'pk':self.message.pk}))
-        self.assertEqual(response.status_code, 200)
-
-    def test_hotel_mixin_non_auth(self):
-        self.client.login(username=self.user.username, password=PASSWORD)
-        response = self.client.get(reverse('concierge:message_detail', kwargs={'pk':self.message_b.pk}))
-        self.assertEqual(response.status_code, 403)
+    def test_holder(self):
+        '''TODO: Hold spot for future tests here.'''
+        self.assertEqual(1,1)
 
 
 class UserOnlyMixinTests(TestCase):

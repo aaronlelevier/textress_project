@@ -14,20 +14,7 @@ from twilio.rest import TwilioRestClient
 from sms.helpers import get_weather
 from main.models import Hotel, TwilioClient
 from utils.exceptions import DailyLimit
-
-
-#################
-# ABSTRACT BASE #
-#################
-
-class AbstractBase(models.Model):
-    """Abstract model for *created, and modified*."""
-    created = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        abstract = True
-        ordering = ['-created']
+from utils.models import TimeStampBaseModel
 
 
 ################
@@ -118,7 +105,7 @@ class PhoneNumberManager(TwilioClient, models.Manager):
         return ph_num, created
 
 
-class PhoneNumber(TwilioClient, AbstractBase):
+class PhoneNumber(TwilioClient, TimeStampBaseModel):
     # Keys
     hotel = models.ForeignKey(Hotel, related_name="phonenumbers")
     # Fields

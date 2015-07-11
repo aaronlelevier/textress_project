@@ -14,9 +14,9 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save, pre_delete
 from django.core.exceptions import ObjectDoesNotExist
 
-from main.models import (AbstractBase, AbstractBaseQuerySet, AbstractBaseManager,
-    Hotel, UserProfile)
+from main.models import Hotel, UserProfile
 from sms.helpers import send_message
+from utils.models import AbstractBase, AbstractBaseQuerySet, AbstractBaseManager
 
 from twilio import TwilioRestException
 from twilio.rest import TwilioRestClient

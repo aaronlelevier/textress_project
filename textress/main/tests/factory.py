@@ -1,3 +1,6 @@
+import random
+import string
+
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User, Group
@@ -30,15 +33,18 @@ CREATE_HOTEL_DICT = {
 PASSWORD = '1234'
 
 
-def create_hotel(name="Test", address_phone=None):
+def create_hotel(name=None, address_phone=None):
     '''
     Standard test Hotel.
     '''
     address_data = CREATE_HOTEL_DICT
+    if not name:
+        name = create._generate_name()
     address_data['name'] = name
 
     if not address_phone:
         address_data['address_phone'] = create._generate_ph()
+    address_data['address_phone']
 
     return Hotel.objects.create(**address_data)
 
