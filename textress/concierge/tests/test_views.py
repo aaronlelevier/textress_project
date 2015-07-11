@@ -27,7 +27,7 @@ from concierge.models import Guest, Message
 from concierge import views, serializers
 from concierge.tests.factory import make_guests, make_messages
 from main.models import Hotel, UserProfile
-from main.tests.factory import create_hotel
+from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
 from utils import create, dj_messages
 
 from main.tests.factory import create_hotel
@@ -70,9 +70,9 @@ class GuestViewTests(TestCase):
         self.guest = Guest.objects.filter(hotel=self.hotel).first()
 
     def test_list(self):
-        # Dave is not logged in, so get's a 302 response
+        # Dave is not logged in, so get's a 403 response
         response = self.client.get(reverse('concierge:guest_list'))
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 403)
         # Error Message
         m = list(response.context['messages'])
         self.assertEqual(len(m), 1)
@@ -157,22 +157,12 @@ class GuestViewTests(TestCase):
 class MessageAPITests(APITestCase):
 
     def setUp(self):
-        self.password = '1234'
-        self.today = timezone.now().date()
-
-        # Hotel
-        self.hotel = create_hotel()
-
-        # create "Hotel Manager" Group
+        # Groups
         create._get_groups_and_perms()
-
-        # Admin
-        self.admin = mommy.make(User, username='admin')
-        self.admin.groups.add(Group.objects.get(name="hotel_admin"))
-        self.admin.set_password(self.password)
-        self.admin.save()
-        self.admin.profile.update_hotel(hotel=self.hotel)
-        # Hotel Admin ID
+        self.password = PASSWORD
+        # User
+        self.hotel = create_hotel()
+        self.admin = create_hotel_user(self.hotel, group='hotel_admin')
         self.hotel.admin_id = self.admin.id
         self.hotel.save()
 
@@ -205,18 +195,6 @@ class MessageAPITests(APITestCase):
         guest = Guest.objects.get(pk=self.guest.id,
                 hotel=hotel)
         assert isinstance(guest, Guest)
-
-    def test_message_create(self):
-        '''
-        User Localhost b/c testserver / APIClient() still wip.
-        '''
-        r = requests.post('http://localhost:8000/api/messages/',
-                          data={"guest": 37,"user": 44,"hotel": 23,"to_ph": "+17754194000",
-                                "body":"curl test","from_ph": "+17028324062"},
-                          auth=('dave', '1234'))
-        
-        print(r.status_code)
-        assert r.status_code == 201
 
     # /api/messages/<pk>/
 
@@ -270,22 +248,12 @@ class GuestMessageAPITests(APITestCase):
 class GuestAPITests(APITestCase):
 
     def setUp(self):
-        self.password = '1234'
-        self.today = timezone.now().date()
-
-        # Hotel
-        self.hotel = create_hotel()
-
-        # create "Hotel Manager" Group
+        # Groups
         create._get_groups_and_perms()
-
-        # Admin
-        self.admin = mommy.make(User, username='admin')
-        self.admin.groups.add(Group.objects.get(name="hotel_admin"))
-        self.admin.set_password(self.password)
-        self.admin.save()
-        self.admin.profile.update_hotel(hotel=self.hotel)
-        # Hotel Admin ID
+        self.password = PASSWORD
+        # User
+        self.hotel = create_hotel()
+        self.admin = create_hotel_user(self.hotel, group='hotel_admin')
         self.hotel.admin_id = self.admin.id
         self.hotel.save()
 
@@ -293,7 +261,7 @@ class GuestAPITests(APITestCase):
         self.guest = make_guests(hotel=self.hotel, number=1)[0] #b/c returns a list
 
         self.data = {'name': 'mike', 'room_number': '123',
-                     'phone_number': settings.DEFAULT_TO_PH}
+                     'phone_number': settings.DEFAULT_TO_PH_2}
 
     # /api/guests/
 

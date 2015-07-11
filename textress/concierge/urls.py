@@ -26,7 +26,7 @@ guest_patterns = patterns('',
     )
 
 message_patterns = patterns('',
-    url(r'^detail/(?P<pk>\d+)/$', views.MessageDetailView.as_view(), name='message_detail'),
+    # url(r'^detail/(?P<pk>\d+)/$', views.MessageDetailView.as_view(), name='message_detail'),
     url(r'^guest/(?P<pk>\d+)/$', views.MessageListView.as_view(), name='message_list'),
     )
 

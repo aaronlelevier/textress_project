@@ -84,7 +84,7 @@
 
                 <ol class="discussion" ng-repeat="message in messages">
                     <div ng-if="message.user !== null ">
-                        <a href="/message/detail/[[message.id]]/" class="no_decoration">
+                        <!-- <a href="/message/detail/[[message.id]]/" class="no_decoration"> -->
                             <li class="other">
                                 <div class="avatar">
                                     <img alt="" src="{% static 'clipone/admin/clip-one/assets/images/avatar-4.jpg' %}">
@@ -95,10 +95,10 @@
                                     <p> User: [[ message.user ]] / Guest: [[ message.guest ]]</p>
                                 </div>
                             </li>
-                        </a>
+                        <!-- </a> -->
                     </div>
                     <div ng-if="message.user === null ">
-                        <a href="/message/detail/[[message.id]]/" class="no_decoration">
+                        <!-- <a href="/message/detail/[[message.id]]/" class="no_decoration"> -->
                             <li class="self">
                                 <div class="avatar">
                                     <img alt="" src="{% static 'clipone/admin/clip-one/assets/images/avatar-1.jpg' %}">
@@ -109,7 +109,7 @@
                                     <p> User: [[ message.user ]] / Guest: [[ message.guest ]]</p>
                                 </div>
                             </li>
-                        </a>
+                        <!-- </a> -->
                     </div>
                 </ol>
                 

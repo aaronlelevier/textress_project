@@ -193,16 +193,16 @@ class MessageListView(HotelUserMixin, FormView):
         return context
 
 
-class MessageDetailView(SetHeadlineMixin, HotelObjectMixin, DetailView):
+# class MessageDetailView(SetHeadlineMixin, HotelObjectMixin, DetailView):
 
-    headline = "Message Detail"
-    model = Message
-    # template_name = 'cpanel/detail.html'
+#     headline = "Message Detail"
+#     model = Message
+#     # template_name = 'cpanel/detail.html'
 
-    def get_context_data(self, **kwargs):
-        context = super(MessageDetailView, self).get_context_data(**kwargs)
-        context['obj'] = model_to_dict(self.object)
-        return context
+#     def get_context_data(self, **kwargs):
+#         context = super(MessageDetailView, self).get_context_data(**kwargs)
+#         context['obj'] = model_to_dict(self.object)
+#         return context
 
 
 
