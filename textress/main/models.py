@@ -58,7 +58,7 @@ class HotelManager(models.Manager):
         removed.
         '''
         try:
-            return self.get(address_phone=ph_num)
+            return self.get(twilio_phone_number=ph_num)
         except ObjectDoesNotExist:
             # TODO: Change to a Celery request to delete the `PhoneNumber`
             # method: PhoneNumber.objects.delete(phone_number=address_phone)
@@ -99,7 +99,7 @@ class Hotel(TwilioClient, AbstractBase):
     # Denormalized Fields
     twilio_sid = models.CharField(_("Twilio Sid"), max_length=100, blank=True, null=True)
     twilio_auth_token = models.CharField(_("Twilio Auth Token"), max_length=100, blank=True, null=True)
-    twilio_phone_number = models.CharField(_("Twilio Phone Number"), max_length=12, blank=True, null=True)
+    twilio_phone_number = models.CharField(_("Twilio Phone Number"), max_length=25, blank=True, null=True)
     twilio_ph_sid = models.CharField(_("Twilio Phone Number Sid"), max_length=100, blank=True, null=True)
 
     objects = HotelManager()

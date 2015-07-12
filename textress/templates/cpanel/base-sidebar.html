@@ -536,7 +536,11 @@
                                 {% endif %}
 
                                 <div class="page-header">
-                                    <h1>{{ headline }} {% if headline_small %}<small>{{ headline_small }}</small>{% endif %}</h1>
+                                    <h1>
+                                        {{ headline }} 
+                                        {% if headline_small %}<small>{{ headline_small }}</small>{% endif %}
+                                        {% block headline_quicklink %}{% endblock headline_quicklink %}
+                                    </h1> 
                                 </div>
                                 <!-- end: PAGE TITLE & BREADCRUMB -->
                             </div>

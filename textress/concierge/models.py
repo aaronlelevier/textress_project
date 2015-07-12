@@ -1,13 +1,13 @@
 import re
 import datetime
 
-from django import forms
 from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.core.validators import BaseValidator
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _, ungettext_lazy
 from django.dispatch import receiver
@@ -271,6 +271,7 @@ class Message(AbstractBase):
                 # self.user = 
             except TwilioRestException as e:
                 self.reason = e.__dict__['msg']
+                # raise ValidationError(self.reason)
 
         self.hotel = self.guest.hotel or self.user.profile.hotel
 
@@ -369,6 +370,6 @@ class Reply(AbstractBase):
     def save(self, *args, **kwargs):
         self.letter = self.letter.upper()
         if not self.hotel.is_textress and self.reserved_letter(self.letter):
-            raise forms.ValidationError("{} is a reserved letter, and can't be \
+            raise ValidationError("{} is a reserved letter, and can't be \
                 configured. Please use a different letter(s).".format(self.letter))
         return super(Reply, self).save(*args, **kwargs)
