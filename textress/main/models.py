@@ -173,6 +173,10 @@ class Hotel(TwilioClient, AbstractBase):
         return self
 
 
+def profile_image(instance, filename):
+    return '/'.join(['profile', filename])
+
+
 class UserProfile(AbstractBase):
     """
     Only 1 Admin per/ Hotel. This is the 1 User that signs up.
@@ -185,7 +189,7 @@ class UserProfile(AbstractBase):
     user = models.OneToOneField(User, primary_key=True, related_name='profile')
     hotel = models.ForeignKey(Hotel, blank=True, null=True)
     msg_sign = models.CharField(_("Message Signature"), max_length=25, blank=True)
-    thumbnail = models.ImageField()
+    thumbnail = models.ImageField(upload_to=profile_image, null=True, blank=True)
 
     class Meta:
         permissions = (
@@ -202,6 +206,10 @@ class UserProfile(AbstractBase):
             A. Take 1st letter of FName, Lname. i.e. Bob Cohen == -BC
             B. Use username. i.e. bobby == -bobby
         """
+        # TESTING ONLY:
+        if not self.thumbnail:
+            self.thumbnail = 'profile/54 Illustrated Flat Icons 1_3P9A3ey.gif'
+            
         # Auto-Join to group of the Hotel for ``ws4redis`` Group Messaging.
         if self.hotel:
             add_group(self.user, self.hotel.group_name)

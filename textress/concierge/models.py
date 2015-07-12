@@ -14,7 +14,7 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save, pre_delete
 from django.core.exceptions import ObjectDoesNotExist
 
-from main.models import Hotel, UserProfile
+from main.models import Hotel, UserProfile, profile_image
 from sms.helpers import send_message
 from utils.models import AbstractBase, AbstractBaseQuerySet, AbstractBaseManager
 
@@ -98,6 +98,7 @@ class Guest(AbstractBase):
         help_text="Reply 'Y' to Confirm PH # for example.")
     stop = models.BooleanField(_("Stop"), blank=True, default=False,
         help_text="Reply 'S' to Stop receiving all messages.")
+    thumbnail = models.ImageField(upload_to=profile_image, null=True, blank=True)
 
     objects = GuestManager()
 
@@ -134,6 +135,10 @@ class Guest(AbstractBase):
         '''
         TODO: Add logic to handle a raw 10-digit input ph # by the User.
         '''
+        # TESTING ONLY:
+        if not self.thumbnail:
+            self.thumbnail = 'profile/54 Illustrated Flat Icons 2_uzPMZsh.gif'
+
         if not self.id:
             self.validate_phone_number_taken(self.phone_number)
 

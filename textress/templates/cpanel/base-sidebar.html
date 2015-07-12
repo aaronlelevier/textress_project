@@ -340,7 +340,7 @@
                         <!-- start: USER DROPDOWN -->
                         <li class="dropdown current-user">
                             <a data-toggle="dropdown" data-hover="dropdown" class="dropdown-toggle" data-close-others="true" href="#">
-                                <img src="{% static 'clipone/admin/clip-one/assets/images/avatar-1-small.jpg' %}" class="circle-img" alt="">
+                                <img src="{{ STATIC_URL }}{{ user.profile.thumbnail }}" class="circle-img" alt="" style="max-width:26px;">
                                 <span class="username">{{ user.username }}</span>
                                 <i class="clip-chevron-down"></i>
                             </a>
