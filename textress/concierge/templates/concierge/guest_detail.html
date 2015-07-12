@@ -99,16 +99,16 @@
                 <ol class="discussion" ng-repeat="message in messages">
                     <li class="[[ (message.user !== null) ? 'other':'self' ]]">
                         <div class="avatar">
-                            <img style="max-width:26px;" ng-src="[[ (message.user !== null) ? '{{ STATIC_URL }}{{ object.thumbnail }}' : '{{ STATIC_URL }}{{ user.profile.thumbnail }}' ]]">
-                            <!-- <img style="max-width:26px;" src="{{ STATIC_URL }}{{ user.profile.thumbnail }}"> -->
+                            <img style="max-width:26px;" ng-src="[[ (message.user !== null) ? '{{ STATIC_URL }}{{ user.profile.thumbnail }}' : '{{ STATIC_URL }}{{ object.thumbnail }}' ]]">
                         </div>
                         <div class="messages">
                             <h4>[[ message.body | limitTo : 100 ]]</h4> 
+                        </div>
+                        <div class="[[ (message.user !== null) ? 'pull-right':'pull-left' ]]">
                             <small>[[ message.created | date:'medium' ]]</small>
-                            <p> User: [[ message.user ]] / Guest: [[ message.guest ]]</p>
                         </div>
                         <div ng-if="message.received !== true" class="alert alert-danger message_error">
-                            Sent: [[ message.received ]] | Error: [[ message.reason ]]
+                            <strong>Error:</strong> Not Sent. [[ message.reason ]]
                         </div>
                     </li>
                 </ol>

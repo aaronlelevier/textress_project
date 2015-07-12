@@ -1,7 +1,14 @@
 2015-07-12
 ----------
+:user_profile:
+    - create a view that has "Hotel" info, and all User/UserProfile views that we want to display.
+        - change password for ex
+:cpanel_home:
+    - "guest quick add", recent conversations snippets
+:delete_views:
+    - only change ``hide=True``
 :todo:
-    - refactor GuestDetailView.html
+    - refactor GuestDetailView.html - put date stamp below
 :manage_users:
     where is the "add a Mgr" view?
 :setup_images_as_attrs:
@@ -12,9 +19,6 @@
 2015-07-08
 ----------
 :Next:
-    :form_styling:
-        - add a red * for required to all "django-angular" forms
-        - Date fields need a ``Date Picker``
     :styling:
         - Message Detail Page 
             - add styling and correct links

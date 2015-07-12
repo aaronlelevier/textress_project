@@ -68,13 +68,13 @@
                         <th>Delete</th>
                     </tr>
                     <tr ng-repeat="user in users | orderBy:predicate:reverse">
-                        <td><a href="/manage/users/[[ user.id ]]/">[[ user.username ]]</a></td>
+                        <td><a href="/manage/users/update/[[ user.id ]]/">[[ user.username ]]</a></td>
                         <td>[[ user.first_name ]]</td>
                         <td>[[ user.last_name ]]</td>
                         <td>[[ user.email ]]</td>
                         <td>&nbsp;</td>
                         <td>
-                            <a href="/account/manage-users/[[ user.id ]]/">
+                            <a href="/account/manage-users/update/[[ user.id ]]/">
                                 <button type="button" class="btn btn-success btn-xs">Details</button>
                             </a>
                         </td>

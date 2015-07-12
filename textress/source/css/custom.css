@@ -204,5 +204,6 @@ a.no_decoration {
 
 .message_error {
   margin-left: 62px;
-  margin-top: 10px;
+  margin-top: 20px;
+  padding: 5px;
 }

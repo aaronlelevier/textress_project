@@ -270,8 +270,7 @@ class MgrUserDeleteView(SetHeadlineMixin, DeleteButtonMixin, HotelUsersOnlyMixin
     headline = "User Delete View"
     groups = ['hotel_admin', 'hotel_manager']
     model = UserProfile
-    # form = EmptyForm
-    fields = []
+    fields = [] # EmptyForm - no user input required. 
     template_name = 'cpanel/form.html'
     success_url = reverse_lazy('main:manage_user_list')
 
