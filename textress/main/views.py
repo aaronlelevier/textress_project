@@ -10,6 +10,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.template import RequestContext
+from django.forms.models import model_to_dict
 
 from rest_framework.response import Response
 from rest_framework import permissions, generics
@@ -169,11 +170,22 @@ class RegisterHotelUpdateView(MyHotelOnlyMixin, RegisterHotelBaseView, UpdateVie
 # USERS #
 #########
 
-class UserDetailView(UserOnlyMixin, DetailView):
+class UserDetailView(LoginRequiredMixin, SetHeadlineMixin, UserOnlyMixin, DetailView):
     '''User's DetailView of themself.'''
 
+    headline = "My Profile"
     model = User
-    template_name = 'detail_view.html'
+    template_name = 'main/user_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(UserDetailView, self).get_context_data(**kwargs)
+        
+        context['user_dict'] = {}
+        for k,v in model_to_dict(self.request.user).iteritems():
+            if k in ['username', 'first_name', 'last_name', 'is_active', 'email']:
+                context['user_dict'].update({k:v})
+
+        return context
 
 
 class UserUpdateView(SetHeadlineMixin, LoginRequiredMixin, UserOnlyMixin, UpdateView):

@@ -29,7 +29,7 @@ manage_users_patterns = patterns('',
     )
 
 user_patterns = patterns('',
-    # url(r'^(?P<pk>\d+)/$', views.UserDetailView.as_view(), name='user_detail'),
+    url(r'^(?P<pk>\d+)/$', views.UserDetailView.as_view(), name='user_detail'),
     url(r'^update/(?P<pk>\d+)/$', views.UserUpdateView.as_view(), name='user_update'),
     )
 

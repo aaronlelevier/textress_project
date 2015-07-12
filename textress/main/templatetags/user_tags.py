@@ -17,3 +17,8 @@ def has_group(user, group_name):
         group = None
 
     return True if group in user.groups.all() else False
+
+
+@register.filter
+def proper_name(value):
+    return value.replace('_',' ')
