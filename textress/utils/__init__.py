@@ -29,12 +29,22 @@ def validate_phone(phone):
         'invalid_ph':_('Please enter a 10-digit phone number'),
     }
     try:
-        re_phone = re.search(r'\d{10}$', phone).group()
+        r = re.compile(r"[^\d]")
+        re_phone = re.search(r'\d{10}$', r.sub("", phone)).group()
     except AttributeError:
         raise ValidationError(error_messages['invalid_ph'])
     else:
-        phone = "+1"+re_phone
-    return phone
+        return "+1"+re_phone
+
+
+def ph_formatter(phone):
+    '''
+    `pre`: len(phone) == 10
+    
+    `post`: 10 10-digit ph num spaced for ex: 702-510-1234
+    '''
+    phone = validate_phone(phone)
+    return phone[2:5]+'-'+phone[5:8]+'-'+phone[8:]
 
 
 def add_group(user, group):

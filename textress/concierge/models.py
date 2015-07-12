@@ -137,7 +137,7 @@ class Guest(AbstractBase):
         if not self.id:
             self.validate_phone_number_taken(self.phone_number)
 
-        validate_phone(self.phone_number)
+        self.phone_number = validate_phone(self.phone_number)
 
         self.check_in, self.check_out = self.validate_check_in_out(
             self.check_in, self.check_out)

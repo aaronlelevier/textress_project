@@ -25,7 +25,6 @@ class IsHotelObject(permissions.BasePermission):
             hotel = request.user.profile.hotel
         except AttributeError:
             raise PermissionDenied
-
         return obj.hotel == request.user.profile.hotel
 
 
@@ -34,8 +33,8 @@ class IsManagerOrAdmin(permissions.BasePermission):
     Must be a Manager or Admin to access any REST EndPoint.
     '''
     def has_permission(self, request, view):
-        return (request.user.groups.filter(name__in=["hotel_admin",
-                                                     "hotel_manager"]))
+        return (request.user.is_superuser or
+                request.user.groups.filter(name__in=["hotel_admin", "hotel_manager"]))
 
 
 class IsHotelUser(permissions.BasePermission):

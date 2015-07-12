@@ -137,7 +137,16 @@ class GuestUpdateView(GuestBaseView, UpdateView):
     headline = "Update Guest"
     template_name = 'cpanel/form.html'
     model = Guest
-    form_class = GuestForm      
+    form_class = GuestForm
+
+    def get_form_kwargs(self):
+        """This method is what injects forms with their keyword
+            arguments."""
+        # grab the current set of form #kwargs
+        kwargs = super(GuestUpdateView, self).get_form_kwargs()
+        # Update the kwargs with the user_id
+        kwargs['guest'] = self.object
+        return kwargs  
 
 
 class GuestDeleteView(GuestBaseView, DeleteButtonMixin, TemplateView):

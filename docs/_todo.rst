@@ -1,3 +1,10 @@
+2015-07-12
+----------
+:todo:
+    - git commit
+    - add GuestDetailView: other fields
+
+
 2015-07-08
 ----------
 :Next:
