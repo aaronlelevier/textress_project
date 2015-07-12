@@ -185,6 +185,7 @@ class UserProfile(AbstractBase):
     user = models.OneToOneField(User, primary_key=True, related_name='profile')
     hotel = models.ForeignKey(Hotel, blank=True, null=True)
     msg_sign = models.CharField(_("Message Signature"), max_length=25, blank=True)
+    thumbnail = models.ImageField()
 
     class Meta:
         permissions = (

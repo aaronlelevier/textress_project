@@ -101,33 +101,19 @@
                 <h3>Messages</h3>
 
                 <ol class="discussion" ng-repeat="message in messages">
-                    <div ng-if="message.user !== null ">
-                        <li class="other">
+                        <li class="[[ (message.user !== null) ? 'other':'self' ]]">
                             <div class="avatar">
-                                <img alt="" src="{% static 'clipone/admin/clip-one/assets/images/avatar-4.jpg' %}">
+                                <img alt="" src="[[ (message.user !== null) ? '{% static 'clipone/admin/clip-one/assets/images/avatar-4.jpg' %}' : '{% static 'clipone/admin/clip-one/assets/images/avatar-1.jpg' %}' ]]">
                             </div>
                             <div class="messages">
                                 <h4>[[ message.body | limitTo : 100 ]]</h4> 
                                 <small>[[ message.created | date:'medium' ]]</small>
                                 <p> User: [[ message.user ]] / Guest: [[ message.guest ]]</p>
-                                <p ng-if="message.received !== null">Sent: [[ message.received ]] | Error: [[ message.reason ]]</p>
+                            </div>
+                            <div ng-if="message.received !== true" class="alert alert-danger message_error">
+                                Sent: [[ message.received ]] | Error: [[ message.reason ]]
                             </div>
                         </li>
-                    </div>
-                    <div ng-if="message.user === null ">
-                        <li class="self">
-                            <div class="avatar">
-                                <img alt="" src="{% static 'clipone/admin/clip-one/assets/images/avatar-1.jpg' %}">
-                            </div>
-                            <div class="messages">
-                                <h4>[[ message.body | limitTo : 100 ]]</h4> 
-                                <small>[[ message.created | date:'medium' ]]</small>
-                                <p> User: [[ message.user ]] / Guest: [[ message.guest ]]</p>
-                                <p>Sent: [[ message.received ]] | Error: [[ message.reason ]]</p>
-                                <p ng-if="message.error !== null">Sent: [[ message.received ]] | Error: [[ message.reason ]]</p>
-                            </div>
-                        </li>
-                    </div>
                 </ol>
                 
             </div>

@@ -1,8 +1,12 @@
 2015-07-12
 ----------
 :todo:
-    - git commit
-    - add GuestDetailView: other fields
+    - refactor GuestDetailView.html
+:manage_users:
+    where is the "add a Mgr" view?
+:setup_images_as_attrs:
+    - for User / Guest - set their profile pick as an image
+        - use ``Gimp`` to generate 2 default pics
 
 
 2015-07-08

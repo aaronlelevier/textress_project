@@ -201,3 +201,8 @@ a.no_decoration {
     text-decoration: none;
     color: inherit;
 }
+
+.message_error {
+  margin-left: 62px;
+  margin-top: 10px;
+}
