@@ -106,6 +106,10 @@ class PhoneNumberManager(TwilioClient, models.Manager):
 
 
 class PhoneNumber(TwilioClient, TimeStampBaseModel):
+    '''
+    All "phone number" fields should be stored as "+18001234567" i.e. +1\d{10} 
+    and should only be formatted when rending in the template.
+    '''
     # Keys
     hotel = models.ForeignKey(Hotel, related_name="phonenumbers")
     # Fields

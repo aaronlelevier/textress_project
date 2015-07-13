@@ -12,6 +12,7 @@ from django.contrib.auth.models import User, Group
 from django.utils.text import slugify
 from django.dispatch import receiver
 from django.db.models.signals import post_save, pre_delete
+from django.forms.models import model_to_dict
 
 from twilio import TwilioRestException
 from twilio.rest import TwilioRestClient
@@ -21,6 +22,16 @@ from payment.models import Customer
 from utils import validate_phone, add_group, dj_messages, exceptions as excp
 from utils.data import STATES, HOTEL_TYPES
 from utils.models import AbstractBase
+
+
+
+def viewable_user_fields_dict(user):
+    "A ``Dict`` of all viewable ``User` fields to be displayed in templates."
+    user_dict = {}
+    for k,v in model_to_dict(user).iteritems():
+        if k in ['username', 'first_name', 'last_name', 'is_active', 'email']:
+            user_dict.update({k:v})
+    return user_dict
 
 
 class TwilioClient(object):

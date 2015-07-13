@@ -207,3 +207,11 @@ a.no_decoration {
   margin-top: 20px;
   padding: 5px;
 }
+
+/* Profile for User/Guest max widths */
+.profile_pic {
+    max-width: 75px;
+}
+.profile_thumbnail {
+    max-width: 26px;
+}

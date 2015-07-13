@@ -20,7 +20,7 @@ from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
 
 from concierge.permissions import (IsHotelObject, IsManagerOrAdmin, IsHotelUser,
     IsHotelOfUser)
-from main.models import Hotel, UserProfile, Subaccount
+from main.models import Hotel, UserProfile, Subaccount, viewable_user_fields_dict
 from main.forms import UserCreateForm, HotelCreateForm, UserUpdateForm
 from main.mixins import (UserOnlyMixin, HotelUsersOnlyMixin,
     MyHotelOnlyMixin, RegistrationContextMixin, HotelUserMixin, HotelContextMixin)
@@ -179,12 +179,8 @@ class UserDetailView(LoginRequiredMixin, SetHeadlineMixin, UserOnlyMixin, Detail
 
     def get_context_data(self, **kwargs):
         context = super(UserDetailView, self).get_context_data(**kwargs)
-        
-        context['user_dict'] = {}
-        for k,v in model_to_dict(self.request.user).iteritems():
-            if k in ['username', 'first_name', 'last_name', 'is_active', 'email']:
-                context['user_dict'].update({k:v})
-
+        context['user_dict'] = viewable_user_fields_dict(self.request.user)
+        context['hotel'] = self.hotel
         return context
 
 
