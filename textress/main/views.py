@@ -252,6 +252,20 @@ class ManagerCreateView(UserCreateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
+class MgrUserDetailView(LoginRequiredMixin, SetHeadlineMixin, HotelUsersOnlyMixin, DetailView):
+    '''User's DetailView of themself.'''
+
+    headline = "User Profile"
+    model = User
+    template_name = 'main/user_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(MgrUserDetailView, self).get_context_data(**kwargs)
+        context['user_dict'] = viewable_user_fields_dict(self.object)
+        context['hotel'] = self.hotel
+        return context
+
+
 class MgrUserUpdateView(SetHeadlineMixin, HotelUsersOnlyMixin, UpdateView):
     '''
     Manager/Admin view of Users.

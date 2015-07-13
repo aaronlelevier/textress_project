@@ -99,7 +99,7 @@
                 <ol class="discussion" ng-repeat="message in messages">
                     <li class="[[ (message.user !== null) ? 'other':'self' ]]">
                         <div class="avatar">
-                            <img style="max-width:26px;" ng-src="[[ (message.user !== null) ? '{{ STATIC_URL }}{{ user.profile.thumbnail }}' : '{{ STATIC_URL }}{{ object.thumbnail }}' ]]">
+                            <img style="max-width:40px;" ng-src="[[ (message.user !== null) ? '{{ STATIC_URL }}{{ user.profile.thumbnail }}' : '{{ STATIC_URL }}{{ object.thumbnail }}' ]]">
                         </div>
                         <div class="messages">
                             <h4>[[ message.body | limitTo : 100 ]]</h4> 

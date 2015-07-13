@@ -1,16 +1,20 @@
 2015-07-12
 ----------
-:user_profile:
-    - create a view that has "Hotel" info, and all User/UserProfile views that we want to display.
-        - change password for ex
+:next:
+    :tests:
+        - simple view tests for things changed on Sunday
+    :dashboard:
+        - add "guest quick add button"
+        - conversation miny ``div``. 1 per Guest, w/ a count of their messages (Angular view)
+        :notes:
+            - do I want to add a "Notes" model per/ Guest, so the User's can take notes on their Guests?
+                - this would be using REST w/ an Angular service to ``Add/View/Update``
+                - could go on the ``GuestDetailView`` below their info.
+
 :cpanel_home:
     - "guest quick add", recent conversations snippets
 :delete_views:
     - only change ``hide=True``
-:todo:
-    - refactor GuestDetailView.html - put date stamp below
-:manage_users:
-    where is the "add a Mgr" view?
 :setup_images_as_attrs:
     - for User / Guest - set their profile pick as an image
         - use ``Gimp`` to generate 2 default pics
