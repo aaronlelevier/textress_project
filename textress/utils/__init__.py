@@ -31,7 +31,7 @@ def validate_phone(phone):
     try:
         r = re.compile(r"[^\d]")
         re_phone = re.search(r'\d{10}$', r.sub("", phone)).group()
-    except AttributeError:
+    except (AttributeError, TypeError):
         raise ValidationError(error_messages['invalid_ph'])
     else:
         return "+1"+re_phone

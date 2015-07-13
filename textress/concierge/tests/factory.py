@@ -8,6 +8,7 @@ from django.utils import timezone
 from model_mommy import mommy
 
 from concierge.models import Message, Guest
+from utils import create
 
 
 def make_guests(hotel, number=10):
@@ -19,7 +20,7 @@ def make_guests(hotel, number=10):
             name="Guest{}".format(str(i)),
             check_in=today,
             check_out=check_out,
-            phone_number=settings.DEFAULT_TO_PH)
+            phone_number=create._generate_ph())
 
     return Guest.objects.filter(hotel=hotel)
 

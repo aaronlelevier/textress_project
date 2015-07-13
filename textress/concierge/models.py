@@ -19,7 +19,6 @@ from sms.helpers import send_message
 from utils.models import AbstractBase, AbstractBaseQuerySet, AbstractBaseManager
 
 from twilio import TwilioRestException
-from twilio.rest import TwilioRestClient
 from utils import validate_phone
 from utils.exceptions import (CheckOutDateException, ValidSenderException,
     PhoneNumberInUse, ReplyNotFound)
@@ -32,6 +31,11 @@ from utils.exceptions import (CheckOutDateException, ValidSenderException,
 class GuestQuerySet(AbstractBaseQuerySet):
     
     def get_by_hotel_phone(self, hotel, phone_number):
+        '''
+        :pre: 
+            - `hotel` is an active hotel in the system
+            - `phone_number` is a "Guest's phone_number"
+        '''
         try:
             return self.get(hotel=hotel, phone_number=phone_number)
         except ObjectDoesNotExist:
@@ -46,9 +50,10 @@ class GuestManager(AbstractBaseManager, models.Manager):
     def get_by_hotel_phone(self, hotel, phone_number):
         return self.get_queryset().get_by_hotel_phone(hotel, phone_number)
 
-    def get_or_create_unknown_guest(self, hotel, phone_number, name="Unknown Guest"):
+    def get_or_create_unknown_guest(self, hotel, phone_number):
         '''
-        Return: Unknown Guest Object, or create one if it doesn't exist.
+        Return: Unknown Guest Object, or create one if it doesn't exist. 
+        Distinct by `phone_number`.
         '''
         try:
             return self.get(hotel=hotel, phone_number=phone_number)
@@ -58,12 +63,16 @@ class GuestManager(AbstractBaseManager, models.Manager):
                 name="Unknown Guest",
                 room_number='0',
                 phone_number=phone_number,
-                check_in=timezone.today(),
-                check_out=timezone.today()
+                check_in=timezone.now(),
+                check_out=timezone.now()
                 )
     
     def get_by_phone(self, hotel, phone_number):
-        '''Resolve Hotel Guest in this order:
+        '''
+        Logic: `phone_numbers` should only be registered to one active 
+        Guest at a time, if not active, they may be in an archived record.
+
+        Resolve Hotel Guest in this order:
             1. current guest
             2. archived guest
             3. unknown hotel guest
@@ -133,7 +142,8 @@ class Guest(AbstractBase):
 
     def save(self, *args, **kwargs):
         '''
-        TODO: Add logic to handle a raw 10-digit input ph # by the User.
+        TODO: Add logic so that all `phone_numbers` are distinct by Hotel. 
+        Enforce this logic in the save override.
         '''
         # TESTING ONLY:
         if not self.thumbnail:
@@ -288,9 +298,6 @@ class Message(AbstractBase):
 
     def msg_short(self):
         return "{}...".format(' '.join(self.body.split()[:5]))
-
-    def get_absolute_url(self):
-        return reverse('concierge:message_detail', kwargs={'pk':self.pk})
 
 
 #########

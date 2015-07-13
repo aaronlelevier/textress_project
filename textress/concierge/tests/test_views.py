@@ -52,32 +52,26 @@ class GlobalTests(TestCase):
 
 class GuestViewTests(TestCase):
 
-    fixtures = ['users.json', 'main.json', 'sms.json', 'concierge.json', 'payment.json']
+    # fixtures = ['users.json', 'main.json', 'sms.json', 'concierge.json', 'payment.json']
 
     def setUp(self):
         create._get_groups_and_perms()
         self.password = '1234'
 
         # set User "aaron_test" from fixtures as an attr on this class
-        self.user = User.objects.get(username='aaron_test')
-        # b/c passwords are stored as a hash in json fixtures
-        self.user.set_password(self.password)
-        self.user.save()
+        self.hotel = create_hotel()
+        self.user = create_hotel_user(self.hotel)
 
         self.username = self.user.username
-        self.hotel = self.user.profile.hotel
-        self.ph_num = self.hotel.phonenumbers.primary(hotel=self.hotel)
-        self.guest = Guest.objects.filter(hotel=self.hotel).first()
+        self.guests = make_guests(self.hotel)
+        self.guest = self.guests.first()
 
     def test_list(self):
         # Dave is not logged in, so get's a 403 response
         response = self.client.get(reverse('concierge:guest_list'))
-        self.assertEqual(response.status_code, 403)
-        # Error Message
-        m = list(response.context['messages'])
-        self.assertEqual(len(m), 1)
-        self.assertEqual(str(m[0]), dj_messages['no_hotel'])
+        self.assertEqual(response.status_code, 302) #login
 
+    def test_list_ok(self):
         # Dave now tries Logged-In        
         self.client.login(username=self.username, password=self.password)
         response = self.client.get(reverse('concierge:guest_list'))
@@ -104,9 +98,8 @@ class GuestViewTests(TestCase):
             follow=True)
 
         # Now 1 guest
-        guest = Guest.objects.get(name='Test Guest')
-        assert isinstance(guest, Guest)
-        self.assertRedirects(response, reverse('concierge:guest_detail', kwargs={'pk': guest.pk}))
+        guest = Guest.objects.first()
+        self.assertIsInstance(guest, Guest)
 
     def test_update(self):
         self.client.login(username=self.user.username, password=self.password)
@@ -114,21 +107,28 @@ class GuestViewTests(TestCase):
         # No guests
         (g.delete() for g in Guest.objects.all())
 
+        guest_info_dict = {
+            'name': 'Test Guest',
+            'room_number': number(5),
+            'phone_number': number(),
+            'check_in': today(),
+            'check_out': today()
+            }
+
         # Create a single Guest
         response = self.client.post(reverse('concierge:guest_create'),
-            {'hotel':self.user.profile.hotel,'name': 'Test Guest',
-            'room_number': number(5), 'phone_number': number(),
-            'check_in': today(), 'check_out': today()},
-            follow=True)
+            guest_info_dict, follow=True)
         guest = Guest.objects.first()
-        self.assertEqual(guest.name, 'Test Guest')
+        self.assertIsInstance(guest, Guest)
+
+        # can visit their DetailView
+        response = self.client.get('concierge:guest_detail', kwargs={'pk': guest.pk})
+        self.assertEqual(response.status_code, 200)
 
         # update in View
+        guest_info_dict['name'] = 'Test Guest New'
         response = self.client.post(reverse('concierge:guest_update', kwargs={'pk':guest.pk}),
-            {'hotel':self.user.profile.hotel, 'name': 'Test Guest New',
-            'room_number': number(5), 'phone_number': number(),
-            'check_in': today(), 'check_out': today()},
-            follow=True)
+            guest_info_dict, follow=True)
 
         # Modified Guest
         self.assertRedirects(response, reverse('concierge:guest_detail', kwargs={'pk': guest.pk}))

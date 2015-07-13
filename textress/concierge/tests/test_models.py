@@ -11,7 +11,7 @@ from django.conf import settings
 from django.test import TestCase, LiveServerTestCase, RequestFactory
 from django.test.client import Client
 from django.core.urlresolvers import reverse
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.contrib.auth.models import User, Group
 from django.http import Http404
 from django.utils import timezone
@@ -130,8 +130,8 @@ class GuestManagerTests(TestCase):
 
     def test_get_by_phone_unknown(self):
         # when the Hotel recieves an SMS from an unknown Guest
-        guest = Guest.objects.get_by_phone(self.hotel, 'wrong_num')
-        assert guest == self.unknown_guest
+        guest = Guest.objects.get_by_phone(self.hotel, create._generate_ph())
+        self.assertEqual(guest.name, self.unknown_guest.name)
 
 
 class MessageTests(TestCase):
@@ -180,11 +180,6 @@ class MessageTests(TestCase):
         message = self.messages[0]
         assert message.msg_short() == "{}...".format(' '.join(message.body.split()[:5]))
 
-    def test_get_absolute_url(self):
-        message = self.messages[0]
-        assert (message.get_absolute_url() ==
-                reverse('concierge:message_detail', kwargs={'pk':message.pk}))
-
     ### MANAGER ###
 
     def test_monthly_all(self):
@@ -216,30 +211,18 @@ class MessageSendTests(TestCase):
         assert message.hotel == self.guest.hotel
 
 
-class ReplyTests(TestCase):
-
-    def setUp(self):
-        self.hotel = create_hotel()
-
-    def test_upper(self):
-        letter = 'g'
-        reply = mommy.make(Reply, hotel=self.hotel, letter=letter)
-        assert reply.letter == letter.upper()
-
-    def test_reserved_letter(self):
-        letter = 's'
-        with pytest.raises(forms.ValidationError):
-            mommy.make(Reply, hotel=self.hotel, letter=letter)
-
-
 class ReplyManagerTests(TestCase):
 
     def setUp(self):
         self.hotel = create_hotel()
-        self.textress = create_hotel('Textress Hotel')
+        self.textress = create_hotel(name=settings.TEXTRESS_HOTEL)
 
+        # reserved letter `Reply`. Can only be created if using "Textress Hotel" 
+        # as configured in the settings.py
         self.stop_reply = mommy.make(Reply, hotel=self.textress, letter='S',
             func_call='_stop')
+
+        # non-reserved letter `Reply`
         self.help_reply = mommy.make(Reply, hotel=self.hotel, letter='H')
 
         self.guest = make_guests(hotel=self.hotel, number=1)[0] # b/c returns list
@@ -301,17 +284,17 @@ class ReplyManagerTests(TestCase):
         assert not reply
 
 
-class TwilioClientTests(TestCase):
-
-    fixtures = ['concierge.json', 'main.json']
+class ReplyTests(TestCase):
 
     def setUp(self):
-        self.hotel = Hotel.objects.filter(name__icontains='dave')[0]
-        self.guest, self.created = Guest.objects.get_or_create(
-            hotel=self.hotel,
-            phone_number=settings.DEFAULT_TO_PH)
+        self.hotel = create_hotel()
 
-    def test_create(self):
-        assert isinstance(self.hotel, Hotel)
-        assert isinstance(self.guest, Guest)
-        assert not self.created
+    def test_upper(self):
+        letter = 'g'
+        reply = mommy.make(Reply, hotel=self.hotel, letter=letter)
+        assert reply.letter == letter.upper()
+
+    def test_reserved_letter(self):
+        letter = 's'
+        with self.assertRaises(ValidationError):
+            mommy.make(Reply, hotel=self.hotel, letter=letter)

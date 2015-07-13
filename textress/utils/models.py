@@ -21,6 +21,7 @@ class AbstractBaseQuerySet(models.query.QuerySet):
     def archived(self):
         return self.filter(hidden=True)
 
+
 class AbstractBaseManager(models.Manager):
 
     def get_queryset(self):

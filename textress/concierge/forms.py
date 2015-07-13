@@ -33,5 +33,10 @@ class GuestForm(NgFormValidationMixin, Bootstrap3ModelForm):
 
     def __init__(self, guest=None, *args, **kwargs):
         super(GuestForm, self).__init__(*args, **kwargs)
-        # kwargs['initial'].update('phone_number': '123')
-        self.initial['phone_number'] = ph_formatter(guest.phone_number)
+
+        try:
+            phone = guest.phone_number
+        except AttributeError:
+            self.initial['phone_number'] = ""
+        else:
+            self.initial['phone_number'] = ph_formatter(getattr(guest, 'phone_number', None))

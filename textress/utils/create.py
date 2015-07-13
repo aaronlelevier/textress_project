@@ -88,7 +88,8 @@ def add_user_to_hotel_group():
 
 ##########
 # HOTELS #
-##########  
+##########
+
 def _generate_ph(numbers=10):
     return ''.join([random.choice(string.digits) for x in range(numbers)])
 
