@@ -12,7 +12,7 @@ class GuestBasicSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Guest
-        fields = ('id', 'name', 'room_number', 'phone_number',
+        fields = ('id', 'name', 'room_number', 'phone_number', 'thumbnail',
             'check_in', 'check_out', 'created', 'modified', 'hidden')
         read_only_fields = ('created', 'modified',)
 
@@ -55,7 +55,7 @@ class GuestMessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Guest
-        fields = ('id', 'name', 'room_number', 'phone_number',
+        fields = ('id', 'name', 'room_number', 'phone_number', 'thumbnail',
             'check_in', 'check_out', 'created', 'modified', 'hidden',
             'messages')
         read_only_fields = ('created', 'modified',)

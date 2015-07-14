@@ -7,6 +7,10 @@
         - highlighted count of unread messages
         - datetime of last message sent
 
+:profile_pics:
+    - add 10 more total to choose from
+    - find out why not loading? or make a static char field for now?
+
 
 
 2015-07-12

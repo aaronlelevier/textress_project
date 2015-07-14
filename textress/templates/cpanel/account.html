@@ -1,4 +1,24 @@
 {% extends "cpanel/base-sidebar.html" %}
+{% load staticfiles %}
+
+
+{% block head_js %}
+    {{ block.super }}
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular.min.js"></script>
+    <script src="{% static 'vendor/angular-resource/angular-resource.min.js' %}"></script>
+    <script src="{% static 'vendor/angular-ui-router/release/angular-ui-router.min.js' %}"></script>
+    <script src="{% static 'angular/concierge/app.js' %}"></script>
+    <script src="{% static 'angular/concierge/services.js' %}"></script>
+    <script src="{% static 'angular/main/services.js' %}"></script>
+    <script src="{% static 'angular/concierge/controllers.js' %}"></script>
+    <script src="{% static 'angular/concierge/filters.js' %}"></script>
+    <script src="{% static 'angular/config.js' %}"></script>
+{% endblock head_js %}
+
+
+{% block angular_app %}
+    ng-app="conciergeApp"
+{% endblock %}
 
 
 {% block content %}
@@ -54,23 +74,22 @@
             </div>
         </div>
 
-        <div class="col-sm-8">
-            <div class="panel-body panel-scroll" style="height:300px">
-                <ul class="activities">
-                    <li>
-                        <a class="activity" href="javascript:void(0)">
-                            <i class="clip-upload-2 circle-icon circle-green"></i>
-                            <span class="desc">You uploaded a new release.</span>
-                            <div class="time">
-                                <i class="fa fa-time bigger-110"></i>
-                                2 hours ago
-                            </div>
-                        </a>
-                    </li>
+            <div class="col-sm-8" ng-controller="GuestListCtrl" id="guestListCtrl" ng-cloak>
+                <div class="panel-body panel-scroll" style="height:300px">
+                    <ul class="activities" ng-repeat="guest in guests">
+                        <li>
+                            <a class="activity" href="javascript:void(0)">
+                                <img ng-src="{{ STATIC_URL }}[[ guest.thumbnail ]]" class="profile_thumbnail">
+                                <span class="desc">[[ guest.thumbnail ]]</span>
+                                <div class="time">
+                                    <i class="fa fa-time bigger-110"></i>
+                                    2 hours ago
+                                </div>
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>
-        </div>
 
     </div>
 </div>
