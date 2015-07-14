@@ -226,6 +226,11 @@ class UserViewTests(TestCase):
         self.assertNotEqual(fname, updated_user.first_name)
         self.assertRedirects(response, reverse('account'))
 
+    def test_user_detail(self):
+        self.client.login(username=self.user.username, password=self.password)
+        response = self.client.get(reverse('main:user_detail', kwargs={'pk': self.user.pk}))
+        self.assertEqual(response.status_code, 200)
+
 
 class ManageUsersTests(TestCase):
 

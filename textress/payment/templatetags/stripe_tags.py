@@ -14,5 +14,5 @@ def stripe_money(value):
 def format_phone(value):
     try:
         return "({}) {}-{}".format(value[2:5], value[5:8], value[8:])
-    except IndexError:
+    except (IndexError, TypeError):
         return None

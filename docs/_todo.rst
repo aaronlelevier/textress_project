@@ -1,3 +1,14 @@
+2015-07-14
+----------
+:cpanel_dashboard:
+    - message_divs:
+        - guest name
+        - most recent message
+        - highlighted count of unread messages
+        - datetime of last message sent
+
+
+
 2015-07-12
 ----------
 :next:
