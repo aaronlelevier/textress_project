@@ -74,16 +74,18 @@
             </div>
         </div>
 
-            <div class="col-sm-8" ng-controller="GuestListCtrl" id="guestListCtrl" ng-cloak>
+            <div class="col-sm-8" ng-controller="GuestMsgPreviewCtrl" ng-cloak>
                 <div class="panel-body panel-scroll" style="height:300px">
                     <ul class="activities" ng-repeat="guest in guests">
                         <li>
-                            <a class="activity" href="javascript:void(0)">
-                                <img ng-src="{{ STATIC_URL }}[[ guest.thumbnail ]]" class="profile_thumbnail">
-                                <span class="desc">[[ guest.thumbnail ]]</span>
+                            <a class="activity" href="/guests/detail/[[ guest.id ]]/">
+                                <img ng-src="[[ guest.thumbnail ]]" class="profile_thumbnail">
+                                <span class="desc">[[ guest.name ]]</span>
                                 <div class="time">
                                     <i class="fa fa-time bigger-110"></i>
                                     2 hours ago
+                                    &nbsp;
+                                    <span class="badge badge-new-msg">1</span>
                                 </div>
                             </a>
                         </li>

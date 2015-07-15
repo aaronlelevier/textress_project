@@ -13,6 +13,14 @@ conciergeControllers.controller('GuestListCtrl', ['$scope', 'Guest', function($s
     };
 }]);
 
+// Dashboard page, where new messages should pop via a websocke to dispay to the User
+conciergeControllers.controller('GuestMsgPreviewCtrl', ['$scope', 'GuestMessages',
+    function($scope, GuestMessages) {
+    // live
+    $scope.guests = GuestMessages.query();
+}]);
+
+// Use for single GuestDetail page w/ SMS messages. Send/Receive SMS
 conciergeControllers.controller('GuestMessageCtrl',
     ['$scope', '$stateParams', '$timeout', 'Message', 'GuestMessages', 'GuestUser', 'CurrentUser',
     function($scope, $stateParams, $timeout, Message, GuestMessages, GuestUser, CurrentUser) {

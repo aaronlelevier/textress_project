@@ -76,6 +76,7 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.core.context_processors.static',
+                'django.core.context_processors.media',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
@@ -112,13 +113,12 @@ USE_L10N = True
 
 USE_TZ = True
 
-# TEMPLATE_DIRS = (
-#     os.path.join(BASE_DIR, 'templates'),
-#     )
+
+ADMIN_MEDIA_PREFIX = '/admin-media/'
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'source'),
-    os.path.join(BASE_DIR, 'media'),
+    # os.path.join(BASE_DIR, 'media'),
     )
 
 STATIC_URL = '/static/'

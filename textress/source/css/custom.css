@@ -215,3 +215,8 @@ a.no_decoration {
 .profile_thumbnail {
     max-width: 40px;
 }
+
+/* message alerts */
+.badge-new-msg {
+    background-color: #007AFF;
+}

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 
@@ -27,4 +28,9 @@ urlpatterns = patterns('',
     url(r'^terms-and-conditions/$', views.TermsNCondView.as_view(), name='terms_n_cond'),
     url(r'^404/$', views.handler404, name='404'),
     url(r'^500/$', views.handler500, name='500'),
+)
+
+if settings.DEBUG:
+    urlpatterns += patterns('',
+        (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes':True}),
 )
