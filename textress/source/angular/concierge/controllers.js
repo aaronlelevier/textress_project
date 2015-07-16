@@ -14,15 +14,83 @@ conciergeControllers.controller('GuestListCtrl', ['$scope', 'Guest', function($s
 }]);
 
 // Dashboard page, where new messages should pop via a websocke to dispay to the User
-conciergeControllers.controller('GuestMsgPreviewCtrl', ['$scope', 'GuestMessages',
-    function($scope, GuestMessages) {
-    // live
-    $scope.guests = GuestMessages.query();
-}]);
+conciergeControllers.controller('GuestMsgPreviewCtrl', ['$scope', '$filter', '$stateParams', '$timeout', 'Message', 'GuestMessages',
+    function($scope, $filter, $stateParams, $timeout, Message, GuestMessages) {
+
+        $scope.guests = GuestMessages.query();
+
+        // works. converts obj to array.
+        var obj = $scope.guests;
+        var arr = Object.keys(obj).map(function(key) {
+            return obj[key]
+        });
+
+        $scope.getMessage = function(message) {
+
+            // get the # of Guests
+            var i = 0;
+            var obj = $scope.guests;
+            var arr = Object.keys(obj).map(function(key) {
+                return obj[key]
+            });
+            var len = arr.length;
+            console.log('messages len:', len);
+
+            Message.get({
+                id: message.id
+            }, function(response) {
+                // append response (msg) to the guest
+                console.log('response:',response);
+                var i = 0,
+                    len = $scope.guests.length;
+                for (; i < len; i++) {
+                    if (+$scope.guests[i].id == +response.guest.id) {
+                        $scope.guests[i].messages.unshift(message);
+                        console.log('if triggered:', $scope.guests[i]);
+                    }
+                }
+            });
+
+            // for (; i < len; i++) {
+            //     if (+$scope.guests[i].id == +message.guest.id) {
+            //         $scope.guests[i].messages.unshift(message);
+            //         console.log('if triggered:', $scope.guests[i]);
+            //     }
+            // }
+
+            // var gm = function(Message, $stateParams, $scope, message) {
+            //     message = JSON.parse(message);
+            //     console.log('getMessage():', message);
+
+            //     Message.get({
+            //         id: message.id
+            //     }, function(response) {
+            //         // append response (msg) to the guest
+            //         var i = 0,
+            //             len = $scope.guests.length;
+            //         for (; i < len; i++) {
+            //             if (+$scope.guests[i].id == +response.guest.id) {
+            //                 $scope.guests[i].messages.unshift(response);
+            //             }
+            //         }
+            //     });
+
+            // if (initializing) {
+            //     $timeout(function() {
+            //         initializing = false;
+            //     });
+            // } else {
+            // gm(Message, $stateParams, $scope, message);
+            // }
+            // }
+
+        }
+    }
+    // TODO: figure out how to add Msg Counts to the template
+]);
 
 // Use for single GuestDetail page w/ SMS messages. Send/Receive SMS
-conciergeControllers.controller('GuestMessageCtrl',
-    ['$scope', '$stateParams', '$timeout', 'Message', 'GuestMessages', 'GuestUser', 'CurrentUser',
+conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '$timeout', 'Message', 'GuestMessages', 'GuestUser', 'CurrentUser',
     function($scope, $stateParams, $timeout, Message, GuestMessages, GuestUser, CurrentUser) {
         $scope.messages = {};
         $scope.modal_msg = 0;
@@ -38,7 +106,7 @@ conciergeControllers.controller('GuestMessageCtrl',
                 $scope.messages = response.messages;
             });
         }
-        
+
         // populate initial context without a delay
         $scope.getGuest(GuestMessages, $stateParams, $scope);
 
@@ -74,7 +142,9 @@ conciergeControllers.controller('GuestMessageCtrl',
                 });
             }
             if (initializing) {
-                $timeout(function() { initializing = false; });
+                $timeout(function() {
+                    initializing = false;
+                });
             } else {
                 gm(Message, $stateParams, $scope, message);
             }

@@ -1,6 +1,13 @@
 2015-07-14
 ----------
 :cpanel_dashboard:
+    - figure out how to push updates to "cpanel" and "navbar" when messages
+    come in
+
+
+2015-07-14
+----------
+:cpanel_dashboard:
     - message_divs:
         - guest name
         - most recent message
