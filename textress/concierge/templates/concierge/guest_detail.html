@@ -80,7 +80,7 @@
             </div>
 
             <div class="col-md-6">
-                <form ng-submit="submitMessage(body)">
+                <form >
                     <div class="form-group">
                         <input placeholder="Enter message here..." name="messageForm" type="text" class="form-control new-message-input" ng-model="body" id="text_message"></input>
                     </div>
@@ -138,7 +138,11 @@ jQuery(document).ready(function($) {
     $("#text_message").keydown(function(event) {
         if (event.keyCode === 13) {
             // event.preventDefault();
-            ws4redis.send_message($('#text_message').val());
+            var message = angular.element('#GuestMessageCtrl').scope().submitMessage($('#text_message').val());
+            angular.element('#GuestMessageCtrl').scope().$apply();
+            ws4redis.send_message(message);
+
+            // ws4redis.send_message($('#text_message').val());
         }
     });
     $('#send_message').click(function() {

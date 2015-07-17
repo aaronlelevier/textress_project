@@ -1,8 +1,15 @@
+2015-07-17
+----------
+:account_view:
+    - use OOP w/ cpanel Messages and GuestDetailMessages if possible
+    - add message append to "cpanel"
+
 2015-07-14
 ----------
 :cpanel_dashboard:
     - figure out how to push updates to "cpanel" and "navbar" when messages
     come in
+
 
 
 2015-07-14

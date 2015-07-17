@@ -14,7 +14,8 @@ conciergeControllers.controller('GuestListCtrl', ['$scope', 'Guest', function($s
 }]);
 
 // Dashboard page, where new messages should pop via a websocke to dispay to the User
-conciergeControllers.controller('GuestMsgPreviewCtrl', ['$scope', '$filter', '$stateParams', '$timeout', 'Message', 'GuestMessages',
+conciergeControllers.controller('GuestMsgPreviewCtrl',
+    ['$scope', '$filter', '$stateParams', '$timeout', 'Message', 'GuestMessages',
     function($scope, $filter, $stateParams, $timeout, Message, GuestMessages) {
 
         $scope.guests = GuestMessages.query();
@@ -25,71 +26,52 @@ conciergeControllers.controller('GuestMsgPreviewCtrl', ['$scope', '$filter', '$s
             return obj[key]
         });
 
+        var initializing = true;
+
         $scope.getMessage = function(message) {
 
-            // get the # of Guests
-            var i = 0;
-            var obj = $scope.guests;
-            var arr = Object.keys(obj).map(function(key) {
-                return obj[key]
-            });
-            var len = arr.length;
-            console.log('messages len:', len);
+            var gm = function(Message, $stateParams, $scope, message) {
 
-            Message.get({
-                id: message.id
-            }, function(response) {
-                // append response (msg) to the guest
-                console.log('response:',response);
-                var i = 0,
-                    len = $scope.guests.length;
-                for (; i < len; i++) {
-                    if (+$scope.guests[i].id == +response.guest.id) {
-                        $scope.guests[i].messages.unshift(message);
-                        console.log('if triggered:', $scope.guests[i]);
+                // get the # of Guests
+                var i = 0;
+                var obj = $scope.guests;
+                var arr = Object.keys(obj).map(function(key) {
+                    return obj[key]
+                });
+                console.log('message pre-JSON:',message);
+                var len = arr.length;
+                message = JSON.parse(message);
+                console.log('message post-JSON:',message);
+                // from the Message Obj, append it to the correct Guest's Messages
+                Message.get({
+                    id: message.id
+                }, function(response) {
+                    console.log('response:',response);
+                    var i = 0,
+                        len = $scope.guests.length;
+                    for (; i < len; i++) {
+                        if (+$scope.guests[i].id == +response.guest.id) {
+                            $scope.guests[i].messages.unshift(message);
+                            console.log('if triggered:', $scope.guests[i]);
+                        }
                     }
-                }
-            });
+                });
 
-            // for (; i < len; i++) {
-            //     if (+$scope.guests[i].id == +message.guest.id) {
-            //         $scope.guests[i].messages.unshift(message);
-            //         console.log('if triggered:', $scope.guests[i]);
-            //     }
-            // }
+            }
+            if (initializing) {
+                $timeout(function() {
+                    initializing = false;
+                });
+            } else {
+                gm(Message, $stateParams, $scope, message);
 
-            // var gm = function(Message, $stateParams, $scope, message) {
-            //     message = JSON.parse(message);
-            //     console.log('getMessage():', message);
-
-            //     Message.get({
-            //         id: message.id
-            //     }, function(response) {
-            //         // append response (msg) to the guest
-            //         var i = 0,
-            //             len = $scope.guests.length;
-            //         for (; i < len; i++) {
-            //             if (+$scope.guests[i].id == +response.guest.id) {
-            //                 $scope.guests[i].messages.unshift(response);
-            //             }
-            //         }
-            //     });
-
-            // if (initializing) {
-            //     $timeout(function() {
-            //         initializing = false;
-            //     });
-            // } else {
-            // gm(Message, $stateParams, $scope, message);
-            // }
-            // }
-
+            }
         }
     }
-    // TODO: figure out how to add Msg Counts to the template
 ]);
 
 // Use for single GuestDetail page w/ SMS messages. Send/Receive SMS
+// GuestUser = Guest
 conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '$timeout', 'Message', 'GuestMessages', 'GuestUser', 'CurrentUser',
     function($scope, $stateParams, $timeout, Message, GuestMessages, GuestUser, CurrentUser) {
         $scope.messages = {};
@@ -123,6 +105,8 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
             message.$save(function() {
                 $scope.messages.unshift(message);
             });
+
+            return message;
         }
 
         // set flag to not call gm() on page load using $timeout. So the 
@@ -132,21 +116,33 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
 
         $scope.getMessage = function(message) {
 
-            var gm = function(Message, $stateParams, $scope, message) {
-                message = JSON.parse(message);
+            var gm = function(message) {
+                // `message` is an array when sent from the User/Guest's View.
+                // when sitting on another view, and receiving from Redis, it is an object.
+                // goal: convert to JSON in order to handle
+                if (typeof(message) === "object") {
+                    message = JSON.stringify(message);
+                }
+                else {
+                    message = JSON.parse(message);                    
+                }
 
                 Message.get({
                     id: message.id
                 }, function(response) {
-                    $scope.messages.unshift(response);
+                    // only append the Message if it belongs to the Guest
+                    if (message.guest == GuestUser.id) {
+                        $scope.messages.unshift(response);
+                    }
                 });
             }
+            
             if (initializing) {
                 $timeout(function() {
                     initializing = false;
                 });
             } else {
-                gm(Message, $stateParams, $scope, message);
+                gm(message);
             }
         }
     }
