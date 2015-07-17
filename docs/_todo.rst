@@ -4,12 +4,12 @@
     - use OOP w/ cpanel Messages and GuestDetailMessages if possible
     - add message append to "cpanel"
 
+
 2015-07-14
 ----------
 :cpanel_dashboard:
     - figure out how to push updates to "cpanel" and "navbar" when messages
     come in
-
 
 
 2015-07-14
@@ -24,7 +24,6 @@
 :profile_pics:
     - add 10 more total to choose from
     - find out why not loading? or make a static char field for now?
-
 
 
 2015-07-12
