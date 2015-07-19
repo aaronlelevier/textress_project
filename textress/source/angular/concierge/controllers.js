@@ -102,13 +102,24 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
                 body: body
             });
 
+            // `response` needed to get full object:
+            // http://stackoverflow.com/questions/17131643/promise-on-angularjs-resource-save-action
             message.$save(function() {
                 $scope.messages.unshift(message);
+            })
+            .then(function(response) {
+                console.log('response:', response);
+                var response = response;
+                console.log('typeof:', typeof(response));
+                console.log('submitMessage pre-return:',response);
+                console.log('created:', response.created);
+                console.log('message id:', response.id);
+                console.log('Acutual msg being sent:', JSON.stringify(response));
+                return JSON.stringify(response);
             });
-
-            console.log('typeof:', typeof(message));
-            console.log('submitMessage pre-return:',message);
-            // return JSON.parse(message;
+            $timeout(function() {}, 1000);
+            return JSON.stringify(response);
+            
         }
 
         // set flag to not call gm() on page load using $timeout. So the 
@@ -124,23 +135,23 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
                 // goal: convert to JSON in order to handle
                 console.log('typeof:', typeof(message));
                 console.log('message pre-JSON:',message);
-                if (typeof(message) === "object") {
-                    message = JSON.stringify(message);
+                if (typeof(message) !== "object") {
+                    message = JSON.parse(message);
                 }
-                else {
-                    message = JSON.parse(message);                    
-                }
+                // else {
+                //     message = JSON.parse(message);                    
+                // }
                 console.log('message post-JSON:',message);
                 console.log('typeof:', typeof(message));
 
-                Message.get({
-                    id: message.id
-                }, function(response) {
-                    // only append the Message if it belongs to the Guest
-                    if (message.guest == GuestUser.id) {
-                        $scope.messages.unshift(response);
-                    }
-                });
+                if (message.guest == GuestUser.id) {
+                    Message.get({
+                        id: message.id
+                    }, function(response) {
+                        // only append the Message if it belongs to the Guest
+                            $scope.messages.unshift(response);
+                    });
+                }
             }
 
             if (initializing) {
