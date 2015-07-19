@@ -266,6 +266,9 @@ class Message(AbstractBase):
 
     objects = MessageManager()
 
+    class Meta:
+        ordering = ('-created',)
+
     def __str__(self):
         return "Date: {} Guest: {} Msg: {}".format(self.created, self.guest,
             self.msg_short())

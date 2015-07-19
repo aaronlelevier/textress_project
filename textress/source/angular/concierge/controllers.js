@@ -106,7 +106,9 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
                 $scope.messages.unshift(message);
             });
 
-            return message;
+            console.log('typeof:', typeof(message));
+            console.log('submitMessage pre-return:',message);
+            // return JSON.parse(message;
         }
 
         // set flag to not call gm() on page load using $timeout. So the 
@@ -120,12 +122,16 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
                 // `message` is an array when sent from the User/Guest's View.
                 // when sitting on another view, and receiving from Redis, it is an object.
                 // goal: convert to JSON in order to handle
+                console.log('typeof:', typeof(message));
+                console.log('message pre-JSON:',message);
                 if (typeof(message) === "object") {
                     message = JSON.stringify(message);
                 }
                 else {
                     message = JSON.parse(message);                    
                 }
+                console.log('message post-JSON:',message);
+                console.log('typeof:', typeof(message));
 
                 Message.get({
                     id: message.id
@@ -136,7 +142,7 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
                     }
                 });
             }
-            
+
             if (initializing) {
                 $timeout(function() {
                     initializing = false;

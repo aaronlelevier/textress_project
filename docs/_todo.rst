@@ -1,8 +1,17 @@
 2015-07-17
 ----------
 :account_view:
-    - use OOP w/ cpanel Messages and GuestDetailMessages if possible
+    - use OOP w/ AngJs w/ cpanel Messages and GuestDetailMessages if possible
     - add message append to "cpanel"
+
+:random:
+    - DRF - order_by for messages
+
+:get_message:
+direction   | guest for msg     | other guests
+----------------------------------------------
+incoming    |       ok          |       ok
+outgoing    |                   |
 
 
 2015-07-14
