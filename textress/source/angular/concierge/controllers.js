@@ -104,22 +104,16 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
 
             // `response` needed to get full object:
             // http://stackoverflow.com/questions/17131643/promise-on-angularjs-resource-save-action
-            message.$save(function() {
+            return message.$save(function() {
                 $scope.messages.unshift(message);
             })
             .then(function(response) {
-                console.log('response:', response);
-                var response = response;
-                console.log('typeof:', typeof(response));
-                console.log('submitMessage pre-return:',response);
-                console.log('created:', response.created);
-                console.log('message id:', response.id);
+                console.log('typeof:', typeof(response), 'id:', response.id, 'response:', response);
                 console.log('Acutual msg being sent:', JSON.stringify(response));
                 return JSON.stringify(response);
             });
-            $timeout(function() {}, 1000);
-            return JSON.stringify(response);
-            
+            // $timeout(function() {}, 1000);
+            // return JSON.stringify(response);
         }
 
         // set flag to not call gm() on page load using $timeout. So the 
