@@ -19,51 +19,22 @@ conciergeControllers.controller('GuestMsgPreviewCtrl', ['$scope', '$filter', '$s
 
         $scope.guests = GuestMessages.query();
 
-        // works. converts obj to array.
-        var obj = $scope.guests;
-        var arr = Object.keys(obj).map(function(key) {
-            return obj[key]
-        });
+        // Append Last Message object to each Guest in Array
+        // LastMsg has: text, time, read/unread status
+
+        $scope.gm = function(message) {
+            $scope.guests = GuestMessages.query();
+        }
 
         var initializing = true;
 
         $scope.getMessage = function(message) {
-
-            var gm = function(Message, $stateParams, $scope, message) {
-
-                // get the # of Guests
-                var i = 0;
-                var obj = $scope.guests;
-                var arr = Object.keys(obj).map(function(key) {
-                    return obj[key]
-                });
-                console.log('message pre-JSON:', message);
-                var len = arr.length;
-                message = JSON.parse(message);
-                console.log('message post-JSON:', message);
-                // from the Message Obj, append it to the correct Guest's Messages
-                Message.get({
-                    id: message.id
-                }, function(response) {
-                    console.log('response:', response);
-                    var i = 0,
-                        len = $scope.guests.length;
-                    for (; i < len; i++) {
-                        if (+$scope.guests[i].id == +response.guest.id) {
-                            $scope.guests[i].messages.unshift(message);
-                            console.log('if triggered:', $scope.guests[i]);
-                        }
-                    }
-                });
-
-            }
             if (initializing) {
                 $timeout(function() {
                     initializing = false;
                 });
             } else {
-                gm(Message, $stateParams, $scope, message);
-
+                $scope.gm(message);
             }
         }
     }
@@ -129,9 +100,6 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
                 if (typeof(message) !== "object") {
                     message = JSON.parse(message);
                 }
-                // else {
-                //     message = JSON.parse(message);                    
-                // }
                 console.log('message post-JSON:', message);
                 console.log('typeof:', typeof(message));
 

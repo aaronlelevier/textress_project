@@ -1,11 +1,20 @@
 2015-07-22
 ----------
 :Goals:
+    - give each guest a "last_message" object that stores 
+
+        - last message text
+        - last message time
+        - read / unread status
+
+    - test incoming Messages from SMS (remember to start n use / "ngrok")
+
+    # add counter of messages that updates to "GuestMsgPreviewCtrl" GuestListView page
+
     # refactor ".rst" docs/ so that the code command sections are readable from the browser
 
-    - ws4redis - see if it cat use Redis w/i the Js file for the promise?
-    
-        - refactor code w/ ``ws4redis`` w/i AngJs ``submitMessage()`` func call
+    # ws4redis - see if it cat use Redis w/i the Js file for the promise?
+    # refactor code w/ ``ws4redis`` w/i AngJs ``submitMessage()`` func call
 
 
 2015-07-17

@@ -5,10 +5,14 @@ Dev Cmds
 --------
 To start all background process, in separate terminals run
 
-`./manage.py runserver`
+.. code-block::
 
-`rabbitmq-server`
+    ./manage.py runserver
 
-`redis-server`
+    # nnot in use
+    rabbitmq-server
 
-`celery -A demo worker -l debug`
+    redis-server
+
+    # nnot in use
+    celery -A demo worker -l debug
