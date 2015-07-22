@@ -132,21 +132,17 @@ jQuery(document).ready(function($) {
         heartbeat_msg: {{ WS4REDIS_HEARTBEAT }}
     });
     var billboard = $('#billboard');
-
     // send message though the Websocket to the server
     // by ``keydown`` or ``click``
     $("#text_message").keydown(function(event) {
         if (event.keyCode === 13) {
-            // event.preventDefault();
-            var message = angular.element('#GuestMessageCtrl').scope().submitMessage($('#text_message').val());
+            var message = angular.element('#GuestMessageCtrl').scope().submitMessage(ws4redis, $('#text_message').val());
             angular.element('#GuestMessageCtrl').scope().$apply();
-            ws4redis.send_message(message);
-
-            // ws4redis.send_message($('#text_message').val());
         }
     });
     $('#send_message').click(function() {
-        ws4redis.send_message($('#text_message').val());
+        var message = angular.element('#GuestMessageCtrl').scope().submitMessage(ws4redis, $('#text_message').val());
+        angular.element('#GuestMessageCtrl').scope().$apply();
     });
 
     function receiveMessage(message) {

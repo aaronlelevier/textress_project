@@ -14,8 +14,7 @@ conciergeControllers.controller('GuestListCtrl', ['$scope', 'Guest', function($s
 }]);
 
 // Dashboard page, where new messages should pop via a websocke to dispay to the User
-conciergeControllers.controller('GuestMsgPreviewCtrl',
-    ['$scope', '$filter', '$stateParams', '$timeout', 'Message', 'GuestMessages',
+conciergeControllers.controller('GuestMsgPreviewCtrl', ['$scope', '$filter', '$stateParams', '$timeout', 'Message', 'GuestMessages',
     function($scope, $filter, $stateParams, $timeout, Message, GuestMessages) {
 
         $scope.guests = GuestMessages.query();
@@ -38,15 +37,15 @@ conciergeControllers.controller('GuestMsgPreviewCtrl',
                 var arr = Object.keys(obj).map(function(key) {
                     return obj[key]
                 });
-                console.log('message pre-JSON:',message);
+                console.log('message pre-JSON:', message);
                 var len = arr.length;
                 message = JSON.parse(message);
-                console.log('message post-JSON:',message);
+                console.log('message post-JSON:', message);
                 // from the Message Obj, append it to the correct Guest's Messages
                 Message.get({
                     id: message.id
                 }, function(response) {
-                    console.log('response:',response);
+                    console.log('response:', response);
                     var i = 0,
                         len = $scope.guests.length;
                     for (; i < len; i++) {
@@ -92,7 +91,7 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
         // populate initial context without a delay
         $scope.getGuest(GuestMessages, $stateParams, $scope);
 
-        $scope.submitMessage = function(body) {
+        $scope.submitMessage = function(ws4redis, body) {
             $scope.body = null;
 
             var message = new Message({
@@ -105,13 +104,13 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
             // `response` needed to get full object:
             // http://stackoverflow.com/questions/17131643/promise-on-angularjs-resource-save-action
             message.$save(function() {
-                $scope.messages.unshift(message);
-            })
-            .then(function(response) {
-                console.log('typeof:', typeof(response), 'id:', response.id, 'response:', response);
-                console.log('Acutual msg being sent:', JSON.stringify(response));
-                return JSON.stringify(response);
-            });
+                    $scope.messages.unshift(message);
+                })
+                .then(function(response) {
+                    console.log('typeof:', typeof(response), 'id:', response.id, 'response:', response);
+                    console.log('Acutual msg being sent:', JSON.stringify(response));
+                    ws4redis.send_message(JSON.stringify(response));
+                });
         }
 
         // set flag to not call gm() on page load using $timeout. So the 
@@ -126,14 +125,14 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
                 // when sitting on another view, and receiving from Redis, it is an object.
                 // goal: convert to JSON in order to handle
                 console.log('typeof:', typeof(message));
-                console.log('message pre-JSON:',message);
+                console.log('message pre-JSON:', message);
                 if (typeof(message) !== "object") {
                     message = JSON.parse(message);
                 }
                 // else {
                 //     message = JSON.parse(message);                    
                 // }
-                console.log('message post-JSON:',message);
+                console.log('message post-JSON:', message);
                 console.log('typeof:', typeof(message));
 
                 if (message.guest == GuestUser.id) {
@@ -141,7 +140,7 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
                         id: message.id
                     }, function(response) {
                         // only append the Message if it belongs to the Guest
-                            $scope.messages.unshift(response);
+                        $scope.messages.unshift(response);
                     });
                 }
             }
