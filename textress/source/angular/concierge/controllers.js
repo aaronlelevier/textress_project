@@ -104,7 +104,7 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
 
             // `response` needed to get full object:
             // http://stackoverflow.com/questions/17131643/promise-on-angularjs-resource-save-action
-            return message.$save(function() {
+            message.$save(function() {
                 $scope.messages.unshift(message);
             })
             .then(function(response) {
@@ -112,8 +112,6 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
                 console.log('Acutual msg being sent:', JSON.stringify(response));
                 return JSON.stringify(response);
             });
-            // $timeout(function() {}, 1000);
-            // return JSON.stringify(response);
         }
 
         // set flag to not call gm() on page load using $timeout. So the 
