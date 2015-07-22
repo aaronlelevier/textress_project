@@ -1,39 +1,53 @@
 uWSGI
 =====
-# test app runs
-# CWD (working dir) needs to be=> /opt/django
-uwsgi --socket textress.sock --wsgi-file /opt/django/textress.wsgi --chmod-socket=666
+
+.. code-block::
+
+    # test app runs
+    # CWD (working dir) needs to be=> /opt/django
+    uwsgi --socket textress.sock --wsgi-file /opt/django/textress.wsgi --chmod-socket=666
 
 TEST
-----
-uwsgi --socket :9000 -H /root/.virtualenvs/textra_17 --no-site --wsgi-file /opt/django/test.py
+
+.. code-block::
+
+    uwsgi --socket :9000 -H /root/.virtualenvs/textra_17 --no-site --wsgi-file /opt/django/test.py
 
 
 START
------
-uwsgi --ini /opt/django/uwsgi.ini
+
+.. code-block::
+
+    uwsgi --ini /opt/django/uwsgi.ini
 
 
 Basict Test
------------
-# link on setup
-http://uwsgi-docs.readthedocs.org/en/latest/tutorials/Django_and_nginx.html#basic-test
 
-# run
-uwsgi --http :9000 --wsgi-file test.py
+.. code-block::
+
+    # link on setup
+    http://uwsgi-docs.readthedocs.org/en/latest/tutorials/Django_and_nginx.html#basic-test
+
+Run
+
+.. code-block::
+
+    uwsgi --http :9000 --wsgi-file test.py
 
 
 STOP uWSGI
-----------
-uwsgi --stop /tmp/textress-master.pid
 
-or
+.. code-block::
 
-# find all ``uwsgi`` pids
-ps ax | grep uwsgi
+    uwsgi --stop /tmp/textress-master.pid
 
-# stop them
-killall -s INT uwsgi
+    # OR
+
+    # find all ``uwsgi`` pids
+    ps ax | grep uwsgi
+
+    # stop them
+    killall -s INT uwsgi
 
 
 
@@ -48,10 +62,13 @@ Emperor mode
 ------------
 http://uwsgi-docs.readthedocs.org/en/latest/tutorials/Django_and_nginx.html#emperor-mode
 
-# create a directory for the vassals
-sudo mkdir /etc/uwsgi
-sudo mkdir /etc/uwsgi/vassals
-# symlink from the default config directory to your config file
-sudo ln -s /path/to/your/mysite/mysite_uwsgi.ini /etc/uwsgi/vassals/
-# run the emperor
-uwsgi --emperor /etc/uwsgi/vassals --uid www-data --gid www-data
+.. code-block::
+
+
+    # create a directory for the vassals
+    sudo mkdir /etc/uwsgi
+    sudo mkdir /etc/uwsgi/vassals
+    # symlink from the default config directory to your config file
+    sudo ln -s /path/to/your/mysite/mysite_uwsgi.ini /etc/uwsgi/vassals/
+    # run the emperor
+    uwsgi --emperor /etc/uwsgi/vassals --uid www-data --gid www-data

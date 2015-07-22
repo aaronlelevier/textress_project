@@ -1,3 +1,11 @@
+2015-07-22
+----------
+:Goals:
+    - refactor ".rst" docs/ so that the code command sections are readable from the browser
+
+    - ws4redis - see if it cat use Redis w/i the Js file for the promise?
+
+
 2015-07-17
 ----------
 :account_view:
