@@ -18,4 +18,15 @@ angular.module('conciergeFilters', [])
             }
             return null;
         }
+    })
+    .filter('unreadMessages', function() {
+        return function(items) {
+            items.sort(function(a,b) {
+                if (a.messages[0].read === false)
+                    return 1;
+                if (a.messages[0].read === true)
+                    return -1;
+                return 0;
+            })
+        }
     });

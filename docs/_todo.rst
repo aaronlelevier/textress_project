@@ -1,13 +1,29 @@
+2015-07-23
+----------
+:Goals:
+    :phone_number:
+        - make sure that I am debiting accounts when buying a new ph #
+    :accounting:
+        - daily charges n balances work
+    :testing:
+        - refactor tests to make simpler
+        - fix broken tests
+    :AngularJs:
+        - global App - b/c need to display "unread messages" in the top of
+        the navbar
+
+            - Question: will this conflict w/ the django-angular app?  maybe...
+
 2015-07-22
 ----------
 :Goals:
-    - give each guest a "last_message" object that stores 
+    # test incoming Messages from SMS (remember to start n use / "ngrok")
+
+    # give each guest a "last_message" object that stores 
 
         - last message text
         - last message time
         - read / unread status
-
-    - test incoming Messages from SMS (remember to start n use / "ngrok")
 
     # add counter of messages that updates to "GuestMsgPreviewCtrl" GuestListView page
 

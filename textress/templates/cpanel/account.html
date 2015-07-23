@@ -76,16 +76,18 @@
 
         <div class="col-sm-8" ng-controller="GuestMsgPreviewCtrl" id="GuestMsgPreviewCtrl" ng-cloak>
             <div class="panel-body panel-scroll" style="height:300px">
-                <ul class="activities" ng-repeat="guest in guests">
+                <ul class="activities" ng-repeat="guest in guests | orderBy:'messages[0].read':false ">
                     <li>
                         <a class="activity" href="/guests/detail/[[ guest.id ]]/">
                             <img ng-src="[[ guest.thumbnail ]]" class="profile_thumbnail">
-                            <span class="desc">[[ guest.name ]]</span>
+                            <span class="desc"><strong>[[ guest.name ]]</strong></span>
+                            &nbsp;
+                            <q>[[ guest.messages[0].body ]]</q>
                             <div class="time">
                                 <i class="fa fa-time bigger-110"></i>
-                                2 hours ago
+                                [[ guest.messages[0].created | date :'medium' ]]
                                 &nbsp;
-                                <span class="badge badge-new-msg">[[ guest.messages.length ]]</span>
+                                <span class="badge [[ (guest.messages[0].read === false) ? 'badge-new-msg' : 'badge-old-msg' ]] ">[[ guest.messages.length ]]</span>
                             </div>
                         </a>
                     </li>

@@ -220,3 +220,6 @@ a.no_decoration {
 .badge-new-msg {
     background-color: #007AFF;
 }
+.badge-old-msg {
+    background-color: #999999;
+}
