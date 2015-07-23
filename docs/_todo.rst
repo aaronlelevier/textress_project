@@ -1,18 +1,29 @@
 2015-07-23
 ----------
+:Next:
+    - try to instantiate StripeClient() by itself to see if I can retrieve a customer
+
+        - i.e. cus_6Kys7xxfuithl0
+        
 :Goals:
+    :testing:
+        - refactor tests to make simpler
+        - fix broken tests
     :phone_number:
         - make sure that I am debiting accounts when buying a new ph #
     :accounting:
         - daily charges n balances work
-    :testing:
-        - refactor tests to make simpler
-        - fix broken tests
     :AngularJs:
         - global App - b/c need to display "unread messages" in the top of
         the navbar
 
             - Question: will this conflict w/ the django-angular app?  maybe...
+
+:Questions:
+    - Should most all ``Models`` have a ``hide`` field?
+
+        - or change ``hide`` to ``deleted``?
+
 
 2015-07-22
 ----------

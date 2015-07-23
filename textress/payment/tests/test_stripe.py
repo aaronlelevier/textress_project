@@ -4,7 +4,7 @@ import stripe
 from django.conf import settings
 from django.test import TestCase
 
-from ..models import Customer, Card, Charge
+from payment.models import Customer, Card, Charge
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -26,7 +26,7 @@ class StripeTests(TestCase):
         """
 
         customer = Customer.objects.order_by('-created')[0]
-        charge = customer.get_all_charges()[0] #even tho limit=1 stilll returns a list obj.
+        charge = customer.get_all_charges()[0] #even tho limit=1 still returns a list obj.
         card = charge['card']
 
         global CUSTOMER

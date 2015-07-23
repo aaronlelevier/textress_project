@@ -10,7 +10,6 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 
-# from main.models import Hotel
 from utils import email
 
 
@@ -93,7 +92,7 @@ class Customer(PmtAbstractBase):
         Returns a List of Dicts of Stripe Charges.
         """
         customer = self.stripe_object
-        charges = [ch for ch in stripe.Charge.all(limit=limit, customer=customer.id).data]
+        charges = [ch for ch in self.stripe.Charge.all(limit=limit, customer=customer.id).data]
         return sorted([json.loads(str(i)) for i in charges],
                       key=lambda k: k['created'], reverse=reverse)
 

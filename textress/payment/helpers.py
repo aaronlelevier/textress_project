@@ -10,9 +10,13 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 def signup_register_step4(hotel, token, email, amount):
-    '''Register Customer, Card, Charge.'''
-    #DB create
+    '''
+    Setup all Payment records for the Hotel upon registration.
+
+    Register Customer, Card, Charge.
+    '''
     try:
+        # Payment.model records
         customer = Customer.objects.stripe_create(
             hotel=hotel, token=token, email=email)
 
@@ -25,7 +29,8 @@ def signup_register_step4(hotel, token, email, amount):
         raise
 
     else:
-        # make an AcctTrans record of 'funds_added' here
+        # Account.model records for individual transactions
+        # recorded for ``accounting`` purposes
         trans_type = TransType.objects.get(name='init_amt')
         
         acct_trans = AcctTrans.objects.create(hotel=hotel,
