@@ -1,12 +1,12 @@
 import stripe
-import pytest
-from model_mommy import mommy
 
 from django.conf import settings
 from django.test import TestCase, LiveServerTestCase, RequestFactory
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
+
+from model_mommy import mommy
 
 from payment.models import StripeClient, Customer, Card, Charge, Refund
 
@@ -24,14 +24,21 @@ class StripeClientTests(TestCase):
 
 class CustomerTests(TestCase):
 
-    fixtures = ['payment.json']
+    # fixtures = ['payment.json']
 
-    def test_fixtures(self):
-        # are fixtures loading any Customer records?
+    def setUp(self):
+        self.sc = stripe.Customer.all(limit=1)
+        self.customer = mommy.make(Customer, id=self.sc.data[0].id)
+
+    def test_create(self):
         self.assertTrue(Customer.objects.count() > 0)
 
     def test_stripe_attr(self):
-        c = Customer.objects.first()
-        print 'id:', c.id
-        print c.stripe_object
-        self.assertTrue(hasattr(c, 'stripe_object'))
+        self.assertTrue(hasattr(self.customer, 'stripe'))
+
+    def test_stripe_object_attr(self):
+        self.assertTrue(hasattr(self.customer, 'stripe_object'))
+
+    def test_get_all_charges(self):
+        self.assertIsNotNone(self.customer.get_all_charges())
+

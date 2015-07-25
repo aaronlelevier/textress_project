@@ -38,5 +38,3 @@ class StripeMixinTests(TestCase):
         # StripeMixin #
         response = self.client.get(reverse('payment:register_step4'))
         self.assertEqual(response.context['publishable_key'], settings.STRIPE_PUBLIC_KEY)
-
-
