@@ -1,10 +1,16 @@
 2015-07-23
 ----------
 :Next:
-    - try to instantiate StripeClient() by itself to see if I can retrieve a customer
+    - payment Model app tests
+
+    :TODO: Continue Payment Model Tests
+
+    - change Deletes to ``deleted`` flag globally
+
+    # try to instantiate StripeClient() by itself to see if I can retrieve a customer
 
         - i.e. cus_6Kys7xxfuithl0
-        
+
 :Goals:
     :testing:
         - refactor tests to make simpler
