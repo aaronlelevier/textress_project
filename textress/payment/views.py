@@ -114,16 +114,9 @@ class RegisterSuccessView(RegistrationContextMixin, AdminOnlyMixin, TemplateView
 
 ### CARD VIEWS ###
 
-class CardListView(AdminOnlyMixin, ListView):
-    '''All Cards for the Hotel.
+class SummaryView(AdminOnlyMixin, TemplateView):
 
-    TODO: Later maybe add this as a template sub-piece to the 
-        accounts:account View w/ Admin Permission Tag on the Template.
-    '''
-    template_name = 'list.html'
-
-    def get_queryset(self):
-        return Card.objects.filter(customer=self.hotel.customer)
+    template_name = 'payment/summary.html'
 
 
 class CardCreateView(AdminOnlyMixin, 

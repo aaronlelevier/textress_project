@@ -1,12 +1,21 @@
-2015-07-23
+2015-07-26
 ----------
 :Next:
-    - payment Model app tests
+    - Billing
 
-    :TODO: Continue Payment Model Tests
+        - make this a single page Summary, and use Twilio like layout
+
+    - mark as read when going to Guest's DetailView
 
     - change Deletes to ``deleted`` flag globally
 
+    - move all TemplateTags to ``utils`` app?
+
+
+2015-07-23
+----------
+:Goals:
+    # payment Model app tests
     # try to instantiate StripeClient() by itself to see if I can retrieve a customer
 
         - i.e. cus_6Kys7xxfuithl0

@@ -1,0 +1,22 @@
+{% extends "cpanel/base-sidebar.html" %}
+{% load staticfiles stripe_tags %}
+
+
+{% block content %}
+
+        {% if addit_info %}
+            {{ addit_info|safe }}
+        {% endif %}
+
+        <div class="row">
+            <div class="col-sm-12">
+                {% for k,v in obj.iteritems %}
+                <p>{{ k }} {{ v }}</p>
+                {% endfor %}
+            </div>
+        </div>
+        <!-- end: PAGE CONTENT -->
+    </div>
+</div>
+<!-- end: PAGE -->        
+{% endblock content %}
