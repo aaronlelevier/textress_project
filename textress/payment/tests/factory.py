@@ -62,3 +62,28 @@ def charge(customer_id=None):
         amount=sc.amount
     )
     return charge
+
+
+### Refunds
+
+def stripe_refund(customer_id=None):
+    charge = stripe_charge(customer_id)
+    try:
+        sr = charge.refunds[0]
+    except IndexError:
+        sr = None
+    finally:
+        return sr
+
+def refund(customer_id=None):
+    sr = stripe_refund(customer_id)
+    if sr:
+        charge = stripe_charge(customer_id)
+        refund, created = Refund.objects.get_or_create(
+            charge=charge,
+            id=sr.id,
+            amount=sr.amount
+        )
+    else:
+        refund = None
+    return refund

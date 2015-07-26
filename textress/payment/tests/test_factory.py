@@ -1,7 +1,7 @@
 import stripe
 
 from django.conf import settings
-from django.test import TestCase, TransactionTestCase
+from django.test import TestCase
 from django.core.urlresolvers import reverse
 
 from model_mommy import mommy
@@ -34,7 +34,7 @@ class CardTests(TestCase):
         self.assertIsInstance(factory.card(), Card)
 
 
-class ChargeTests(TransactionTestCase):
+class ChargeTests(TestCase):
 
     def test_stripe_charge(self):
         sc = factory.stripe_charge()
@@ -42,3 +42,13 @@ class ChargeTests(TransactionTestCase):
 
     def test_card(self):
         self.assertIsInstance(factory.charge(), Charge)
+
+
+class RefundTests(TestCase):
+
+    def test_stripe_refund(self):
+        sr = factory.stripe_refund()
+        if sr:
+            self.assertIsNotNone(sr.id)
+        else:
+            self.assertIsNone(sr)

@@ -54,8 +54,13 @@ class CardTests(TestCase):
         self.assertIsInstance(self.card.expires, str)
 
 
-class ChargeTests(self):
-    
+class ChargeTests(TestCase):
+
+    def setUp(self):
+        self.charge = factory.charge()
+
+    def test_stripe_object_attr(self):
+        self.assertTrue(hasattr(self.charge, 'stripe_object'))
 
 
 

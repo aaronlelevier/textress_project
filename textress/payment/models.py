@@ -247,4 +247,5 @@ class Refund(PmtAbstractBase):
     @property
     def stripe_object(self):
         "Returns the related Stripe Obj for the Model."
-        return self.stripe.Customer.retrieve(self.id)
+        charge = self.charge.stripe_object
+        return charge.refunds.retrieve(self.id)
