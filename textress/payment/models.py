@@ -153,6 +153,12 @@ class Card(PmtAbstractBase):
 
     objects = CardManager()
 
+    @property
+    def stripe_object(self):
+        "Returns the related Stripe Obj for the Model."
+        customer = self.stripe.Customer.retrieve(self.customer.id)
+        return customer.cards.retrieve(self.id)
+
     def save(self, *args, **kwargs):
         '''When saving, if the card is the "default", update using the 
         model manager.'''
@@ -177,12 +183,6 @@ class Card(PmtAbstractBase):
         
     def get_absolute_url(self):
         return reverse('payment:card_detail', kwargs={'pk': self.short_pk})
-
-    @property
-    def stripe_object(self):
-        "Returns the related Stripe Obj for the Model."
-        customer = self.stripe.Customer.retrieve(self.customer.id)
-        return customer.cards.retrieve(self.id)
 
 
 ##########
@@ -229,7 +229,7 @@ class Charge(PmtAbstractBase):
     @property
     def stripe_object(self):
         "Returns the related Stripe Obj for the Model."
-        return self.stripe.Customer.retrieve(self.id)
+        return self.stripe.Charge.retrieve(self.id)
 
 
 ##########
