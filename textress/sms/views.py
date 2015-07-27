@@ -12,15 +12,14 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
     GroupRequiredMixin, SetHeadlineMixin, FormValidMessageMixin)
 
-from main.mixins import HotelAdminCheckMixin
+from main.mixins import AdminOnlyMixin
 from sms.models import PhoneNumber
 from sms.forms import PhoneNumberForm, PhoneNumberAddForm
 from utils.exceptions import DailyLimit
 from utils.hotel import TwilioHotel
 
 
-class PhoneNumberBaseView(GroupRequiredMixin, SetHeadlineMixin, FormValidMessageMixin,
-    HotelAdminCheckMixin, FormView):
+class PhoneNumberBaseView(AdminOnlyMixin, SetHeadlineMixin, FormValidMessageMixin, FormView):
     '''All phone number views require the same permissions, and context mixins. 
     Just the attrs are different.'''
     pass
@@ -31,7 +30,6 @@ class PhoneNumberListView(PhoneNumberBaseView):
     Lists all PhoneNumber Obj available for the Hotel with a Form
     to change the `is_primary` PhoneNumber.
     """
-    group_required = ["hotel_admin"]
     headline = "Phone Number List"
     template_name = 'sms/ph_num_list.html'
     form_class = PhoneNumberForm
@@ -60,7 +58,6 @@ class PhoneNumberAddView(PhoneNumberBaseView):
     '''
     Form with no input, just confirms purchasing the ph num.
     '''
-    group_required = ["hotel_admin"]
     headline = "Purchase a Phone Number"
     template_name = 'cpanel/form.html'
     form_class = PhoneNumberAddForm

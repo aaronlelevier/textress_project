@@ -13,14 +13,17 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.forms.models import model_to_dict
 
 import stripe
-from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
-    GroupRequiredMixin)
+from braces.views import (
+    LoginRequiredMixin, PermissionRequiredMixin, GroupRequiredMixin,
+    SetHeadlineMixin
+    )
 
 from account.mixins import AcctCostContextMixin
-from account.models import AcctCost
+from account.models import AcctCost, AcctStmt
 from main.models import Hotel
-from main.mixins import (RegistrationContextMixin, HotelContextMixin, HotelUserMixin,
-    HotelAdminCheckMixin, AdminOnlyMixin)
+from main.mixins import (
+    RegistrationContextMixin, HotelContextMixin, HotelUserMixin, AdminOnlyMixin
+    )
 from payment.models import Card
 from payment.forms import StripeForm
 from payment.helpers import signup_register_step4
@@ -104,7 +107,6 @@ class RegisterSuccessView(RegistrationContextMixin, AdminOnlyMixin, TemplateView
         else:
             return HttpResponseRedirect(reverse('payment:register_step4'))
 
-
     def get_context_data(self, **kwargs):
         context = super(RegisterSuccessView, self).get_context_data(**kwargs)
         context['step_number'] = 4
@@ -114,9 +116,22 @@ class RegisterSuccessView(RegistrationContextMixin, AdminOnlyMixin, TemplateView
 
 ### CARD VIEWS ###
 
-class SummaryView(AdminOnlyMixin, TemplateView):
+class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
 
+    headline = "Billing Overview"
     template_name = 'payment/summary.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(SummaryView, self).get_context_data(**kwargs)
+        acct_stmts = AcctStmt.objects.filter(hotel=self.hotel)
+        
+        try:
+            last_acct_stmt = acct_stmts[0]
+            context['balance'] = last_acct_stmt.balance
+        except IndexError:
+            context['balance'] = None
+
+        return context
 
 
 class CardCreateView(AdminOnlyMixin, 

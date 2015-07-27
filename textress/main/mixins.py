@@ -125,33 +125,18 @@ class HotelUserMixin(HotelContextMixin):
         return super(HotelUserMixin, self).dispatch(*args, **kwargs)
 
 
-class HotelAdminCheckMixin(HotelContextMixin):
-    "Only the Admin for the Hotel can access this page when using this mixin"
+class AdminOnlyMixin(GroupRequiredMixin, HotelContextMixin, View):
+    '''
+    Only the Admin for the Hotel can access this page when using this mixin.
+    '''
+    group_required = "hotel_admin"
+
     def dispatch(self, *args, **kwargs):
         self.hotel = self.request.user.profile.hotel
         admin_hotel = get_object_or_404(Hotel, admin_id=self.request.user.id)
         if admin_hotel != self.hotel:
             raise Http404
-        return super(HotelAdminCheckMixin, self).dispatch(*args, **kwargs)
-
-
-class AdminOnlyMixin(HotelContextMixin, GroupRequiredMixin, View):
-    '''Only the Admin of the Hotel can access.'''
-    
-    group_required = "hotel_admin"
-    
-    def dispatch(self, request, *args, **kwargs):
-        # Login Required
-        if not request.user.is_authenticated():
-            return redirect_to_login(request.get_full_path())
-
-        self.hotel = self.request.user.profile.hotel
-        
-        # test only Admin allowed
-        if request.user.id != self.hotel.admin_id:
-            raise Http404
-        
-        return super(AdminOnlyMixin, self).dispatch(request, *args, **kwargs)
+        return super(AdminOnlyMixin, self).dispatch(*args, **kwargs)
 
 
 ### REGISTRATION MIXINS ###

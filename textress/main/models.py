@@ -165,7 +165,7 @@ class Hotel(TwilioClient, AbstractBase):
         # User
         user.profile.update_hotel(self)
         # Admin Group
-        user.goups.add(Group.objects.get(name="hotel_admin"))
+        user.groups.add(Group.objects.get(name="hotel_admin"))
         user.save()
         # Hotel
         self.admin_id = user.id
@@ -232,7 +232,8 @@ class UserProfile(AbstractBase):
             
         # Auto-Join to group of the Hotel for ``ws4redis`` Group Messaging.
         if self.hotel:
-            self.user.groups.add(self.hotel.group_name)
+            g, _ = Group.objects.get_or_create(name=self.hotel.group_name)
+            self.user.groups.add(g)
 
         try:
             self.msg_sign = "-{}{}".format(self.user.first_name[0].upper(),

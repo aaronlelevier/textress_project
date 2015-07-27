@@ -28,8 +28,7 @@ from account.forms import (AuthenticationForm, CloseAccountForm,
     CloseAcctConfirmForm, AcctCostForm)
 from account.models import AcctCost, AcctStmt, AcctTrans, Pricing
 from account.serializers import PricingSerializer
-from main.mixins import (RegistrationContextMixin, AdminOnlyMixin, HotelUserMixin,
-    HotelAdminCheckMixin)
+from main.mixins import RegistrationContextMixin, AdminOnlyMixin, HotelUserMixin
 from main.models import UserProfile, Subaccount
 from main.forms import UserCreateForm 
 from sms.models import PhoneNumber

@@ -14,9 +14,11 @@ from django.forms.models import model_to_dict
 
 from rest_framework.response import Response
 from rest_framework import permissions, generics
-from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
-    GroupRequiredMixin, AnonymousRequiredMixin, SetHeadlineMixin,
-    FormValidMessageMixin, FormInvalidMessageMixin)
+from braces.views import (
+    LoginRequiredMixin, PermissionRequiredMixin, GroupRequiredMixin,
+    AnonymousRequiredMixin, SetHeadlineMixin, FormValidMessageMixin,
+    FormInvalidMessageMixin
+    )
 
 from concierge.permissions import (IsHotelObject, IsManagerOrAdmin, IsHotelUser,
     IsHotelOfUser)
