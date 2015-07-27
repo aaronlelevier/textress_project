@@ -19,7 +19,7 @@ from twilio.rest import TwilioRestClient
 from rest_framework.authtoken.models import Token
 
 from payment.models import Customer
-from utils import validate_phone, add_group, dj_messages, exceptions as excp
+from utils import validate_phone, dj_messages, exceptions as excp
 from utils.data import STATES, HOTEL_TYPES
 from utils.models import AbstractBase
 
@@ -162,6 +162,12 @@ class Hotel(TwilioClient, AbstractBase):
         return reverse('main:hotel_update', kwargs={'pk':self.pk})
 
     def set_admin_id(self, user):
+        # User
+        user.profile.update_hotel(self)
+        # Admin Group
+        user.goups.add(Group.objects.get(name="hotel_admin"))
+        user.save()
+        # Hotel
         self.admin_id = user.id
         self.save()
         return self
@@ -190,12 +196,15 @@ def profile_image(instance, filename):
 
 class UserProfile(AbstractBase):
     """
-    Only 1 Admin per/ Hotel. This is the 1 User that signs up.
+    Admin User Reqs
+    ---------------
+    #1 Below will call all methods, to confirm that the Hotel 
+    Admin is setup correctly.
 
-    TODO:
-        - v0.2 is Users
-        - Add Msg. signature field (if blank, populate w/ user.username)
-        - FName, LName
+    1. Set as Admin on the Hotel Obj: ``Hotel.set_admin_id(user)``
+    2. The Admin User must have a hotel attr: ``UserProfile.update_hotel(hotel)`` 
+    3. Group set: ``user.groups.add(Group.objects.get(name="hotel_admin"))``
+
     """
     user = models.OneToOneField(User, primary_key=True, related_name='profile')
     hotel = models.ForeignKey(Hotel, blank=True, null=True)
@@ -223,7 +232,7 @@ class UserProfile(AbstractBase):
             
         # Auto-Join to group of the Hotel for ``ws4redis`` Group Messaging.
         if self.hotel:
-            add_group(self.user, self.hotel.group_name)
+            self.user.groups.add(self.hotel.group_name)
 
         try:
             self.msg_sign = "-{}{}".format(self.user.first_name[0].upper(),

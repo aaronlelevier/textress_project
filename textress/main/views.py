@@ -26,8 +26,7 @@ from main.mixins import (UserOnlyMixin, HotelUsersOnlyMixin,
     MyHotelOnlyMixin, RegistrationContextMixin, HotelUserMixin, HotelContextMixin)
 from main.serializers import UserSerializer, HotelSerializer
 from contact.mixins import NewsletterMixin, TwoFormMixin
-from utils import (add_group, dj_messages, login_messages, EmptyForm,
-    DeleteButtonMixin)
+from utils import dj_messages, login_messages, EmptyForm, DeleteButtonMixin
 
 
 ### Hotel ###
@@ -94,8 +93,9 @@ class RegisterAdminCreateView(RegisterAdminBaseView, CreateView):
         cd = form.cleaned_data
 
         # Add User to "Admin" Group
-        user = add_group(user=User.objects.get(username=cd['username']),
-            group='hotel_admin')
+        user = User.objects.get(username=cd['username'])
+        user.groups.add(Group.objects.get(name='hotel_admin'))
+        user.save()
 
         # Login
         user = auth.authenticate(username=cd['username'], password=cd['password1'])

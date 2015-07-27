@@ -45,10 +45,4 @@ def ph_formatter(phone):
     '''
     phone = validate_phone(phone)
     return phone[2:5]+'-'+phone[5:8]+'-'+phone[8:]
-
-
-def add_group(user, group):
-    group = Group.objects.get(name=group)
-    user.groups.add(group)
-    user.save()
-    return user
+    
