@@ -1,3 +1,4 @@
+import calendar
 import datetime
 
 from django.db import models
@@ -287,11 +288,14 @@ class AcctStmt(AbstractBase):
         verbose_name = "Account Statement"
 
     def __str__(self):
-        return "{self.hotel}: {self.month}-{self.year} Monthly Costs:{self.monthly_costs:.2f} \
-        Balance:{self.balance}".format(self=self)
+        return "{} {}".format(calendar.month_name[self.month], self.year)
 
     def get_absolute_url(self):
         return reverse('acct_stmt_detail', kwargs={'year':self.year, 'month':self.month})
+
+    @property
+    def month_abbr(self):
+        return "{} {}".format(calendar.month_abbr[self.month], self.year)
 
 
 ##############

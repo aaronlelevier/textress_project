@@ -7,6 +7,21 @@
 
         - make this a single page Summary, and use Twilio like layout
 
+        - Change Payment Settings View
+
+        - Deposit Funds 1x View
+
+        - Monthly Stmts ListView
+
+        - Single Month Transactions DetailView
+
+        - Handle Auto-Reload True/False
+
+            - Put a single ``Hook`` in ``recharge`` Func to check this status
+            and disable if Auto-Reload=False
+
+        - Recent Payments Table
+
     - mark as read when going to Guest's DetailView
 
     - change Deletes to ``deleted`` flag globally

@@ -121,6 +121,16 @@ class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
     headline = "Billing Overview"
     template_name = 'payment/summary.html'
 
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        try:
+            date = request.GET.get('date')
+            year, month = date.split('-')
+            context['acct_stmt'] = AcctStmt.objects.get(year=year, month=month)
+        except (KeyError, AttributeError):
+            context['acct_stmt'] = AcctStmt.objects.first()
+        return self.render_to_response(context)
+
     def get_context_data(self, **kwargs):
         context = super(SummaryView, self).get_context_data(**kwargs)
         context['acct_stmts'] = AcctStmt.objects.filter(hotel=self.hotel)
