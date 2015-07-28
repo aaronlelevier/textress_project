@@ -123,14 +123,8 @@ class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(SummaryView, self).get_context_data(**kwargs)
-        acct_stmts = AcctStmt.objects.filter(hotel=self.hotel)
-        
-        try:
-            last_acct_stmt = acct_stmts[0]
-            context['balance'] = last_acct_stmt.balance
-        except IndexError:
-            context['balance'] = None
-
+        context['acct_stmts'] = AcctStmt.objects.filter(hotel=self.hotel)
+        context['acct_cost'], created = AcctCost.objects.get_or_create(hotel=self.hotel)
         return context
 
 

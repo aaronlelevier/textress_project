@@ -146,7 +146,7 @@ class TransType(AbstractBase):
 # ACCT COST #
 #############
 
-CHARGE_AMOUNTS = [(100, '${:.2f}'.format(1))] + [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
+CHARGE_AMOUNTS = [(500, '${:.2f}'.format(1))] + [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
 # replace ``CHARGE_AMOUNTS`` with the below amount choices once Stripe Payments confirmed to work.
 # CHARGE_AMOUNTS = [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
 BALANCE_AMOUNTS = [(100, '${:.2f}'.format(1))] + [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
@@ -196,6 +196,7 @@ class AcctCost(AbstractBase):
         choices=BALANCE_AMOUNTS, default=BALANCE_AMOUNTS[0][0])
     recharge_amt = models.PositiveIntegerField(_("Recharge Amount"),
         choices=CHARGE_AMOUNTS, default=CHARGE_AMOUNTS[0][0])
+    auto_recharge = models.BooleanField(blank=True, default=True)
 
     objects = AcctCostManager()
 
@@ -282,6 +283,7 @@ class AcctStmt(AbstractBase):
     objects = AcctStmtManager()
 
     class Meta:
+        ordering = ('-year', '-month',)
         verbose_name = "Account Statement"
 
     def __str__(self):

@@ -1,3 +1,5 @@
+import calendar
+
 from django import template
 
 register = template.Library()
@@ -16,3 +18,8 @@ def format_phone(value):
         return "({}) {}-{}".format(value[2:5], value[5:8], value[8:])
     except (IndexError, TypeError):
         return None
+
+
+@register.filter
+def month_name(month_number):
+    return calendar.month_name[month_number]

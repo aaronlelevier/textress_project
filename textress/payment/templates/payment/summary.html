@@ -4,15 +4,31 @@
 
 {% block content %}
 
-        {% if addit_info %}
-            {{ addit_info|safe }}
-        {% endif %}
-
         <div class="row">
-            <div class="col-sm-12">
-                {% for k,v in obj.iteritems %}
-                <p>{{ k }} {{ v }}</p>
-                {% endfor %}
+            <div class="col-md-4">
+                <h3 class="lead">Current Funds Balance</h3>
+                <h3>{{ acct_stmts.first.balance|stripe_money }}</h3>
+            </div>
+            <div class="col-md-4">
+                <h3 class="lead">Auto Recharge: {% if acct_cost.auto_recharge %}ON{% else %}OFF{% endif %}</h3>
+                <p>If the balance falls below {{ acct_cost.balance_min|stripe_money }},</p>
+                <p>refill the balance to {{ acct_cost.recharge_amt|stripe_money }}.</p>
+                <a href="#">
+                    <p><strong>Change Settings</strong></p>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <h3 class="lead">Make a One-time Payment</h3>
+                <a href="#">
+                    <p><strong>Deposit Funds</strong></p>
+                </a>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Account Statement {{ acct_stmts.first.month|month_name }} {{ acct_stmts.first.year }}</h3>
+                <h4></h4>
             </div>
         </div>
         <!-- end: PAGE CONTENT -->
