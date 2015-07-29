@@ -3,14 +3,6 @@
 :Next:
     - Billing
 
-        - Context / Sub URLs
-
-        - make this a single page Summary, and use Twilio like layout
-
-        - Change Payment Settings View
-
-        - Deposit Funds 1x View
-
         - Monthly Stmts ListView
 
         - Single Month Transactions DetailView
@@ -21,6 +13,14 @@
             and disable if Auto-Reload=False
 
         - Recent Payments Table
+
+        - Deposit Funds 1x View
+
+        - Context / Sub URLs
+
+        - make this a single page Summary, and use Twilio like layout
+
+        - Change Payment Settings View
 
     - mark as read when going to Guest's DetailView
 

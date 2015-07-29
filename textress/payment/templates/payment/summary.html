@@ -28,9 +28,8 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="row">
-                    <div class="col-md-8">
-                        <h3 class="lead">Account Statement</h3>
-                        <p>Costs: {{ acct_stmt.monthly_costs }}</p>
+                    <div class="col-sm-8">
+                        <h3 class="lead text-center">Account Statement</h3>
                     </div>
                     <div class="col-md-4" style="margin-top: 20px;">
                         <div class="btn btn-default btn-xs pull-right">
@@ -42,6 +41,34 @@
                                 </ul>
                             </a>
                         </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <table class="table table-hover">
+                            <tr>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Cost</th>
+                            </tr>
+                            <tr>
+                                <td>SMS</td>
+                                <td>{{ acct_stmt.total_sms }}</td>
+                                <td>{{ sms_cost|stripe_money }}</td>
+                            </tr>
+                            <tr>
+                                <td>Phone Numbers</td>
+                                <td>{{ phone_numbers.count }}</td>
+                                <td>{{ phone_numbers_cost|stripe_money }}</td>
+                            </tr>
+                            <tr>
+                                <strong>
+                                    <td>Total</td>
+                                    <td></td>
+                                    <td>{{ acct_stmt.balance|stripe_money }}</td>
+                                </strong>
+                            </tr>
+                        </table>
                     </div>
                 </div>
             </div>

@@ -129,12 +129,15 @@ class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
             context['acct_stmt'] = AcctStmt.objects.get(year=year, month=month)
         except (KeyError, AttributeError):
             context['acct_stmt'] = AcctStmt.objects.first()
+            context['sms_cost'] = context['acct_stmt'].balance - context['phone_numbers_cost']
         return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
         context = super(SummaryView, self).get_context_data(**kwargs)
         context['acct_stmts'] = AcctStmt.objects.filter(hotel=self.hotel)
         context['acct_cost'], created = AcctCost.objects.get_or_create(hotel=self.hotel)
+        context['phone_numbers'] = PhoneNumber.objects.filter(hotel=self.hotel)
+        context['phone_numbers_cost'] = context['phone_numbers'].count() * settings.PHONE_NUMBER_MONTHLY_COST
         return context
 
 
