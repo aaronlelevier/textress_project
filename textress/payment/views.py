@@ -19,7 +19,7 @@ from braces.views import (
     )
 
 from account.mixins import AcctCostContextMixin
-from account.models import AcctCost, AcctStmt
+from account.models import AcctCost, AcctStmt, AcctTrans
 from main.models import Hotel
 from main.mixins import (
     RegistrationContextMixin, HotelContextMixin, HotelUserMixin, AdminOnlyMixin
@@ -139,6 +139,7 @@ class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
         context['acct_cost'], created = AcctCost.objects.get_or_create(hotel=self.hotel)
         context['phone_numbers'] = PhoneNumber.objects.filter(hotel=self.hotel)
         context['phone_numbers_cost'] = context['phone_numbers'].count() * settings.PHONE_NUMBER_MONTHLY_COST
+        context['acct_trans'] = AcctTrans.objects.filter(hotel=self.hotel).order_by('-insert_date')[:4]
         return context
 
 

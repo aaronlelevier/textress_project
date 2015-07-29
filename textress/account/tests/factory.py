@@ -99,9 +99,9 @@ def make_acct_trans(hotel):
     last_month = today + td
 
     # TransType
-    init_amt = TransType.objects.get(name='init_amt')
-    recharge_amt = TransType.objects.get(name='recharge_amt')
-    sms_used = TransType.objects.get(name='sms_used')
+    init_amt, _ = TransType.objects.get_or_create(name='init_amt')
+    recharge_amt, _ = TransType.objects.get_or_create(name='recharge_amt')
+    sms_used, _ = TransType.objects.get_or_create(name='sms_used')
 
     # set the Hotel as Created 1 month ago
     hotel.created = last_month

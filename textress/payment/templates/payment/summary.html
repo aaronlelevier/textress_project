@@ -77,6 +77,27 @@
                 <div class="row">
                     <h3 class="lead">Recent Transactions</h3>
                 </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <table class="table table-hover">
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                            </tr>
+                            {% for at in acct_trans %}
+                            <tr>
+                                <td>{{ at.insert_date }}</td>
+                                <td>{{ at.trans_type.name|format_snake_case }}</td>
+                                <td>{{ at.amount|stripe_money }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                        <a href="#">
+                            <p class="pull-right"><strong>View Transactions</strong></p>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
         <!-- end: PAGE CONTENT -->

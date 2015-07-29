@@ -23,3 +23,8 @@ def format_phone(value):
 @register.filter
 def month_name(month_number):
     return calendar.month_name[month_number]
+
+
+@register.filter
+def format_snake_case(snake_case):
+    return snake_case.replace('_',' ')
