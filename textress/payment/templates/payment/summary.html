@@ -62,13 +62,14 @@
                                 <td>{{ phone_numbers_cost|stripe_money }}</td>
                             </tr>
                             <tr>
-                                <strong>
-                                    <td>Total</td>
-                                    <td></td>
-                                    <td>{{ acct_stmt.balance|stripe_money }}</td>
-                                </strong>
+                                <td><strong>Total</strong></td>
+                                <td></td>
+                                <td><strong>{{ acct_stmt.balance|stripe_money }}</strong></td>
                             </tr>
                         </table>
+                        <a href="#">
+                            <p class="pull-right"><strong>View Usage Detail</strong></p>
+                        </a>
                     </div>
                 </div>
             </div>

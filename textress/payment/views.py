@@ -129,6 +129,7 @@ class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
             context['acct_stmt'] = AcctStmt.objects.get(year=year, month=month)
         except (KeyError, AttributeError):
             context['acct_stmt'] = AcctStmt.objects.first()
+        finally:
             context['sms_cost'] = context['acct_stmt'].balance - context['phone_numbers_cost']
         return self.render_to_response(context)
 
