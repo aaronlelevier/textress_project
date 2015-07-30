@@ -58,6 +58,11 @@ def create_hotel_user(hotel, username='user', group=None):
     if group:
         g = Group.objects.get(name=group)
         user.groups.add(g)
+
+        # if this is not done, ``main.mixins.AdminOnlyMixin``
+        # will raise a 404
+        if group == 'hotel_admin':
+            hotel.set_admin_id(user)
     
     user.set_password(PASSWORD)
     user.save()

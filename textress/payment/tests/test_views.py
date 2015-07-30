@@ -13,12 +13,14 @@ from django.http import Http404
 from model_mommy import mommy
 
 from account.models import AcctCost
-from account.tests.factory import CREATE_ACCTCOST_DICT
+from account.tests.factory import (CREATE_ACCTCOST_DICT, create_acct_stmts,
+    create_acct_trans)
 from main.models import Hotel
 from main.tests.factory import (CREATE_USER_DICT, CREATE_HOTEL_DICT, PASSWORD,
     create_hotel, create_hotel_user)
-from payment import factory
+from payment.tests import factory
 from payment.models import Customer, Card, Charge
+from sms.models import PhoneNumber
 from utils import create
 from utils.email import Email
 
@@ -117,13 +119,20 @@ class BillingSummaryTests(TestCase):
         create._get_groups_and_perms()
 
         # Users
-        self.mgr = create_hotel_user(hotel=self.hotel, username='mgr', group='hotel_manager')
+        self.admin = create_hotel_user(hotel=self.hotel, username='admin', group='hotel_admin')
         self.user = create_hotel_user(hotel=self.hotel, username='user')
 
-        self.client.login(username=self.user.username, password=PASSWORD)
+        self.client.login(username=self.admin.username, password=PASSWORD)
 
         # Billing Stmt Fixtures
-        
+        self.acct_cost, created = AcctCost.objects.get_or_create(self.hotel)
+        self.acct_stmts = create_acct_stmts(self.hotel)
+        self.acct_trans = create_acct_trans(self.hotel)
+        self.phone_numbers = mommy.make(PhoneNumber, hotel=self.hotel)
 
     def tearDown(self):
         self.client.logout()
+
+    def test_get(self):
+        response = self.client.get(reverse('payment:summary'))
+        self.assertEqual(response.status_code, 200)
