@@ -1,3 +1,9 @@
+2015-07-30
+----------
+:Goals:
+    - Payment History (on 'right' side, like Twilio), shows dates of recent payments
+
+
 2015-07-27
 ----------
 :Next:
