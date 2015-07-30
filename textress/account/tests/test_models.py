@@ -16,7 +16,7 @@ from model_mommy import mommy
 
 from account.models import (Dates, Pricing, TransType, AcctCost, AcctStmt, AcctTrans,
     CHARGE_AMOUNTS, BALANCE_AMOUNTS)
-from account.tests.factory import make_acct_stmts, make_acct_trans
+from account.tests.factory import create_acct_stmts, create_acct_trans
 from concierge.models import Message
 from concierge.tests.factory import make_guests, make_messages
 from main.models import Hotel, UserProfile
@@ -161,13 +161,13 @@ class AcctStmtTests(TestCase):
             )
 
         # AcctStmt
-        self.acct_stmts = make_acct_stmts(hotel=self.hotel)
+        self.acct_stmts = create_acct_stmts(hotel=self.hotel)
         # Single AcctStmt
         self.acct_stmt = self.acct_stmts[0]
 
         # Supporting Models
         self.acct_cost = AcctCost.objects.get_or_create(hotel=self.hotel)
-        self.acct_trans = make_acct_trans(hotel=self.hotel)
+        self.acct_trans = create_acct_trans(hotel=self.hotel)
 
     def test_get_absolute_url(self):
         assert (self.acct_stmt.get_absolute_url() ==
@@ -268,14 +268,14 @@ class AcctTransTests(TestCase):
         self.bulk_discount = TransType.objects.get(name='bulk_discount')
 
         # AcctStmt
-        self.acct_stmts = make_acct_stmts(hotel=self.hotel)
+        self.acct_stmts = create_acct_stmts(hotel=self.hotel)
         self.acct_stmt = self.acct_stmts[0]
 
         # AcctCost
         self.acct_cost, created = AcctCost.objects.get_or_create(hotel=self.hotel)
 
         # AcctTrans
-        self.acct_trans = make_acct_trans(hotel=self.hotel)
+        self.acct_trans = create_acct_trans(hotel=self.hotel)
         self.acct_tran = self.acct_trans[0]
 
     ### CREATE TESTS ###

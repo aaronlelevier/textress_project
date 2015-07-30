@@ -14,7 +14,10 @@ from django.utils import timezone
 
 from model_mommy import mommy
 
-from account.models import AcctStmt, TransType, AcctTrans, CHARGE_AMOUNTS, BALANCE_AMOUNTS, TRANS_TYPES
+from account.models import (
+    AcctStmt, TransType, AcctTrans, AcctCost,
+    CHARGE_AMOUNTS, BALANCE_AMOUNTS, TRANS_TYPES
+    )
 from main.models import Hotel
 from main.tests.test_models import create_hotel
 from payment.models import Customer
@@ -32,11 +35,17 @@ def _randint(a=10, b=100):
     return random.randint(a,b)
 
 
-def make_trans_types():
+def create_trans_type(name):
+    if name not in [tt[0] for tt in TRANS_TYPES]:
+        raise Exception("{} is an invalid TransType".format(name))
+    return mommy.make(TransType, name=name)
+
+
+def create_trans_types():
     return [mommy.make(TransType, name=tt[0]) for tt in TRANS_TYPES]
 
 
-def _acct_stmt(hotel, year, month):
+def create_acct_stmt(hotel, year, month):
     '''
     Monkey-patch save() so just generating test data and not based on actual 
     usage from Message records.
@@ -52,12 +61,12 @@ def _acct_stmt(hotel, year, month):
         balance=_randint()
         )
 
-def make_acct_stmts(hotel):
-    return [_acct_stmt(hotel=hotel, year=2014, month=m)
+def create_acct_stmts(hotel):
+    return [create_acct_stmt(hotel=hotel, year=2014, month=m)
             for m in range(1,13)]
 
 
-def _acct_trans(hotel, trans_type, insert_date, amount=None):
+def create_acct_tran(hotel, trans_type, insert_date, amount=None):
     '''
     Monkey-patch save() for same reason as AcctStmt.
     
@@ -82,7 +91,8 @@ def _acct_trans(hotel, trans_type, insert_date, amount=None):
         insert_date=insert_date
         )
 
-def make_acct_trans(hotel):
+
+def create_acct_trans(hotel):
     '''
     TransType: use get() b/c tests using `fixtures`.
     
@@ -108,7 +118,7 @@ def make_acct_trans(hotel):
     hotel.save()
 
     # Create `init_amt`
-    _acct_trans(hotel=hotel, trans_type=init_amt, insert_date=hotel.created)
+    create_acct_tran(hotel=hotel, trans_type=init_amt, insert_date=hotel.created)
 
     # Daily usage until `today` (start populating based on `last_month` date)
     insert_date = hotel.created
@@ -116,10 +126,10 @@ def make_acct_trans(hotel):
 
     # Loop thro and create. Recharge Account if Balancd < 0
     while insert_date < today:
-        trans = _acct_trans(hotel=hotel, trans_type=sms_used, insert_date=insert_date)
+        trans = create_acct_tran(hotel=hotel, trans_type=sms_used, insert_date=insert_date)
         balance = AcctTrans.objects.filter(hotel=hotel).balance()
         if balance < 0:
-            trans = _acct_trans(hotel=hotel, trans_type=recharge_amt, insert_date=insert_date)
+            trans = create_acct_tran(hotel=hotel, trans_type=recharge_amt, insert_date=insert_date)
         insert_date += next_day
 
     return AcctTrans.objects.all()
