@@ -1,5 +1,3 @@
-import pytest
-
 from django import forms
 from django.conf import settings
 from django.test import TestCase, LiveServerTestCase, RequestFactory
@@ -28,7 +26,7 @@ class AuthTests(TestCase):
 
     def test_login(self):
         response = self.client.get(reverse('logout'))
-        with pytest.raises(TypeError):
+        with self.assertRaises(TypeError):
             assert response.context['user'].username != self.user.username
 
         response = self.client.post(reverse('login'),
@@ -45,7 +43,7 @@ class AuthTests(TestCase):
         self.client.login(username=self.user.username, password=self.password)
         response = self.client.get(reverse('logout'))
         assert response.status_code == 302
-        with pytest.raises(TypeError):
+        with self.assertRaises(TypeError):
             assert not response.context['user']
 
 
