@@ -118,6 +118,14 @@ class Pricing(AbstractBase):
 # TRANS TYPE #
 ##############
 
+# Global static list for tests
+TRANS_TYPES = [
+    ('init_amt', 'init_amt'),
+    ('recharge_amt', 'recharge_amt'),
+    ('sms_used', 'sms_used'),
+    ('bulk_discount', 'bulk_discount')
+]
+
 class TransType(AbstractBase):
     """Name and Description for different transaction types.
 

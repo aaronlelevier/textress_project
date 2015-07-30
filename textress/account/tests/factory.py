@@ -1,10 +1,6 @@
 import random
-
-from ..models import AcctStmt, TransType, AcctTrans
-
 import os
 import time
-
 import datetime
 
 from django.db import models
@@ -18,7 +14,7 @@ from django.utils import timezone
 
 from model_mommy import mommy
 
-from account.models import CHARGE_AMOUNTS, BALANCE_AMOUNTS
+from account.models import AcctStmt, TransType, AcctTrans, CHARGE_AMOUNTS, BALANCE_AMOUNTS, TRANS_TYPES
 from main.models import Hotel
 from main.tests.test_models import create_hotel
 from payment.models import Customer
@@ -34,6 +30,10 @@ CREATE_ACCTCOST_DICT = {
 
 def _randint(a=10, b=100):
     return random.randint(a,b)
+
+
+def make_trans_types():
+    return [mommy.make(TransType, name=tt[0]) for tt in TRANS_TYPES]
 
 
 def _acct_stmt(hotel, year, month):
