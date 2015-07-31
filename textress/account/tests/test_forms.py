@@ -7,7 +7,10 @@ from django.contrib.auth.models import User
 
 from model_mommy import mommy
 
-from main.tests.factory import create_hotel
+from account.models import AcctCost, CHARGE_AMOUNTS, BALANCE_AMOUNTS
+from account.tests.factory import create_acct_stmts, create_acct_trans
+from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
+from sms.models import PhoneNumber
 from utils import create, login_messages
 
 
@@ -74,3 +77,39 @@ class PasswordChangeFormTests(TestCase):
                         'password': self.new_password}, follow=True)
         self.assertRedirects(response, reverse('account'))
         assert response.context['user'].username == self.user.username
+
+
+class AcctCostUpdateTests(TestCase):
+
+    def setUp(self):
+        self.password = PASSWORD
+        self.hotel = create_hotel()
+
+        # create "Hotel Manager" Group
+        create._get_groups_and_perms()
+
+        # Users
+        self.admin = create_hotel_user(hotel=self.hotel, username='admin', group='hotel_admin')
+        self.user = create_hotel_user(hotel=self.hotel, username='user')
+
+        self.client.login(username=self.admin.username, password=PASSWORD)
+
+        # Billing Stmt Fixtures
+        self.acct_cost, created = AcctCost.objects.get_or_create(self.hotel)
+        self.acct_stmts = create_acct_stmts(self.hotel)
+        self.acct_trans = create_acct_trans(self.hotel)
+        self.phone_number = mommy.make(PhoneNumber, hotel=self.hotel)
+
+    def test_acct_cost_update_get(self):
+        response = self.client.get(reverse('payment:acct_cost_update', kwargs={'pk': self.acct_cost.pk}))
+        self.assertEqual(response.status_code, 200)
+
+    def test_acct_cost_update_post(self):
+        data = {
+            'balance_min': BALANCE_AMOUNTS[0][0],
+            'recharge_amt': CHARGE_AMOUNTS[0][0],
+            'auto_recharge': True
+        }
+        response = self.client.post(reverse('payment:acct_cost_update', kwargs={'pk': self.acct_cost.pk}),
+            data, follow=True)
+        self.assertRedirects(response, reverse('payment:summary'))

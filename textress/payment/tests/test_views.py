@@ -12,7 +12,7 @@ from django.http import Http404
 
 from model_mommy import mommy
 
-from account.models import AcctCost, AcctStmt, AcctTrans
+from account.models import AcctCost, AcctStmt, AcctTrans, CHARGE_AMOUNTS, BALANCE_AMOUNTS
 from account.tests.factory import (CREATE_ACCTCOST_DICT, create_acct_stmts,
     create_acct_trans)
 from main.models import Hotel
@@ -109,7 +109,7 @@ class PaymentEmailTests(TestCase):
         email.msg.send()
 
 
-class BillingSummaryTests(TestCase):
+class BillingTests(TestCase):
 
     def setUp(self):
         self.password = PASSWORD
@@ -133,11 +133,13 @@ class BillingSummaryTests(TestCase):
     def tearDown(self):
         self.client.logout()
 
-    def test_get(self):
+    ### BillingSummaryView ###
+
+    def test_summmary_get(self):
         response = self.client.get(reverse('payment:summary'))
         self.assertEqual(response.status_code, 200)
 
-    def test_context(self):
+    def test_summary_context(self):
         response = self.client.get(reverse('payment:summary'))
         self.assertIsInstance(response.context['acct_stmt'], AcctStmt)
         # User's current fund's balance show's in context
@@ -146,3 +148,4 @@ class BillingSummaryTests(TestCase):
         self.assertIsInstance(response.context['acct_trans'][0], AcctTrans)
         self.assertIsInstance(response.context['acct_cost'], AcctCost)
         self.assertIsInstance(response.context['phone_numbers'][0], PhoneNumber)
+

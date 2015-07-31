@@ -14,6 +14,8 @@ payment_patterns = patterns('',
     url(r'^detail/(?P<pk>\w+)/$', views.CardDetailView.as_view(), name='card_detail'),
     url(r'^update/(?P<pk>\w+)/$', views.CardUpdateView.as_view(), name='card_update'),
     url(r'^remove/(?P<pk>\w+)/$', views.CardDeleteView.as_view(), name='card_delete'),
+    # AcctCost
+    url(r'^refill-settings/(?P<pk>\w+)/$', views.AcctCostUpdateView.as_view(), name='acct_cost_update'),
     )
 
 urlpatterns = patterns('',

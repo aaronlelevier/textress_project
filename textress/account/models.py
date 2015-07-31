@@ -205,7 +205,7 @@ class AcctCost(AbstractBase):
         choices=BALANCE_AMOUNTS, default=BALANCE_AMOUNTS[0][0])
     recharge_amt = models.PositiveIntegerField(_("Recharge Amount"),
         choices=CHARGE_AMOUNTS, default=CHARGE_AMOUNTS[0][0])
-    auto_recharge = models.BooleanField(blank=True, default=True)
+    auto_recharge = models.BooleanField("Auto Recharge On", blank=True, default=True)
 
     objects = AcctCostManager()
 

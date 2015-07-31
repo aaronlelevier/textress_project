@@ -27,7 +27,16 @@ class AcctCostForm(NgFormValidationMixin, Bootstrap3ModelForm):
 
     class Meta:
         model = AcctCost
-        fields = ['init_amt', 'balance_min', 'recharge_amt']
+        fields = ['init_amt', 'balance_min', 'recharge_amt'] # TODO: add "auto-recharge" field
+
+
+class AcctCostUpdateForm(NgFormValidationMixin, Bootstrap3ModelForm):
+    # djangular req
+    form_name = 'acct_cost_update_form'
+
+    class Meta:
+        model = AcctCost
+        fields = ['balance_min', 'recharge_amt', 'auto_recharge']
         
 
 ########
