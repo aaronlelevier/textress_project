@@ -13,21 +13,18 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.forms.models import model_to_dict
 
 import stripe
-from braces.views import (
-    LoginRequiredMixin, PermissionRequiredMixin, GroupRequiredMixin,
-    SetHeadlineMixin
-    )
+from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
+    GroupRequiredMixin, SetHeadlineMixin, FormValidMessageMixin)
 
 from account.mixins import AcctCostContextMixin
 from account.models import AcctCost, AcctStmt, AcctTrans
 from main.models import Hotel
-from main.mixins import (
-    RegistrationContextMixin, HotelContextMixin, HotelUserMixin, AdminOnlyMixin
-    )
+from main.mixins import (RegistrationContextMixin, HotelContextMixin, HotelUserMixin,
+    AdminOnlyMixin)
 from payment.models import Card
 from payment.forms import StripeForm
 from payment.helpers import signup_register_step4
-from payment.mixins import StripeMixin, HotelCardOnlyMixin
+from payment.mixins import StripeMixin, StripeFormValidMixin, HotelCardOnlyMixin
 from sms.models import PhoneNumber
 from utils.email import Email
 
@@ -35,7 +32,7 @@ from utils.email import Email
 ### REGISTRATION VIEWS ###
 
 class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin, AcctCostContextMixin,
-    StripeMixin, FormView):
+    StripeMixin, StripeFormValidMixin, FormView):
     """
     Step #4 of Registration
 
@@ -59,34 +56,6 @@ class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin, AcctCostContextM
         context['PHONE_NUMBER_CHARGE'] = settings.PHONE_NUMBER_CHARGE
         return context
 
-    def form_valid(self, form):
-        try:
-            #DB create
-            (customer, card, charge) = signup_register_step4(
-                hotel=self.request.user.profile.hotel,
-                token=form.cleaned_data['stripe_token'],
-                email=self.request.user.email,
-                amount=self.hotel.acct_cost.init_amt)
-        except stripe.error.StripeError as e:
-            body = e.json_body
-            err = body['error']
-            messages.warning(self.request, err)
-            return HttpResponseRedirect(reverse('payment:register_step4'))
-        else:
-            # send conf email
-            email = Email(
-                to=self.request.user.email,
-                from_email=settings.DEFAULT_EMAIL_BILLING,
-                extra_context={
-                    'user': self.request.user,
-                    'customer': customer,
-                    'charge': charge
-                },
-                subject='email/payment_subject.txt',
-                html_content='email/payment_email.html'
-            )
-            email.msg.send()
-            return HttpResponseRedirect(self.success_url)
 
 
 class RegisterSuccessView(RegistrationContextMixin, AdminOnlyMixin, TemplateView):
@@ -114,9 +83,11 @@ class RegisterSuccessView(RegistrationContextMixin, AdminOnlyMixin, TemplateView
         return context
 
 
-### CARD VIEWS ###
-
 class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
+    '''
+    Main Billing Summary View with links to view more detail of 
+    payment transactions, and manage account payment settings.
+    '''
 
     headline = "Billing Overview"
     template_name = 'payment/summary.html'
@@ -144,10 +115,22 @@ class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
         return context
 
 
-class CardCreateView(AdminOnlyMixin, 
-                     StripeMixin,
-                     AcctCostContextMixin,
-                     TemplateView):
+class OneTimePaymentView(AdminOnlyMixin, SetHeadlineMixin, FormValidMessageMixin,
+    StripeMixin, StripeFormValidMixin, FormView):
+
+    headline = "One Time Payment"
+    template_name = "payment/one_time_payment.html"
+    form_class = StripeForm
+    success_url = reverse_lazy('payment:summary')
+
+    def get_form_valid_message(self):
+        return "The payment has been successfully processed. An email will be \
+sent to {}. Thank you.".format(self.request.user.email) # TODO: Is this the correct email ??
+
+
+### CARD VIEWS ###
+
+class CardCreateView(AdminOnlyMixin, StripeMixin, AcctCostContextMixin, TemplateView):
     '''Admin Only. Add a Card to an existing Customer Account View.'''
 
     # TODO: prbly change template_name later?

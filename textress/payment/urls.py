@@ -14,6 +14,8 @@ payment_patterns = patterns('',
     url(r'^detail/(?P<pk>\w+)/$', views.CardDetailView.as_view(), name='card_detail'),
     url(r'^update/(?P<pk>\w+)/$', views.CardUpdateView.as_view(), name='card_update'),
     url(r'^remove/(?P<pk>\w+)/$', views.CardDeleteView.as_view(), name='card_delete'),
+    # Stripe
+    url(r'^one-time-payment/$', views.OneTimePaymentView.as_view(), name='one_time_payment'),
     )
 
 urlpatterns = patterns('',

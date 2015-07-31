@@ -135,11 +135,11 @@ class BillingTests(TestCase):
 
     ### BillingSummaryView ###
 
-    def test_summmary_get(self):
+    def test_get_summmary(self):
         response = self.client.get(reverse('payment:summary'))
         self.assertEqual(response.status_code, 200)
 
-    def test_summary_context(self):
+    def test_context_summary(self):
         response = self.client.get(reverse('payment:summary'))
         self.assertIsInstance(response.context['acct_stmt'], AcctStmt)
         # User's current fund's balance show's in context
@@ -149,3 +149,8 @@ class BillingTests(TestCase):
         self.assertIsInstance(response.context['acct_cost'], AcctCost)
         self.assertIsInstance(response.context['phone_numbers'][0], PhoneNumber)
 
+    ### OneTimePaymentView ###
+
+    def test_get_one_time_payment(self):
+        response = self.client.get(reverse('payment:one_time_payment'))
+        self.assertEqual(response.status_code, 200)
