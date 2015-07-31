@@ -101,7 +101,7 @@ class AcctCostUpdateTests(TestCase):
         self.phone_number = mommy.make(PhoneNumber, hotel=self.hotel)
 
     def test_acct_cost_update_get(self):
-        response = self.client.get(reverse('payment:acct_cost_update', kwargs={'pk': self.acct_cost.pk}))
+        response = self.client.get(reverse('acct_cost_update', kwargs={'pk': self.acct_cost.pk}))
         self.assertEqual(response.status_code, 200)
 
     def test_acct_cost_update_post(self):
@@ -110,6 +110,6 @@ class AcctCostUpdateTests(TestCase):
             'recharge_amt': CHARGE_AMOUNTS[0][0],
             'auto_recharge': True
         }
-        response = self.client.post(reverse('payment:acct_cost_update', kwargs={'pk': self.acct_cost.pk}),
+        response = self.client.post(reverse('acct_cost_update', kwargs={'pk': self.acct_cost.pk}),
             data, follow=True)
         self.assertRedirects(response, reverse('payment:summary'))

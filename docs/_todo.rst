@@ -9,6 +9,10 @@
 :Next:
     - Billing
 
+        - Deposit Funds 1x View
+
+            - Use the Registration Payment look / template
+
         - Monthly Stmts ListView
 
         - Single Month Transactions DetailView
@@ -18,15 +22,13 @@
             - Put a single ``Hook`` in ``recharge`` Func to check this status
             and disable if Auto-Reload=False
 
-        - Recent Payments Table
+        # Recent Payments Table
 
-        - Deposit Funds 1x View
+        # Context / Sub URLs
 
-        - Context / Sub URLs
+        # make this a single page Summary, and use Twilio like layout
 
-        - make this a single page Summary, and use Twilio like layout
-
-        - Change Payment Settings View
+        # Change Payment Settings View
 
     - mark as read when going to Guest's DetailView
 

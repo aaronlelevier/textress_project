@@ -17,6 +17,10 @@ api_patterns = patterns('',
     url(r'^account/pricing/(?P<pk>\d+)/$', views.PricingRetrieveAPIView.as_view(), name='api_pricing'),
     )
 
+acct_cost_patterns = patterns('',
+    url(r'^refill-settings/(?P<pk>\w+)/$', views.AcctCostUpdateView.as_view(), name='acct_cost_update'),
+)
+
 acct_stmt_patterns = patterns('',
     url(r'^$', views.AcctStmtListView.as_view(), name='acct_stmt_list'),
     url(r'^(?P<year>\d+)/(?P<month>\d+)/$', views.AcctStmtDetailView.as_view(), name='acct_stmt_detail'),
@@ -87,6 +91,9 @@ urlpatterns = patterns('',
     url(r'^api/', include(api_patterns)),
     url(r'^account/', include(account_patterns)),
     url(r'^register/', include(register_patterns)),
+    # Maybe ``payments`` will include other URL patterns besides ``AcctCost`` because
+    # I may want to reuse the namespace for other URLs.
+    url(r'^payments/', include(acct_cost_patterns)),
     url(r'^statements/', include(acct_stmt_patterns)),
     url(r'^close/', include(close_acct_patterns)),
     )

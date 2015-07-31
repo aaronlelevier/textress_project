@@ -25,7 +25,7 @@ from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
 
 from account.decorators import anonymous_required
 from account.forms import (AuthenticationForm, CloseAccountForm,
-    CloseAcctConfirmForm, AcctCostForm)
+    CloseAcctConfirmForm, AcctCostForm, AcctCostUpdateForm)
 from account.models import AcctCost, AcctStmt, AcctTrans, Pricing
 from account.serializers import PricingSerializer
 from main.mixins import RegistrationContextMixin, AdminOnlyMixin, HotelUserMixin
@@ -133,6 +133,19 @@ class RegisterAcctCostUpdateView(RegisterAcctCostBaseView, UpdateView):
             raise Http404
 
         return super(RegisterAcctCostUpdateView, self).dispatch(request, *args, **kwargs)
+
+
+#############
+# ACCT COST #
+#############
+
+class AcctCostUpdateView(AdminOnlyMixin, SetHeadlineMixin, UpdateView):
+
+    headline = "Payment Refill Settings"
+    template_name = "cpanel/form.html"
+    model = AcctCost
+    form_class = AcctCostUpdateForm
+    success_url = reverse_lazy('payment:summary')
 
 
 #############

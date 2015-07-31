@@ -18,7 +18,6 @@ from braces.views import (
     SetHeadlineMixin
     )
 
-from account.forms import AcctCostUpdateForm
 from account.mixins import AcctCostContextMixin
 from account.models import AcctCost, AcctStmt, AcctTrans
 from main.models import Hotel
@@ -143,15 +142,6 @@ class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
         context['acct_trans'] = AcctTrans.objects.filter(hotel=self.hotel,
             trans_type__name__in=['init_amt', 'recharge_amt']).order_by('-insert_date')[:4]
         return context
-
-
-class AcctCostUpdateView(AdminOnlyMixin, SetHeadlineMixin, UpdateView):
-
-    headline = "Payment Refill Settings"
-    template_name = "cpanel/form.html"
-    model = AcctCost
-    form_class = AcctCostUpdateForm
-    success_url = reverse_lazy('payment:summary')
 
 
 class CardCreateView(AdminOnlyMixin, 
