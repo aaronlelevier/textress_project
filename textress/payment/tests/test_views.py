@@ -12,7 +12,7 @@ from django.http import Http404
 
 from model_mommy import mommy
 
-from account.models import AcctCost
+from account.models import AcctCost, AcctStmt, AcctTrans
 from account.tests.factory import (CREATE_ACCTCOST_DICT, create_acct_stmts,
     create_acct_trans)
 from main.models import Hotel
@@ -128,7 +128,7 @@ class BillingSummaryTests(TestCase):
         self.acct_cost, created = AcctCost.objects.get_or_create(self.hotel)
         self.acct_stmts = create_acct_stmts(self.hotel)
         self.acct_trans = create_acct_trans(self.hotel)
-        self.phone_numbers = mommy.make(PhoneNumber, hotel=self.hotel)
+        self.phone_number = mommy.make(PhoneNumber, hotel=self.hotel)
 
     def tearDown(self):
         self.client.logout()
@@ -136,3 +136,13 @@ class BillingSummaryTests(TestCase):
     def test_get(self):
         response = self.client.get(reverse('payment:summary'))
         self.assertEqual(response.status_code, 200)
+
+    def test_context(self):
+        response = self.client.get(reverse('payment:summary'))
+        self.assertIsInstance(response.context['acct_stmt'], AcctStmt)
+        # User's current fund's balance show's in context
+        self.assertIsNotNone(response.context['acct_stmts'][0].balance)
+        # Other context
+        self.assertIsInstance(response.context['acct_trans'][0], AcctTrans)
+        self.assertIsInstance(response.context['acct_cost'], AcctCost)
+        self.assertIsInstance(response.context['phone_numbers'][0], PhoneNumber)
