@@ -1,0 +1,154 @@
+{% extends "cpanel/base-sidebar.html" %}
+{% load staticfiles stripe_tags %}
+
+{% block head_js %}
+{{ block.super }}
+<!-- stipe: start -->
+<script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+<script type="text/javascript">
+    Stripe.setPublishableKey('{{ publishable_key }}');
+
+    var stripeResponseHandler = function(status, response) {
+        var $form = $('#checkout-form');
+
+        if (response.error) {
+            // Show the errors on the form
+            $form.find('.payment-errors').text(response.error.message);
+            $form.find('.payment-errors').addClass('alert');
+            $form.find('.payment-errors').addClass('alert-error');
+            $form.find('button').prop('disabled', false);
+        } else {
+            // token contains id, last4, and card type
+            var token = response.id;
+            // Insert the token into the form so it gets submitted to the server
+            $form.append($('<input type="hidden" name="stripe_token" />').val(token));
+            // and re-submit
+            $form.get(0).submit();
+        }
+    };
+
+    jQuery(function($) {
+        $('#checkout-form').submit(function(e) {
+            var $form = $(this);
+
+            // Disable the submit button to prevent repeated clicks
+            $form.find('button').prop('disabled', true);
+
+            Stripe.createToken($form, stripeResponseHandler);
+
+            // Prevent the form from submitting with the default action
+            return false;
+        });
+    });
+</script>
+<!-- stripe: end -->
+{% endblock head_js %}
+
+
+{% block content %}
+
+<form method="post" action="" id="checkout-form">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4">
+            <div class="well" style="padding:0;">
+                <h4 class="text-center">One-Time payment amount</h4>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4">
+            <select for="id_amount" class="form-control" />
+            {% for v,t in form.amount.field.choices %}
+                <option value="{{ v }}">{{ t }}</option>
+            {% endfor %}
+            </select>
+        </div>
+    </div>
+    <br>
+
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4">
+            <div class="well" style="padding:0;">
+                <h4 class="text-center">Card Info</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 col-md-offset-4">
+            <div class="form-group">
+                <label class="control-label" for="card">Card</label>
+                <div class="controls">
+                    <input type="text" id="card" class="form-control" data-stripe="number" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="form-group">
+                        <label class="control-label" for="">Expiration (MM/YYYY)</label>
+                        <div class="row">
+                            <div class="col-md-5" style="padding-right:0;">
+                                <select data-stripe="exp-month" class="form-control" />
+                                {% for month in months %}
+                                    {{ month|safe }}
+                                {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-xs-1">
+                                <h2 style="margin-top:0;">/</h2>
+                            </div>
+                            <div class="col-md-5" style="padding-left:5px;">
+                                <select data-stripe="exp-year" class="form-control" />
+                                {% for year in years %}
+                                    {{ year|safe }}
+                                {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="control-label" for="cvc">CVC</label>
+                        <div class="controls">
+                            <input type="text" id="cvc" size="4" class="form-control" data-stripe="cvc" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <small>By clicking submit, you are agreeing to the <a href="{% url 'terms_n_cond' %}">terms and conditions</a></small>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <div class="controls">
+                            <div class="pull-right">
+                                <input type="submit" value="Submit" class="btn btn-primary" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+            <div class="row">
+                <div class="col-md-12 tab-content">
+                    <div class="row">
+                        <div class="col-md-11">
+                            <p>We don't store any credit card information. All payments information is transferred via secure SSL and processed by <a href="https://stripe.com/gallery"><strong>Stripe, Inc.</strong></a></p>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <a href="https://stripe.com/gallery">
+                            <img style="max-width:80%" src="{% static 'images/stripe-payments.png' %}" alt="powered-by-stripe">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<br>
+{% endblock content %}
