@@ -1,3 +1,12 @@
+2015-08-02
+----------
+:Next:
+    - card images as a separate table
+    - pretty up cards list
+    - config Django Views.py to work w/ OneTimePayment Form Data
+
+    # "add a card" below like first checkbox
+
 2015-07-30
 ----------
 :Goals:
