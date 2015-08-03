@@ -70,22 +70,23 @@
                     <h4 class="text-center">One-Time payment amount</h4>
                 </div>
             </div>
-            <div class="row">
+            <div class="row pull-right">
+                <div>
+                    {{ form.other }} &nbsp; Other Amount
+                </div>
+            </div>
+            <br>
+            <br>
+            <div class="row" id="recharge_amount">
                 {{ form.amount.errors }}
-                <select for="id_amount" name="amount" class="form-control" />
+                Payment Amount <small class="text-success">0.00</small>
+                <select for="id_amount" name="amount" class="form-control" style="margin-top:5px;" />
                 {% for v,t in form.amount.field.choices %}
                     <option value="{{ v }}">{{ t }}</option>
                 {% endfor %}
                 </select>
             </div>
-            <br>
-            <div class="row">
-                <div>
-                    {{ form.other }} &nbsp; Other Amount
-                </div>
-            </div>
             <div class="row" id="other_amount">
-                <br>
                 <label for="id_other_amount">
                     Payment Amount <small class="text-success">0.00</small>
                 </label>
@@ -217,6 +218,12 @@ $(document).ready(function(){
     });
     $('#id_other').click(function(){
         $("#other_amount").toggle();
+        if ($("#recharge_amount").is(":visible")){
+            $("#recharge_amount").hide();
+        }
+        else {
+            $("#recharge_amount").show();   
+        }
     });
 });
 // Input Helpers

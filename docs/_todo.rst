@@ -1,6 +1,13 @@
 2015-08-02
 ----------
 :Next:
+    - Add other Cards to Test Data List
+    - Connect HTML / CSS logic w/ View code
+    - Add Tests
+
+2015-08-02
+----------
+:Next:
     - card images as a separate table
 
         - Add DB table

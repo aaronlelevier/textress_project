@@ -155,6 +155,13 @@ class OneTimePaymentView(AdminOnlyMixin, SetHeadlineMixin, FormValidMessageMixin
         return "The payment has been successfully processed. An email will be \
 sent to {}. Thank you.".format(self.request.user.email) 
 
+    def get_context_data(self, **kwargs):
+        context = super(OneTimePaymentView, self).get_context_data(**kwargs)
+        context['months'] = ['<option value="{num:02d}">{num:02d}</option>'.format(num=i) for i in range(1,13)]
+        cur_year = datetime.date.today().year
+        context['years'] = ['<option value="{num}">{num}</option>'.format(num=i) for i in range(cur_year, cur_year+12)]
+        return context
+
     def get_form_kwargs(self):
         "The Hotel Card objects will be need for the C.Card ChoiceField."
         # grab the current set of form #kwargs
