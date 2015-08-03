@@ -223,3 +223,14 @@ a.no_decoration {
 .badge-old-msg {
     background-color: #999999;
 }
+
+/* Credit Card List CSS*/
+.col-centered input {
+    vertical-align: middle;
+    margin: 0px;"
+}
+.vcenter {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}

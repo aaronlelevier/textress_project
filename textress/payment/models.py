@@ -97,6 +97,23 @@ class Customer(PmtAbstractBase):
                       key=lambda k: k['created'], reverse=reverse)
 
 
+###############
+# CARD IMAGES #
+###############
+
+
+def card_image_file(instance, filename):
+    return '/'.join(['card_images', filename])
+
+
+class CardImage(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    image = models.ImageField(upload_to=card_image_file)
+
+    def __str__(self):
+        return self.name
+
+
 ########
 # CARD #
 ########
@@ -140,6 +157,8 @@ class CardManager(StripeClient, models.Manager):
 class Card(PmtAbstractBase):
     # Keys
     customer = models.ForeignKey(Customer, related_name='cards')
+    image = models.ForeignKey(CardImage, blank=True, null=True,
+        help_text="Auto-add the CardImage at save() based on Card.brand")
     # Fields
     id = models.CharField(_("Stripe Card ID"), primary_key=True, max_length=100)
     brand = models.CharField(_("Brand"), max_length=25)
@@ -169,6 +188,11 @@ class Card(PmtAbstractBase):
 
         if self.exp_month and self.exp_year:
             self.expires = "{self.exp_month:02d}/{self.exp_year}".format(self=self)
+
+        try:
+            self.image = CardImage.objects.get(name=self.brand)
+        except CardImage.DoesNotExist:
+            raise Exception("The CardImage object for {} does not exist".format(self.brand))
 
         return super(Card, self).save(*args, **kwargs)
 

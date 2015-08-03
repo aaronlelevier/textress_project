@@ -61,7 +61,7 @@
 {% block content %}
 
 <div class="row">
-    <div class="col-md-4 col-md-offset-4">
+    <div class="col-md-5 col-md-offset-3">
         <form method="post" action="" id="checkout-form">
             {% csrf_token %}
             {{ form.non_field_errors }}
@@ -109,11 +109,13 @@
 
             <div class="row" id="current_cards">
                 {% for c in hotel.customer.cards.all %}
-                    <div class="radio">
+                    <div class="radio vcenter">
                         <label for="id_cards{{ forloop.counter0 }}">
                             <input id="id_cards{{ forloop.counter0 }}" name="cards" type="radio" value="{{ c.id }}" class="grey">
-                            {{ c.brand }} ending in {{ c.last4 }}
-                        </label>
+                                <img src="{{ MEDIA_URL }}{{ c.image.image }}"> 
+                                <span style="margin-left:5px">{{ c.brand }} ending in {{ c.last4 }}</span>
+                                <span style="margin-left:5px"><small>Expires:</small> {{ c.expires }}</span>
+                    </label>
                     </div>
                 {% endfor %}
             <br>

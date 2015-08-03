@@ -2,6 +2,10 @@
 ----------
 :Next:
     - card images as a separate table
+
+        - Add DB table
+        - use the same naming convention as Stripe.com
+
     - pretty up cards list
     - config Django Views.py to work w/ OneTimePayment Form Data
 
