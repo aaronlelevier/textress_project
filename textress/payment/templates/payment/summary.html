@@ -18,8 +18,8 @@
                 </a>
             </div>
             <div class="col-md-4">
-                <h3 class="lead">Make a One-time Payment</h3>
-                <a href="{% url 'payment:one_time_payment' %}">
+                <h3 class="lead">Manage Payment Methods (TODO)</h3>
+                <a href="#">
                     <p><strong>Deposit Funds</strong></p>
                 </a>
             </div>
@@ -67,7 +67,7 @@
                                 <td><strong>{{ acct_stmt.balance|stripe_money }}</strong></td>
                             </tr>
                         </table>
-                        <a href="#">
+                        <a href="{% url 'acct_stmt_detail' year month %}">
                             <p class="pull-right"><strong>View Usage Detail</strong></p>
                         </a>
                     </div>

@@ -101,6 +101,13 @@
                     <h4 class="text-center">Credit &amp; Debit Cards</h4>
                 </div>
             </div>
+
+<!-- Stripe Error Alert -->
+            <div class="row" style="margin-bottom:2em">
+                <div class="col-md-12">
+                    <span class="payment-errors alert-danger"></span>
+                </div>
+            </div>
             
             <div class="row">
                 <div class="pull-right">
@@ -207,6 +214,15 @@
 <script type="text/javascript">
 // Add a Card hide logic
 $(document).ready(function(){
+    $('#id_other').click(function(){
+        $("#other_amount").toggle();
+        if ($("#recharge_amount").is(":visible")){
+            $("#recharge_amount").hide();
+        }
+        else {
+            $("#recharge_amount").show();
+        }
+    });
     $('#id_add_card').click(function(){
         $("#add_card").toggle();
         if ($("#current_cards").is(":visible")){
@@ -214,15 +230,6 @@ $(document).ready(function(){
         }
         else {
             $("#current_cards").show();
-        }
-    });
-    $('#id_other').click(function(){
-        $("#other_amount").toggle();
-        if ($("#recharge_amount").is(":visible")){
-            $("#recharge_amount").hide();
-        }
-        else {
-            $("#recharge_amount").show();   
         }
     });
 });

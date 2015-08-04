@@ -18,6 +18,7 @@ from account.tests.factory import (CREATE_ACCTCOST_DICT, create_acct_stmts,
 from main.models import Hotel
 from main.tests.factory import (CREATE_USER_DICT, CREATE_HOTEL_DICT, PASSWORD,
     create_hotel, create_hotel_user)
+from payment.forms import StripeOneTimePaymentForm
 from payment.tests import factory
 from payment.models import Customer, Card, Charge
 from sms.models import PhoneNumber
@@ -92,8 +93,8 @@ class PaymentEmailTests(TestCase):
 
     def test_email(self):
         user = User.objects.first()
-        customer = mommy.make(Customer, email=user.email)
-        charge = mommy.make(Charge, customer=customer)
+        customer = factory.customer()
+        charge = factory.charge(customer.id)
 
         email = Email(
             to=user.email,
@@ -154,3 +155,53 @@ class BillingTests(TestCase):
     def test_get_one_time_payment(self):
         response = self.client.get(reverse('payment:one_time_payment'))
         self.assertEqual(response.status_code, 200)
+
+
+
+'''Remove for the time being. Can add in V2 of the software. Not critical at 
+this time.'''
+# class OneTimePaymentTests(TestCase):
+
+#     def setUp(self):
+#         self.password = PASSWORD
+#         self.hotel = create_hotel()
+#         # create "Hotel Manager" Group
+#         create._get_groups_and_perms()
+#         # Users
+#         self.admin = create_hotel_user(hotel=self.hotel, username='admin', group='hotel_admin')
+#         # Stripe Card
+#         self.card = factory.card()
+#         self.hotel.customer = self.card.customer
+#         self.hotel.save()
+#         # Login
+#         self.client.login(username=self.admin.username, password=PASSWORD)
+
+#     def tearDown(self):
+#         self.client.logout()
+
+#     def test_create(self):
+#         self.assertIsInstance(self.card, Card)
+#         self.assertIsInstance(self.hotel.customer, Customer)
+
+#     def test_response(self):
+#         response = self.client.get(reverse('payment:one_time_payment'))
+#         self.assertEqual(response.status_code, 200)
+
+#     # For Attr's
+
+#     def test_form(self):
+#         response = self.client.get(reverse('payment:one_time_payment'))
+#         self.assertIsInstance(response.context['form'], StripeOneTimePaymentForm)
+
+#     def test_hotel(self):
+#         response = self.client.get(reverse('payment:one_time_payment'))
+#         self.assertEqual(response.context['form'].hotel, self.hotel)
+
+#     def test_card_list(self):
+#         response = self.client.get(reverse('payment:one_time_payment'))
+#         self.assertTrue(response.context['form'].fields['cards'].choices)
+
+
+
+
+

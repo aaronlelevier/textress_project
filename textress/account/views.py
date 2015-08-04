@@ -68,7 +68,7 @@ class AccountView(LoginRequiredMixin, HotelUserMixin, SetHeadlineMixin, StaticCo
 
     - will use Paypal style *account not 100% setup* if setup needed. i.e. ph num.
     """
-    headline = 'Demo Dashboard'
+    headline = 'Dashboard'
     static_context = {'headline_small': 'overview &amp; stats'}
     template_name = 'cpanel/account.html'
 
@@ -170,7 +170,7 @@ class AcctStmtListView(AdminOnlyMixin, SetHeadlineMixin, ListView):
         return super(AcctStmtListView, self).get(request, *args, **kwargs)
 
 
-class AcctStmtDetailView(AdminOnlyMixin, TemplateView):
+class AcctStmtDetailView(SetHeadlineMixin, AdminOnlyMixin, TemplateView):
     '''
     All AcctTrans for a single Month.
 
@@ -182,31 +182,24 @@ class AcctStmtDetailView(AdminOnlyMixin, TemplateView):
                 - total
         Balance - total
     '''
+    headline = "Account Statement Detail"
     template_name = 'account/acct_trans_detail.html'
 
     def get_context_data(self, **kwargs):
-        '''
-        TODO
-        ----
-        Move get custom `context` logic to a helper method to clean up view.
-        '''
         context = super(AcctStmtDetailView, self).get_context_data(**kwargs)
-
         # Use All Time Hotel Transactions to get the Balance
         all_trans = AcctTrans.objects.filter(hotel=self.hotel)
-
-        # New Context
-        context['init_balance'] = (all_trans.previous_monthly_trans(hotel=self.hotel,
-                                                                    month=kwargs['month'],
-                                                                    year=kwargs['year'])
-                                            .balance())
-        monthly_trans = (all_trans.monthly_trans(hotel=self.hotel,
-                                                 month=kwargs['month'],
-                                                 year=kwargs['year'])
-                                  .order_by('created'))
-        context['monthly_trans'] = monthly_trans
+        # Table Context
+        context['init_balance'] = all_trans.previous_monthly_trans(
+            hotel=self.hotel, month=kwargs['month'], year=kwargs['year']
+            ).balance()
+        context['monthly_trans'] = all_trans.monthly_trans(
+            hotel=self.hotel, month=kwargs['month'], year=kwargs['year']
+            ).order_by('created')
+        # Normal Context
+        context['acct_stmt'] = AcctStmt.objects.get(month=kwargs['month'], year=kwargs['year'])
+        context['acct_stmts'] = AcctStmt.objects.filter(hotel=self.hotel)
         context['balance'] = all_trans.balance()
-
         return context
 
 

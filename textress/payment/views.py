@@ -125,11 +125,16 @@ class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
         try:
             date = request.GET.get('date')
             year, month = date.split('-')
-            context['acct_stmt'] = AcctStmt.objects.get(year=year, month=month)
+            acct_stmt = AcctStmt.objects.get(year=year, month=month)  
         except (KeyError, AttributeError):
-            context['acct_stmt'] = AcctStmt.objects.first()
+            acct_stmt = AcctStmt.objects.first()
         finally:
-            context['sms_cost'] = context['acct_stmt'].balance - context['phone_numbers_cost']
+            context.update({
+                'year': acct_stmt.year,
+                'month': acct_stmt.month,
+                'acct_stmt': acct_stmt,
+                'sms_cost': acct_stmt.balance - context['phone_numbers_cost']
+            })
         return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
@@ -182,7 +187,7 @@ sent to {}. Thank you.".format(self.request.user.email)
             body = e.json_body
             err = body['error']
             messages.warning(self.request, err)
-            return HttpResponseRedirect(reverse('payment:register_step4'))
+            return HttpResponseRedirect(reverse('payment:one_time_payment'))
         else:
             # send conf email
             email = Email(

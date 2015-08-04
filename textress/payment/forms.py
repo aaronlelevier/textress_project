@@ -17,7 +17,6 @@ class StripeOneTimePaymentForm(forms.Form):
     def __init__(self, hotel, *args, **kwargs):
         super(StripeOneTimePaymentForm, self).__init__(*args, **kwargs)
         self.hotel = hotel
-        print self.__dict__
         self.fields['cards'].choices = self._card_list
 
     @property
@@ -26,8 +25,7 @@ class StripeOneTimePaymentForm(forms.Form):
             cards = self.hotel.customer.cards.all()
         except AttributeError:
             cards = None
-        print cards
-        print [(c.id, c.last4) for c in cards]
+
         if cards:
             return [(c.id, c.last4) for c in cards]
         else:

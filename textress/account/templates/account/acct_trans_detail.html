@@ -1,7 +1,23 @@
-{% extends "base_test.html" %}
-{% load stripe_tags %}
+{% extends "cpanel/base-sidebar.html" %}
+{% load staticfiles stripe_tags %}
 
-{% block main %}
+
+{% block content %}
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="btn btn-default btn-xs pull-right">
+                            <a class="btn dropdown-toggle no_decoration" data-toggle="dropdown" href="#">{{ acct_stmt }} <span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    {% for as in acct_stmts %}
+                                    <li><a href="{% url 'acct_stmt_detail' as.year as.month %}">{{ as.month_abbr }}</a></li>
+                                    {% endfor %}
+                                </ul>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
 <h4>Montly transaction details</h4>
 
     <h5>Initial Balance</h5>
@@ -27,5 +43,6 @@
     </ul>
     <p>Debit Total: {{ monthly_trans.debit.balance|stripe_money }}</p>
 
-<h5>Balance: {{ balance|stripe_money }}</h5>
-{% endblock main %}
+    <h5>Balance: {{ balance|stripe_money }}</h5>
+
+{% endblock content %}
