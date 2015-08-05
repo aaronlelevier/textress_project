@@ -1,3 +1,13 @@
+Account Detail Fields
+---------------------
+date
+type
+desc
+credit
+debit
+balance
+
+
 2015-08-02
 ----------
 :Next:

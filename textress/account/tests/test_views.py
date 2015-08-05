@@ -16,20 +16,47 @@ from django.utils import timezone
 from model_mommy import mommy
 
 from account.forms import AcctCostForm
-from account.models import (
-    AcctStmt, TransType, AcctTrans, AcctCost,
-    Pricing, CHARGE_AMOUNTS, BALANCE_AMOUNTS
-    )
-from account.tests.factory import (
-    create_acct_stmts, create_acct_trans, CREATE_ACCTCOST_DICT
-    )
+from account.models import (AcctStmt, TransType, AcctTrans, AcctCost,
+    Pricing, CHARGE_AMOUNTS, BALANCE_AMOUNTS)
+from account.tests.factory import (create_acct_stmts, create_acct_stmt,
+    create_acct_trans, CREATE_ACCTCOST_DICT)
 from main.models import Hotel
-from main.tests.factory import (
-    create_hotel, create_hotel_user, make_subaccount,
-    CREATE_USER_DICT, CREATE_HOTEL_DICT, PASSWORD
-    )
+from main.tests.factory import (create_hotel, create_hotel_user, make_subaccount,
+    CREATE_USER_DICT, CREATE_HOTEL_DICT, PASSWORD)
 from payment.models import Customer
 from utils import create
+
+
+class AcctStmtDetailTests(TestCase):
+
+    def setUp(self):
+        self.hotel = create_hotel()
+        create._get_groups_and_perms()
+        self.admin = create_hotel_user(hotel=self.hotel, username='admin', group='hotel_admin')
+        # dates
+        today = datetime.datetime.today()
+        self.year = today.year
+        self.month = today.month
+        # Account Data
+        self.acct_stmt = create_acct_stmt(hotel=self.hotel, year=self.year, month=self.month)
+        self.acct_trans = create_acct_trans(hotel=self.hotel)
+        # Login
+        self.client.login(username=self.admin.username, password=PASSWORD)
+
+    def tearDown(self):
+        self.client.logout()
+
+    def test_response(self):
+        response = self.client.get(reverse('acct_stmt_detail',
+            kwargs={'year': self.year, 'month': self.month}))
+        self.assertEqual(response.status_code, 200)
+
+    def test_context(self):
+        response = self.client.get(reverse('acct_stmt_detail',
+            kwargs={'year': self.year, 'month': self.month}))
+        self.assertTrue(response.context['acct_stmt'])
+        self.assertTrue(response.context['acct_stmts'])
+        self.assertTrue(response.context['monthly_trans'])
 
 
 class APITests(TestCase):

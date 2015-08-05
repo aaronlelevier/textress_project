@@ -195,7 +195,7 @@ class AcctStmtDetailView(SetHeadlineMixin, AdminOnlyMixin, TemplateView):
             ).balance()
         context['monthly_trans'] = all_trans.monthly_trans(
             hotel=self.hotel, month=kwargs['month'], year=kwargs['year']
-            ).order_by('created')
+            ).order_by('-created')
         # Normal Context
         context['acct_stmt'] = AcctStmt.objects.get(month=kwargs['month'], year=kwargs['year'])
         context['acct_stmts'] = AcctStmt.objects.filter(hotel=self.hotel)

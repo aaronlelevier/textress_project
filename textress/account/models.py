@@ -476,6 +476,7 @@ class AcctTrans(AbstractBase):
 
     class Meta:
         verbose_name = "Account Transaction"
+        ordering = ('-insert_date',)
 
     def __str__(self):
         return """Date: {self.insert_date} Hotel: {self.hotel} TransType: {self.trans_type} \

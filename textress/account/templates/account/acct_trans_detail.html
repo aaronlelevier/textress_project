@@ -4,20 +4,49 @@
 
 {% block content %}
 
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="btn btn-default btn-xs pull-right">
-                            <a class="btn dropdown-toggle no_decoration" data-toggle="dropdown" href="#">{{ acct_stmt }} <span class="caret"></span></a>
-                                <ul class="dropdown-menu">
-                                    {% for as in acct_stmts %}
-                                    <li><a href="{% url 'acct_stmt_detail' as.year as.month %}">{{ as.month_abbr }}</a></li>
-                                    {% endfor %}
-                                </ul>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+    <div class="row" style="margin-bottom:10px;">
+        <div class="col-md-12">
+            <div class="btn btn-default btn-xs pull-right">
+                <a class="btn dropdown-toggle no_decoration" data-toggle="dropdown" href="#">{{ acct_stmt }} <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        {% for as in acct_stmts %}
+                        <li><a href="{% url 'acct_stmt_detail' as.year as.month %}">{{ as.month_abbr }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </a>
+            </div>
+        </div>
+    </div>
 
+    <div class="row">
+        <div class="col-md-12">
+            {% if monthly_trans %}
+                <table class="table table-hover">
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Debit</th>
+                        <th>Credit</th>
+                        <th>Balance</th>
+                    </tr>
+                    {% for trans in monthly_trans %}
+                        <tr>
+                            <td>{{ trans.insert_date }}</td>
+                            <td>{{ trans.trans_type.name|format_snake_case }}</td>
+                            <td>{{ trans.trans_type.desc }}</td>
+                            <td>{% if trans.trans_type.name == 'sms_used' %}{{ trans.amount|stripe_money }}{% endif %}</td>
+                            <td>{% if trans.trans_type.name != 'sms_used' %}{{ trans.amount|stripe_money }}{% endif %}</td>
+                            <td>Bal?</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <h3>No monthly transactions</h3>
+            {% endif %}
+        </div>
+    </div>
+<!-- 
 <h4>Montly transaction details</h4>
 
     <h5>Initial Balance</h5>
@@ -43,6 +72,6 @@
     </ul>
     <p>Debit Total: {{ monthly_trans.debit.balance|stripe_money }}</p>
 
-    <h5>Balance: {{ balance|stripe_money }}</h5>
+    <h5>Balance: {{ balance|stripe_money }}</h5> -->
 
 {% endblock content %}
