@@ -10,6 +10,8 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import ugettext, ugettext_lazy as _
+from django.dispatch import receiver
+from django.db.models.signals import post_save
 
 import stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -281,12 +283,12 @@ class AcctStmt(AbstractBase):
     # Keys
     hotel = models.ForeignKey(Hotel, related_name='acct_stmt')
     # Auto Fields
-    year = models.IntegerField(_("Year"), blank=True)
-    month = models.IntegerField(_("Month"), blank=True)
-    monthly_costs = models.FloatField(_("Total Monthly Cost"), blank=True,
+    year = models.PositiveIntegerField(_("Year"), blank=True)
+    month = models.PositiveIntegerField(_("Month"), blank=True)
+    monthly_costs = models.PositiveIntegerField(_("Total Monthly Cost"), blank=True,
         default=settings.DEFAULT_MONTHLY_FEE)
-    total_sms = models.IntegerField(blank=True, default=0)
-    balance = models.FloatField(_("Current Funds Balance"), blank=True, default=0,
+    total_sms = models.PositiveIntegerField(blank=True, default=0)
+    balance = models.PositiveIntegerField(_("Current Funds Balance"), blank=True, default=0,
         help_text="Monthly Cost + (SMS Used * Cost Per SMS)")
 
     objects = AcctStmtManager()
@@ -466,11 +468,13 @@ class AcctTrans(AbstractBase):
     hotel = models.ForeignKey(Hotel, related_name='acct_trans')
     trans_type = models.ForeignKey(TransType)
     # Auto
-    amount = models.FloatField(_("Amount"), blank=True, null=True,
+    amount = models.IntegerField(_("Amount"), blank=True, null=True,
         help_text="Negative for Usage, Positive for 'Funds Added' records.")
-    sms_used = models.IntegerField(blank=True, null=True,
+    sms_used = models.PositiveIntegerField(blank=True, null=True,
         help_text="NULL unless trans_type=sms_used")
-    insert_date = models.DateField(_("Insert Date"), blank=True, null=True) # auto_now_add=True) # add back in Prod
+    insert_date = models.DateField(_("Insert Date"), blank=True, null=True) # remove in Prod (use ``created``)
+    balance = models.PositiveIntegerField(_("Balance"), blank=True, null=True,
+        help_text="Current blance, just like in a Bank Account.")
 
     objects = AcctTransManager()
 
@@ -486,5 +490,13 @@ class AcctTrans(AbstractBase):
         # For testing only
         if not self.insert_date:
             self.insert_date = timezone.now().date()
-
         return super(AcctTrans, self).save(*args, **kwargs)
+
+
+@receiver(post_save, sender=AcctTrans)
+def update_balance(sender, instance=None, created=False, **kwargs):
+    '''Update the current ``balance`` on the Account after the last 
+    transaction has been saved.'''
+    if not instance.balance:
+        instance.balance = AcctTrans.objects.balance()
+        instance.save()

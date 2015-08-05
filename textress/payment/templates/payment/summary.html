@@ -11,8 +11,8 @@
             </div>
             <div class="col-md-4">
                 <h3 class="lead">Auto Recharge: {% if acct_cost.auto_recharge %}ON{% else %}OFF{% endif %}</h3>
-                <p>If the balance falls below {{ acct_cost.balance_min|stripe_money }},</p>
-                <p>refill the balance to {{ acct_cost.recharge_amt|stripe_money }}.</p>
+                <p>If the balance falls below {{ acct_cost.balance_min|stripe_money }}</p>
+                <p>refill the balance to {{ acct_cost.recharge_amt|stripe_money }}</p>
                 <a href="{% url 'acct_cost_update' acct_cost.pk %}">
                     <p><strong>Change Settings</strong></p>
                 </a>
@@ -20,7 +20,7 @@
             <div class="col-md-4">
                 <h3 class="lead">Manage Payment Methods (TODO)</h3>
                 <a href="#">
-                    <p><strong>Deposit Funds</strong></p>
+                    <p><strong>Change / Add Payment Method</strong></p>
                 </a>
             </div>
         </div>

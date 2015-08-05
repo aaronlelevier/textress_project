@@ -360,54 +360,58 @@ class AcctTransTests(TestCase):
         print('old_balance:', old_balance, 'new_balance:', new_balance)
         self.assertTrue(old_balance < new_balance)
 
-    def sms_used_mgr_no_messages(self):
-        # Remove all Messages for today, so shouldn't be creating a `sms_used` AcctTrans record
-        messages = self.hotel.messages.filter(insert_date=self.today)
-        for m in messages:
-            m.delete()
+    # def test_sms_used_mgr_no_messages(self):
+    #     # Remove all Messages for today, so shouldn't be creating a `sms_used` AcctTrans record
+    #     messages = self.hotel.messages.filter(insert_date=self.today)
+    #     for m in messages:
+    #         m.delete()
 
-        acct_tran, created = AcctTrans.objects.sms_used(hotel=self.hotel,
-            trans_type=self.sms_used)
-        assert not acct_tran
-        assert not created
+    #     acct_tran, created = AcctTrans.objects.sms_used(hotel=self.hotel,
+    #         trans_type=self.sms_used)
+    #     assert not acct_tran
+    #     assert not created
 
-    def sms_used_mgr_messages_get(self):
-        # Create initial messages for today and `sms_used` AcctTrans record
-        messages = make_messages(
-            hotel=self.hotel,
-            user=self.admin,
-            guest=self.guest
-            )
-        acct_tran, created = AcctTrans.objects.sms_used(hotel=self.hotel,
-            trans_type=self.sms_used)
+    # def test_sms_used_mgr_messages_get(self):
+    #     # Create initial messages for today and `sms_used` AcctTrans record
+    #     messages = make_messages(
+    #         hotel=self.hotel,
+    #         user=self.admin,
+    #         guest=self.guest
+    #         )
+    #     acct_tran, created = AcctTrans.objects.sms_used(hotel=self.hotel,
+    #         trans_type=self.sms_used)
 
-        # More messages should be an AcctTrans `sms_used` get(), not create()
-        messages = make_messages(
-            hotel=self.hotel,
-            user=self.admin,
-            guest=self.guest
-            )
-        acct_tran, created = AcctTrans.objects.sms_used(hotel=self.hotel,
-            trans_type=self.sms_used)
-        assert acct_tran
-        assert not created
+    #     # More messages should be an AcctTrans `sms_used` get(), not create()
+    #     messages = make_messages(
+    #         hotel=self.hotel,
+    #         user=self.admin,
+    #         guest=self.guest
+    #         )
+    #     acct_tran, created = AcctTrans.objects.sms_used(hotel=self.hotel,
+    #         trans_type=self.sms_used)
+    #     assert acct_tran
+    #     assert not created
 
-    def sms_used_mgr_messages_create(self):
-        # Create `sms_used` AcctTrans record for the day
+    # def test_sms_used_mgr_messages_create(self):
+    #     # Create `sms_used` AcctTrans record for the day
 
-        # Prep by deleting all `sms_used` AcctTrans for the day
-        acct_trans = AcctTrans.objects.filter(hotel=self.hotel,
-            trans_type=self.sms_used, insert_date=self.today)
-        for ac in acct_trans:
-            ac.delete()
+    #     # Prep by deleting all `sms_used` AcctTrans for the day
+    #     acct_trans = AcctTrans.objects.filter(hotel=self.hotel,
+    #         trans_type=self.sms_used, insert_date=self.today)
+    #     for ac in acct_trans:
+    #         ac.delete()
 
-        # Populate messages, and assure AcctTrans.sms_used() populates a create() record
-        messages = make_messages(
-            hotel=self.hotel,
-            user=self.admin,
-            guest=self.guest
-            )
-        acct_tran, created = AcctTrans.objects.sms_used(hotel=self.hotel,
-            trans_type=self.sms_used)
-        assert acct_tran
-        assert created
+    #     # Populate messages, and assure AcctTrans.sms_used() populates a create() record
+    #     messages = make_messages(
+    #         hotel=self.hotel,
+    #         user=self.admin,
+    #         guest=self.guest
+    #         )
+    #     acct_tran, created = AcctTrans.objects.sms_used(hotel=self.hotel,
+    #         trans_type=self.sms_used)
+    #     assert acct_tran
+    #     assert created
+
+    def test_balance_field(self):
+        at = AcctTrans.objects.last()
+        self.assertTrue(at.balance)

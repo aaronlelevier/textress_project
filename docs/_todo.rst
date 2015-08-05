@@ -1,11 +1,28 @@
-Account Detail Fields
----------------------
-date
-type
-desc
-credit
-debit
-balance
+2015-08-05
+----------
+:Next:
+    1. "Change / Add Payment Method"
+
+        - provide a C.card drop down list:
+
+            -like OneTimePaymentView, but only updates credit cards, and 
+            does not charge them.
+
+    2. "View Payment History" 
+
+        - table list like AcctStmtDetailView
+
+
+AcctStmtDetailView
+
+    # Account Detail Fields
+      
+        date
+        type
+        desc
+        credit
+        debit
+        balance
 
 
 2015-08-02
