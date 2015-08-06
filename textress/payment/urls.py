@@ -11,7 +11,7 @@ register_patterns = patterns('',
 payment_patterns = patterns('',
     url(r'^$', views.SummaryView.as_view(), name='summary'),
     url(r'^manage-payment-methods/$', views.CardListView.as_view(), name='card_list'),
-    url(r'^update-default-card/(?P<pk>\w+)/$', views.UpdateDefaultCardView.as_view(), name='card_update_default'),
+    url(r'^update-default-card/(?P<pk>\w+)/$', views.CardUpdateDefaultView.as_view(), name='card_update_default'),
     url(r'^remove/(?P<pk>\w+)/$', views.CardDeleteView.as_view(), name='card_delete'),
     # Stripe
     # url(r'^one-time-payment/$', views.OneTimePaymentView.as_view(), name='one_time_payment'),

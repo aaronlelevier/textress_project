@@ -220,7 +220,7 @@ class CardListView(AdminOnlyMixin, SetHeadlineMixin, FormValidMessageMixin,
     success_url = reverse_lazy('payment:summary')
 
 
-class CardUpdateView(AdminOnlyMixin, RedirectView):
+class CardUpdateDefaultView(AdminOnlyMixin, RedirectView):
 
     url = reverse_lazy('payment:card_list')
 
