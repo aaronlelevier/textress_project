@@ -1,0 +1,65 @@
+{% extends "cpanel/base-sidebar.html" %}
+{% load staticfiles stripe_tags %}
+
+
+{% block content %}
+
+    <div class="row" style="margin-bottom:10px;">
+        <div class="col-md-12">
+            <div class="btn btn-default btn-xs pull-right">
+                <p>Pagination Here!</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            {% if acct_trans %}
+                <table class="table table-hover">
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                    </tr>
+                    {% for trans in acct_trans %}
+                        <tr>
+                            <td>{{ trans.insert_date }}</td>
+                            <td>{{ trans.trans_type.name|format_snake_case }}</td>
+                            <td>{{ trans.amount|stripe_money }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <h3>No monthly transactions</h3>
+            {% endif %}
+        </div>
+    </div>
+<!-- 
+<h4>Montly transaction details</h4>
+
+    <h5>Initial Balance</h5>
+    <p>{{ init_balance|stripe_money }}</p>
+
+    <h5>Credit</h5>
+    <ul>
+    {% for trans in monthly_trans.credit %}
+        <li>{{ trans }}</li>
+    {% empty %}
+        <li>No Credit Transactions</li>
+    {% endfor %}
+    </ul>
+    <p>Credit Total: {{ monthly_trans.credit.balance|stripe_money }}</p>
+
+    <h5>Debit</h5>
+    <ul>
+    {% for trans in monthly_trans.debit %}
+        <li>{{ trans }}</li>
+    {% empty %}
+        <li>No Debit Transactions</li>
+    {% endfor %}
+    </ul>
+    <p>Debit Total: {{ monthly_trans.debit.balance|stripe_money }}</p>
+
+    <h5>Balance: {{ balance|stripe_money }}</h5> -->
+
+{% endblock content %}

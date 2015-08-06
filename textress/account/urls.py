@@ -19,6 +19,7 @@ api_patterns = patterns('',
 
 acct_cost_patterns = patterns('',
     url(r'^refill-settings/(?P<pk>\w+)/$', views.AcctCostUpdateView.as_view(), name='acct_cost_update'),
+    url(r'^history/$', views.AcctPmtHistoryView.as_view(), name='acct_pmt_history'),
 )
 
 acct_stmt_patterns = patterns('',
