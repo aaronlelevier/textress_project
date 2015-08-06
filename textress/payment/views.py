@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.template import RequestContext
 from django.contrib import messages
 from django.views.generic import (ListView, DetailView, DeleteView, TemplateView,
-    FormView, UpdateView)
+    FormView, UpdateView, RedirectView)
 from django.forms.models import model_to_dict
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms.models import model_to_dict
@@ -206,46 +206,33 @@ sent to {}. Thank you.".format(self.request.user.email)
 
 ### CARD VIEWS ###
 
-class CardCreateView(AdminOnlyMixin, StripeMixin, AcctCostContextMixin, TemplateView):
-    '''Admin Only. Add a Card to an existing Customer Account View.'''
-
-    # TODO: prbly change template_name later?
-    template_name = 'payment/payment.html' 
-    form_class = StripeForm
-    success_url = reverse_lazy('accounts:account')
-
-    def post(self, request, *args, **kwargs):
-        try:
-            card = Card.objects.stripe_create(customer=self.hotel.customer,
-                token=request.POST['stripeToken'])
-        except stripe.error.CardError as e:
-            body = e.json_body
-            err = body['error']
-            print(err)
-            messages.warning(self.request, err)
-            return HttpResponseRedirect(reverse('payment:card_create'))
-        else:
-            return HttpResponseRedirect(self.success_url)
-
-
-class CardDetailView(AdminOnlyMixin, HotelCardOnlyMixin, DetailView):
-    '''All Cards for the Hotel. Only viewable by the Admin.
-
-    dispatch kwargs['pk']: \w+ regex ok b/c using card.short_pk (shortened
-        version of the Stripe Card ID)
+class CardListView(AdminOnlyMixin, SetHeadlineMixin, FormValidMessageMixin,
+    StripeMixin, FormView):
     '''
-    model = Card
-    template_name = 'detail_view.html'
+    Admin Only. Add a Card to an existing Customer Account View.
+    '''
+
+    # TODO: Form, View styling
+
+    headline = "Manage Payment Methods"
+    template_name = "payment/one_time_payment.html"
+    form_class = StripeOneTimePaymentForm
+    success_url = reverse_lazy('payment:summary')
 
 
-class CardUpdateView(AdminOnlyMixin, HotelCardOnlyMixin, UpdateView):
+class CardUpdateView(AdminOnlyMixin, RedirectView):
 
-    model = Card
-    fields = ['default']
-    template_name = 'account/account_form.html'
+    url = reverse_lazy('payment:card_list')
 
-    def get_success_url(self): 
-        return reverse_lazy('payment:card_detail', kwargs={'pk': self.object.short_pk})
+    # TODO: tests
+
+    def get(self, request, *args, **kwargs):
+        # set default card
+        Card.objects.update_default(
+            customer=request.user.hotel.customer,
+            id_=kwargs['pk']
+        )
+        return super(CardUpdateView, self).get(request, *args, *kwargs)
 
 
 class CardDeleteView(AdminOnlyMixin, HotelCardOnlyMixin, DeleteView):
