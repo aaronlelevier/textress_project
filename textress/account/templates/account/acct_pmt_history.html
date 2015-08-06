@@ -6,22 +6,46 @@
 
     <div class="row" style="margin-bottom:10px;">
         <div class="col-md-12">
-            <div class="btn btn-default btn-xs pull-right">
-                <p>Pagination Here!</p>
+
+        {% if is_paginated %}
+            <div>
+                <ul class="pagination">
+                    <li>
+                        {% if page_obj.has_previous %}
+                            <a href="{% url 'acct_pmt_history' %}?page={{ page_obj.previous_page_number }}">Previous</a>
+                        {% else %}
+                            <a href="" onclick="return false;" style="color:grey;">Previous</a>
+                        {% endif %}
+                    </li>
+                    <li>
+                        {% for page in paginator.page_range %}
+                            <a href="{% url 'acct_pmt_history' %}?page={{ page }}">{{ page }}</a>
+                        {% endfor %}
+                    </li>
+                    <li>
+                        {% if page_obj.has_next %}
+                            <a href="{% url 'acct_pmt_history' %}?page={{ page_obj.next_page_number }}">Next</a>
+                        {% else %}
+                            <a href="" onclick="return false;" style="color:grey;">Next</a>
+                        {% endif %}
+                    </li>
+                </ul>
             </div>
+        {% endif %}
+
         </div>
     </div>
 
     <div class="row">
         <div class="col-md-12">
-            {% if acct_trans %}
+            {% if object_list %}
                 <table class="table table-hover">
                     <tr>
                         <th>Date</th>
                         <th>Type</th>
                         <th>Amount</th>
                     </tr>
-                    {% for trans in acct_trans %}
+                    {% for trans in object_list %}
                         <tr>
                             <td>{{ trans.insert_date }}</td>
                             <td>{{ trans.trans_type.name|format_snake_case }}</td>

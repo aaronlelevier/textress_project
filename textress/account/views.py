@@ -203,18 +203,19 @@ class AcctStmtDetailView(SetHeadlineMixin, AdminOnlyMixin, TemplateView):
         return context
 
 
-class AcctPmtHistoryView(SetHeadlineMixin, AdminOnlyMixin, TemplateView):
+class AcctPmtHistoryView(SetHeadlineMixin, AdminOnlyMixin, ListView):
     '''
     Simple table view of payments that uses pagination.
     '''
     headline = "Account Payments"
+    model = AcctTrans
     template_name = "account/acct_pmt_history.html"
+    paginate_by = 2
 
-    def get_context_data(self, **kwargs):
-        context = super(AcctPmtHistoryView, self).get_context_data(**kwargs)
-        context['acct_trans'] = AcctTrans.objects.filter(hotel=self.hotel,
+    def get_queryset(self):
+        queryset = AcctTrans.objects.filter(hotel=self.hotel,
             trans_type__name__in=['init_amt', 'recharge_amt']).order_by('-insert_date')
-        return context
+        return queryset
 
 
 ##############

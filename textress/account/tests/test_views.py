@@ -27,7 +27,7 @@ from payment.models import Customer
 from utils import create
 
 
-class AcctStmtDetailTests(TestCase):
+class AcctStmtViewTests(TestCase):
 
     def setUp(self):
         self.hotel = create_hotel()
@@ -46,17 +46,29 @@ class AcctStmtDetailTests(TestCase):
     def tearDown(self):
         self.client.logout()
 
-    def test_response(self):
+    ### ACCT STMT DETAIL
+
+    def test_detail_response(self):
         response = self.client.get(reverse('acct_stmt_detail',
             kwargs={'year': self.year, 'month': self.month}))
         self.assertEqual(response.status_code, 200)
 
-    def test_context(self):
+    def test_detail_context(self):
         response = self.client.get(reverse('acct_stmt_detail',
             kwargs={'year': self.year, 'month': self.month}))
         self.assertTrue(response.context['acct_stmt'])
         self.assertTrue(response.context['acct_stmts'])
         self.assertTrue(response.context['monthly_trans'])
+
+    ### ACCT PMT HISTORY
+
+    def test_pmt_history_response(self):
+        response = self.client.get(reverse('acct_pmt_history'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_pmt_history_context(self):
+        response = self.client.get(reverse('acct_pmt_history'))
+        self.assertTrue(response.context['object_list'])
 
 
 class APITests(TestCase):
