@@ -202,6 +202,7 @@ this time.'''
 #         self.assertTrue(response.context['form'].fields['cards'].choices)
 
 
-
+class CardTests(TestCase):
+    
 
 

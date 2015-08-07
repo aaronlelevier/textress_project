@@ -8,14 +8,12 @@ class StripeForm(forms.Form):
     stripe_token = forms.CharField()
 
 
-class StripeOneTimePaymentForm(forms.Form):
+class CardListForm(forms.Form):
     '''
-    Amount: One-Time payment amount from Dropdown, or Choose an other amount
-
     Card: Choose Existing Card, or Add a new one 
     '''
     def __init__(self, hotel, *args, **kwargs):
-        super(StripeOneTimePaymentForm, self).__init__(*args, **kwargs)
+        super(CardListForm, self).__init__(*args, **kwargs)
         self.hotel = hotel
         self.fields['cards'].choices = self._card_list
 
@@ -32,20 +30,24 @@ class StripeOneTimePaymentForm(forms.Form):
             return [(None, None)]
 
     stripe_token = forms.CharField(required=False)
-    # Amount
-    amount = forms.ChoiceField(choices=CHARGE_AMOUNTS, required=False)
-    other = forms.BooleanField(label='Other Amount',
-        initial=False, required=False)
-    other_amount = forms.FloatField(required=False)
     # Card
     cards = forms.ChoiceField(widget=forms.RadioSelect, required=False)
     add_card = forms.BooleanField(label='Add a Card',
         initial=False, required=False)
 
     def clean(self):
-        cd = super(StripeOneTimePaymentForm, self).clean()
+        cd = super(CardListForm, self).clean()
         return cd
 
 
+class StripeOneTimePaymentForm(CardListForm):
+    '''
+    Amount: One-Time payment amount from Dropdown, or Choose an other amount
 
-
+    Card: Choose Existing Card, or Add a new one 
+    '''
+    # Amount
+    amount = forms.ChoiceField(choices=CHARGE_AMOUNTS, required=False)
+    other = forms.BooleanField(label='Other Amount',
+        initial=False, required=False)
+    other_amount = forms.FloatField(required=False)

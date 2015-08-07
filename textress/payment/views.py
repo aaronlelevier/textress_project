@@ -6,8 +6,8 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.template import RequestContext
 from django.contrib import messages
-from django.views.generic import (ListView, DetailView, DeleteView, TemplateView,
-    FormView, UpdateView, RedirectView)
+from django.views.generic import (View, ListView, DetailView, DeleteView,
+    TemplateView, FormView, UpdateView, RedirectView)
 from django.forms.models import model_to_dict
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms.models import model_to_dict
@@ -22,7 +22,7 @@ from main.models import Hotel
 from main.mixins import (RegistrationContextMixin, HotelContextMixin, HotelUserMixin,
     AdminOnlyMixin)
 from payment.models import Card
-from payment.forms import StripeForm, StripeOneTimePaymentForm
+from payment.forms import StripeForm, StripeOneTimePaymentForm, CardListForm
 from payment.helpers import signup_register_step4
 from payment.mixins import StripeMixin, StripeFormValidMixin, HotelCardOnlyMixin
 from sms.models import PhoneNumber
@@ -211,31 +211,64 @@ class CardListView(AdminOnlyMixin, SetHeadlineMixin, FormValidMessageMixin,
     '''
     Admin Only. Add a Card to an existing Customer Account View.
     '''
-
-    # TODO: Form, View styling
-
     headline = "Manage Payment Methods"
-    template_name = "payment/one_time_payment.html"
-    form_class = StripeOneTimePaymentForm
-    success_url = reverse_lazy('payment:summary')
+    template_name = "payment/card_list.html"
+    form_class = CardListForm
+    success_url = reverse_lazy('payment:card_list')
+
+    def get_form_valid_message(self):
+        return "The payment has been successfully processed. An email will be \
+sent to {}. Thank you.".format(self.request.user.email) 
+
+    def get_context_data(self, **kwargs):
+        context = super(CardListView, self).get_context_data(**kwargs)
+        context['months'] = ['<option value="{num:02d}">{num:02d}</option>'.format(num=i) for i in range(1,13)]
+        cur_year = datetime.date.today().year
+        context['years'] = ['<option value="{num}">{num}</option>'.format(num=i) for i in range(cur_year, cur_year+12)]
+        return context
+
+    def get_form_kwargs(self):
+        "The Hotel Card objects will be need for the C.Card ChoiceField."
+        # grab the current set of form #kwargs
+        kwargs = super(CardListView, self).get_form_kwargs()
+        # Update the kwargs with the user_id
+        kwargs['hotel'] = self.hotel
+        return kwargs
+
+    def form_valid(self, form):
+        try:
+            #DB create
+            (customer, card, charge) = signup_register_step4(
+                hotel=self.request.user.profile.hotel,
+                token=form.cleaned_data['stripe_token'],
+                email=self.request.user.email,
+                amount=self.hotel.acct_cost.init_amt)
+        except stripe.error.StripeError as e:
+            body = e.json_body
+            err = body['error']
+            messages.warning(self.request, err)
+            return HttpResponseRedirect(reverse('payment:one_time_payment'))
+        else:
+            return HttpResponseRedirect(self.success_url)
 
 
-class CardUpdateDefaultView(AdminOnlyMixin, RedirectView):
+class CardUpdateDefaultView(View):
 
-    url = reverse_lazy('payment:card_list')
+    # permanent = False
+    query_string = True
+    pattern_name = 'payment:card_list'
 
-    # TODO: tests
+    # def get_redirect_url(self, *args, **kwargs):
+    #     return super(CardUpdateDefaultView, self).get_redirect_url(*args, **kwargs)
 
-    def get(self, request, *args, **kwargs):
-        # set default card
-        Card.objects.update_default(
-            customer=request.user.hotel.customer,
-            id_=kwargs['pk']
-        )
-        return super(CardUpdateView, self).get(request, *args, *kwargs)
+    def dispatch(self, request, *args, **kwargs):
+        # Card.objects.update_default(customer=request.user.hotel.customer,id_=kwargs['pk'])
+        super(CardUpdateDefaultView, self).dispatch(request, *args, **kwargs)
+        return HttpResponseRedirect(revers('payment:card_list'))
+        # return super(CardUpdateDefaultView, self).get(request, *args, *kwargs)
 
 
-class CardDeleteView(AdminOnlyMixin, HotelCardOnlyMixin, DeleteView):
+class CardDeleteView(AdminOnlyMixin, DeleteView):
 
     model = Card
     template_name = 'account/account_form.html'
