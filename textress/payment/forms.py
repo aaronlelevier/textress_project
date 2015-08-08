@@ -15,7 +15,8 @@ class CardListForm(forms.Form):
     def __init__(self, hotel, *args, **kwargs):
         super(CardListForm, self).__init__(*args, **kwargs)
         self.hotel = hotel
-        self.fields['cards'].choices = self._card_list
+        self.fields['set_as_default'].choices = self._card_list
+        self.fields['delete'].choices = self._card_list
 
     @property
     def _card_list(self):
@@ -27,11 +28,12 @@ class CardListForm(forms.Form):
         if cards:
             return [(c.id, c.last4) for c in cards]
         else:
-            return [(None, None)]
+            return [(None, None)]          
 
     stripe_token = forms.CharField(required=False)
     # Card
-    cards = forms.ChoiceField(widget=forms.RadioSelect, required=False)
+    set_as_default = forms.ChoiceField(widget=forms.RadioSelect, required=False)
+    delete = forms.ChoiceField(widget=forms.RadioSelect, required=False)
     add_card = forms.BooleanField(label='Add a Card',
         initial=False, required=False)
 

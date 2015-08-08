@@ -150,11 +150,6 @@ class BillingTests(TestCase):
         self.assertIsInstance(response.context['acct_cost'], AcctCost)
         self.assertIsInstance(response.context['phone_numbers'][0], PhoneNumber)
 
-    ### OneTimePaymentView ###
-
-    def test_get_one_time_payment(self):
-        response = self.client.get(reverse('payment:one_time_payment'))
-        self.assertEqual(response.status_code, 200)
 
 
 
@@ -178,6 +173,12 @@ this time.'''
 
 #     def tearDown(self):
 #         self.client.logout()
+
+    ### OneTimePaymentView ###
+
+    # def test_get_one_time_payment(self):
+    #     response = self.client.get(reverse('payment:one_time_payment'))
+    #     self.assertEqual(response.status_code, 200)
 
 #     def test_create(self):
 #         self.assertIsInstance(self.card, Card)
@@ -203,6 +204,6 @@ this time.'''
 
 
 class CardTests(TestCase):
-    
+    pass    
 
 

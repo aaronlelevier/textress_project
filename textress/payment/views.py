@@ -26,6 +26,7 @@ from payment.forms import StripeForm, StripeOneTimePaymentForm, CardListForm
 from payment.helpers import signup_register_step4
 from payment.mixins import StripeMixin, StripeFormValidMixin, HotelCardOnlyMixin
 from sms.models import PhoneNumber
+from utils.forms import EmptyForm
 from utils.email import Email
 
 
@@ -252,20 +253,18 @@ sent to {}. Thank you.".format(self.request.user.email)
             return HttpResponseRedirect(self.success_url)
 
 
-class CardUpdateDefaultView(View):
+class CardUpdateDefaultView(AdminOnlyMixin, FormView):
 
-    # permanent = False
-    query_string = True
-    pattern_name = 'payment:card_list'
+    form_class = EmptyForm
+    template_name = "cpanel/form.html"
+    success_url = reverse_lazy('payment:card_list')
 
-    # def get_redirect_url(self, *args, **kwargs):
-    #     return super(CardUpdateDefaultView, self).get_redirect_url(*args, **kwargs)
-
-    def dispatch(self, request, *args, **kwargs):
-        # Card.objects.update_default(customer=request.user.hotel.customer,id_=kwargs['pk'])
-        super(CardUpdateDefaultView, self).dispatch(request, *args, **kwargs)
-        return HttpResponseRedirect(revers('payment:card_list'))
-        # return super(CardUpdateDefaultView, self).get(request, *args, *kwargs)
+    def post(self, request, *args, **kwargs):
+        """
+        Set the Card as the Default Payment Card.
+        """
+        card = Card.objects.update_default(self.hotel.customer, id=kwargs['id'])
+        return super(CardUpdateDefaultView, self).post(request, *args, **kwargs)        
 
 
 class CardDeleteView(AdminOnlyMixin, DeleteView):
