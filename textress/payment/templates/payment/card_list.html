@@ -78,12 +78,12 @@
         <div class="row" id="current_cards">
             {% for c in hotel.customer.cards.all %}
                 <div class="row well" style="background-color:white;">
-                    <div class="col-sm-8">
+                    <div class="col-sm-7" style="padding:0px;margin:0px;">
                         <img src="{{ MEDIA_URL }}{{ c.image.image }}" style="max-width:40px;"> 
-                        <span style="margin-left:5px">{{ c.brand }} ending in {{ c.last4 }}</span>
+                        <span style="margin-left:5px"><small>{{ c.brand }} ending in</small> {{ c.last4 }}</span>
                         <span style="margin-left:5px"><small>Expires:</small> {{ c.expires }}</span>
                     </div>
-                    <div class="col-sm-2 text-center">
+                    <div class="col-sm-3 text-center">
                         {% if c.default %}
                             <a href="#" onclick="return false;">
                                 <button type="button" class="btn btn-teal btn-xs">Primary</button>

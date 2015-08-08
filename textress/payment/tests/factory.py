@@ -30,7 +30,11 @@ def customer(customer_id=None):
 
 def stripe_card(customer_id=None):
     sc = stripe_customer(customer_id)
-    return sc.sources.retrieve(sc.cards.data[0].id)
+    count = Card.objects.filter(id=sc.id).count()
+    try:
+        return sc.sources.retrieve(sc.cards.data[count].id)
+    except IndexError:
+        return sc.sources.retrieve(sc.cards.data[0].id)
 
 def card(customer_id=None):
     _customer = customer(customer_id)

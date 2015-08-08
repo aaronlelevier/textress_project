@@ -214,7 +214,10 @@ class Card(PmtAbstractBase):
         # Auto-set ``default=True`` of Customer's 1st Card
         if not Card.objects.filter(customer=self.customer):
             self.default = True
-            
+
+        if self.default:
+            Card.objects._update_non_defaults(self.customer, self.id)
+
         if self.exp_month and self.exp_year:
             self.expires = "{self.exp_month:02d}/{self.exp_year}".format(self=self)
 

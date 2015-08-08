@@ -163,6 +163,7 @@ class CardUpdateTests(TestCase):
         # 2 Customers w/ 2 Cards each.
         self.customer = factory.customer()
         self.card = factory.card(customer_id=self.customer.id)
+        self.card2 = factory.card(customer_id=self.customer.id)
         self.hotel.customer = self.customer
         self.hotel.save()
         # Login

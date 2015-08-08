@@ -3,7 +3,7 @@
 :Next:
     1. "Change / Add Payment Method"
 
-        - provide a C.card drop down list:
+        # provide a C.card drop down list:
 
             -like OneTimePaymentView, but only updates credit cards, and 
             does not charge them.
