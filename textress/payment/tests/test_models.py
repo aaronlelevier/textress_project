@@ -3,6 +3,7 @@ import stripe
 from django.conf import settings
 from django.test import TestCase
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ValidationError
 
 from model_mommy import mommy
 
@@ -36,19 +37,59 @@ class CustomerTests(TestCase):
         self.assertIsNotNone(self.customer.get_all_charges())
 
 
+### CARD
+
+class CardManagerTests(TestCase):
+
+    def setUp(self):
+        # 2 Customers w/ 2 Cards each.
+        self.customer = factory.customer()
+        self.card = factory.card(customer_id=self.customer.id)
+        # Other Customer/Card
+        self.customer2 = factory.customer()
+        self.card2 = factory.card(customer_id=self.customer2.id)
+
+    def test_create(self):
+        self.assertEqual(Customer.objects.count(), 2)
+        self.assertEqual(Card.objects.count(), 2)
+
+    def test_validate_card(self):
+        # If nothing is returned (no Error Raised) the card is Valid
+        self.assertFalse(Card.objects._validate_card(self.customer, self.card.id))
+
+    def test_validate_card_validationerror(self):
+        with self.assertRaises(ValidationError):
+            Card.objects._validate_card(self.customer, 'bad-card-id')
+
+    def test_set_default(self):
+        # Set False
+        self.card.default = False
+        self.card.save()
+        self.assertFalse(self.card.default)
+        # Set True
+        card = Card.objects._set_default(self.customer, self.card.id)
+        self.assertTrue(card.default)
+
+    def test_update_non_defaults(self):
+        # Default
+        card = Card.objects._set_default(self.customer, self.card.id)
+        # Non-Defaults
+        Card.objects._update_non_defaults(self.customer, self.card.id)
+        self.assertTrue(card.default)
+        self.assertEqual(Card.objects.filter(customer=self.customer, default=True).count(), 1)
+
+    def test_update_default(self):
+        Card.objects.update_default(self.customer, self.card.id)
+        self.assertEqual(Card.objects.filter(customer=self.customer, default=True).count(), 1)
+
 class CardTests(TestCase):
 
     def setUp(self):
-        self.card = factory.card()
+        self.customer = factory.customer()
+        self.card = factory.card(customer_id=self.customer.id)
 
     def test_stripe_object_attr(self):
         self.assertTrue(hasattr(self.card, 'stripe_object'))
-
-    def test_get_absolute_url(self):
-        self.assertEqual(
-            self.card.get_absolute_url(),
-            reverse('payment:card_detail', kwargs={'pk': self.card.short_pk})
-        )
 
     def test_expires(self):
         self.assertIsInstance(self.card.expires, str)

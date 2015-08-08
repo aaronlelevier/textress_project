@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext, ugettext_lazy as _
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.urlresolvers import reverse
 
 from utils import email
@@ -120,19 +120,43 @@ class CardImage(models.Model):
 
 class CardManager(StripeClient, models.Manager):
 
+    def _validate_card(self, customer, id_):
+        "The Card exists for the Customer."
+        try:
+            self.get(customer=customer, id=id_)
+        except Card.DoesNotExist:
+            raise ValidationError("The Card does not exist for \
+customer: {}".format(customer))
+
+    def _set_default(self, customer, id_):
+        """Set the Default Card before calling the complete 
+        ``update_default`` method."""
+        card = self.get(id=id_)
+        card.default = True
+        card.save()
+        return card
+
+    def _update_non_defaults(self, customer, id_):
+        "All other 'non-default' cards are set as default=False."
+        for card in self.filter(customer=customer).exclude(id=id_):
+            card.default = False
+            card.save()
+
+    def _update_stripe_default(self, customer, id_):
+        "Update `default card` on Stripe Customer Obj."
+        stripe_customer = self.stripe.Customer.retrieve(customer.id)
+        stripe_customer.default_card = id_
+        stripe_customer.save()
+
     def update_default(self, customer, id_):
         '''
         `customer` is a DB Obj
         `id_` is the "default card id"
         '''
-        for card in self.exclude(id=id_):
-            card.default = False
-            card.save()
-
-        # update `default card` on Stripe Customer Obj
-        stripe_customer = self.stripe.Customer.retrieve(customer.id)
-        stripe_customer.default_card = id_
-        stripe_customer.save()
+        self._validate_card(customer, id_)
+        self._set_default(customer, id_)
+        self._update_non_defaults(customer, id_)
+        self._update_stripe_default(customer, id_)
 
     def stripe_create(self, customer, token=None):
         '''Only Create Card DB instance. The Stripe Card Obj is already
@@ -208,9 +232,6 @@ class Card(PmtAbstractBase):
 
         return super(Card, self).delete(*args, **kwargs)
         
-    def get_absolute_url(self):
-        return reverse('payment:card_detail', kwargs={'pk': self.short_pk})
-
 
 ##########
 # CHARGE #

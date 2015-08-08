@@ -16,7 +16,8 @@ def stripe_customer(customer_id=None):
     if customer_id:
         return stripe.Customer.retrieve(customer_id)
     else:
-        return stripe.Customer.all(limit=1).data[0]
+        count_ = Customer.objects.count()
+        return stripe.Customer.all(limit=count_+1).data[count_]
 
 def customer(customer_id=None):
     if not customer_id:
