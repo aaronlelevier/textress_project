@@ -23,9 +23,10 @@ from main.models import Hotel
 from main.mixins import (RegistrationContextMixin, HotelContextMixin, HotelUserMixin,
     AdminOnlyMixin)
 from payment.models import Card
-from payment.forms import StripeForm, StripeOneTimePaymentForm, CardListForm
+from payment.forms import StripeForm, CardListForm # StripeOneTimePaymentForm
 from payment.helpers import signup_register_step4
-from payment.mixins import StripeMixin, StripeFormValidMixin, HotelCardOnlyMixin
+from payment.mixins import (StripeMixin, StripeFormValidMixin, HotelCardOnlyMixin,
+    MonthYearContextMixin)
 from sms.models import PhoneNumber
 from utils.forms import EmptyForm
 from utils.email import Email
@@ -33,8 +34,8 @@ from utils.email import Email
 
 ### REGISTRATION VIEWS ###
 
-class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin, AcctCostContextMixin,
-    StripeMixin, FormView):
+class RegisterPmtView(AdminOnlyMixin, RegistrationContextMixin, MonthYearContextMixin,
+    AcctCostContextMixin, StripeMixin, FormView):
     """
     Step #4 of Registration
 
@@ -51,10 +52,6 @@ class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin, AcctCostContextM
         context = super(RegisterPmtView, self).get_context_data(**kwargs)
         context['step_number'] = 3
         context['step'] = context['steps'][context['step_number']]
-        # form choices
-        context['months'] = ['<option value="{num:02d}">{num:02d}</option>'.format(num=i) for i in range(1,13)]
-        cur_year = datetime.date.today().year
-        context['years'] = ['<option value="{num}">{num}</option>'.format(num=i) for i in range(cur_year, cur_year+12)]
         context['PHONE_NUMBER_CHARGE'] = settings.PHONE_NUMBER_CHARGE
         return context
 
@@ -150,66 +147,60 @@ class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
         return context
 
 
-class OneTimePaymentView(AdminOnlyMixin, SetHeadlineMixin, FormValidMessageMixin,
-    StripeMixin, FormView):
+# class OneTimePaymentView(AdminOnlyMixin, MonthYearContextMixin, SetHeadlineMixin,
+#     FormValidMessageMixin, StripeMixin, FormView):
 
-    headline = "One Time Payment"
-    template_name = "payment/one_time_payment.html"
-    form_class = StripeOneTimePaymentForm
-    success_url = reverse_lazy('payment:summary')
+#     headline = "One Time Payment"
+#     template_name = "payment/one_time_payment.html"
+#     form_class = StripeOneTimePaymentForm
+#     success_url = reverse_lazy('payment:summary')
 
-    def get_form_valid_message(self):
-        return "The payment has been successfully processed. An email will be \
-sent to {}. Thank you.".format(self.request.user.email) 
+#     def get_form_valid_message(self):
+#         return "The payment has been successfully processed. An email will be \
+# sent to {}. Thank you.".format(self.request.user.email) 
 
-    def get_context_data(self, **kwargs):
-        context = super(OneTimePaymentView, self).get_context_data(**kwargs)
-        context['months'] = ['<option value="{num:02d}">{num:02d}</option>'.format(num=i) for i in range(1,13)]
-        cur_year = datetime.date.today().year
-        context['years'] = ['<option value="{num}">{num}</option>'.format(num=i) for i in range(cur_year, cur_year+12)]
-        return context
+#     def get_form_kwargs(self):
+#         "The Hotel Card objects will be need for the C.Card ChoiceField."
+#         # grab the current set of form #kwargs
+#         kwargs = super(OneTimePaymentView, self).get_form_kwargs()
+#         # Update the kwargs with the user_id
+#         kwargs['hotel'] = self.hotel
+#         return kwargs
 
-    def get_form_kwargs(self):
-        "The Hotel Card objects will be need for the C.Card ChoiceField."
-        # grab the current set of form #kwargs
-        kwargs = super(OneTimePaymentView, self).get_form_kwargs()
-        # Update the kwargs with the user_id
-        kwargs['hotel'] = self.hotel
-        return kwargs
+#     def form_valid(self, form):
+#         try:
+#             #DB create
+#             (customer, card, charge) = signup_register_step4(
+#                 hotel=self.request.user.profile.hotel,
+#                 token=form.cleaned_data['stripe_token'],
+#                 email=self.request.user.email,
+#                 amount=self.hotel.acct_cost.init_amt)
+#         except stripe.error.StripeError as e:
+#             body = e.json_body
+#             err = body['error']
+#             messages.warning(self.request, err)
+#             return HttpResponseRedirect(reverse('payment:one_time_payment'))
+#         else:
+#             # send conf email
+#             email = Email(
+#                 to=self.request.user.email,
+#                 from_email=settings.DEFAULT_EMAIL_BILLING,
+#                 extra_context={
+#                     'user': self.request.user,
+#                     'customer': customer,
+#                     'charge': charge
+#                 },
+#                 subject='email/payment_subject.txt',
+#                 html_content='email/payment_email.html'
+#             )
+#             email.msg.send()
+#             return HttpResponseRedirect(self.success_url)
 
-    def form_valid(self, form):
-        try:
-            #DB create
-            (customer, card, charge) = signup_register_step4(
-                hotel=self.request.user.profile.hotel,
-                token=form.cleaned_data['stripe_token'],
-                email=self.request.user.email,
-                amount=self.hotel.acct_cost.init_amt)
-        except stripe.error.StripeError as e:
-            body = e.json_body
-            err = body['error']
-            messages.warning(self.request, err)
-            return HttpResponseRedirect(reverse('payment:one_time_payment'))
-        else:
-            # send conf email
-            email = Email(
-                to=self.request.user.email,
-                from_email=settings.DEFAULT_EMAIL_BILLING,
-                extra_context={
-                    'user': self.request.user,
-                    'customer': customer,
-                    'charge': charge
-                },
-                subject='email/payment_subject.txt',
-                html_content='email/payment_email.html'
-            )
-            email.msg.send()
-            return HttpResponseRedirect(self.success_url)
 
 ### CARD VIEWS ###
 
-class CardListView(AdminOnlyMixin, SetHeadlineMixin, FormValidMessageMixin,
-    StripeMixin, FormView):
+class CardListView(AdminOnlyMixin, MonthYearContextMixin, SetHeadlineMixin,
+    FormValidMessageMixin, StripeMixin, FormView):
     '''
     Admin Only. Add a Card to an existing Customer Account View.
     '''
@@ -220,31 +211,15 @@ class CardListView(AdminOnlyMixin, SetHeadlineMixin, FormValidMessageMixin,
 
     def get_form_valid_message(self):
         return "The payment has been successfully processed. An email will be \
-sent to {}. Thank you.".format(self.request.user.email) 
-
-    def get_context_data(self, **kwargs):
-        context = super(CardListView, self).get_context_data(**kwargs)
-        context['months'] = ['<option value="{num:02d}">{num:02d}</option>'.format(num=i) for i in range(1,13)]
-        cur_year = datetime.date.today().year
-        context['years'] = ['<option value="{num}">{num}</option>'.format(num=i) for i in range(cur_year, cur_year+12)]
-        return context
-
-    def get_form_kwargs(self):
-        "The Hotel Card objects will be need for the C.Card ChoiceField."
-        # grab the current set of form #kwargs
-        kwargs = super(CardListView, self).get_form_kwargs()
-        # Update the kwargs with the user_id
-        kwargs['hotel'] = self.hotel
-        return kwargs
+sent to {}. Thank you.".format(self.request.user.email)
 
     def form_valid(self, form):
         try:
             #DB create
-            (customer, card, charge) = signup_register_step4(
-                hotel=self.request.user.profile.hotel,
-                token=form.cleaned_data['stripe_token'],
-                email=self.request.user.email,
-                amount=self.hotel.acct_cost.init_amt)
+            Card.objects.stripe_create(
+                customer=self.request.user.profile.hotel.customer,
+                token=form.cleaned_data['stripe_token']
+                )
         except stripe.error.StripeError as e:
             body = e.json_body
             err = body['error']
@@ -252,6 +227,7 @@ sent to {}. Thank you.".format(self.request.user.email)
             return HttpResponseRedirect(reverse('payment:one_time_payment'))
         else:
             return HttpResponseRedirect(self.success_url)
+
 
 @login_required(login_url=reverse_lazy('login'))
 def set_default_card_view(request, pk):

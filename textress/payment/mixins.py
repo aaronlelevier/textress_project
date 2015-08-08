@@ -1,3 +1,5 @@
+import datetime
+
 from django.conf import settings
 from django.http import Http404, HttpResponseRedirect
 from django.core.urlresolvers import reverse, reverse_lazy
@@ -17,7 +19,20 @@ from utils import dj_messages
 from utils.email import Email
 
 
-### STRIPE MIXINS ###
+### MISC.
+
+class MonthYearContextMixin(object):
+    "For Form Month/Year dropdown ChoiceFields."
+
+    def get_context_data(self, **kwargs):
+        context = super(MonthYearContextMixin, self).get_context_data(**kwargs)
+        context['months'] = ['<option value="{num:02d}">{num:02d}</option>'.format(num=i) for i in range(1,13)]
+        cur_year = datetime.date.today().year
+        context['years'] = ['<option value="{num}">{num}</option>'.format(num=i) for i in range(cur_year, cur_year+12)]
+        return context
+
+
+### STRIPE
 
 class StripeMixin(object):
     
@@ -62,7 +77,8 @@ class StripeFormValidMixin(object):
             email.msg.send()
             return HttpResponseRedirect(self.success_url)
 
-### CARD MIXINS ###
+
+### CARD
 
 class HotelCardOnlyMixin(object):
     '''Make sure that the Card belongs to the Hotel.'''

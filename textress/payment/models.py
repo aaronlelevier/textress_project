@@ -230,11 +230,9 @@ class Card(PmtAbstractBase):
 
     def delete(self, *args, **kwargs):
         '''Delete Stripe Card b/4 deleting Model instance.'''
-
-        if 'test' not in sys.argv:
-            stripe_customer = self.stripe.Customer.retrieve(self.customer.id)
-            stripe_customer.cards.retrieve(self.id).delete()
-
+        # if 'test' not in sys.argv:
+        #     stripe_customer = self.stripe.Customer.retrieve(self.customer.id)
+        #     stripe_customer.cards.retrieve(self.id).delete()
         return super(Card, self).delete(*args, **kwargs)
         
 

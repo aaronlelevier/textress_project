@@ -4,7 +4,7 @@ import pytest
 import stripe
 
 from django.conf import settings
-from django.test import TestCase, LiveServerTestCase, RequestFactory
+from django.test import TestCase, RequestFactory
 from django.test.client import Client
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Group
@@ -18,7 +18,7 @@ from account.tests.factory import (CREATE_ACCTCOST_DICT, create_acct_stmts,
 from main.models import Hotel
 from main.tests.factory import (CREATE_USER_DICT, CREATE_HOTEL_DICT, PASSWORD,
     create_hotel, create_hotel_user)
-from payment.forms import StripeOneTimePaymentForm
+# from payment.forms import StripeOneTimePaymentForm
 from payment.tests import factory
 from payment.models import Customer, Card, Charge
 from sms.models import PhoneNumber
@@ -163,6 +163,8 @@ class CardUpdateTests(TestCase):
         # 2 Customers w/ 2 Cards each.
         self.customer = factory.customer()
         self.card = factory.card(customer_id=self.customer.id)
+        self.hotel.customer = self.customer
+        self.hotel.save()
         # Login
         self.client.login(username=self.admin.username, password=PASSWORD)
 
@@ -179,7 +181,7 @@ class CardUpdateTests(TestCase):
             kwargs={'pk': self.card.id}), follow=True)
         self.assertRedirects(response, reverse('payment:card_list'))
         card = Card.objects.get(id=self.card.id)
-        self.assertTrue(self.card.default)
+        self.assertTrue(card.default)
 
     def test_delete_card_view(self):
         response = self.client.get(reverse('payment:delete_card',
