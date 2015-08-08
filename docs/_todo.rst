@@ -1,3 +1,21 @@
+2015-08-08
+----------
+:Next:
+    - breadcrums for sub-urls
+
+        - ex: payments, phone-numbers, etc...
+
+    - charge when a phone-number is purchased
+
+        - setup a monthly cron-job type charge for all phone-numbers
+        at the month anniversary of signup
+
+    - global notifications for SMS when they arrive?
+
+    - marking a message as read when you go to the GuestDetailView
+
+
+
 2015-08-05
 ----------
 :Next:
