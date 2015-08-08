@@ -11,6 +11,7 @@ from django.views.generic import (View, ListView, DetailView, DeleteView,
 from django.forms.models import model_to_dict
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms.models import model_to_dict
+from django.contrib.auth.decorators import login_required
 
 import stripe
 from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
@@ -252,23 +253,13 @@ sent to {}. Thank you.".format(self.request.user.email)
         else:
             return HttpResponseRedirect(self.success_url)
 
-
-class CardUpdateDefaultView(AdminOnlyMixin, FormView):
-
-    form_class = EmptyForm
-    template_name = "cpanel/form.html"
-    success_url = reverse_lazy('payment:card_list')
-
-    def post(self, request, *args, **kwargs):
-        """
-        Set the Card as the Default Payment Card.
-        """
-        card = Card.objects.update_default(self.hotel.customer, id=kwargs['id'])
-        return super(CardUpdateDefaultView, self).post(request, *args, **kwargs)        
+@login_required(login_url=reverse_lazy('login'))
+def set_default_card_view(request, pk):
+    card = Card.objects.update_default(request.user.profile.hotel.customer, pk)
+    return HttpResponseRedirect(reverse('payment:card_list'))
 
 
-class CardDeleteView(AdminOnlyMixin, DeleteView):
-
-    model = Card
-    template_name = 'account/account_form.html'
-    success_url = reverse_lazy('payment:card_list')
+@login_required(login_url=reverse_lazy('login'))
+def delete_card_view(request, pk):
+    Card.objects.delete_card(request.user.profile.hotel.customer, pk)
+    return HttpResponseRedirect(reverse('payment:card_list'))

@@ -61,64 +61,57 @@
 
 <div class="row">
     <div class="col-md-6 col-md-offset-3">
-        <form method="post" action="" id="checkout-form">
-            {% csrf_token %}
-            {{ form.non_field_errors }}
 
-            <div class="row">
-                <div class="row well" style="padding:0;">
-                    <h4 class="text-center">Credit &amp; Debit Cards</h4>
-                </div>
+        <div class="row">
+            <div class="row well" style="padding:0;">
+                <h4 class="text-center">Credit &amp; Debit Cards</h4>
             </div>
+        </div>
+        
+        <div class="row">
+            <div class="pull-right">
+                {{ form.add_card }} &nbsp; Add a Card
+            </div>
+        </div>
+        <br>
 
-<!-- Stripe Error Alert -->
-            <div class="row" style="margin-bottom:2em">
-                <div class="col-md-12">
-                    <span class="payment-errors alert-danger"></span>
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="pull-right">
-                    {{ form.add_card }} &nbsp; Add a Card
-                </div>
-            </div>
-            <br>
-
-            <div class="row" id="current_cards">
-                {% for c in hotel.customer.cards.all %}
-                    <div class="row well" style="background-color:white;">
-                        <div class="col-md-7">
-                            <img src="{{ MEDIA_URL }}{{ c.image.image }}" style="max-width:40px;"> 
-                            <span style="margin-left:5px">{{ c.brand }} ending in {{ c.last4 }}</span>
-                            <span style="margin-left:5px"><small>Expires:</small> {{ c.expires }}</span>
-                        </div>
-                        <div class="col-md-3">
-                            {% if c.default %}
-                                <a href="/guests/update/[[ guest.id ]]/">
-                                    <button type="button" class="btn btn-teal btn-xs">Primary</button>
-                                </a>
-                            {% else %}
-                                <a href="/guests/update/[[ guest.id ]]/">
-                                    <button type="button" class="btn btn-success btn-xs">Set as Primary</button>
-                                </a>
-                            {% endif %}
-                        </div>
-                        <div class="col-md-2">
-                            <a href="/guests/delete/[[ guest.id ]]/">
-                                <button type="button" class="btn btn-danger btn-xs">Delete</button>
-                            </a>
-                        </div>
+        <div class="row" id="current_cards">
+            {% for c in hotel.customer.cards.all %}
+                <div class="row well" style="background-color:white;">
+                    <div class="col-md-7">
+                        <img src="{{ MEDIA_URL }}{{ c.image.image }}" style="max-width:40px;"> 
+                        <span style="margin-left:5px">{{ c.brand }} ending in {{ c.last4 }}</span>
+                        <span style="margin-left:5px"><small>Expires:</small> {{ c.expires }}</span>
                     </div>
-                    {{ form.set_as_default.label }}
-                    {{ form.set_as_default }}
-                    {{ form.delete.label }}
-                    {{ form.delete }}
-                {% endfor %}
-            </div>
+                    <div class="col-md-3 text-center">
+                        {% if c.default %}
+                            <a href="#" onclick="return false;">
+                                <button type="button" class="btn btn-teal btn-xs">Primary</button>
+                            </a>
+                        {% else %}
+                            <a href="{% url 'payment:set_default_card' c.pk %}">
+                                <button type="button" class="btn btn-success btn-xs">Set as Primary</button>
+                            </a>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-2">
+                        <a href="{% url 'payment:delete_card' c.pk %}">
+                            <button type="button" class="btn btn-danger btn-xs">Delete</button>
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
 
-
-            <div class="row" id="add_card">
+        <div class="row" id="add_card">
+            <form method="post" action="" id="checkout-form">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                <div class="row" style="margin-bottom:2em">
+                    <div class="col-md-12">
+                        <span class="payment-errors alert-danger"></span>
+                    </div>
+                </div>
                 <div class="form-group">
                     <label class="control-label" for="card">Card</label>
                     <div class="controls">
@@ -159,7 +152,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="row">
                     <div class="col-md-6">
                         <small>By clicking submit, you are agreeing to the <a href="{% url 'terms_n_cond' %}">terms and conditions</a></small>
@@ -174,27 +166,29 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </form>
+        </div>
 
-            <hr>
-            <div class="row">
-                <div class="col-md-12 tab-content">
-                    <div class="row">
-                        <div class="col-md-11">
-                            <p>We don't store any credit card information. All payments information is transferred via secure SSL and processed by <a href="https://stripe.com/gallery"><strong>Stripe, Inc.</strong></a></p>
-                        </div>
-                    </div>
-                    <div class="text-center">
-                        <a href="https://stripe.com/gallery">
-                            <img style="max-width:80%" src="{% static 'images/stripe-payments.png' %}" alt="powered-by-stripe">
-                        </a>
+        <hr>
+        <div class="row">
+            <div class="col-md-12 tab-content">
+                <div class="row">
+                    <div class="col-md-11">
+                        <p>We don't store any credit card information. All payments information is transferred via secure SSL and processed by <a href="https://stripe.com/gallery"><strong>Stripe, Inc.</strong></a></p>
                     </div>
                 </div>
+                <div class="text-center">
+                    <a href="https://stripe.com/gallery">
+                        <img style="max-width:80%" src="{% static 'images/stripe-payments.png' %}" alt="powered-by-stripe">
+                    </a>
+                </div>
             </div>
-        </form>
+        </div>
+
     </div>
 </div>
 <br>
+
 {% endblock content %}
 
 

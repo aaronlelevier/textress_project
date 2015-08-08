@@ -123,10 +123,11 @@ class CardManager(StripeClient, models.Manager):
     def _validate_card(self, customer, id_):
         "The Card exists for the Customer."
         try:
-            self.get(customer=customer, id=id_)
+            card = self.get(customer=customer, id=id_)
         except Card.DoesNotExist:
             raise ValidationError("The Card does not exist for \
 customer: {}".format(customer))
+        return card
 
     def _set_default(self, customer, id_):
         """Set the Default Card before calling the complete 
@@ -177,6 +178,11 @@ customer: {}".format(customer))
                 brand=stripe_card.brand, last4=stripe_card.last4,
                 exp_month=stripe_card.exp_month, exp_year=stripe_card.exp_year)
 
+    def delete_card(self, customer, id_):
+        "Validate the Card before deleting it."
+        card = self._validate_card(customer, id_)
+        card.delete()
+
 
 class Card(PmtAbstractBase):
     # Keys
@@ -205,11 +211,10 @@ class Card(PmtAbstractBase):
     def save(self, *args, **kwargs):
         '''When saving, if the card is the "default", update using the 
         model manager.'''
-        # remove when not testing "sys.argv" check...
-        if 'test' not in sys.argv:
-            if self.default:
-                Card.objects.update_default(customer=self.customer, id_=self.id)
-
+        # Auto-set ``default=True`` of Customer's 1st Card
+        if not Card.objects.filter(customer=self.customer):
+            self.default = True
+            
         if self.exp_month and self.exp_year:
             self.expires = "{self.exp_month:02d}/{self.exp_year}".format(self=self)
 

@@ -54,8 +54,8 @@ class CardManagerTests(TestCase):
         self.assertEqual(Card.objects.count(), 2)
 
     def test_validate_card(self):
-        # If nothing is returned (no Error Raised) the card is Valid
-        self.assertFalse(Card.objects._validate_card(self.customer, self.card.id))
+        # If Card is returned, (no Error Raised) the card is Valid
+        self.assertTrue(Card.objects._validate_card(self.customer, self.card.id))
 
     def test_validate_card_validationerror(self):
         with self.assertRaises(ValidationError):
@@ -82,17 +82,31 @@ class CardManagerTests(TestCase):
         Card.objects.update_default(self.customer, self.card.id)
         self.assertEqual(Card.objects.filter(customer=self.customer, default=True).count(), 1)
 
+    def test_delete_card(self):
+        Card.objects.delete_card(self.customer, self.card.id)
+        with self.assertRaises(Card.DoesNotExist):
+            Card.objects.get(id=self.card.id)
+
+
 class CardTests(TestCase):
 
     def setUp(self):
         self.customer = factory.customer()
         self.card = factory.card(customer_id=self.customer.id)
 
+    ### Save Logic
+
+    def test_default(self):
+        self.assertTrue(self.card.default)
+
     def test_stripe_object_attr(self):
         self.assertTrue(hasattr(self.card, 'stripe_object'))
 
     def test_expires(self):
         self.assertIsInstance(self.card.expires, str)
+
+    def test_image(self):
+        self.assertTrue(self.card.image)
 
 
 class ChargeTests(TestCase):

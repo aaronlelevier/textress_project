@@ -151,6 +151,44 @@ class BillingTests(TestCase):
         self.assertIsInstance(response.context['phone_numbers'][0], PhoneNumber)
 
 
+class CardUpdateTests(TestCase):
+
+    def setUp(self):
+        # User Info
+        self.password = PASSWORD
+        self.hotel = create_hotel()
+        # create "Hotel Manager" Group
+        create._get_groups_and_perms()
+        self.admin = create_hotel_user(hotel=self.hotel, username='admin', group='hotel_admin')
+        # 2 Customers w/ 2 Cards each.
+        self.customer = factory.customer()
+        self.card = factory.card(customer_id=self.customer.id)
+        # Login
+        self.client.login(username=self.admin.username, password=PASSWORD)
+
+    def tearDown(self):
+        self.client.logout()
+
+    def test_set_default_card_view(self):
+        # default = False
+        self.card.default = False
+        self.card.save()
+        self.assertFalse(self.card.default)
+        # set to True
+        response = self.client.get(reverse('payment:set_default_card',
+            kwargs={'pk': self.card.id}), follow=True)
+        self.assertRedirects(response, reverse('payment:card_list'))
+        card = Card.objects.get(id=self.card.id)
+        self.assertTrue(self.card.default)
+
+    def test_delete_card_view(self):
+        response = self.client.get(reverse('payment:delete_card',
+            kwargs={'pk': self.card.id}), follow=True)
+        self.assertRedirects(response, reverse('payment:card_list'))
+        with self.assertRaises(Card.DoesNotExist):
+            Card.objects.get(id=self.card.id)
+
+
 
 
 '''Remove for the time being. Can add in V2 of the software. Not critical at 
