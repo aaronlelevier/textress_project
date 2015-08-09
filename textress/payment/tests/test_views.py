@@ -172,6 +172,19 @@ class CardUpdateTests(TestCase):
     def tearDown(self):
         self.client.logout()
 
+    def test_card_list_response(self):
+        response = self.client.get(reverse('payment:card_list'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_card_list_context(self):
+        response = self.client.get(reverse('payment:card_list'))
+        self.assertTrue(response.context['form'])
+
+    def test_card_list_billing_summary_breadcrumbs(self):
+        # Also tests: ``BreadcrumbBaseMixin``
+        response = self.client.get(reverse('payment:card_list'))
+        self.assertTrue(response.context['breadcrumbs'])
+
     def test_set_default_card_view(self):
         # default = False
         self.card.default = False

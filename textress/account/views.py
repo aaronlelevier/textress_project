@@ -30,7 +30,8 @@ from account.models import AcctCost, AcctStmt, AcctTrans, Pricing
 from account.serializers import PricingSerializer
 from main.mixins import RegistrationContextMixin, AdminOnlyMixin, HotelUserMixin
 from main.models import UserProfile, Subaccount
-from main.forms import UserCreateForm 
+from main.forms import UserCreateForm
+from payment.mixins import BillingSummaryContextMixin
 from sms.models import PhoneNumber
 from utils import email, login_messages
 
@@ -139,7 +140,7 @@ class RegisterAcctCostUpdateView(RegisterAcctCostBaseView, UpdateView):
 # ACCT COST #
 #############
 
-class AcctCostUpdateView(AdminOnlyMixin, SetHeadlineMixin, UpdateView):
+class AcctCostUpdateView(AdminOnlyMixin, BillingSummaryContextMixin, SetHeadlineMixin, UpdateView):
 
     headline = "Payment Refill Settings"
     template_name = "cpanel/form.html"
@@ -170,7 +171,7 @@ class AcctStmtListView(AdminOnlyMixin, SetHeadlineMixin, ListView):
         return super(AcctStmtListView, self).get(request, *args, **kwargs)
 
 
-class AcctStmtDetailView(SetHeadlineMixin, AdminOnlyMixin, TemplateView):
+class AcctStmtDetailView(AdminOnlyMixin, SetHeadlineMixin, BillingSummaryContextMixin, TemplateView):
     '''
     All AcctTrans for a single Month.
 
@@ -203,7 +204,7 @@ class AcctStmtDetailView(SetHeadlineMixin, AdminOnlyMixin, TemplateView):
         return context
 
 
-class AcctPmtHistoryView(SetHeadlineMixin, AdminOnlyMixin, ListView):
+class AcctPmtHistoryView(AdminOnlyMixin, SetHeadlineMixin, BillingSummaryContextMixin, ListView):
     '''
     Simple table view of payments that uses pagination.
     '''

@@ -19,6 +19,14 @@
 {% endblock %}
 
 
+{% block breadcrumbs %}
+    {{ block.super }}
+    {% if breadcrumbs %}
+        {{ breadcrumbs|safe }}
+    {% endif %}
+{% endblock breadcrumbs %}
+
+
 {% block content %}
 
         {% if addit_info %}

@@ -518,25 +518,29 @@
                             <div class="col-sm-12">
                                 <!-- start: PAGE TITLE & BREADCRUMB -->
                                 <ol class="breadcrumb">
-                                    <li>
-                                        <i class="clip-home-3"></i>
-                                        <a href="{% url 'account' %}">
-                                            Home
-                                        </a>
-                                    </li>
-                                    <li class="active">
-                                        {{ headline }}
-                                    </li>
-                                    <li class="search-box">
-                                        <form class="sidebar-search">
-                                            <div class="form-group">
-                                                <input type="text" placeholder="Start Searching...">
-                                                <button class="submit">
-                                                    <i class="clip-search-3"></i>
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </li>
+                                    {% block breadcrumbs %}
+                                        <li>
+                                            <i class="clip-home-3"></i>
+                                            <a href="{% url 'account' %}">
+                                                Home
+                                            </a>
+                                        </li>
+                                    {% endblock breadcrumbs %}
+                                        <li class="active">
+                                            {{ headline }}
+                                        </li>
+                                    {% block searchbar %}
+                                        <li class="search-box">
+                                            <form class="sidebar-search">
+                                                <div class="form-group">
+                                                    <input type="text" placeholder="Start Searching...">
+                                                    <button class="submit">
+                                                        <i class="clip-search-3"></i>
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </li>
+                                    {% endblock searchbar %}
                                 </ol>
 
                                 {% if messages %}

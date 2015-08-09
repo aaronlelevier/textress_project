@@ -48,27 +48,45 @@ class AcctStmtViewTests(TestCase):
 
     ### ACCT STMT DETAIL
 
-    def test_detail_response(self):
+    def test_acct_stmt_detail_response(self):
         response = self.client.get(reverse('acct_stmt_detail',
             kwargs={'year': self.year, 'month': self.month}))
         self.assertEqual(response.status_code, 200)
 
-    def test_detail_context(self):
+    def test_acct_stmt_detail_context(self):
         response = self.client.get(reverse('acct_stmt_detail',
             kwargs={'year': self.year, 'month': self.month}))
         self.assertTrue(response.context['acct_stmt'])
         self.assertTrue(response.context['acct_stmts'])
         self.assertTrue(response.context['monthly_trans'])
 
+    def test_acct_stmt_detail_breadcrumbs(self):
+        response = self.client.get(reverse('acct_stmt_detail',
+            kwargs={'year': self.year, 'month': self.month}))
+        self.assertTrue(response.context['breadcrumbs'])
+
     ### ACCT PMT HISTORY
 
-    def test_pmt_history_response(self):
+    def test_acct_pmt_history_response(self):
         response = self.client.get(reverse('acct_pmt_history'))
         self.assertEqual(response.status_code, 200)
 
-    def test_pmt_history_context(self):
+    def test_acct_pmt_history_context(self):
         response = self.client.get(reverse('acct_pmt_history'))
         self.assertTrue(response.context['object_list'])
+
+    def test_acct_pmt_history_breadcrumbs(self):
+        response = self.client.get(reverse('acct_pmt_history'))
+        self.assertTrue(response.context['breadcrumbs'])
+        
+    ### ACCT COST
+
+    def test_acct_cost_update(self):
+        acct_cost, created = AcctCost.objects.get_or_create(self.hotel)
+        response = self.client.get(reverse('acct_cost_update', kwargs={'pk':acct_cost.pk}))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['form'])
+        self.assertTrue(response.context['breadcrumbs'])
 
 
 class APITests(TestCase):
@@ -124,7 +142,7 @@ class RegistrationTests(TestCase):
         # TODO: remove when going Beta
         # Warning is in the Context
         self.assertContains(response, 'Textress is currently Pre-Alpha with limited functionality')
-        
+
 
 class RenderTests(TestCase):
     # Test Rending of view, template path is correct, url

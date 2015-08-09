@@ -26,13 +26,13 @@ from payment.models import Card
 from payment.forms import StripeForm, CardListForm # StripeOneTimePaymentForm
 from payment.helpers import signup_register_step4
 from payment.mixins import (StripeMixin, StripeFormValidMixin, HotelCardOnlyMixin,
-    MonthYearContextMixin)
+    BillingSummaryContextMixin, MonthYearContextMixin)
 from sms.models import PhoneNumber
 from utils.forms import EmptyForm
 from utils.email import Email
 
 
-### REGISTRATION VIEWS ###
+### REGISTRATION
 
 class RegisterPmtView(AdminOnlyMixin, RegistrationContextMixin, MonthYearContextMixin,
     AcctCostContextMixin, StripeMixin, FormView):
@@ -110,6 +110,8 @@ class RegisterSuccessView(RegistrationContextMixin, AdminOnlyMixin, TemplateView
         return context
 
 
+### BILLING
+
 class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
     '''
     Main Billing Summary View with links to view more detail of 
@@ -145,6 +147,50 @@ class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
         context['acct_trans'] = AcctTrans.objects.filter(hotel=self.hotel,
             trans_type__name__in=['init_amt', 'recharge_amt']).order_by('-insert_date')[:4]
         return context
+
+
+### CARD VIEWS ###
+
+class CardListView(AdminOnlyMixin, BillingSummaryContextMixin, MonthYearContextMixin,
+    SetHeadlineMixin, FormValidMessageMixin, StripeMixin, FormView):
+    '''
+    Admin Only. Add a Card to an existing Customer Account View.
+    '''
+    headline = "Manage Payment Methods"
+    template_name = "payment/card_list.html"
+    form_class = CardListForm
+    success_url = reverse_lazy('payment:card_list')
+
+    def get_form_valid_message(self):
+        return "The payment has been successfully processed. An email will be \
+sent to {}. Thank you.".format(self.request.user.email)
+
+    def form_valid(self, form):
+        try:
+            #DB create
+            Card.objects.stripe_create(
+                customer=self.request.user.profile.hotel.customer,
+                token=form.cleaned_data['stripe_token']
+                )
+        except stripe.error.StripeError as e:
+            body = e.json_body
+            err = body['error']
+            messages.warning(self.request, err)
+            return HttpResponseRedirect(reverse('payment:one_time_payment'))
+        else:
+            return HttpResponseRedirect(self.success_url)
+
+
+@login_required(login_url=reverse_lazy('login'))
+def set_default_card_view(request, pk):
+    card = Card.objects.update_default(request.user.profile.hotel.customer, pk)
+    return HttpResponseRedirect(reverse('payment:card_list'))
+
+
+@login_required(login_url=reverse_lazy('login'))
+def delete_card_view(request, pk):
+    Card.objects.delete_card(request.user.profile.hotel.customer, pk)
+    return HttpResponseRedirect(reverse('payment:card_list'))
 
 
 # class OneTimePaymentView(AdminOnlyMixin, MonthYearContextMixin, SetHeadlineMixin,
@@ -196,46 +242,3 @@ class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
 #             email.msg.send()
 #             return HttpResponseRedirect(self.success_url)
 
-
-### CARD VIEWS ###
-
-class CardListView(AdminOnlyMixin, MonthYearContextMixin, SetHeadlineMixin,
-    FormValidMessageMixin, StripeMixin, FormView):
-    '''
-    Admin Only. Add a Card to an existing Customer Account View.
-    '''
-    headline = "Manage Payment Methods"
-    template_name = "payment/card_list.html"
-    form_class = CardListForm
-    success_url = reverse_lazy('payment:card_list')
-
-    def get_form_valid_message(self):
-        return "The payment has been successfully processed. An email will be \
-sent to {}. Thank you.".format(self.request.user.email)
-
-    def form_valid(self, form):
-        try:
-            #DB create
-            Card.objects.stripe_create(
-                customer=self.request.user.profile.hotel.customer,
-                token=form.cleaned_data['stripe_token']
-                )
-        except stripe.error.StripeError as e:
-            body = e.json_body
-            err = body['error']
-            messages.warning(self.request, err)
-            return HttpResponseRedirect(reverse('payment:one_time_payment'))
-        else:
-            return HttpResponseRedirect(self.success_url)
-
-
-@login_required(login_url=reverse_lazy('login'))
-def set_default_card_view(request, pk):
-    card = Card.objects.update_default(request.user.profile.hotel.customer, pk)
-    return HttpResponseRedirect(reverse('payment:card_list'))
-
-
-@login_required(login_url=reverse_lazy('login'))
-def delete_card_view(request, pk):
-    Card.objects.delete_card(request.user.profile.hotel.customer, pk)
-    return HttpResponseRedirect(reverse('payment:card_list'))

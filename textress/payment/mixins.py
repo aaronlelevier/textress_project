@@ -15,11 +15,19 @@ from braces.views import LoginRequiredMixin, GroupRequiredMixin
 from payment.models import Card
 from payment.helpers import signup_register_step4
 from main.models import Hotel
-from utils import dj_messages
+from utils import dj_messages, mixins
 from utils.email import Email
 
 
 ### MISC.
+
+class BillingSummaryContextMixin(mixins.BreadcrumbBaseMixin):
+
+    def __init__(self):
+        self.clip_icon = 'clip-banknote'
+        self.url = reverse('payment:summary')
+        self.url_name = 'Billing Overview'
+
 
 class MonthYearContextMixin(object):
     "For Form Month/Year dropdown ChoiceFields."

@@ -191,14 +191,15 @@ class AcctCost(AbstractBase):
 
     Note:
 
-        - All Amounts in Stripe Amount. 
-            - ex: if DB record = 1000, then amount in dollars = 10.00
-
-        - Used to have a ``per_sms`` static cost here, and I was going to 
-        adjust billing at the end of the month for the ``bulk_discount``.  
+    - All Amounts in Stripe Amount. 
         
-        - NOW: will apply discounts as they happen through "Daily AcctTrans" 
-        Records.
+        - ex: if DB record = 1000, then amount in dollars = 10.00
+
+    - Used to have a ``per_sms`` static cost here, and I was going to 
+    adjust billing at the end of the month for the ``bulk_discount``.  
+    
+    - NOW: will apply discounts as they happen through "Daily AcctTrans" 
+    Records.
     """
     hotel = models.OneToOneField(Hotel, related_name='acct_cost')
     init_amt = models.PositiveIntegerField(_("Amount to Add"), 
