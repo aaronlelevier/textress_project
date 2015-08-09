@@ -14,14 +14,14 @@ from model_mommy import mommy
 from main.models import Hotel
 from main.tests.factory import create_hotel
 from sms.models import PhoneNumber
+from sms.tests.factory import create_phone_number
 
 
 class PhoneNumberTests(TestCase):
 
     def test_is_primary(self):
-        hotel = create_hotel()
-        ph = mommy.make(PhoneNumber, hotel=hotel)
-        assert isinstance(ph, PhoneNumber)
+        ph = create_phone_number()
+        self.assertTrue(ph.is_primary)
 
     def test_last_created_is_primary(TestCase):
         hotel = create_hotel()

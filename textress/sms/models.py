@@ -25,19 +25,19 @@ class PhoneNumberQuerySet(models.query.QuerySet):
 
     def update_primary(self, hotel, sid):
         "Make sure their are no other Primary PhoneNumbers"
-        objs = self.filter(hotel=hotel).exclude(sid=sid)
-        for o in objs:
-            o.is_primary = False
-            o.save()
+        ph_nums = self.filter(hotel=hotel).exclude(sid=sid)
+        for ph in ph_nums:
+            ph.is_primary = False
+            ph.save()
 
     def primary(self, hotel):
         '''
         Returns the single "primary" PhoneNumber object.
         '''
         try:
-            return self.filter(hotel=hotel).get(is_primary=True)
+            return self.get(hotel=hotel, is_primary=True)
         except ObjectDoesNotExist:
-            return
+            raise
         except MultipleObjectsReturned:
             self.update_primary(hotel, sid=self.order_by('-created')[0].sid)
             return self.primary(hotel)

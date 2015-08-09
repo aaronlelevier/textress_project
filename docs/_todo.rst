@@ -3,6 +3,20 @@
 :Next:
     - SMS App
 
+        - Use SingleDefault Pattern
+
+            - Make a "SingleDefaultManager / SingleDefaultModel"
+
+            - Applies to:
+
+                1. payment.Card
+                2. sms.PhoneNumber
+
+                    - need to rename ``PhoneNumber.is_primary`` > ``.default``
+
+            - I should filter for: hotel, default=True; then exclude the single
+            "Default Account".
+
         - remove fixture data
 
             - add factory / test_factory instead
@@ -18,6 +32,10 @@
     - global notifications for SMS when they arrive?
 
     - marking a message as read when you go to the GuestDetailView
+
+:reading:
+    - Pragmatic Programmer
+    - 12 Factor Coding
 
 
 2015-08-08
