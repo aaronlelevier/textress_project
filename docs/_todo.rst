@@ -1,15 +1,28 @@
-2015-08-08
+2015-08-09
 ----------
 :Next:
+    - SMS App
 
-    - charge when a phone-number is purchased
+        - remove fixture data
 
-        - setup a monthly cron-job type charge for all phone-numbers
-        at the month anniversary of signup
+            - add factory / test_factory instead
+
+        - check all tests
+
+        - charge when a phone-number is purchased
+
+            - setup a monthly cron-job type charge for all phone-numbers
+            at the month anniversary of signup
+
 
     - global notifications for SMS when they arrive?
 
     - marking a message as read when you go to the GuestDetailView
+
+
+2015-08-08
+----------
+:Next:
 
     # Billing Overview
 
@@ -60,13 +73,13 @@ AcctStmtDetailView
 2015-08-02
 ----------
 :Next:
-    - card images as a separate table
+    # card images as a separate table
 
         - Add DB table
         - use the same naming convention as Stripe.com
 
-    - pretty up cards list
-    - config Django Views.py to work w/ OneTimePayment Form Data
+    # pretty up cards list
+    # config Django Views.py to work w/ OneTimePayment Form Data
 
     # "add a card" below like first checkbox
 

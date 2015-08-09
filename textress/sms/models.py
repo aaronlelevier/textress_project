@@ -139,6 +139,8 @@ class PhoneNumber(TwilioClient, TimeStampBaseModel):
 Denormalize Hotel
 -----------------
 Twilio PhoneNumber attrs denormalized to Hotel.
+
+The ``hotel.twilio_phone_number`` is the default Twilio PhoneNumber in use.
 '''
 @receiver(post_save, sender=PhoneNumber)
 def denormalize_twilio_phone(sender, instance=None, created=False, **kwargs):

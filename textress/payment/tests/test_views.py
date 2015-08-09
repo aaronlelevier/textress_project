@@ -255,9 +255,3 @@ this time.'''
 #     def test_card_list(self):
 #         response = self.client.get(reverse('payment:one_time_payment'))
 #         self.assertTrue(response.context['form'].fields['cards'].choices)
-
-
-class CardTests(TestCase):
-    pass    
-
-
