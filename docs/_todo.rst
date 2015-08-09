@@ -1,10 +1,6 @@
 2015-08-08
 ----------
 :Next:
-    (Billing Done)
-    - breadcrumbs for sub-urls 
-
-        - ex: payments, phone-numbers, etc...
 
     - charge when a phone-number is purchased
 
@@ -14,6 +10,16 @@
     - global notifications for SMS when they arrive?
 
     - marking a message as read when you go to the GuestDetailView
+
+    # Billing Overview
+
+        # Side-bar sub-url links
+
+        # breadcrumbs
+
+    # breadcrumbs for sub-urls 
+
+        - ex: payments, phone-numbers, etc...
 
 
 

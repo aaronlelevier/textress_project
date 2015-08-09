@@ -174,14 +174,6 @@ class AcctStmtListView(AdminOnlyMixin, SetHeadlineMixin, ListView):
 class AcctStmtDetailView(AdminOnlyMixin, SetHeadlineMixin, BillingSummaryContextMixin, TemplateView):
     '''
     All AcctTrans for a single Month.
-
-    Organized in 4 blocks, by:
-        Initial Monthly Balance
-        Credits - detail
-                - total
-        Debits  - detail
-                - total
-        Balance - total
     '''
     headline = "Account Statement Detail"
     template_name = 'account/acct_trans_detail.html'

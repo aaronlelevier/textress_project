@@ -66,8 +66,6 @@ class PhoneNumberAddView(PhoneNumberBaseView):
 
     def get_context_data(self, **kwargs):
         context = super(PhoneNumberAddView, self).get_context_data(**kwargs)
-        # context['question'] = "Purchase {} for ${}".format(
-        #     self.request.session['phone_number'], settings.PHONE_NUMBER_CHARGE/100)
         context['addit_info'] = render_to_string("cpanel/forms/form_ph_add.html",
             {'amount': settings.PHONE_NUMBER_CHARGE, 'hotel': self.hotel})
         context['btn_text'] = "Confirm"

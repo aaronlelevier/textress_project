@@ -14,7 +14,7 @@
                 <p>If the balance falls below {{ acct_cost.balance_min|stripe_money }}</p>
                 <p>refill the balance to {{ acct_cost.recharge_amt|stripe_money }}</p>
                 <a href="{% url 'acct_cost_update' acct_cost.pk %}">
-                    <p><strong>Change Settings</strong></p>
+                    <p><strong>Change Refill Settings</strong></p>
                 </a>
             </div>
             <div class="col-md-4">

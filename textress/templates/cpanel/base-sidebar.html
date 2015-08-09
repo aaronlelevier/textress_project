@@ -497,6 +497,16 @@
                                         <span class="title"> Overview </span>
                                     </a>
                                 </li>
+                                <li>
+                                    <a href="{% url 'payment:card_list' %}">
+                                        <span class="title"> Change / Add Payment Method </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'acct_pmt_history' %}">
+                                        <span class="title"> View Payment History </span>
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                         {% endif %}
