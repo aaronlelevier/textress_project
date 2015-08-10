@@ -137,7 +137,7 @@ class PhoneNumber(TwilioClient, TimeStampBaseModel):
     def save(self, *args, **kwargs):
         if self.default:
             PhoneNumber.objects._update_non_defaults(self.hotel, self.sid)
-        return super(PhoneNumber, self).save(*args, *kwargs)
+        return super(PhoneNumber, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         # TODO: add HTTP DELETE request here to release Twilio PH #
