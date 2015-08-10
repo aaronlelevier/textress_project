@@ -21,40 +21,50 @@ from utils.models import TimeStampBaseModel
 # PHONE NUMBER #
 ################
 
-class PhoneNumberQuerySet(models.query.QuerySet):
-
-    def update_primary(self, hotel, sid):
-        "Make sure their are no other Primary PhoneNumbers"
-        ph_nums = self.filter(hotel=hotel).exclude(sid=sid)
-        for ph in ph_nums:
-            ph.is_primary = False
-            ph.save()
-
-    def primary(self, hotel):
-        '''
-        Returns the single "primary" PhoneNumber object.
-        '''
-        try:
-            return self.get(hotel=hotel, is_primary=True)
-        except ObjectDoesNotExist:
-            raise
-        except MultipleObjectsReturned:
-            self.update_primary(hotel, sid=self.order_by('-created')[0].sid)
-            return self.primary(hotel)
-
-
 class PhoneNumberManager(TwilioClient, models.Manager):
 
-    def get_queryset(self):
-        return PhoneNumberQuerySet(self.model, self._db)
+    ### UPDATE PRIMARY
 
-    def primary(self, hotel):
-        "Return Single Primary PhoneNumber Obj."
-        return self.get_queryset().primary(hotel)
+    def _validate_ph_num(self, hotel, sid):
+        "The PhoneNumber exists for the Hotel."
+        try:
+            ph = self.get(hotel=hotel, sid=sid)
+        except PhoneNumber.DoesNotExist:
+            raise ValidationError("The PhoneNumber does not exist for \
+hotel: {}".format(hotel))
+        return ph
 
-    def update_primary(self, hotel, sid):
-        "Make sure their are no other Primary PhoneNumbers"
-        return self.get_queryset().update_primary(hotel, sid)
+    def _set_default(self, hotel, sid):
+        """Set the Default Card before calling the complete 
+        ``update_default`` method."""
+        ph_num = self.get(sid=sid)
+        ph.default = True
+        ph.save()
+        return ph
+
+    def _update_non_defaults(self, hotel, sid):
+        "All other 'non-default' PhoneNumbers are set as default=False."
+        for ph in self.filter(hotel=hotel, default=True).exclude(sid=sid):
+            ph.default = False
+            ph.save()
+
+    def update_default(self, hotel, sid):
+        "Public method for setting a PhoneNumber to the Default."
+        self._validate_ph_num(hotel, sid)
+        self._set_default(hotel, sid)
+        self._update_non_defaults(hotel, sid)
+
+    def default(self, hotel):
+        '''
+        Returns the single "default" PhoneNumber object.
+        defaul
+        '''
+        try:
+            return self.get(hotel=hotel, default=True)
+        except (ObjectDoesNotExist, MultipleObjectsReturned):
+            raise
+
+    ### TWILIO
 
     def purchase_number(self, hotel):
         "Based on ``area_code`` of the Hotel."
@@ -82,27 +92,27 @@ class PhoneNumberManager(TwilioClient, models.Manager):
         return number
 
     def get_or_create(self, hotel, *args, **kwargs):
+        '''
+        Standard ``.get_or_create()`` but if a Create is called, the 
+        PhoneNumber will be purchased from Twilio and set as the default.
+        '''
         try:
-            ph_num = self.get(sid=hotel.twilio_ph_sid)
+            ph = self.get(sid=hotel.twilio_ph_sid)
             created = False
         except ObjectDoesNotExist:
             # Buy Twilio Ph#
             number = self.purchase_number(hotel)
-
             # Assign the Twilio PhoneNumber to the Hotel's Subaccount
             number = self.update_account_sid(hotel, number)
-
             # Save to DB
-            ph_num = self.create(hotel=hotel,
+            ph = self.create(hotel=hotel,
                 sid=number.sid,
                 phone_number=number.phone_number,
                 friendly_name=number.friendly_name)
             created = True
-
         # assure there is only 1 Primary Ph #
-        self.update_primary(hotel=hotel, sid=ph_num.sid)
-
-        return ph_num, created
+        self.update_default(hotel=hotel, sid=ph.sid)
+        return ph, created
 
 
 class PhoneNumber(TwilioClient, TimeStampBaseModel):
@@ -116,13 +126,18 @@ class PhoneNumber(TwilioClient, TimeStampBaseModel):
     sid = models.CharField(_("Twilio Phone # Sid"), primary_key=True, max_length=50)
     phone_number = models.CharField(_("Twilio Phone #"), max_length=12)
     friendly_name = models.CharField(_("Twilio Friendly Name"), max_length=14, blank=True)
-    is_primary = models.BooleanField(_("Is Primary"), blank=True, default=True,
+    default = models.BooleanField(_("Is Primary"), blank=True, default=True,
         help_text="only 1 phone number can be the primary")
 
     objects = PhoneNumberManager()
 
     def __str__(self):
         return self.friendly_name
+
+    def save(self, *args, **kwargs):
+        if self.default:
+            PhoneNumber.objects._update_non_defaults(self.hotel, self.sid)
+        return super(PhoneNumber, self).save(*args, *kwargs)
 
     def delete(self, *args, **kwargs):
         # TODO: add HTTP DELETE request here to release Twilio PH #
@@ -144,7 +159,7 @@ The ``hotel.twilio_phone_number`` is the default Twilio PhoneNumber in use.
 '''
 @receiver(post_save, sender=PhoneNumber)
 def denormalize_twilio_phone(sender, instance=None, created=False, **kwargs):
-    if instance.is_primary:
+    if instance.default:
         hotel = instance.hotel
         hotel.twilio_phone_number = instance.phone_number
         hotel.save()

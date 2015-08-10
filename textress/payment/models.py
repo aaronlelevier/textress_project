@@ -139,7 +139,7 @@ customer: {}".format(customer))
 
     def _update_non_defaults(self, customer, id_):
         "All other 'non-default' cards are set as default=False."
-        for card in self.filter(customer=customer).exclude(id=id_):
+        for card in self.filter(customer=customer, default=True).exclude(id=id_):
             card.default = False
             card.save()
 

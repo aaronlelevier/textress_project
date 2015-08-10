@@ -17,6 +17,16 @@ from sms.models import PhoneNumber
 from sms.tests.factory import create_phone_number
 
 
+class PhoneNumberManagerTests(TestCase):
+
+    def setUp(self):
+        self.ph = create_phone_number()
+        self.ph2 = create_phone_number()
+
+    def test_primary(self):
+        pass
+
+
 class PhoneNumberTests(TestCase):
 
     def test_is_primary(self):
