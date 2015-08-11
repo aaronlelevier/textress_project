@@ -20,31 +20,32 @@ from sms.tests.factory import create_phone_number
 class PhoneNumberManagerTests(TestCase):
 
     def setUp(self):
-        self.ph = create_phone_number()
-        self.ph2 = create_phone_number()
+        self.hotel = create_hotel()
+        self.ph = create_phone_number(self.hotel)
+        self.ph2 = create_phone_number(self.hotel)
 
-    def test_primary(self):
+    def test_create(self):
         pass
 
 
 class PhoneNumberTests(TestCase):
 
-    def test_is_primary(self):
+    def test_default(self):
         ph = create_phone_number()
-        self.assertTrue(ph.is_primary)
+        self.assertTrue(ph.default)
 
-    def test_last_created_is_primary(TestCase):
+    def test_last_created_default(TestCase):
         hotel = create_hotel()
         ph = mommy.make(PhoneNumber, hotel=hotel)
         ph_2 = mommy.make(PhoneNumber, hotel=hotel)
-        assert ph_2.is_primary
+        assert ph_2.default
 
-    def test_last_created_is_primary_else(TestCase):
+    def test_last_created_default_else(TestCase):
         # Unless expicitly told
         hotel = create_hotel()
         ph = mommy.make(PhoneNumber, hotel=hotel)
-        ph_2 = mommy.make(PhoneNumber, hotel=hotel, is_primary=False)
-        assert not ph_2.is_primary 
+        ph_2 = mommy.make(PhoneNumber, hotel=hotel, default=False)
+        assert not ph_2.default 
 
     def test_primary(self):
         hotel = create_hotel()
@@ -54,8 +55,8 @@ class PhoneNumberTests(TestCase):
         # will return multiple phone numbers
         primary = PhoneNumber.objects.primary(hotel)
         assert isinstance(primary, PhoneNumber)
-        assert primary.is_primary
-        assert len(PhoneNumber.objects.filter(is_primary=False)) == len(phones) - 1
+        assert primary.default
+        assert len(PhoneNumber.objects.filter(default=False)) == len(phones) - 1
 
 
 class LivePhoneNumberTests(TestCase):

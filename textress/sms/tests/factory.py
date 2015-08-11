@@ -11,17 +11,18 @@ auth_token  = settings.TWILIO_AUTH_TOKEN
 client = TwilioRestClient(account_sid, auth_token)
  
 
-def create_phone_number():
+def create_phone_number(hotel=None):
     '''Get the first existing Twilio PhoneNumber for the Master 
     Account and create a DB record for it.'''
     count = PhoneNumber.objects.count()
     number = client.phone_numbers.list()[count]
-    hotel = create_hotel()
+    if not hotel:
+        hotel = create_hotel()
     ph_num = PhoneNumber.objects.create(
         hotel=hotel,
         sid=number.sid,
         phone_number=number.phone_number,
         friendly_name=number.friendly_name,
-        is_primary=True
+        default=True
     )
     return ph_num
