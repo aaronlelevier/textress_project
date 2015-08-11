@@ -24,7 +24,6 @@ from utils.data import STATES, HOTEL_TYPES
 from utils.models import AbstractBase
 
 
-
 def viewable_user_fields_dict(user):
     "A ``Dict`` of all viewable ``User` fields to be displayed in templates."
     user_dict = {}

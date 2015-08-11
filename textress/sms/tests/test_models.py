@@ -6,6 +6,8 @@ from django.conf import settings
 from django.test import TestCase, LiveServerTestCase, RequestFactory
 from django.test.client import Client
 from django.core.urlresolvers import reverse
+from django.core.exceptions import (ObjectDoesNotExist, MultipleObjectsReturned,
+    ValidationError)
 from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
 
@@ -24,9 +26,51 @@ class PhoneNumberManagerTests(TestCase):
         self.ph = create_phone_number(self.hotel)
         self.ph2 = create_phone_number(self.hotel)
 
-    def test_create(self):
-        pass
+    def test_validate_ph_num(self):
+        ph = PhoneNumber.objects._validate_ph_num(self.hotel, self.ph.sid)
+        self.assertIsInstance(ph, PhoneNumber)
 
+    def test_validate_ph_num_raise_error(self):
+        with self.assertRaises(ValidationError):
+            PhoneNumber.objects._validate_ph_num(self.hotel, 'bad-sid')
+
+    def test_set_default(self):
+        self.ph.default = False
+        self.ph.save()
+        # Get PH and confirm it's still ``default=False``
+        self.ph = PhoneNumber.objects.get(sid=self.ph.sid)
+        self.assertFalse(self.ph.default)
+        # Now method will set to ``default=True``
+        PhoneNumber.objects._set_default(self.hotel, self.ph.sid)
+        self.ph = PhoneNumber.objects.get(sid=self.ph.sid)
+        self.assertTrue(self.ph.default)
+
+    def test_update_non_defaults(self):
+        # Start out with a default, and after calling this method,
+        # that PH should still be the default.
+        PhoneNumber.objects._set_default(self.hotel, self.ph.sid)
+        PhoneNumber.objects._update_non_defaults(self.hotel, self.ph.sid)
+        self.assertTrue(self.ph.default)
+        for ph in PhoneNumber.objects.exclude(sid=self.ph.sid):
+            self.assertFalse(ph.default)
+
+    def test_update_default(self):
+        # ph
+        PhoneNumber.objects.update_default(self.hotel, self.ph.sid)
+        self.assertTrue(self.ph.default)
+        for ph in PhoneNumber.objects.exclude(sid=self.ph.sid):
+            self.assertFalse(ph.default)
+        # ph2
+        PhoneNumber.objects.update_default(self.hotel, self.ph2.sid)
+        self.assertTrue(self.ph2.default)
+        for ph in PhoneNumber.objects.exclude(sid=self.ph2.sid):
+            self.assertFalse(ph.default)
+
+    def test_get_default(self):
+        PhoneNumber.objects.update_default(self.hotel, self.ph.sid)
+        default = PhoneNumber.objects.default(self.hotel)
+        self.assertTrue(default, PhoneNumber)
+        
 
 class PhoneNumberTests(TestCase):
 
@@ -47,15 +91,15 @@ class PhoneNumberTests(TestCase):
         ph_2 = mommy.make(PhoneNumber, hotel=hotel, default=False)
         assert not ph_2.default 
 
-    def test_primary(self):
+    def test_default(self):
         hotel = create_hotel()
         phones = mommy.make(PhoneNumber, hotel=hotel, _quantity=3)
 
-        # Need to update the "primary" ph num 1st or else ".primary()"
+        # Need to update the "default" ph num 1st or else ".default()"
         # will return multiple phone numbers
-        primary = PhoneNumber.objects.primary(hotel)
-        assert isinstance(primary, PhoneNumber)
-        assert primary.default
+        default = PhoneNumber.objects.default(hotel)
+        assert isinstance(default, PhoneNumber)
+        assert default.default
         assert len(PhoneNumber.objects.filter(default=False)) == len(phones) - 1
 
 
@@ -91,25 +135,25 @@ class LivePhoneNumberTests(TestCase):
         dave_number = client.phone_numbers.get(self.ph_sid)
         assert dave_number
 
-    def test_update_account_sid(self):
-        # # First Return PH # to Master Account
-        # dave_acct = self.client.accounts.list(friendly_name='Dave Hotel')[0]
-        # client = TwilioRestClient(dave_acct.sid, dave_acct.auth_token)
-        # number = client.phone_numbers.update(self.ph_sid,
-        #     account_sid=settings.TWILIO_ACCOUNT_SID)
-        # assert number.account_sid == settings.TWILIO_ACCOUNT_SID
+    # def test_update_account_sid(self):
+    #     # # First Return PH # to Master Account
+    #     # dave_acct = self.client.accounts.list(friendly_name='Dave Hotel')[0]
+    #     # client = TwilioRestClient(dave_acct.sid, dave_acct.auth_token)
+    #     # number = client.phone_numbers.update(self.ph_sid,
+    #     #     account_sid=settings.TWILIO_ACCOUNT_SID)
+    #     # assert number.account_sid == settings.TWILIO_ACCOUNT_SID
 
-        # Call `update_account_sid`
-        t_number = self.client.phone_numbers.get(self.ph_sid)
-        number = PhoneNumber.objects.update_account_sid(self.hotel, t_number)
-        # Get the Hotel again and confirm the PhoneNumber has been denormalized
-        hotel = Hotel.objects.get(name='sub_test_865')
-        assert number.account_sid == self.hotel.sid
+    #     # Call `update_account_sid`
+    #     t_number = self.client.phone_numbers.get(self.ph_sid)
+    #     number = PhoneNumber.objects.update_account_sid(self.hotel, t_number)
+    #     # Get the Hotel again and confirm the PhoneNumber has been denormalized
+    #     hotel = Hotel.objects.get(name='sub_test_865')
+    #     assert number.account_sid == self.hotel.sid
 
-        # Return the PhoneNubmer to 'Dave Hotel'
-        dave_acct = self.client.accounts.list(friendly_name='Dave Hotel')[0]
-        test_client = TwilioRestClient(self.hotel.sid, self.hotel.auth_token)
-        assert isinstance(test_client, TwilioRestClient)
+    #     # Return the PhoneNubmer to 'Dave Hotel'
+    #     dave_acct = self.client.accounts.list(friendly_name='Dave Hotel')[0]
+    #     test_client = TwilioRestClient(self.hotel.sid, self.hotel.auth_token)
+    #     assert isinstance(test_client, TwilioRestClient)
 
-        number = test_client.phone_numbers.update(self.ph_sid,
-            account_sid=settings.TWILIO_ACCOUNT_SID)
+    #     number = test_client.phone_numbers.update(self.ph_sid,
+    #         account_sid=settings.TWILIO_ACCOUNT_SID)

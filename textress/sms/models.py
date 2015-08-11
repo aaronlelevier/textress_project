@@ -3,7 +3,8 @@ from django.conf import settings
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.utils.timezone import now 
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.core.exceptions import (ObjectDoesNotExist, MultipleObjectsReturned,
+    ValidationError)
 from django.db.utils import IntegrityError
 from django.dispatch import receiver
 from django.db.models.signals import post_save, pre_delete
@@ -21,7 +22,22 @@ from utils.models import TimeStampBaseModel
 # PHONE NUMBER #
 ################
 
+class PhoneNumberQuerySet(models.query.QuerySet):
+
+    def default(self, hotel):
+        '''
+        Returns the single "default" PhoneNumber object default.
+        '''
+        try:
+            return self.get(hotel=hotel, default=True)
+        except (ObjectDoesNotExist, MultipleObjectsReturned):
+            return []
+
+
 class PhoneNumberManager(TwilioClient, models.Manager):
+
+    def get_queryset(self):
+        return PhoneNumberQuerySet(self.model, self._db)
 
     ### UPDATE PRIMARY
 
@@ -37,7 +53,7 @@ hotel: {}".format(hotel))
     def _set_default(self, hotel, sid):
         """Set the Default Card before calling the complete 
         ``update_default`` method."""
-        ph_num = self.get(sid=sid)
+        ph = self.get(sid=sid)
         ph.default = True
         ph.save()
         return ph
@@ -59,10 +75,7 @@ hotel: {}".format(hotel))
         Returns the single "default" PhoneNumber object.
         defaul
         '''
-        try:
-            return self.get(hotel=hotel, default=True)
-        except (ObjectDoesNotExist, MultipleObjectsReturned):
-            raise
+        return self.get_queryset().default(hotel)
 
     ### TWILIO
 
@@ -140,13 +153,13 @@ class PhoneNumber(TwilioClient, TimeStampBaseModel):
         return super(PhoneNumber, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        # TODO: add HTTP DELETE request here to release Twilio PH #
+        # TODO: Verify this delete actually deletes the PH
         try:
             number = self.hotel._client.phone_numbers.get(self.sid)
             number.delete()
         except TwilioRestException as e:
             # TODO: Add logging
-            print("{}, {}".format(e.__class__, e))
+            raise("{}, {}".format(e.__class__, e))
         return super(PhoneNumber, self).delete(*args, **kwargs)
 
 

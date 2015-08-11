@@ -1,33 +1,14 @@
-2015-08-09
+2015-08-11
 ----------
 :Next:
-    - SMS App
+    - PhoneNumbers
 
-        - Use SingleDefault Pattern
-
-            - Make a "SingleDefaultManager / SingleDefaultModel"
-
-            - Applies to:
-
-                1. payment.Card
-                2. sms.PhoneNumber
-
-                    - need to rename ``PhoneNumber.is_primary`` > ``.default``
-
-            - I should filter for: hotel, default=True; then exclude the single
-            "Default Account".
-
-        - remove fixture data
-
-            - add factory / test_factory instead
-
-        - check all tests
+        - View tests
 
         - charge when a phone-number is purchased
 
             - setup a monthly cron-job type charge for all phone-numbers
             at the month anniversary of signup
-
 
     - global notifications for SMS when they arrive?
 

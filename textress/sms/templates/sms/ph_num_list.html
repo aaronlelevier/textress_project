@@ -8,47 +8,48 @@
     
         <div class="row">
             <div class="col-sm-12">
-                <form name="{{ form.form_name }}" method="post" action="">
-                    {% csrf_token %}
-                    {% if form.phone_numbers %}
-                        <table class="table table-hover">
+                {% if phone_numbers %}
+                    <table class="table table-hover">
+                        <tr>
+                            <th>Phone Number</th>
+                            <th>Primary</th>
+                            <th>Delete</th>
+                        </tr>
+                        {% for ph in phone_numbers %}
                             <tr>
-                                <th>Primary</th>
-                                <th>Phone Number</th>
-                                <th>Delete</th>
-                            </tr>
-                            <tr>
-                                {% for ph in phone_numbers %}
-                                    <td><input checked="checked" type="radio" id="id_phone_numbers_{{forloop.counter0}}" name="phone_numbers" value="{{ ph.sid }}"></td>
-                                    <td>{{ ph.friendly_name }}</td>
-                                    <td>
-                                        <a href="{% url 'sms:ph_num_delete' ph.sid %}">
-                                            <button type="button" class="btn btn-danger btn-xs">Delete</button>
+                                <td>{{ ph.friendly_name }}</td>
+                                <td>
+                                    {% if ph.default %}
+                                        <a href="#" onclick="return false;">
+                                            <button type="button" class="btn btn-teal btn-xs">Primary</button>
                                         </a>
-                                    </td>
-                                {% endfor %}
+                                    {% else %}
+                                        <a href="{% url 'sms:set_default_phone_number' ph.sid %}">
+                                            <button type="button" class="btn btn-success btn-xs">Set as Primary</button>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'sms:ph_num_delete' ph.sid %}">
+                                        <button type="button" class="btn btn-danger btn-xs">Delete</button>
+                                    </a>
+                                </td>
                             </tr>
-                        </table>
-                        <div>
-                            <button class="btn btn-success next-step" ng-disabled="{{ form.form_name }}.$invalid">
-                                Update primary number <i class="fa fa-arrow-circle-right"></i>
-                            </button>
+                        {% endfor %}
+                    </table>
+                {% else %}
+                    <br>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4>No phone numbers on account.</h4>
                         </div>
-                    {% else %}
-                        <br>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h4>No phone numbers on account.</h4>
-                            </div>
-                            <div class="col-md-6">
-                                <a href="{% url 'sms:ph_num_add' %}">
-                                    <button class="btn btn-success next-step">Add a Phone Number</button>
-                                </a>
-                            </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'sms:ph_num_add' %}">
+                                <button class="btn btn-success next-step">Add a Phone Number</button>
+                            </a>
                         </div>
-                    {% endif %}
-                
-                </form>
+                    </div>
+                {% endif %}
             </div>
         </div>
         <!-- end: PAGE CONTENT -->

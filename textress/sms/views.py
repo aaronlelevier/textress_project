@@ -8,15 +8,16 @@ from django.views.generic import FormView, CreateView, DeleteView
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib import messages
 from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.contrib.auth.decorators import login_required
 
 from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
     GroupRequiredMixin, SetHeadlineMixin, FormValidMessageMixin)
 
 from main.mixins import AdminOnlyMixin
 from sms.models import PhoneNumber
-from sms.forms import PhoneNumberForm, PhoneNumberAddForm
 from utils.exceptions import DailyLimit
 from utils.hotel import TwilioHotel
+from utils.forms import EmptyForm
 
 
 class PhoneNumberBaseView(AdminOnlyMixin, SetHeadlineMixin, FormValidMessageMixin, FormView):
@@ -32,7 +33,7 @@ class PhoneNumberListView(PhoneNumberBaseView):
     """
     headline = "Phone Number List"
     template_name = 'sms/ph_num_list.html'
-    form_class = PhoneNumberForm
+    form_class = EmptyForm
     success_url = reverse_lazy('sms:ph_num_list')
     form_valid_message = "Primary Phone Number successfully updated"
 
@@ -43,16 +44,6 @@ class PhoneNumberListView(PhoneNumberBaseView):
             {'ph_num_monthly_cost': settings.PHONE_NUMBER_MONTHLY_COST})
         return context
 
-    def get_form_kwargs(self):
-        """
-        Attaches the Hotel's PhoneNumbers to the Form, so that each
-        PhoneNumber is available to set as "Primary" Ph # for the Hotel.
-        """
-        kwargs = super(PhoneNumberListView, self).get_form_kwargs()
-        kwargs['hotel'] = self.hotel
-        kwargs['phone_numbers'] = self.hotel.phonenumbers.all()
-        return kwargs
-
 
 class PhoneNumberAddView(PhoneNumberBaseView):
     '''
@@ -60,7 +51,7 @@ class PhoneNumberAddView(PhoneNumberBaseView):
     '''
     headline = "Purchase a Phone Number"
     template_name = 'cpanel/form.html'
-    form_class = PhoneNumberAddForm
+    form_class = EmptyForm
     success_url = reverse_lazy('sms:ph_num_list')
     form_valid_message = "Phone Number successfully purchased"
 
@@ -77,6 +68,12 @@ class PhoneNumberAddView(PhoneNumberBaseView):
         return super(PhoneNumberAddView, self).form_valid(form)
 
 
+@login_required(login_url=reverse_lazy('login'))
+def set_default_phone_number_view(request, pk):
+    ph = PhoneNumber.objects.update_default(request.user.profile.hotel, pk)
+    return HttpResponseRedirect(reverse('sms:ph_num_list'))
+
+
 class PhoneNumberDeleteView(PhoneNumberBaseView, DeleteView):
     '''
     Admin confirms to Delete PhoneNumber here before deleting.
@@ -84,7 +81,7 @@ class PhoneNumberDeleteView(PhoneNumberBaseView, DeleteView):
     group_required = ["hotel_admin"]
     headline = "Delete Phone Number"
     template_name = 'cpanel/form.html'
-    form_class = PhoneNumberAddForm # empty form here w/ no fields, just confirming delete
+    form_class = EmptyForm
     success_url = reverse_lazy('sms:ph_num_list')
     model = PhoneNumber
     pk_url_kwarg = 'sid'
@@ -102,3 +99,7 @@ class PhoneNumberDeleteView(PhoneNumberBaseView, DeleteView):
     def get_form_valid_message(self):
         # dynamic msg success to show which ph num was deleted
         return u"{0} deleted!".format(self.object.friendly_name)
+
+    def form_valid(self, form):
+        PhoneNumber.objects.delete(request.user.profile.hotel, sid)
+        return HttpResponseRedirect(self.get_success_url())
