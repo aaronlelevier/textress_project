@@ -1,14 +1,6 @@
-import os
-import time
-import pytest
-import stripe
-
 from django.conf import settings
 from django.test import TestCase
 from django.core.urlresolvers import reverse
-from django.contrib.auth.models import User, Group
-
-from model_mommy import mommy
 
 from account.tests.factory import CREATE_ACCTCOST_DICT
 from main.tests.factory import (CREATE_USER_DICT, CREATE_HOTEL_DICT, PASSWORD,

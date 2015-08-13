@@ -2,10 +2,7 @@ import stripe
 
 from django.conf import settings
 from django.test import TestCase
-from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
-
-from model_mommy import mommy
 
 from payment.models import StripeClient, Customer, Card, Charge, Refund
 from payment.tests import factory

@@ -2,8 +2,6 @@ import stripe
 
 from django.conf import settings
 
-from model_mommy import mommy
-
 from payment.models import StripeClient, Customer, Card, Charge, Refund
 
 # Set Stripe Key for All tests

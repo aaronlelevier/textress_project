@@ -2,19 +2,14 @@ import datetime
 
 from django.conf import settings
 from django.http import Http404, HttpResponseRedirect
-from django.core.urlresolvers import reverse, reverse_lazy
-from django.contrib.auth.views import redirect_to_login
-from django.shortcuts import get_object_or_404
-from django.views.generic.base import View
+from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist
-from django.contrib import auth, messages
+from django.contrib import messages
 
 import stripe
-from braces.views import LoginRequiredMixin, GroupRequiredMixin
 
 from payment.models import Card
 from payment.helpers import signup_register_step4
-from main.models import Hotel
 from utils import dj_messages, mixins
 from utils.email import Email
 

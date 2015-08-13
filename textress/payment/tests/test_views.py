@@ -1,14 +1,7 @@
-import os
-import time
-import pytest
-import stripe
-
 from django.conf import settings
-from django.test import TestCase, RequestFactory
-from django.test.client import Client
+from django.test import TestCase
 from django.core.urlresolvers import reverse
-from django.contrib.auth.models import User, Group
-from django.http import Http404
+from django.contrib.auth.models import User
 
 from model_mommy import mommy
 

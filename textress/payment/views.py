@@ -1,25 +1,15 @@
-import datetime
-
 from django.conf import settings
-from django.shortcuts import render, render_to_response, get_object_or_404
-from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse, reverse_lazy
-from django.template import RequestContext
 from django.contrib import messages
-from django.views.generic import (View, ListView, DetailView, DeleteView,
-    TemplateView, FormView, UpdateView, RedirectView)
-from django.forms.models import model_to_dict
-from django.core.exceptions import ObjectDoesNotExist
-from django.forms.models import model_to_dict
+from django.views.generic import TemplateView, FormView
 from django.contrib.auth.decorators import login_required
 
 import stripe
-from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
-    GroupRequiredMixin, SetHeadlineMixin, FormValidMessageMixin)
+from braces.views import SetHeadlineMixin, FormValidMessageMixin
 
 from account.mixins import AcctCostContextMixin
 from account.models import AcctCost, AcctStmt, AcctTrans
-from main.models import Hotel
 from main.mixins import (RegistrationContextMixin, HotelContextMixin, HotelUserMixin,
     AdminOnlyMixin)
 from payment.models import Card
@@ -28,7 +18,6 @@ from payment.helpers import signup_register_step4
 from payment.mixins import (StripeMixin, StripeFormValidMixin, HotelCardOnlyMixin,
     BillingSummaryContextMixin, MonthYearContextMixin)
 from sms.models import PhoneNumber
-from utils.forms import EmptyForm
 from utils.email import Email
 
 

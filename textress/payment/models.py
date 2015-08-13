@@ -4,13 +4,8 @@ import stripe
 
 from django.db import models
 from django.conf import settings
-from django.contrib import messages
-from django.contrib.auth.models import User
 from django.utils.translation import ugettext, ugettext_lazy as _
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.core.urlresolvers import reverse
-
-from utils import email
+from django.core.exceptions import ValidationError
 
 
 class StripeClient(object):
