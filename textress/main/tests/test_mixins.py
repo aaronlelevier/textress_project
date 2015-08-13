@@ -1,14 +1,7 @@
-from django.conf import settings
-from django.http import Http404
 from django.test import TestCase
 from django.core.urlresolvers import reverse
-from django.core.exceptions import PermissionDenied
 
-from model_mommy import mommy
-
-from concierge.models import Message, Guest
 from concierge.tests.factory import make_guests, make_messages
-from main import mixins
 from main.tests.factory import create_hotel_user, create_hotel, PASSWORD
 from utils import create
 

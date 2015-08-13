@@ -1,20 +1,14 @@
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-from django.views.generic.base import View, ContextMixin
-from django.views.generic.edit import FormMixin
+from django.views.generic.base import View
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse, reverse_lazy
-from django.http import HttpResponseRedirect
-from django.forms.models import model_to_dict
 
 from braces.views import GroupRequiredMixin
 
 from main.helpers import get_user_hotel
 from main.models import Hotel
-from contact.models import Newsletter
-from contact.forms import NewsletterForm
 from utils import dj_messages
 
 

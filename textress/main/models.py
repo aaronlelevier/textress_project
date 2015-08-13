@@ -1,4 +1,3 @@
-import re
 import random
 import string
 
@@ -7,7 +6,6 @@ from django.conf import settings
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User, Group
 from django.utils.text import slugify
 from django.dispatch import receiver

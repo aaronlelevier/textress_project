@@ -1,24 +1,16 @@
 from django.conf import settings
 from django.contrib import auth, messages
 from django.contrib.auth.models import User, Group
-from django.shortcuts import render, get_object_or_404
-from django.views.generic import (CreateView, FormView, DetailView,
-    ListView, UpdateView, DeleteView)
-from django.views.generic.base import View, ContextMixin, TemplateView
+from django.views.generic import CreateView, DetailView, UpdateView
+from django.views.generic.base import View, TemplateView
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth.forms import UserCreationForm
-from django.http import HttpResponse, Http404, HttpResponseRedirect
-from django.template import RequestContext
-from django.forms.models import model_to_dict
+from django.http import HttpResponseRedirect
 
 from rest_framework.response import Response
 from rest_framework import permissions, generics
-from braces.views import (
-    LoginRequiredMixin, PermissionRequiredMixin, GroupRequiredMixin,
-    AnonymousRequiredMixin, SetHeadlineMixin, FormValidMessageMixin,
-    FormInvalidMessageMixin
-    )
+from braces.views import (LoginRequiredMixin, GroupRequiredMixin,
+     SetHeadlineMixin, FormValidMessageMixin)
 
 from concierge.permissions import (IsHotelObject, IsManagerOrAdmin, IsHotelUser,
     IsHotelOfUser)
@@ -27,7 +19,6 @@ from main.forms import UserCreateForm, HotelCreateForm, UserUpdateForm
 from main.mixins import (UserOnlyMixin, HotelUsersOnlyMixin,
     MyHotelOnlyMixin, RegistrationContextMixin, HotelUserMixin, HotelContextMixin)
 from main.serializers import UserSerializer, HotelSerializer
-from contact.mixins import NewsletterMixin, TwoFormMixin
 from utils import dj_messages, login_messages, EmptyForm, DeleteButtonMixin
 
 

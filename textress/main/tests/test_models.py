@@ -2,9 +2,7 @@ import os
 import random
 
 from django.conf import settings
-from django.test import TestCase, LiveServerTestCase, RequestFactory
-from django.test.client import Client
-from django.core.urlresolvers import reverse
+from django.test import TestCase
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User, Group
 from django.utils import timezone
@@ -16,7 +14,6 @@ from main.models import TwilioClient, Hotel, UserProfile, Subaccount
 from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
 from payment.models import Customer
 from utils import create
-from utils.data import STATES
 
 
 class TwilioClientTests(TestCase):
@@ -29,23 +26,22 @@ class TwilioClientTests(TestCase):
 
 class HotelManagerTests(TestCase):
 
-    fixtures = ['users.json', 'main.json', 'sms.json', 'payment.json']
+    # fixtures = ['users.json', 'main.json', 'sms.json', 'payment.json']
 
     def setUp(self):
         create._get_groups_and_perms()
         self.password = '1234'
 
         # set User "aaron_test" from fixtures as an attr on this class
-        self.user = User.objects.get(username='aaron_test')
-        # b/c passwords are stored as a hash in json fixtures
-        self.user.set_password(self.password)
-        self.user.save()
-
+        self.hotel = create_hotel()
+        self.user = create_hotel_user(hotel=self.hotel, username='aaron_test')
         self.username = self.user.username
-        self.hotel = self.user.profile.hotel
 
         # Phone
-        self.ph_num = self.hotel.phonenumbers.primary(hotel=self.hotel)
+        self.ph_num = self.hotel.phonenumbers.default(hotel=self.hotel)
+
+        # Default Hotel
+        create_hotel(name=settings.TEXTRESS_HOTEL)
 
     def test_get_by_phone(self):
         hotel = Hotel.objects.get_by_phone(self.hotel.address_phone)
@@ -65,9 +61,8 @@ class HotelManagerTests(TestCase):
 
 class HotelTests(TestCase):
 
-    # fixtures = ['users.json', 'main.json', 'sms.json', 'payment.json']
-
     def setUp(self):
+        create._get_groups_and_perms()
         self.password = PASSWORD
         self.hotel = create_hotel()
         self.dave_hotel = create_hotel()

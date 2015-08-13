@@ -1,21 +1,12 @@
-import re
-
 from django import forms
-from django.conf import settings
-from django.contrib import auth, messages
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 from django.utils.translation import ugettext, ugettext_lazy as _
-from django.utils import six
 
-from djangular.forms import (NgFormValidationMixin, NgDeclarativeFieldsMetaclass,
-    NgModelFormMetaclass, NgFormBaseMixin, NgModelFormMixin)
-from djangular.styling.bootstrap3.forms import (Bootstrap3Form,
-    Bootstrap3ModelForm, Bootstrap3FormMixin)
+from djangular.forms import NgFormValidationMixin
+from djangular.styling.bootstrap3.forms import Bootstrap3ModelForm
 
 from main.models import Hotel
 from concierge.models import validate_phone
-from utils import login_messages
 
 
 class UserCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):

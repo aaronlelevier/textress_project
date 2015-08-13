@@ -1,24 +1,15 @@
-import os
-import pytest
-
-from django.db import models
 from django.conf import settings
-from django.test import TestCase, LiveServerTestCase, RequestFactory
-from django.test.client import Client
+from django.test import TestCase
 from django.core.urlresolvers import reverse
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
-from django.http import Http404
 
 import stripe
-from model_mommy import mommy
 
 from main.models import Hotel, UserProfile, Subaccount
 from main.tests.factory import (CREATE_USER_DICT, CREATE_HOTEL_DICT,
     create_hotel, create_hotel_user)
-from sms.models import PhoneNumber
 from utils import create
-from utils.data import STATES, HOTEL_TYPES
 from utils.messages import dj_messages
 
 
