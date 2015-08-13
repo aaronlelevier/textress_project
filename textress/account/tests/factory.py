@@ -1,16 +1,7 @@
 import random
-import os
-import time
 import datetime
 
 from django.db import models
-from django.conf import settings
-from django.test import TestCase, LiveServerTestCase, RequestFactory
-from django.test.client import Client
-from django.core.urlresolvers import reverse
-from django.contrib.auth.models import User, Group
-from django.http import Http404
-from django.utils import timezone
 
 from model_mommy import mommy
 
@@ -18,10 +9,6 @@ from account.models import (
     AcctStmt, TransType, AcctTrans, AcctCost,
     CHARGE_AMOUNTS, BALANCE_AMOUNTS, TRANS_TYPES
     )
-from main.models import Hotel
-from main.tests.test_models import create_hotel
-from payment.models import Customer
-from utils import create
 
 
 CREATE_ACCTCOST_DICT = {

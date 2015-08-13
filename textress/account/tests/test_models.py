@@ -1,15 +1,9 @@
 import datetime
-import pytest
 
-from django.db import models
-from django.db.models import Avg, Max, Min, Sum
-from django import forms
-from django.conf import settings
-from django.test import TestCase, LiveServerTestCase, RequestFactory
-from django.test.client import Client
+from django.db.models import Max, Sum
+from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Group
-from django.core.exceptions import ImproperlyConfigured
 from django.utils import timezone
 
 from model_mommy import mommy
@@ -17,12 +11,9 @@ from model_mommy import mommy
 from account.models import (Dates, Pricing, TransType, AcctCost, AcctStmt, AcctTrans,
     CHARGE_AMOUNTS, BALANCE_AMOUNTS)
 from account.tests.factory import create_acct_stmts, create_acct_trans
-from concierge.models import Message
 from concierge.tests.factory import make_guests, make_messages
-from main.models import Hotel, UserProfile
 from main.tests.factory import create_hotel
 from utils import create
-from utils.exceptions import InvalidAmtException
 
 
 class DateTests(TestCase):

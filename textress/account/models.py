@@ -2,11 +2,10 @@ import calendar
 import datetime
 
 from django.db import models
-from django.db.models import Avg, Max, Min, Sum
+from django.db.models import Max, Sum
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import ugettext, ugettext_lazy as _
@@ -17,8 +16,6 @@ import stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 from main.models import Hotel
-# from payment.models import Card, Charge
-from utils.exceptions import InvalidAmtException
 
 
 class Dates(object):

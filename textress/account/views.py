@@ -1,38 +1,27 @@
-import calendar
-
-from django.conf import settings
 from django.shortcuts import render
 from django.utils.translation import ugettext_lazy as _
-from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib import auth, messages
-from django.contrib.auth import REDIRECT_FIELD_NAME, views as auth_views
-from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.auth.models import User, Group, AnonymousUser
+from django.contrib.auth.decorators import login_required
 
-from django.views.generic import View, ListView, DetailView
-from django.views.generic.base import TemplateView, RedirectView
-from django.views.generic.edit import FormView, CreateView, UpdateView, FormMixin
-from django.db.models import Avg, Max, Min, Sum
+from django.views.generic import View, ListView
+from django.views.generic.base import TemplateView
+from django.views.generic.edit import FormView, CreateView, UpdateView
 from django.views.generic.edit import ModelFormMixin
 
 from rest_framework.response import Response
-from rest_framework import generics, permissions, mixins
+from rest_framework import generics
 
-from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
-    GroupRequiredMixin, SetHeadlineMixin, AnonymousRequiredMixin,
+from braces.views import (LoginRequiredMixin, GroupRequiredMixin, SetHeadlineMixin,
     StaticContextMixin)
 
-from account.decorators import anonymous_required
 from account.forms import (AuthenticationForm, CloseAccountForm,
     CloseAcctConfirmForm, AcctCostForm, AcctCostUpdateForm)
 from account.models import AcctCost, AcctStmt, AcctTrans, Pricing
 from account.serializers import PricingSerializer
 from main.mixins import RegistrationContextMixin, AdminOnlyMixin, HotelUserMixin
-from main.models import UserProfile, Subaccount
-from main.forms import UserCreateForm
 from payment.mixins import BillingSummaryContextMixin
-from sms.models import PhoneNumber
 from utils import email, login_messages
 
 
@@ -324,12 +313,6 @@ class PricingListAPIView(generics.ListAPIView):
 
     queryset = Pricing.objects.all()
     serializer_class = PricingSerializer
-
-    def list(self, request, *args, **kwargs):
-        '''For JSON Encoding.'''
-
-        serializer = PricingSerializer(self.queryset, many=True)
-        return Response(serializer.data)
 
 
 class PricingRetrieveAPIView(generics.RetrieveAPIView):

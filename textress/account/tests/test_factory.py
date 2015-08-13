@@ -6,7 +6,6 @@ from account.models import (
     TRANS_TYPES
     )
 from account.tests import factory
-from main.models import Hotel
 from main.tests.factory import create_hotel
 
 

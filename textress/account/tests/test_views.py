@@ -1,19 +1,9 @@
-import os
-import time
-import pytest
-import random
 import datetime
 
-from django.db import models
 from django.conf import settings
-from django.test import TestCase, LiveServerTestCase, RequestFactory
-from django.test.client import Client
+from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Group
-from django.http import Http404
-from django.utils import timezone
-
-from model_mommy import mommy
 
 from account.forms import AcctCostForm
 from account.models import (AcctStmt, TransType, AcctTrans, AcctCost,
@@ -23,7 +13,6 @@ from account.tests.factory import (create_acct_stmts, create_acct_stmt,
 from main.models import Hotel
 from main.tests.factory import (create_hotel, create_hotel_user, make_subaccount,
     CREATE_USER_DICT, CREATE_HOTEL_DICT, PASSWORD)
-from payment.models import Customer
 from utils import create
 
 
