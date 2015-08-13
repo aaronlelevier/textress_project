@@ -1,5 +1,5 @@
 from django.views.generic.edit import FormMixin
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.core.urlresolvers import reverse_lazy
 
 from braces.views import FormValidMessageMixin
 

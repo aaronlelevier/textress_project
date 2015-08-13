@@ -1,7 +1,6 @@
 from django.db import models
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.utils.text import slugify
-from django.core.urlresolvers import reverse
 
 from utils.create import random_lorem
 

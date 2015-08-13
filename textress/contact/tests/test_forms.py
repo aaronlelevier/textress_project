@@ -1,11 +1,7 @@
 from django.test import TestCase
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.core.exceptions import ValidationError
 
-from model_mommy import mommy
-
-from contact.forms import NewsletterForm, ContactForm
 from contact.models import Newsletter, Contact
 from utils.messages import dj_messages
 

@@ -1,7 +1,5 @@
 from django import forms
-from django.contrib import messages
 from django.core.exceptions import ValidationError
-from djangular.forms.fields import FloatField
 
 from djangular.forms import NgFormValidationMixin
 from djangular.styling.bootstrap3.forms import (Bootstrap3Form,
