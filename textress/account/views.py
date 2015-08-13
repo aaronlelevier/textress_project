@@ -10,7 +10,6 @@ from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView, CreateView, UpdateView
 from django.views.generic.edit import ModelFormMixin
 
-from rest_framework.response import Response
 from rest_framework import generics
 
 from braces.views import (LoginRequiredMixin, GroupRequiredMixin, SetHeadlineMixin,

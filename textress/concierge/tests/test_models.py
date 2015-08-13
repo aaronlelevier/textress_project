@@ -1,19 +1,11 @@
-import random
 import datetime
 import pytest
-from twilio.rest import TwilioRestClient
 
-from django import forms
-from django.db import models
 from django.conf import settings
-from django.contrib.auth.models import User
-from django.conf import settings
-from django.test import TestCase, LiveServerTestCase, RequestFactory
-from django.test.client import Client
+from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.contrib.auth.models import User, Group
-from django.http import Http404
 from django.utils import timezone
 
 from model_mommy import mommy

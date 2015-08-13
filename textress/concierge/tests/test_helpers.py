@@ -1,7 +1,7 @@
 from django.test import TestCase
 
-from ..helpers import process_from_messages
-from ..models import Message
+from concierge.helpers import process_from_messages
+from concierge.models import Message
 
 
 class HelperTests(TestCase):

@@ -1,17 +1,13 @@
-import re
+import sys
 import datetime
 
 from django.db import models
 from django.conf import settings
-from django.utils.translation import ugettext, ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
-from django.core.validators import BaseValidator
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _, ungettext_lazy
-from django.dispatch import receiver
-from django.db.models.signals import post_save, pre_delete
+from django.utils.translation import ugettext, ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 
 from main.models import Hotel, UserProfile, profile_image
@@ -146,8 +142,9 @@ class Guest(AbstractBase):
         Enforce this logic in the save override.
         '''
         # TESTING ONLY:
-        if not self.thumbnail:
-            self.thumbnail = 'profile/54 Illustrated Flat Icons 2_uzPMZsh.gif'
+        if 'test' not in sys.argv:
+            if not self.thumbnail:
+                self.thumbnail = 'profile/54 Illustrated Flat Icons 2_uzPMZsh.gif'
 
         if not self.id:
             self.validate_phone_number_taken(self.phone_number)

@@ -1,31 +1,19 @@
-import json
-import re
-import datetime
-from collections import OrderedDict
-import twilio
-from twilio import twiml, TwilioRestException 
+from twilio import twiml
 
-from django.contrib.auth.models import User, Group
-from django.contrib import messages
-from django.shortcuts import render, get_object_or_404
-from django.views.generic import View, FormView, DetailView, ListView, TemplateView
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.core.urlresolvers import reverse, reverse_lazy
-from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponse, Http404, HttpResponseRedirect
-from django.views.decorators.csrf import csrf_exempt, csrf_protect, ensure_csrf_cookie
-from django.http import HttpResponse
-from django.utils import timezone
+from django.contrib.auth.models import Group
+from django.shortcuts import render
+from django.views.generic import View, DetailView, ListView, TemplateView
+from django.views.generic.edit import CreateView, UpdateView
+from django.core.urlresolvers import reverse
+from django.http import Http404, HttpResponseRedirect
+from django.views.decorators.csrf import csrf_exempt
 from django.forms.models import model_to_dict
 
 from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
-from rest_framework.decorators import detail_route, list_route
 from rest_framework.response import Response
-from rest_framework import mixins, generics, status, permissions, viewsets
+from rest_framework import generics, permissions
 
-from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
-    GroupRequiredMixin, SetHeadlineMixin, FormValidMessageMixin, CsrfExemptMixin)
+from braces.views import LoginRequiredMixin, SetHeadlineMixin, CsrfExemptMixin
 
 from ws4redis.redis_store import RedisMessage
 from ws4redis.publisher import RedisPublisher
@@ -36,11 +24,7 @@ from concierge.forms import GuestForm
 from concierge.permissions import IsHotelObject, IsManagerOrAdmin, IsHotelUser
 from concierge.serializers import (MessageSerializer, GuestMessageSerializer,
     GuestBasicSerializer)
-from sms.helpers import send_text, send_message, sms_messages
-from main.models import Hotel, UserProfile
 from main.mixins import HotelUserMixin, HotelObjectMixin
-from utils.exceptions import (DailyLimit, NotHotelGuestException,
-    HotelGuestNotFoundException)
 from utils import EmptyForm, DeleteButtonMixin
 
 

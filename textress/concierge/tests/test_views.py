@@ -1,26 +1,18 @@
-import pytest
 import string
 import random
-import requests
 
-from django.db import models, transaction, IntegrityError
 from django.conf import settings
-from django.test import TestCase, LiveServerTestCase, RequestFactory
-from django.test.client import Client
+from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Group
-from django.http import Http404
 from django.utils import timezone
-from django.core.exceptions import ObjectDoesNotExist
 
 from model_mommy import mommy
 
 from rest_framework import status
-from rest_framework.test import (APIRequestFactory, force_authenticate, APIClient,
-    APITestCase)
+from rest_framework.test import APITestCase
 
 from main.models import Hotel, UserProfile
-from utils.create import create_all
 from concierge.models import Guest, Message
 
 # Test Factory Imports
@@ -34,20 +26,14 @@ from main.tests.factory import create_hotel
 
 
 def number(limit=10):
-    return ''.join([str(x) for d in range(limit) 
+    ret = ''.join([str(x) for d in range(limit) 
                            for x in random.choice(string.digits)])
+    return "{}-{}-{}".format(ret[:3], ret[3:6], ret[6:])
 
 
 def today():
-    return timezone.now().date()
-
-
-class GlobalTests(TestCase):
-
-    def test_ph_num(self):
-        ph = number()
-        assert len(ph) == 10
-        assert type(int(ph)) == int
+    d = timezone.now().date()
+    return d.strftime("%Y-%m-%d")
 
 
 class GuestViewTests(TestCase):
@@ -56,87 +42,85 @@ class GuestViewTests(TestCase):
 
     def setUp(self):
         create._get_groups_and_perms()
-        self.password = '1234'
 
         # set User "aaron_test" from fixtures as an attr on this class
         self.hotel = create_hotel()
-        self.user = create_hotel_user(self.hotel)
+        self.user = create_hotel_user(self.hotel, group='hotel_admin')
 
-        self.username = self.user.username
         self.guests = make_guests(self.hotel)
         self.guest = self.guests.first()
 
+        # Login
+        self.client.login(username=self.user.username, password=PASSWORD)
+
+    def tearDown(self):
+        self.client.logout()
+
     def test_list(self):
+        self.client.logout()
         # Dave is not logged in, so get's a 403 response
         response = self.client.get(reverse('concierge:guest_list'))
         self.assertEqual(response.status_code, 302) #login
 
     def test_list_ok(self):
         # Dave now tries Logged-In        
-        self.client.login(username=self.username, password=self.password)
         response = self.client.get(reverse('concierge:guest_list'))
         self.assertEqual(response.status_code, 200)
         assert response.context['object_list']
 
     def test_detail(self):
-        self.client.login(username=self.user.username, password=self.password)
         # Get Guest's details
         response = self.client.get(reverse('concierge:guest_detail', kwargs={'pk': self.guest.pk}))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['object'], self.guest)
 
-    def test_create(self):
+    def test_delete_guests(self):
         # No guests
-        (g.delete() for g in Guest.objects.all())
+        [g.delete() for g in Guest.objects.all()]
+        self.assertEqual(Guest.objects.count(), 0)
+
+    def test_create(self):
+        [g.delete() for g in Guest.objects.all()]
 
         # Login n Create One
-        self.client.login(username=self.user.username, password=self.password)
         response = self.client.post(reverse('concierge:guest_create'),
-            {'hotel':self.user.profile.hotel,'name': 'Test Guest',
-            'room_number': number(5), 'phone_number': number(),
-            'check_in': today(), 'check_out': today()},
+            {'hotel':self.user.profile.hotel,
+            'name': 'Test Guest',
+            'room_number': number(5),
+            'phone_number': number(),
+            'check_in': today(),
+            'check_out': today()},
             follow=True)
 
         # Now 1 guest
         guest = Guest.objects.first()
         self.assertIsInstance(guest, Guest)
+        self.assertRedirects(response, reverse('concierge:guest_detail', kwargs={'pk':guest.pk}))
 
-    def test_update(self):
-        self.client.login(username=self.user.username, password=self.password)
+    def test_update_get(self):
+        response = self.client.get(reverse('concierge:guest_update', kwargs={'pk':self.guest.pk}))
+        self.assertEqual(response.status_code, 200)
 
-        # No guests
-        (g.delete() for g in Guest.objects.all())
-
+    def test_update_post(self):
         guest_info_dict = {
-            'name': 'Test Guest',
+            'hotel': self.guest.hotel,
+            'name': self.guest.name,
             'room_number': number(5),
             'phone_number': number(),
             'check_in': today(),
             'check_out': today()
             }
 
-        # Create a single Guest
-        response = self.client.post(reverse('concierge:guest_create'),
-            guest_info_dict, follow=True)
-        guest = Guest.objects.first()
-        self.assertIsInstance(guest, Guest)
-
-        # can visit their DetailView
-        response = self.client.get('concierge:guest_detail', kwargs={'pk': guest.pk})
-        self.assertEqual(response.status_code, 200)
-
         # update in View
-        guest_info_dict['name'] = 'Test Guest New'
-        response = self.client.post(reverse('concierge:guest_update', kwargs={'pk':guest.pk}),
+        guest_info_dict['name'] = 'Updated Name'
+        # POST  
+        response = self.client.post(reverse('concierge:guest_update', kwargs={'pk':self.guest.pk}),
             guest_info_dict, follow=True)
-
-        # Modified Guest
-        self.assertRedirects(response, reverse('concierge:guest_detail', kwargs={'pk': guest.pk}))
-        new_guest = Guest.objects.first()
-        self.assertNotEqual(guest.name, new_guest.name)
+        self.assertRedirects(response, reverse('concierge:guest_detail', kwargs={'pk': self.guest.pk}))
+        new_guest = Guest.objects.get(name=guest_info_dict['name'])
+        self.assertNotEqual(self.guest.name, new_guest.name)
 
     def test_delete(self):
-        self.client.login(username=self.user.username, password=self.password)
         guest = Guest.objects.first()
         self.assertTrue(isinstance(guest, Guest))
         self.assertFalse(guest.hidden)

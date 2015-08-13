@@ -1,8 +1,6 @@
-from django.core.exceptions import ObjectDoesNotExist
-
-from .models import Guest, Message, Reply
+from concierge.models import Guest, Message, Reply
 from main.models import Hotel
-from utils import exceptions as excp, login_messages
+from utils import login_messages
 
 
 def process_from_messages():

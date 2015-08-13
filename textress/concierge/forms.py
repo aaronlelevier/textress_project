@@ -4,7 +4,7 @@ from django import forms
 from django.utils import timezone
 
 from djangular.forms import NgFormValidationMixin
-from djangular.styling.bootstrap3.forms import Bootstrap3Form, Bootstrap3ModelForm
+from djangular.styling.bootstrap3.forms import Bootstrap3ModelForm
 
 from concierge.models import Guest
 from utils import ph_formatter
