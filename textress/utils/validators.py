@@ -1,6 +1,3 @@
-'''
-Add regex, or some other validators for fields like phone number.
-'''
 from django.core.validators import BaseValidator
 from django.utils.translation import ugettext, ugettext_lazy as _
 

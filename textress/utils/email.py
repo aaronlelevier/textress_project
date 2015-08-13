@@ -1,11 +1,8 @@
 from django.conf import settings
-from django.utils import timezone, html
+from django.utils import html
 from django.template.loader import render_to_string
-from django.core.urlresolvers import reverse
-from django.contrib.auth.models import User
 
-from django.core.mail import (send_mail, EmailMessage, EmailMultiAlternatives,
-    get_connection)
+from django.core.mail import EmailMultiAlternatives
 
 
 class Email(object):

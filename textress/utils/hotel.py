@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.contrib.auth.models import User
 
 from twilio import TwilioRestException
 from twilio.rest import TwilioRestClient

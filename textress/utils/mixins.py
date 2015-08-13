@@ -1,5 +1,3 @@
-
-
 class DeleteButtonMixin(object):
     "Color and Text for a Delete Button to display to User."
 
