@@ -1,44 +1,31 @@
-import pytest
-import twilio
-
-from django.conf import settings
-from django.test import TestCase, LiveServerTestCase, RequestFactory
-from django.test.client import Client
+from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
-
-from model_mommy import mommy
 
 from main.models import Hotel
-from main.tests.factory import (create_hotel, make_subaccount,
-    CREATE_USER_DICT, CREATE_HOTEL_DICT)
+from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
 from sms.models import PhoneNumber
+from sms.tests.factory import create_phone_number
 from utils import create
-from sms.helpers import sms_messages
 
 
 class PhoneNumberTests(TestCase):
 
     # TODO: Add fixtures b/c will use actual created Twilio Phone
     #   numbers to test "context", etc...
-    fixtures = ['users.json', 'main.json', 'sms.json']
+    # fixtures = ['users.json', 'main.json', 'sms.json']
 
     def setUp(self):
         create._get_groups_and_perms()
-        self.password = '1234'
+        self.password = PASSWORD
 
         # set User "aaron_test" from fixtures as an attr on this class
-        self.user = User.objects.get(username='aaron_test')
-        # b/c passwords are stored as a hash in json fixtures
-        self.user.set_password(self.password)
-        self.user.save()
-
+        self.hotel = create_hotel()
+        self.user = create_hotel_user(self.hotel, username='aaron_test', group='hotel_admin')
         self.username = self.user.username
-        self.hotel = self.user.profile.hotel
 
         # Phone
-        self.ph_num = self.hotel.phonenumbers.primary(hotel=self.hotel)
+        self.ph_num = create_phone_number(self.hotel)
 
     def test_fixtures(self):
         self.assertTrue(isinstance(self.user, User))

@@ -1,19 +1,12 @@
 import os
-import pytest
 from twilio.rest import TwilioRestClient
 
 from django.conf import settings
-from django.test import TestCase, LiveServerTestCase, RequestFactory
-from django.test.client import Client
-from django.core.urlresolvers import reverse
-from django.core.exceptions import (ObjectDoesNotExist, MultipleObjectsReturned,
-    ValidationError)
-from django.contrib.auth.models import User
-from django.db.utils import IntegrityError
+from django.test import TestCase
+from django.core.exceptions import ValidationError
 
 from model_mommy import mommy
 
-from main.models import Hotel
 from main.tests.factory import create_hotel
 from sms.models import PhoneNumber
 from sms.tests.factory import create_phone_number

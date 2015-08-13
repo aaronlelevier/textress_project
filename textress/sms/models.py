@@ -1,20 +1,13 @@
 from django.db import models
-from django.conf import settings
 from django.utils.translation import ugettext, ugettext_lazy as _
-from django.core.urlresolvers import reverse
-from django.utils.timezone import now 
 from django.core.exceptions import (ObjectDoesNotExist, MultipleObjectsReturned,
     ValidationError)
-from django.db.utils import IntegrityError
 from django.dispatch import receiver
 from django.db.models.signals import post_save, pre_delete
 
 from twilio import TwilioRestException
-from twilio.rest import TwilioRestClient
 
-from sms.helpers import get_weather
 from main.models import Hotel, TwilioClient
-from utils.exceptions import DailyLimit
 from utils.models import TimeStampBaseModel
 
 

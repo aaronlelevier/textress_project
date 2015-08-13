@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 import re
 import requests
 import xmltodict
@@ -11,9 +10,6 @@ from twilio.rest import TwilioRestClient
 
 from django import forms
 from django.conf import settings
-from django.core.mail import send_mail, EmailMessage, EmailMultiAlternatives
-from django.template.loader import render_to_string
-from django.utils.timezone import now 
 
 
 sms_messages = {

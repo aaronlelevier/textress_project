@@ -1,19 +1,12 @@
-import pytest
-import requests
-
-import twilio
 from twilio.rest import TwilioRestClient
 
 from django.conf import settings
-from django.test import TestCase, LiveServerTestCase, RequestFactory
-from django.test.client import Client
-from django.core.urlresolvers import reverse
+from django.test import TestCase
 from django.contrib.auth.models import User, Group
 
 from model_mommy import mommy
 
 from sms.helpers import send_text, get_weather, sms_messages, send_message
-from main.models import Hotel
 from main.tests.test_models import create_hotel
 from utils import create
 

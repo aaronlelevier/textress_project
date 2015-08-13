@@ -1,22 +1,14 @@
-import re
-import twilio
-
 from django.conf import settings
-from django.shortcuts import render
 from django.template.loader import render_to_string
-from django.views.generic import FormView, CreateView, DeleteView
+from django.views.generic import FormView, DeleteView
 from django.core.urlresolvers import reverse, reverse_lazy
-from django.contrib import messages
-from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 
-from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
-    GroupRequiredMixin, SetHeadlineMixin, FormValidMessageMixin)
+from braces.views import SetHeadlineMixin, FormValidMessageMixin
 
 from main.mixins import AdminOnlyMixin
 from sms.models import PhoneNumber
-from utils.exceptions import DailyLimit
-from utils.hotel import TwilioHotel
 from utils.forms import EmptyForm
 
 
