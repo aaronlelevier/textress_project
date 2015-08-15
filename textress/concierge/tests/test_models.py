@@ -1,3 +1,4 @@
+import os
 import datetime
 import pytest
 
@@ -41,7 +42,12 @@ class GuestTests(TestCase):
 
     def test_validate_phone_number_taken(self):
         with pytest.raises(PhoneNumberInUse):
-            make_guests(hotel=self.hotel, number=1)
+            mommy.make(
+                Guest,
+                name="Unknown Guest",
+                hotel=self.hotel,
+                phone_number=settings.DEFAULT_TO_PH_BAD
+                )
 
     def test_checkin_date_validation(self):
         with pytest.raises(CheckOutDateException):
@@ -191,6 +197,10 @@ class MessageSendTests(TestCase):
 
     def setUp(self):
         self.hotel = create_hotel()
+        self.hotel.twilio_sid = os.environ['TWILIO_ACCOUNT_SID_TEST']
+        self.hotel.twilio_auth_token = os.environ['TWILIO_AUTH_TOKEN_TEST']
+        self.hotel.twilio_phone_number = os.environ['TWILIO_PH_NUM_TEST']
+        self.hotel.save()
         self.guest = make_guests(hotel=self.hotel, number=1)[0] # b/c returns list
 
     def test_create_that_sends(self):
@@ -199,8 +209,8 @@ class MessageSendTests(TestCase):
             to_ph=self.guest.phone_number,
             body='sent via unittest save() method'
             )
-        assert isinstance(message, Message)
-        assert message.hotel == self.guest.hotel
+        self.assertIsInstance(message, Message)
+        self.assertEqual(message.hotel, self.guest.hotel)
 
 
 class ReplyManagerTests(TestCase):

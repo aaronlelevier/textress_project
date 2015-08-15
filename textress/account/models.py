@@ -494,7 +494,11 @@ class AcctTrans(AbstractBase):
 @receiver(post_save, sender=AcctTrans)
 def update_balance(sender, instance=None, created=False, **kwargs):
     '''Update the current ``balance`` on the Account after the last 
-    transaction has been saved.'''
+    transaction has been saved.
+
+    :TODO: Drop this off to a Celery Task so doesnt cause an infinite loop
+    '''
     if not instance.balance:
         instance.balance = AcctTrans.objects.balance()
         instance.save()
+
