@@ -59,14 +59,4 @@ def _phone_numbers():
     phone_numbers = []
     for i in range(5):
         phone_numbers.append("+1702601860"+str(int(settings.DEFAULT_TO_PH[-1])+i+3))
-    return phone_numbers  
-
-
-### REMOVE
-
-def remove_all():
-    models = [User, Group, Permission, UserProfile, Hotel, Guest, Message]
-    for m in models:
-        objs = m.objects.all()
-        for o in objs:
-            o.delete()
+    return phone_numbers

@@ -27,9 +27,3 @@ class CreateTests(TestCase):
         phs = create._phone_numbers()
         self.assertTrue(phs)
         self.assertIsInstance(phs, list)
-
-    def test_remove_all(self):
-        create.remove_all()
-        models = [User, Group, Permission, UserProfile, Hotel, Guest, Message]
-        for m in models:
-            assert not m.objects.all()
