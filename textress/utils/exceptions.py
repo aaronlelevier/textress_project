@@ -1,3 +1,5 @@
+from django.core.exceptions import ValidationError
+
 from rest_framework.exceptions import APIException
 
 
@@ -55,7 +57,7 @@ class InvalidAmtException(Exception):
 class ValidSenderException(Exception):
     pass
 
-class PhoneNumberInUse(Exception):
+class PhoneNumberInUse(ValidationError):
     pass
 
 class InvalidSubaccountStatus(Exception):

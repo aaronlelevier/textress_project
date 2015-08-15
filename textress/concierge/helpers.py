@@ -1,3 +1,5 @@
+from django.forms.models import model_to_dict
+
 from concierge.models import Guest, Message, Reply
 from main.models import Hotel
 from utils import login_messages
@@ -12,7 +14,7 @@ def process_from_messages():
         client = guest.hotel._client
         for message in (sorted(client.messages.list(from_=guest.phone_number),
                         key=lambda message: message.date_sent)):
-            Message.objects.receive_message(guest, message)
+            Message.objects.receive_message(guest, message.__dict__)
 
 
 def process_incoming_message(data):

@@ -114,10 +114,13 @@ class Guest(AbstractBase):
     def is_unknown(self):
         return self.name == "Unknown Guest"
 
-    def validate_phone_number_taken(self, phone_number):
+    @staticmethod
+    def validate_phone_number_taken(phone_number):
         '''Ph # isn't being used by any other current Guests.
 
-        TODO: Should this raise a Form Error instead? Like `validate_phone`?
+        :TODO: 
+            1. Should this raise a Form Error instead? Like `validate_phone`?
+            2. Need a 2nd Validator that validates the PH format == '+17027284769'
         '''
         if Guest.objects.current().filter(phone_number=phone_number):
             raise PhoneNumberInUse("{} is currently in use.".format(phone_number))
@@ -195,27 +198,24 @@ class MessageManager(models.Manager):
 
     def receive_message(self, guest, data):
         """
-        TODO: Review this method, test logic.
-
-        NOTES:
-        Hotels will have an "Unknown" Guest Messages container, if they
-        receive a Message from an unregistered ph #.
-
-        `tm` = Twilio Message Object
+        :guest: Guest Model object
+        :data: Twilio Message object as a Dict
+        :NOTES:
+            Hotels will have an "Unknown" Guest Messages container, if they
+            receive a Message from an unregistered ph #.
         """
-
         try:
-            return self.get(sid=data['SmsSid'])
+            return self.get(sid=data['sid'])
         except ObjectDoesNotExist:
             try:
                 db_message = self.create(
                     guest=guest,
-                    sid=data['SmsSid'],
+                    sid=data['sid'],
                     received=True,
-                    status=data['SmsStatus'],
-                    to_ph=data['To'],
-                    from_ph=data['From'],
-                    body=data['Body']
+                    status=data['status'],
+                    to_ph=data['to'],
+                    from_ph=data['from_'],
+                    body=data['body']
                     )
             except (ObjectDoesNotExist, Exception) as e:
                 # TODO: only reaches this point if the received Twilio Message
