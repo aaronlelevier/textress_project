@@ -56,7 +56,7 @@ class PhoneNumberAddView(PhoneNumberBaseView):
 
     def form_valid(self, form):
         "Purchase Twilio Ph # Obj here, and add to related models."
-        phone_number, created = PhoneNumber.objects.get_or_create(hotel=self.hotel)
+        phone_number, created = PhoneNumber.objects.purchase_number(hotel=self.hotel)
         return super(PhoneNumberAddView, self).form_valid(form)
 
 

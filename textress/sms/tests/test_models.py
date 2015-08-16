@@ -1,11 +1,12 @@
 import os
-from twilio.rest import TwilioRestClient
 
 from django.conf import settings
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
 from model_mommy import mommy
+from twilio.rest import TwilioRestClient
+from twilio.rest.resources.phone_numbers import PhoneNumber as TwilioPhoneNumber
 
 from main.tests.factory import create_hotel
 from sms.models import PhoneNumber
@@ -59,11 +60,15 @@ class PhoneNumberManagerTests(TestCase):
         for ph in PhoneNumber.objects.exclude(sid=self.ph2.sid):
             self.assertFalse(ph.default)
 
-    def test_get_default(self):
+    def test_default(self):
         PhoneNumber.objects.update_default(self.hotel, self.ph.sid)
         default = PhoneNumber.objects.default(self.hotel)
         self.assertTrue(default, PhoneNumber)
         
+    # LIVE TEST
+    # def test_twilio_purchase_number(self):
+    #     twilio_ph = PhoneNumber.objects._twilio_purchase_number(self.hotel)
+    #     self.assertIsInstance(twilio_ph, TwilioPhoneNumber)
 
 class PhoneNumberTests(TestCase):
 

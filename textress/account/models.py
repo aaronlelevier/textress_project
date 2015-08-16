@@ -383,10 +383,19 @@ class AcctTransManager(Dates, models.Manager):
         
             return acct_tran, True
 
-    def check_balance(self, hotel):
+    def check_balance(self, hotel, minimum_amt=0):
+        '''
+        TODO: return Bool of if Charged or not.
+
+        :hotel: Hotel object
+        :minimum_amt: minimum balance to check for.
+
+        :return: Bool. True: if account was charged.
+        '''
         balance = AcctTrans.objects.filter(hotel=hotel).balance()
-        if balance < 0:
-            acct_tran = self.recharge(hotel, balance)
+        if balance < minimum_amt:
+            acct_tran, charged = self.recharge(hotel, balance)
+        return charged
 
     def sms_used(self, hotel, trans_type=None, insert_date=None):
         '''
@@ -496,9 +505,8 @@ def update_balance(sender, instance=None, created=False, **kwargs):
     '''Update the current ``balance`` on the Account after the last 
     transaction has been saved.
 
-    :TODO: Drop this off to a Celery Task so doesnt cause an infinite loop
+    :TODO: Drop this off to a Celery Task so doesn't cause an infinite loop.
     '''
     if not instance.balance:
         instance.balance = AcctTrans.objects.balance()
         instance.save()
-

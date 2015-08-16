@@ -82,7 +82,9 @@
                             <img ng-src="[[ guest.thumbnail ]]" class="profile_thumbnail">
                             <span class="desc"><strong>[[ guest.name ]]</strong></span>
                             &nbsp;
-                            <q>[[ guest.messages[0].body ]]</q>
+                            <span ng-if="guest.messages[0]">
+                                <q>[[ guest.messages[0].body ]]</q>
+                            </span>
                             <div class="time">
                                 <i class="fa fa-time bigger-110"></i>
                                 [[ guest.messages[0].created | date :'medium' ]]

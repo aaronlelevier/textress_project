@@ -58,21 +58,25 @@ hotel: {}".format(hotel))
             ph.save()
 
     def update_default(self, hotel, sid):
-        "Public method for setting a PhoneNumber to the Default."
+        """
+        Call all set default PH logic.
+
+        :hotel: Hotel object
+        :sid: PhoneNumber.sid that will be set as the **default**
+        """
         self._validate_ph_num(hotel, sid)
         self._set_default(hotel, sid)
         self._update_non_defaults(hotel, sid)
 
     def default(self, hotel):
         '''
-        Returns the single "default" PhoneNumber object.
-        defaul
+        Returns the single "default" PhoneNumber object default.
         '''
         return self.get_queryset().default(hotel)
 
     ### TWILIO
 
-    def purchase_number(self, hotel):
+    def _twilio_purchase_number(self, hotel):
         "Based on ``area_code`` of the Hotel."
         number = None
         while not number:
@@ -85,16 +89,31 @@ hotel: {}".format(hotel))
 
     def update_account_sid(self, hotel, number):
         '''
-        Assings PH # to Hotel.
-        Denormalize Twilio PH # Fields
-        Return: Twilio PhoneNumber Object.
+        Transfer on Twilio the PhoneNumber to the Hotel's 
+        Subaccount.
+
+        Update denormalized PH fields on Hotel.
+
+        :hotel: Hotel object
+        :number: PhoneNumber object
         '''
         number = self.client.phone_numbers.update(
             number.sid, account_sid=hotel.twilio_sid)
-
         hotel.update_twilio_phone(ph_sid=number.sid,
             phone_number=number.phone_number)
 
+    def purchase_number(self, hotel):
+        '''
+        Calls all logic for the Purchase of a New PhoneNumber.
+        '''
+        # confirm funds are available
+        _twilio_ph = self._twilio_purchase_number(hotel)
+        # charge account on success
+        number = self.create(hotel=hotel,
+            sid=_twilio_ph.sid,
+            phone_number=_twilio_ph.phone_number,
+            friendly_name=_twilio_ph.friendly_name)
+        self.update_account_sid(hotel, number)
         return number
 
     def get_or_create(self, hotel, *args, **kwargs):
@@ -103,21 +122,15 @@ hotel: {}".format(hotel))
         PhoneNumber will be purchased from Twilio and set as the default.
         '''
         try:
-            ph = self.get(sid=hotel.twilio_ph_sid)
+            ph = self.get(hotel=hotel)
             created = False
         except ObjectDoesNotExist:
-            # Buy Twilio Ph#
-            number = self.purchase_number(hotel)
-            # Assign the Twilio PhoneNumber to the Hotel's Subaccount
-            number = self.update_account_sid(hotel, number)
-            # Save to DB
-            ph = self.create(hotel=hotel,
-                sid=number.sid,
-                phone_number=number.phone_number,
-                friendly_name=number.friendly_name)
+            ph = self.purchase_number(hotel)
             created = True
+
         # assure there is only 1 Primary Ph #
         self.update_default(hotel=hotel, sid=ph.sid)
+        
         return ph, created
 
 

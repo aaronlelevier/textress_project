@@ -13,7 +13,11 @@ client = TwilioRestClient(account_sid, auth_token)
 
 def create_phone_number(hotel=None):
     '''Get the first existing Twilio PhoneNumber for the Master 
-    Account and create a DB record for it.'''
+    Account and create a DB record for it.
+
+    **Note:** Can only get the max real Twilio PH's that exist for 
+    the account.
+    '''
     count = PhoneNumber.objects.count()
     number = client.phone_numbers.list()[count]
     if not hotel:
