@@ -134,7 +134,8 @@ class TransType(AbstractBase):
     2   init_amt        initial account funding
     3   recharge_amt    Recharge amount selected by the Hotel
     4   sms_used        daily deduction for sms used for that day; cache - sms used during the day to save DB trips
-    5   bulk_discount   credit applied from previous months use based on bulk
+    5   phone_number    Monthly phone number cost. Is charged at the initial purchase of a phone number, and monthly after that.
+    6   bulk_discount   credit applied from previous months use based on bulk
 
     TODO:
         - cache `sms_used` during the day to save DB trips
@@ -236,7 +237,7 @@ class AcctStmtManager(models.Manager):
 
         balance = AcctTrans.objects.filter(hotel=hotel).balance()
 
-        if balance < 0:
+        if balance < hotel.acct_cost.balance:
             recharge_amt = AcctTrans.objects.recharge(hotel, balance)
             balance = AcctTrans.objects.filter(hotel=hotel).balance()
 
@@ -356,6 +357,13 @@ class AcctTransManager(Dates, models.Manager):
         acct_cost = AcctCost.objects.get(hotel=hotel)
         return getattr(acct_cost, trans_type.name)
 
+    def phone_number_charge(hotel):
+        trans_type = TransType.objects.get_or_create(name='phone_number', desc='Monthly phone \
+number cost. Is charged at the initial purchase of a phone number, and monthly after that.')
+        acct_tran = self.create(hotel=hotel, trans_type=trans_type,
+            amount=settings.PHONE_NUMBER_MONTHLY_COST)
+        return acct_tran
+
     def recharge(self, hotel, balance):
         '''
         Should only occur if the ``balance`` is less than the ``recharge_amt`` 
@@ -369,33 +377,42 @@ class AcctTransManager(Dates, models.Manager):
         :Return:
             acct_tran, created
         '''
-        if balance > hotel.acct_cost.balance_min:
-            return None, False
-        else:
-            amount = hotel.acct_cost.recharge_amt - balance
+        amount = hotel.acct_cost.recharge_amt - balance
 
-            # TODO: need to charge credit card here in order to "recharge"
-            #   the account
+        # TODO: need to charge credit card here in order to "recharge"
+        #   the account
 
-            # should I set ``trans_type`` as a global VAR b/c doesn't change?
-            trans_type = get_object_or_404(TransType, name='recharge_amt')
-            acct_tran = self.create(hotel=hotel, trans_type=trans_type, amount=amount)
-        
-            return acct_tran, True
+        # should I set ``trans_type`` as a global VAR b/c doesn't change?
+        trans_type = get_object_or_404(TransType, name='recharge_amt')
+        acct_tran = self.create(hotel=hotel, trans_type=trans_type, amount=amount)
+        return acct_tran, True
 
-    def check_balance(self, hotel, minimum_amt=0):
+    def check_balance(self, hotel):
         '''
         TODO: return Bool of if Charged or not.
 
         :hotel: Hotel object
         :minimum_amt: minimum balance to check for.
 
-        :return: Bool. True: if account was charged.
+        :return: 
+            Boolean. 
+                -``True`` if the Balance is enough to 
+                process the transaction. (or if a recharge happened, 
+                then the balance is okay as well.)
+                - ``False`` if failed and ``auto_recharge`` OFF
         '''
         balance = AcctTrans.objects.filter(hotel=hotel).balance()
-        if balance < minimum_amt:
-            acct_tran, charged = self.recharge(hotel, balance)
-        return charged
+
+        if balance > hotel.acct_cost.balance_min:
+            return True
+        else:
+            if hotel.acct_cost.auto_recharge:
+                acct_tran, charged = self.recharge(hotel, balance)
+                return True
+            else:
+                # ``auto_charge`` is OFF and the Account Balance is not 
+                # enought to process the transaction.
+                return False
 
     def sms_used(self, hotel, trans_type=None, insert_date=None):
         '''

@@ -2,6 +2,7 @@ import datetime
 
 from django.db.models import Max, Sum
 from django.test import TestCase
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Group
 from django.utils import timezone
@@ -328,6 +329,11 @@ class AcctTransTests(TestCase):
     def test_sms_used_on_date(self):
         max_date = AcctTrans.objects.sms_used_max_date()
         assert AcctTrans.objects.sms_used_on_date(date=max_date)
+
+    def test_phone_number_charge(self):
+        acct_tran = AcctTrans.objects.phone_number_charge(self.hotel)
+        self.assertIsInstance(acct_tran, AcctTrans)
+        self.assertEqual(acct_tran.amount, settings.PHONE_NUMBER_MONTHLY_COST)
 
     def test_recharge(self):
         # ``recharge()`` returns None if it is not triggered

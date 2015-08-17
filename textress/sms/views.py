@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from braces.views import SetHeadlineMixin, FormValidMessageMixin
 
 from main.mixins import AdminOnlyMixin
+from sms.forms import PhoneNumberAddForm
 from sms.models import PhoneNumber
 from utils.forms import EmptyForm
 
@@ -43,7 +44,7 @@ class PhoneNumberAddView(PhoneNumberBaseView):
     '''
     headline = "Purchase a Phone Number"
     template_name = 'cpanel/form.html'
-    form_class = EmptyForm
+    form_class = PhoneNumberAddForm
     success_url = reverse_lazy('sms:ph_num_list')
     form_valid_message = "Phone Number successfully purchased"
 
@@ -54,9 +55,14 @@ class PhoneNumberAddView(PhoneNumberBaseView):
         context['btn_text'] = "Confirm"
         return context
 
+    def get_form_kwargs(self):
+        kwargs = super(PhoneNumberAddView, self).get_form_kwargs()
+        kwargs['hotel'] = self.hotel
+        return kwargs
+
     def form_valid(self, form):
         "Purchase Twilio Ph # Obj here, and add to related models."
-        phone_number, created = PhoneNumber.objects.purchase_number(hotel=self.hotel)
+        phone_number = PhoneNumber.objects.purchase_number(hotel=self.hotel)
         return super(PhoneNumberAddView, self).form_valid(form)
 
 

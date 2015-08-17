@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.core.exceptions import (ObjectDoesNotExist, MultipleObjectsReturned,
     ValidationError)
@@ -7,6 +8,7 @@ from django.db.models.signals import post_save, pre_delete
 
 from twilio import TwilioRestException
 
+from account.models import AcctTrans, TransType
 from main.models import Hotel, TwilioClient
 from utils.models import TimeStampBaseModel
 
@@ -106,14 +108,17 @@ hotel: {}".format(hotel))
         '''
         Calls all logic for the Purchase of a New PhoneNumber.
         '''
-        # confirm funds are available
         _twilio_ph = self._twilio_purchase_number(hotel)
+        
         # charge account on success
+        acct_tran = AcctTrans.objects.phone_number_charge(hotel)
+
         number = self.create(hotel=hotel,
             sid=_twilio_ph.sid,
             phone_number=_twilio_ph.phone_number,
             friendly_name=_twilio_ph.friendly_name)
         self.update_account_sid(hotel, number)
+        
         return number
 
     def get_or_create(self, hotel, *args, **kwargs):

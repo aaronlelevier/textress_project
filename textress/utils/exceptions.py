@@ -3,9 +3,7 @@ from django.core.exceptions import ValidationError
 from rest_framework.exceptions import APIException
 
 
-########
-# REST #
-########
+### REST ###
 
 class NotHotelGuestException(APIException):
     status_code = 400
@@ -15,6 +13,15 @@ class NotHotelGuestException(APIException):
 class HotelGuestNotFoundException(APIException):
     status_code = 400
     default_detail = 'Hotel Guest Not Found.'
+
+
+### Account ###
+
+class RechargeAccountRequiredExcp(Exception):
+
+    def __init__(self, *args, **kwargs):
+        super(RechargeAccountRequiredExcp, self).__init__(
+            "Unable to process transaction. Please recharge the account balance.")
 
 
 ### Concierge ###

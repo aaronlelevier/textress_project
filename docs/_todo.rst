@@ -18,6 +18,8 @@
 
     - marking a message as read when you go to the GuestDetailView
 
+    - ``AcctCost.auto_recharge`` - add testing and logic for this feature
+
 :reading:
     - Pragmatic Programmer
     - 12 Factor Coding
