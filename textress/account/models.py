@@ -389,17 +389,10 @@ number cost. Is charged at the initial purchase of a phone number, and monthly a
 
     def check_balance(self, hotel):
         '''
-        TODO: return Bool of if Charged or not.
+        Returns a Boolean if the Account balance is more than the 
+        ``hotel.acct_cost.balance_min``
 
         :hotel: Hotel object
-        :minimum_amt: minimum balance to check for.
-
-        :return: 
-            Boolean. 
-                -``True`` if the Balance is enough to 
-                process the transaction. (or if a recharge happened, 
-                then the balance is okay as well.)
-                - ``False`` if failed and ``auto_recharge`` OFF
         '''
         balance = AcctTrans.objects.filter(hotel=hotel).balance()
 

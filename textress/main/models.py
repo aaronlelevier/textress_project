@@ -186,6 +186,13 @@ class Hotel(TwilioClient, AbstractBase):
         self.save()
         return self
 
+    def remove_twilio_phone(self):
+        "Remove denormalized PH reference on Hotel"
+        self.twilio_ph_sid = None
+        self.twilio_phone_number = None
+        self.save()
+        return self
+
 
 def profile_image(instance, filename):
     return '/'.join(['profile', filename])

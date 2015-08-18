@@ -10,6 +10,7 @@ from twilio import TwilioRestException
 
 from account.models import AcctTrans, TransType
 from main.models import Hotel, TwilioClient
+from utils.exceptions import PhoneNumberNotDeletedExcp
 from utils.models import TimeStampBaseModel
 
 
@@ -67,7 +68,8 @@ hotel: {}".format(hotel))
         :sid: PhoneNumber.sid that will be set as the **default**
         """
         self._validate_ph_num(hotel, sid)
-        self._set_default(hotel, sid)
+        ph = self._set_default(hotel, sid)
+        Hotel.objects.update_twilio_phone(ph.sid, ph.phone_number)
         self._update_non_defaults(hotel, sid)
 
     def default(self, hotel):
@@ -127,7 +129,7 @@ hotel: {}".format(hotel))
         PhoneNumber will be purchased from Twilio and set as the default.
         '''
         try:
-            ph = self.get(hotel=hotel)
+            ph = self.get(hotel=hotel, default=True)
             created = False
         except ObjectDoesNotExist:
             ph = self.purchase_number(hotel)
@@ -163,15 +165,21 @@ class PhoneNumber(TwilioClient, TimeStampBaseModel):
             PhoneNumber.objects._update_non_defaults(self.hotel, self.sid)
         return super(PhoneNumber, self).save(*args, **kwargs)
 
-    def delete(self, *args, **kwargs):
+    def delete(self):
         # TODO: Verify this delete actually deletes the PH
+
+        # Twilio Delete
         try:
             number = self.hotel._client.phone_numbers.get(self.sid)
             number.delete()
-        except TwilioRestException as e:
-            # TODO: Add logging
-            raise("{}, {}".format(e.__class__, e))
-        return super(PhoneNumber, self).delete(*args, **kwargs)
+        except TwilioRestException:
+            raise PhoneNumberNotDeletedExcp()
+
+        # Remove denormalized PH reference on Hotel
+        self.hotel.remove_twilio_phone()
+
+        # DB PhoneNumber delete
+        return super(PhoneNumber, self).delete()
 
 
 '''

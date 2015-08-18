@@ -44,6 +44,10 @@ class DailyLimit(Exception):
         super(DailyLimit, self).__init__("Daily text message limit reached")
 
 
+class PhoneNumberNotDeletedExcp(Exception):
+    pass
+
+
 # TODO: maybe add cost args to this, so show in error msg
 class ConvertCostException(Exception):
     pass

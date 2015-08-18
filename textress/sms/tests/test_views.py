@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 
+from account.models import AcctCost
 from main.models import Hotel
 from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
 from sms.models import PhoneNumber
@@ -49,6 +50,19 @@ class PhoneNumberTests(TestCase):
         self.assertTrue(response.context['headline'])
         self.assertTrue(response.context['addit_info'])
         self.assertTrue(response.context['btn_text'])
+
+    def test_add_context_form(self):
+        response = self.client.get(reverse('sms:ph_num_add'))
+        self.assertTrue(response.context['form'])
+        self.assertIsInstance(response.context['form'].hotel, Hotel)
+
+    def test_add_form(self):
+        # TODO: Test Form Validation
+        # acct_cost, created = AcctCost.objects.get_or_create(self.hotel)
+        # print self.hotel.acct_cost.__dict__
+        # assert 1 == 2
+
+    ### DELETE
 
     def test_delete(self):
         # Dave goes to DeleteView

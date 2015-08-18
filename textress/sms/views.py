@@ -3,6 +3,7 @@ from django.template.loader import render_to_string
 from django.views.generic import FormView, DeleteView
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseRedirect
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
 from braces.views import SetHeadlineMixin, FormValidMessageMixin
@@ -10,6 +11,7 @@ from braces.views import SetHeadlineMixin, FormValidMessageMixin
 from main.mixins import AdminOnlyMixin
 from sms.forms import PhoneNumberAddForm
 from sms.models import PhoneNumber
+from utils.exceptions import PhoneNumberNotDeletedExcp
 from utils.forms import EmptyForm
 
 
@@ -96,8 +98,12 @@ class PhoneNumberDeleteView(PhoneNumberBaseView, DeleteView):
     
     def get_form_valid_message(self):
         # dynamic msg success to show which ph num was deleted
-        return u"{0} deleted!".format(self.object.friendly_name)
+        return u"Phone number: {0} deleted!".format(self.object.friendly_name)
 
     def form_valid(self, form):
-        PhoneNumber.objects.delete(request.user.profile.hotel, sid)
+        try:
+            self.object.delete()
+        except PhoneNumberNotDeletedExcp:
+            messages.add_message(self.request, messages.INFO, "Phone number delete \
+failed. Please contact support at: {}".format(settings.DEFAULT_EMAIL_SUPPORT))
         return HttpResponseRedirect(self.get_success_url())
