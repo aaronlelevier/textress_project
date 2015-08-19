@@ -69,7 +69,7 @@ hotel: {}".format(hotel))
         """
         self._validate_ph_num(hotel, sid)
         ph = self._set_default(hotel, sid)
-        Hotel.objects.update_twilio_phone(ph.sid, ph.phone_number)
+        hotel.update_twilio_phone(ph.sid, ph.phone_number)
         self._update_non_defaults(hotel, sid)
 
     def default(self, hotel):
@@ -115,11 +115,17 @@ hotel: {}".format(hotel))
         # charge account on success
         acct_tran = AcctTrans.objects.phone_number_charge(hotel)
 
+        # DB create
         number = self.create(hotel=hotel,
             sid=_twilio_ph.sid,
             phone_number=_twilio_ph.phone_number,
             friendly_name=_twilio_ph.friendly_name)
+
+        # Xfr Twilio PH to Hotel Subaccount
         self.update_account_sid(hotel, number)
+
+        # Update default
+        self.update_default(hotel, number.sid)
         
         return number
 

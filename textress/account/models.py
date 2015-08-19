@@ -357,8 +357,8 @@ class AcctTransManager(Dates, models.Manager):
         acct_cost = AcctCost.objects.get(hotel=hotel)
         return getattr(acct_cost, trans_type.name)
 
-    def phone_number_charge(hotel):
-        trans_type = TransType.objects.get_or_create(name='phone_number', desc='Monthly phone \
+    def phone_number_charge(self, hotel):
+        trans_type, _ = TransType.objects.get_or_create(name='phone_number', desc='Monthly phone \
 number cost. Is charged at the initial purchase of a phone number, and monthly after that.')
         acct_tran = self.create(hotel=hotel, trans_type=trans_type,
             amount=settings.PHONE_NUMBER_MONTHLY_COST)
@@ -500,8 +500,8 @@ class AcctTrans(AbstractBase):
         ordering = ('-insert_date',)
 
     def __str__(self):
-        return """Date: {self.insert_date} Hotel: {self.hotel} TransType: {self.trans_type} \
-        Amount: ${amount:.2f}""".format(self=self, amount=self.amount/100.0)
+        return "Date: {self.insert_date} Hotel: {self.hotel} TransType: {self.trans_type} \
+Amount: ${amount:.2f}".format(self=self, amount=self.amount/100.0)
 
     def save(self, *args, **kwargs):
         # For testing only

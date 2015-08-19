@@ -12,7 +12,7 @@ class PhoneNumberAddForm(forms.Form):
     def clean(self):
         cd = super(PhoneNumberAddForm, self).clean()
 
-        balance_ok = AcctTrans.objects.check_balance(hotel)
+        balance_ok = AcctTrans.objects.check_balance(self.hotel)
         if not balance_ok:
             raise forms.ValidationError("Please refill your account balance \
 in order to process this transation.")
