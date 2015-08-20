@@ -64,6 +64,31 @@ class PhoneNumberManagerTests(TestCase):
         PhoneNumber.objects.update_default(self.hotel, self.ph.sid)
         default = PhoneNumber.objects.default(self.hotel)
         self.assertTrue(default, PhoneNumber)
+
+    def test_default_no_current_defaults(self):
+        self.ph.default = False
+        self.ph.save()
+        self.ph2.default = False
+        self.ph2.save()
+        self.assertFalse(PhoneNumber.objects.filter(default=True))
+        ph = PhoneNumber.objects.default(self.hotel)
+        self.assertIsInstance(ph, PhoneNumber)
+        self.assertTrue(ph.default)
+
+    def test_default_multiple_defaults(self):
+        self.ph.default = True
+        self.ph.save()
+        self.ph2.default = True
+        self.ph2.save()
+        self.assertTrue(PhoneNumber.objects.filter(default=True))
+        ph = PhoneNumber.objects.default(self.hotel)
+        self.assertIsInstance(ph, PhoneNumber)
+        self.assertTrue(ph.default)
+
+    def test_update_account_sid(self):
+        # TODO: CONTINUE HERE
+        pass
+
         
     # LIVE TEST
     # def test_twilio_purchase_number(self):
@@ -101,37 +126,37 @@ class PhoneNumberTests(TestCase):
         assert len(PhoneNumber.objects.filter(default=False)) == len(phones) - 1
 
 
-class LivePhoneNumberTests(TestCase):
+# class LivePhoneNumberTests(TestCase):
 
-    def setUp(self):
-        self.hotel = create_hotel(name='sub_test_865')
+#     def setUp(self):
+#         self.hotel = create_hotel(name='sub_test_865')
 
-        # Twilio Test Sid
-        self.test_sid = os.environ['TWILIO_ACCOUNT_SID_TEST']
-        self.test_auth_token = os.environ['TWILIO_AUTH_TOKEN_TEST']
+#         # Twilio Test Sid
+#         self.test_sid = os.environ['TWILIO_ACCOUNT_SID_TEST']
+#         self.test_auth_token = os.environ['TWILIO_AUTH_TOKEN_TEST']
         
-        # Update Hotel Subaccount, so can purchase a PhonNumber
-        self.hotel.update_twilio(sid=self.test_sid,
-            auth_token=self.test_auth_token)
+#         # Update Hotel Subaccount, so can purchase a PhonNumber
+#         self.hotel.update_twilio(sid=self.test_sid,
+#             auth_token=self.test_auth_token)
 
-        self.client = TwilioRestClient(settings.TWILIO_ACCOUNT_SID,
-            settings.TWILIO_AUTH_TOKEN)
+#         self.client = TwilioRestClient(settings.TWILIO_ACCOUNT_SID,
+#             settings.TWILIO_AUTH_TOKEN)
 
-        self.ph_sid = os.environ['TWILIO_TEST_PH_SID']
+#         self.ph_sid = os.environ['TWILIO_TEST_PH_SID']
         
-    def test_purchase_number(self):
-        # # Comment out b/c creates a live Twilio PhoneNumber each time.
-        # number = PhoneNumber.objects.purchase_number(self.hotel)
-        # assert number
+#     def test_purchase_number(self):
+#         # # Comment out b/c creates a live Twilio PhoneNumber each time.
+#         # number = PhoneNumber.objects.purchase_number(self.hotel)
+#         # assert number
 
-        # Confirm Account Exists
-        dave_acct = self.client.accounts.list(friendly_name='Dave Hotel')[0]
-        assert dave_acct
+#         # Confirm Account Exists
+#         dave_acct = self.client.accounts.list(friendly_name='Dave Hotel')[0]
+#         assert dave_acct
 
-        # Confirm that he has a PhoneNumber
-        client = TwilioRestClient(dave_acct.sid, dave_acct.auth_token)
-        dave_number = client.phone_numbers.get(self.ph_sid)
-        assert dave_number
+#         # Confirm that he has a PhoneNumber
+#         client = TwilioRestClient(dave_acct.sid, dave_acct.auth_token)
+#         dave_number = client.phone_numbers.get(self.ph_sid)
+#         assert dave_number
 
     # def test_update_account_sid(self):
     #     # # First Return PH # to Master Account

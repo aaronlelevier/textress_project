@@ -133,7 +133,10 @@ class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
         context['acct_cost'], created = AcctCost.objects.get_or_create(hotel=self.hotel)
         context['phone_numbers'] = PhoneNumber.objects.filter(hotel=self.hotel)
         context['phone_numbers_cost'] = context['phone_numbers'].count() * settings.PHONE_NUMBER_MONTHLY_COST
-        context['acct_trans'] = AcctTrans.objects.filter(hotel=self.hotel,
+        # AcctTrans
+        self.acct_trans = AcctTrans.objects.filter(hotel=self.hotel)
+        context['balance'] = self.acct_trans.balance()
+        context['acct_trans'] = self.acct_trans.filter(hotel=self.hotel,
             trans_type__name__in=['init_amt', 'recharge_amt']).order_by('-insert_date')[:4]
         return context
 

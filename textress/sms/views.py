@@ -1,3 +1,5 @@
+import sys
+
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.views.generic import FormView, DeleteView
@@ -6,7 +8,8 @@ from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
-from braces.views import SetHeadlineMixin, FormValidMessageMixin
+from braces.views import (SetHeadlineMixin, FormValidMessageMixin,
+    FormInvalidMessageMixin)
 
 from main.mixins import AdminOnlyMixin
 from sms.forms import PhoneNumberAddForm
@@ -40,7 +43,7 @@ class PhoneNumberListView(PhoneNumberBaseView):
         return context
 
 
-class PhoneNumberAddView(PhoneNumberBaseView):
+class PhoneNumberAddView(FormInvalidMessageMixin, PhoneNumberBaseView):
     '''
     Form with no input, just confirms purchasing the ph num.
     '''
@@ -49,6 +52,10 @@ class PhoneNumberAddView(PhoneNumberBaseView):
     form_class = PhoneNumberAddForm
     success_url = reverse_lazy('sms:ph_num_list')
     form_valid_message = "Phone Number successfully purchased"
+    form_invalid_message = (
+        "Please refill your account balance in order to "
+        "process this transation or turn Auto-recharge ON."
+    )
 
     def get_context_data(self, **kwargs):
         context = super(PhoneNumberAddView, self).get_context_data(**kwargs)
@@ -64,7 +71,8 @@ class PhoneNumberAddView(PhoneNumberBaseView):
 
     def form_valid(self, form):
         "Purchase Twilio Ph # Obj here, and add to related models."
-        phone_number = PhoneNumber.objects.purchase_number(hotel=self.hotel)
+        if not settings.DEBUG:
+            phone_number = PhoneNumber.objects.purchase_number(hotel=self.hotel)
         return super(PhoneNumberAddView, self).form_valid(form)
 
 

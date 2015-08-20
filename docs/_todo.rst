@@ -1,6 +1,6 @@
 2015-08-16
 ----------
-
+:todo: look over billing overview page for calculation errors
 
 2015-08-11
 ----------

@@ -155,9 +155,14 @@ class TransType(AbstractBase):
 # ACCT COST #
 #############
 
-CHARGE_AMOUNTS = [(500, '${:.2f}'.format(1))] + [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
-# replace ``CHARGE_AMOUNTS`` with the below amount choices once Stripe Payments confirmed to work.
-# CHARGE_AMOUNTS = [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
+# use a lower charge amount in DEBUG:
+if settings.DEBUG:
+    INIT_CHARGE_AMT = 50
+else:
+    INIT_CHARGE_AMT = 500
+
+# AcctCost Amount Choices
+CHARGE_AMOUNTS = [(INIT_CHARGE_AMT, '${:.2f}'.format(1))] + [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
 BALANCE_AMOUNTS = [(100, '${:.2f}'.format(1))] + [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
 
 
@@ -395,6 +400,8 @@ number cost. Is charged at the initial purchase of a phone number, and monthly a
         :hotel: Hotel object
         '''
         balance = AcctTrans.objects.filter(hotel=hotel).balance()
+        print 'balance:', balance
+        print 'balance_min:', hotel.acct_cost.balance_min
 
         if balance > hotel.acct_cost.balance_min:
             return True

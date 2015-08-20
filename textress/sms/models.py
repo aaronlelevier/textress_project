@@ -19,15 +19,7 @@ from utils.models import TimeStampBaseModel
 ################
 
 class PhoneNumberQuerySet(models.query.QuerySet):
-
-    def default(self, hotel):
-        '''
-        Returns the single "default" PhoneNumber object default.
-        '''
-        try:
-            return self.get(hotel=hotel, default=True)
-        except (ObjectDoesNotExist, MultipleObjectsReturned):
-            return []
+    pass
 
 
 class PhoneNumberManager(TwilioClient, models.Manager):
@@ -71,12 +63,22 @@ hotel: {}".format(hotel))
         ph = self._set_default(hotel, sid)
         hotel.update_twilio_phone(ph.sid, ph.phone_number)
         self._update_non_defaults(hotel, sid)
+        return ph
 
     def default(self, hotel):
         '''
         Returns the single "default" PhoneNumber object default.
         '''
-        return self.get_queryset().default(hotel)
+        ph_nums = self.filter(hotel=hotel)
+        if not ph_nums:
+            return []
+        else:
+            try:
+                return ph_nums.get(default=True)
+            except (ObjectDoesNotExist, MultipleObjectsReturned):
+                ph = ph_nums[0]
+                ph = self.update_default(hotel, ph.sid)
+                return ph
 
     ### TWILIO
 
@@ -172,8 +174,6 @@ class PhoneNumber(TwilioClient, TimeStampBaseModel):
         return super(PhoneNumber, self).save(*args, **kwargs)
 
     def delete(self):
-        # TODO: Verify this delete actually deletes the PH
-
         # Twilio Delete
         try:
             number = self.hotel._client.phone_numbers.get(self.sid)
