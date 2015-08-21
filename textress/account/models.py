@@ -122,6 +122,7 @@ TRANS_TYPES = [
     ('init_amt', 'init_amt'),
     ('recharge_amt', 'recharge_amt'),
     ('sms_used', 'sms_used'),
+    ('phone_number', 'phone_number'),
     ('bulk_discount', 'bulk_discount')
 ]
 
@@ -242,7 +243,7 @@ class AcctStmtManager(models.Manager):
 
         balance = AcctTrans.objects.filter(hotel=hotel).balance()
 
-        if balance < hotel.acct_cost.balance:
+        if balance < hotel.acct_cost.balance_min:
             recharge_amt = AcctTrans.objects.recharge(hotel, balance)
             balance = AcctTrans.objects.filter(hotel=hotel).balance()
 
@@ -362,35 +363,48 @@ class AcctTransManager(Dates, models.Manager):
         acct_cost = AcctCost.objects.get(hotel=hotel)
         return getattr(acct_cost, trans_type.name)
 
-    def phone_number_charge(self, hotel):
-        trans_type, _ = TransType.objects.get_or_create(name='phone_number', desc='Monthly phone \
-number cost. Is charged at the initial purchase of a phone number, and monthly after that.')
+    def phone_number_charge(self, hotel, desc):
+        """
+        Creates an AcctTrans charge for a PH.  This could be an initial 
+        charge or monthly.
+
+        :hotel: Hotel object
+        :desc: twilio ``phone_number`` as a string
+        """
+        self.check_balance(hotel)
+        trans_type, _ = TransType.objects.get_or_create(name='phone_number',
+            desc='phone_number')
         acct_tran = self.create(hotel=hotel, trans_type=trans_type,
-            amount=settings.PHONE_NUMBER_MONTHLY_COST)
+            amount= -settings.PHONE_NUMBER_MONTHLY_COST, desc=desc)
         return acct_tran
 
     def recharge(self, hotel, balance):
         '''
-        Should only occur if the ``balance`` is less than the ``recharge_amt`` 
+        Should only occur if the ``balance`` is less than the ``balance_min`` 
         for the Hotel.
 
         :ex: 
-            acct_cost.balance_min = 100
+            acct_cost.balance_min = 1000
             current balance = -25
             recharge_amt - current balance = 1000-(-25) = 1025
 
         :Return:
             acct_tran, created
         '''
-        amount = hotel.acct_cost.recharge_amt - balance
+        balance_ok = balance > hotel.acct_cost.balance_min
 
-        # TODO: need to charge credit card here in order to "recharge"
-        #   the account
+        if balance_ok:
+            return None, False
+        else:
+            amount = hotel.acct_cost.balance_min - balance
 
-        # should I set ``trans_type`` as a global VAR b/c doesn't change?
-        trans_type = get_object_or_404(TransType, name='recharge_amt')
-        acct_tran = self.create(hotel=hotel, trans_type=trans_type, amount=amount)
-        return acct_tran, True
+            # TODO: need to charge credit card here in order to "recharge"
+            #   the account
+
+            # should I set ``trans_type`` as a global VAR b/c doesn't change?
+            trans_type = get_object_or_404(TransType, name='recharge_amt')
+            acct_tran = self.create(hotel=hotel, trans_type=trans_type, amount=amount)
+            return acct_tran, True
 
     def check_balance(self, hotel):
         '''
@@ -400,8 +414,6 @@ number cost. Is charged at the initial purchase of a phone number, and monthly a
         :hotel: Hotel object
         '''
         balance = AcctTrans.objects.filter(hotel=hotel).balance()
-        print 'balance:', balance
-        print 'balance_min:', hotel.acct_cost.balance_min
 
         if balance > hotel.acct_cost.balance_min:
             return True
@@ -494,6 +506,8 @@ class AcctTrans(AbstractBase):
     # Auto
     amount = models.IntegerField(_("Amount"), blank=True, null=True,
         help_text="Negative for Usage, Positive for 'Funds Added' records.")
+    desc = models.CharField(max_length=100, blank=True, null=True,
+        help_text="Use to store additional filter logic")
     sms_used = models.PositiveIntegerField(blank=True, null=True,
         help_text="NULL unless trans_type=sms_used")
     insert_date = models.DateField(_("Insert Date"), blank=True, null=True) # remove in Prod (use ``created``)

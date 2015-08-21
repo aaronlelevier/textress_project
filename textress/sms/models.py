@@ -115,7 +115,8 @@ hotel: {}".format(hotel))
         _twilio_ph = self._twilio_purchase_number(hotel)
         
         # charge account on success
-        acct_tran = AcctTrans.objects.phone_number_charge(hotel)
+        acct_tran = AcctTrans.objects.phone_number_charge(hotel,
+            desc=_twilio_ph.phone_number)
 
         # DB create
         number = self.create(hotel=hotel,

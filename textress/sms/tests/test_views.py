@@ -56,12 +56,6 @@ class PhoneNumberTests(TestCase):
         self.assertTrue(response.context['form'])
         self.assertIsInstance(response.context['form'].hotel, Hotel)
 
-    def test_add_form(self):
-        # TODO: Test Form Validation
-        # acct_cost, created = AcctCost.objects.get_or_create(self.hotel)
-        # print self.hotel.acct_cost.__dict__
-        # assert 1 == 2
-
     ### DELETE
 
     def test_delete(self):

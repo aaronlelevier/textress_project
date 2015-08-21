@@ -7,12 +7,12 @@
 :Next:
     - PhoneNumbers
 
-        - View tests
+        # View tests
 
-        - charge when a phone-number is purchased
+        # charge when a phone-number is purchased
 
-            - setup a monthly cron-job type charge for all phone-numbers
-            at the month anniversary of signup
+        - setup a monthly cron-job type charge for all phone-numbers
+        at the month anniversary of signup
 
     - global notifications for SMS when they arrive?
 

@@ -86,7 +86,7 @@ class PhoneNumberManagerTests(TestCase):
         self.assertTrue(ph.default)
 
     def test_update_account_sid(self):
-        # TODO: CONTINUE HERE
+        # Don't test b/c only calling 1 hotel method
         pass
 
         

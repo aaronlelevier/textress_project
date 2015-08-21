@@ -331,9 +331,11 @@ class AcctTransTests(TestCase):
         assert AcctTrans.objects.sms_used_on_date(date=max_date)
 
     def test_phone_number_charge(self):
-        acct_tran = AcctTrans.objects.phone_number_charge(self.hotel)
+        # set the ``desc`` as an arbitrary ph num string
+        acct_tran = AcctTrans.objects.phone_number_charge(self.hotel,
+            desc=settings.DEFAULT_TO_PH)
         self.assertIsInstance(acct_tran, AcctTrans)
-        self.assertEqual(acct_tran.amount, settings.PHONE_NUMBER_MONTHLY_COST)
+        self.assertEqual(acct_tran.amount, -settings.PHONE_NUMBER_MONTHLY_COST)
 
     def test_recharge(self):
         # ``recharge()`` returns None if it is not triggered
@@ -342,9 +344,15 @@ class AcctTransTests(TestCase):
         recharge_amt, created = AcctTrans.objects.recharge(self.hotel, old_balance)
         self.assertIsNone(recharge_amt)
 
+        # Create a fake charge to cause a call to ``.recharge()``
+        AcctTrans.objects.phone_number_charge(hotel=self.hotel, desc=settings.DEFAULT_TO_PH)
+        AcctTrans.objects.phone_number_charge(hotel=self.hotel, desc=settings.DEFAULT_TO_PH)
+
         # the balance of credits is higher than the acct_cost.balance_min, so no recharge occurs
         # set balance=0 b/c min balance is 100, so this will trigger a recharge
-        recharge_amt, created = AcctTrans.objects.recharge(self.hotel, balance=0)
+        current_balance = AcctTrans.objects.filter(hotel=self.hotel).balance()
+        print "current_balance:", current_balance
+        recharge_amt, created = AcctTrans.objects.recharge(self.hotel, balance=current_balance)
         print('recharge w/ balance=0:', recharge_amt.amount)
         assert recharge_amt.amount
         assert recharge_amt
@@ -355,7 +363,9 @@ class AcctTransTests(TestCase):
         print('self.hotel.acct_cost.recharge_amt:', self.hotel.acct_cost.recharge_amt)
         print('recharge_amt.amount:', recharge_amt.amount)
         print('old_balance:', old_balance, 'new_balance:', new_balance)
-        self.assertTrue(old_balance < new_balance)
+        print('balance_min:', self.hotel.acct_cost.balance_min)
+        print('new_balance:', new_balance)
+        self.assertTrue(new_balance >= self.hotel.acct_cost.balance_min)
 
     # def test_sms_used_mgr_no_messages(self):
     #     # Remove all Messages for today, so shouldn't be creating a `sms_used` AcctTrans record
