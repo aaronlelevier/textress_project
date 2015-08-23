@@ -38,8 +38,6 @@ def today():
 
 class GuestViewTests(TestCase):
 
-    # fixtures = ['users.json', 'main.json', 'sms.json', 'concierge.json', 'payment.json']
-
     def setUp(self):
         create._get_groups_and_perms()
 

@@ -25,7 +25,7 @@ def make_guests(hotel, number=10):
     return Guest.objects.filter(hotel=hotel)
 
 
-def make_messages(hotel, user, guest, insert_date=timezone.now().date(), number=10):
+def make_messages(hotel, user, guest, insert_date=None, number=10):
     '''
     Randomly choose if the Guest or User is sending the Message.
     Then fill in the details.
@@ -36,6 +36,9 @@ def make_messages(hotel, user, guest, insert_date=timezone.now().date(), number=
     global Message
     Message.save = models.Model.save
 
+    if not insert_date:
+        insert_date = timezone.now().date()
+
     for i in range(number):
 
         # Randomly chose Message sender.
@@ -44,6 +47,7 @@ def make_messages(hotel, user, guest, insert_date=timezone.now().date(), number=
         # Guest Sender
         if sender:
             mommy.make(Message,
+                sid=create._generate_name(),
                 hotel=hotel,
                 guest=guest,
                 user=None,
@@ -55,6 +59,7 @@ def make_messages(hotel, user, guest, insert_date=timezone.now().date(), number=
         # User Sender
         else:
             mommy.make(Message,
+                sid=create._generate_name(),
                 hotel=hotel,
                 guest=guest,
                 user=user,
