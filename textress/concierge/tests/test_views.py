@@ -73,6 +73,22 @@ class GuestViewTests(TestCase):
         self.assertEqual(response.context['object'], self.guest)
         self.assertIn(reverse('concierge:guest_list'), response.content)
 
+    def test_detail_unread_messages(self):
+        # 10 unread messages at start, but after going to the Guest's 
+        # Detail view, they are bulk updated as "read=True"
+        messages = make_messages(
+            hotel=self.hotel,
+            user=self.user,
+            guest=self.guest
+        )
+        Message.objects.filter(guest=self.guest).update(read=False)
+        self.assertEqual(Message.objects.filter(guest=self.guest).count(), 10)
+        self.assertEqual(Message.objects.filter(guest=self.guest, read=True).count(), 0)
+        # Go to Detail View n trigger Update
+        response = self.client.get(reverse('concierge:guest_detail', kwargs={'pk': self.guest.pk}))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Message.objects.filter(guest=self.guest, read=True).count(), 10)
+
     def test_delete_guests(self):
         # No guests
         [g.delete() for g in Guest.objects.all()]

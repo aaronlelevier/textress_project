@@ -90,9 +90,10 @@ class GuestDetailView(GuestBaseView, GuestListContextMixin, DetailView):
     def get(self, request, *args, **kwargs):
         """All Messages should be marked as 'read=True' when the User 
         goes to the Guests' DetailView."""
-        self.model.message_set.filter(read=False).update(read=True)
+        self.object = self.get_object()
+        Message.objects.filter(guest=self.object, read=False).update(read=True)
         return super(GuestDetailView, self).get(request, *args, **kwargs)
-        
+
     def get_headline(self):
         return u"{} Detail".format(self.object)
 
