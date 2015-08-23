@@ -24,7 +24,7 @@ from concierge.forms import GuestForm
 from concierge.mixins import GuestListContextMixin
 from concierge.permissions import IsHotelObject, IsManagerOrAdmin, IsHotelUser
 from concierge.serializers import (MessageSerializer, GuestMessageSerializer,
-    GuestBasicSerializer)
+    GuestBasicSerializer, MessageBasicSerializer)
 from main.mixins import HotelUserMixin, HotelObjectMixin
 from utils import EmptyForm, DeleteButtonMixin
 
@@ -188,9 +188,10 @@ class MessageListCreateAPIView(generics.ListCreateAPIView):
         return Response(serializer.data)
 
 
-class MessageRetrieveAPIView(generics.RetrieveAPIView):
+class MessageRetrieveAPIView(generics.RetrieveUpdateAPIView):
+
     queryset = Message.objects.all()
-    serializer_class = MessageSerializer
+    serializer_class = MessageBasicSerializer
     permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
 
 

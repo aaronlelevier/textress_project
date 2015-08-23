@@ -107,7 +107,12 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
                     Message.get({
                         id: message.id
                     }, function(response) {
-                        // only append the Message if it belongs to the Guest
+                        // Message should be marked as 'read=true' at this point because 
+                        //  is being rendered in the GuestDetailView to the User
+                        response.read = true;
+                        response.user = null;
+                        Message.update({id:response.id}, response);
+                        // Only append the Message if it belongs to the Guest
                         $scope.messages.unshift(response);
                     });
                 }
