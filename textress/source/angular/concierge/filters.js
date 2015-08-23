@@ -1,3 +1,4 @@
+
 angular.module('conciergeFilters', [])
     .filter('ph', function() {
         return function(str) {
@@ -21,12 +22,19 @@ angular.module('conciergeFilters', [])
     })
     .filter('unreadMessages', function() {
         return function(items) {
-            items.sort(function(a,b) {
+            items.sort(function(a, b) {
                 if (a.messages[0].read === false)
                     return 1;
                 if (a.messages[0].read === true)
                     return -1;
                 return 0;
             })
+        }
+    })
+    .filter('numRead', function() {
+        return function(guestArr) {
+            return guestArr.filter(function(guest) {
+                return guest.read === false;
+            }).length
         }
     });
