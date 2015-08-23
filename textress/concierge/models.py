@@ -198,6 +198,9 @@ class MessageManager(models.Manager):
 
     def receive_message(self, guest, data):
         """
+        Process SMS from Twilio API.  This is not for processing an 
+        SMS from an XML endpoint.  
+
         :guest: Guest Model object
         :data: Twilio Message object as a Dict
         :NOTES:
@@ -216,6 +219,38 @@ class MessageManager(models.Manager):
                     to_ph=data['to'],
                     from_ph=data['from_'],
                     body=data['body']
+                    )
+            except (ObjectDoesNotExist, Exception) as e:
+                # TODO: only reaches this point if the received Twilio Message
+                #   failed to save to the DB.
+                # this should be logged
+                print("{}, {}".format(e.__class__, e))
+            else:
+                return db_message
+
+    def receive_message_post(self, guest, data):
+        """
+        POSTed kwargs to an XML enpoint are different then the keys when 
+        trying to access the Twilio API, so process the key's separately.
+
+        :guest: Guest Model object
+        :data: Twilio Message object as a Dict
+        :NOTES:
+            Hotels will have an "Unknown" Guest Messages container, if they
+            receive a Message from an unregistered ph #.
+        """
+        try:
+            return self.get(sid=data['SmsSid'])
+        except ObjectDoesNotExist:
+            try:
+                db_message = self.create(
+                    guest=guest,
+                    sid=data['SmsSid'],
+                    received=True,
+                    status=data['SmsStatus'],
+                    to_ph=data['To'],
+                    from_ph=data['From'],
+                    body=data['Body']
                     )
             except (ObjectDoesNotExist, Exception) as e:
                 # TODO: only reaches this point if the received Twilio Message
@@ -284,6 +319,7 @@ class Message(AbstractBase):
                 self.received = True
                 # add User to note the message was sent by a User, not a Guest
                 # self.user = 
+                self.read = True
             except TwilioRestException as e:
                 self.reason = e.__dict__['msg']
                 # raise ValidationError(self.reason)
