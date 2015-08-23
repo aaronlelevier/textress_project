@@ -73,6 +73,7 @@ class GuestViewTests(TestCase):
         response = self.client.get(reverse('concierge:guest_detail', kwargs={'pk': self.guest.pk}))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['object'], self.guest)
+        self.assertIn(reverse('concierge:guest_list'), response.content)
 
     def test_delete_guests(self):
         # No guests
@@ -82,7 +83,7 @@ class GuestViewTests(TestCase):
     def test_create(self):
         [g.delete() for g in Guest.objects.all()]
 
-        # Login n Create One
+        # Login n Create a Guest
         response = self.client.post(reverse('concierge:guest_create'),
             {'hotel':self.user.profile.hotel,
             'name': 'Test Guest',

@@ -37,6 +37,14 @@
 {% endblock %}
 
 
+{% block breadcrumbs %}
+    {{ block.super }}
+    {% if breadcrumbs %}
+        {{ breadcrumbs|safe }}
+    {% endif %}
+{% endblock breadcrumbs %}
+
+
 {% block headline_quicklink %}
     &nbsp;<a href="{% url 'concierge:guest_update' object.id %}" class="btn btn-green btn-xs tooltips" data-placement="top" data-original-title="Edit"><i class="fa fa-edit"></i></a>
 {% endblock headline_quicklink %}

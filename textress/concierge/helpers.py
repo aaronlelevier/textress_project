@@ -39,7 +39,7 @@ def process_incoming_message(data):
             body=login_messages['hotel_not_found'])
 
     # save message to DB
-    msg = Message.objects.receive_message(guest, data)
+    msg = Message.objects.receive_message_post(guest, data)
 
     reply = Reply.objects.process_reply(guest, hotel, data['Body'])
 

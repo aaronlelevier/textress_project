@@ -1,6 +1,13 @@
-2015-08-16
+2015-08-21
 ----------
-:todo: look over billing overview page for calculation errors
+:todo:
+    - global notifications for SMS when they arrive?
+
+    - marking a message as read when you go to the GuestDetailView
+
+    - ``AcctCost.auto_recharge`` - add testing and logic for this feature
+
+    - look over billing overview page for calculation errors
 
 2015-08-11
 ----------
@@ -11,14 +18,8 @@
 
         # charge when a phone-number is purchased
 
-        - setup a monthly cron-job type charge for all phone-numbers
+        # setup a monthly cron-job type charge for all phone-numbers
         at the month anniversary of signup
-
-    - global notifications for SMS when they arrive?
-
-    - marking a message as read when you go to the GuestDetailView
-
-    - ``AcctCost.auto_recharge`` - add testing and logic for this feature
 
 :reading:
     - Pragmatic Programmer

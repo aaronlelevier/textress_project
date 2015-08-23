@@ -21,6 +21,7 @@ from ws4redis.publisher import RedisPublisher
 from concierge.models import Message, Guest
 from concierge.helpers import process_incoming_message
 from concierge.forms import GuestForm
+from concierge.mixins import GuestListContextMixin
 from concierge.permissions import IsHotelObject, IsManagerOrAdmin, IsHotelUser
 from concierge.serializers import (MessageSerializer, GuestMessageSerializer,
     GuestBasicSerializer)
@@ -42,6 +43,7 @@ class ReceiveSMSView(CsrfExemptMixin, TemplateView):
         # must return this to confirm SMS received for Twilio API
         resp = twiml.Response()
 
+        print request.POST
         # if a msg is returned, attach and reply to Guest
         msg, reply, hotel = process_incoming_message(data=request.POST)
         if reply:
@@ -79,7 +81,7 @@ class GuestListView(GuestBaseView, ListView):
     headline = "Guest List"
 
 
-class GuestDetailView(GuestBaseView, DetailView):
+class GuestDetailView(GuestBaseView, GuestListContextMixin, DetailView):
     '''
     Angular View
     ------------
