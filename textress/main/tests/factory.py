@@ -46,10 +46,13 @@ def create_hotel(name=None, address_phone=None):
     return Hotel.objects.create(**address_data)
 
 
-def create_hotel_user(hotel, username='user', group=None):
+def create_hotel_user(hotel, username=None, group=None):
     '''
     Handle making Admin, Manager, and Users with 1 Func.
     '''
+    if not username:
+        username = create._generate_name()
+
     user = mommy.make(User, username=username, password=PASSWORD)
 
     if group:
