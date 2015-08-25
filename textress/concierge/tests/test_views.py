@@ -1,5 +1,6 @@
 import string
 import random
+import json
 
 from django.conf import settings
 from django.test import TestCase
@@ -153,7 +154,7 @@ class GuestViewTests(TestCase):
 # REST #
 ########
 
-class MessageAPITests(APITestCase):
+class MessageListCreateAPIViewTests(APITestCase):
 
     def setUp(self):
         # Groups
@@ -162,12 +163,8 @@ class MessageAPITests(APITestCase):
         # User
         self.hotel = create_hotel()
         self.admin = create_hotel_user(self.hotel, group='hotel_admin')
-        self.hotel.admin_id = self.admin.id
-        self.hotel.save()
-
         # Guest
         self.guest = make_guests(hotel=self.hotel, number=1)[0] #b/c returns a list
-        
         # Messages
         self.messages = make_messages(
             hotel=self.hotel,
@@ -178,70 +175,112 @@ class MessageAPITests(APITestCase):
         self.data = {'guest': self.guest.pk, 'user': self.admin.pk, 'hotel': self.hotel,
             'to_ph': '+17754194000', 'body':'curl test', 'from_ph': '+17028324062'}
 
-    # /api/messages/
+        # Hotel2
+        self.hotel2 = create_hotel()
+        self.admin2 = create_hotel_user(self.hotel2, username='admin2', group='hotel_admin')
+        self.guest2 = make_guests(hotel=self.hotel2, number=1)[0]
+        self.messages = make_messages(
+            hotel=self.hotel2,
+            user=self.admin2,
+            guest=self.guest2
+            )
+
+        # Login
+        self.client.login(username=self.admin.username, password=self.password)
+
+    def tearDown(self):
+        self.client.logout()
+
+    def test_create(self):
+        self.assertEqual(Message.objects.count(), 20)
+        self.assertEqual(Message.objects.filter(hotel=self.hotel).count(), 10)
+
+    def test_response(self):
+        response = self.client.get(reverse('concierge:api_messages'))
+        self.assertEqual(response.status_code, 200)
 
     def test_get(self):
-        self.client.login(username=self.admin.username, password=self.password)
         response = self.client.get(reverse('concierge:api_messages'))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = json.loads(response.content)
+        self.assertEqual(len(data), 10)
 
-    def test_message_required_objects(self):
-        # Make sure all objects needed to send a message have been created
-        # if not, maybe need to change .create() in APIView
-        hotel = self.admin.profile.hotel
-        assert isinstance(hotel, Hotel)
+    def test_no_other_hotel_messages(self):
+        response = self.client.get(reverse('concierge:api_messages'))
+        data = json.loads(response.content)
+        for d in data:
+            msg = Message.objects.get(id=d['id'])
+            self.assertEqual(msg.hotel, self.admin.profile.hotel)
 
-        guest = Guest.objects.get(pk=self.guest.id,
-                hotel=hotel)
-        assert isinstance(guest, Guest)
+    def test_no_profile(self):
+        user = mommy.make(User)
+        user.set_password(PASSWORD)
+        user.save()
 
-    # /api/messages/<pk>/
+        self.client.logout()
 
-    def test_get_message_pk(self):
-        message = Message.objects.filter(guest=self.guest)[0]
-        self.client.login(username=self.admin.username, password=self.password)
-        response = self.client.get(reverse('concierge:api_messages', kwargs={'pk': message.pk}))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.client.login(username=user.username, password=PASSWORD)
+
+        response = self.client.get(reverse('concierge:api_messages'))
+        self.assertEqual(response.status_code, 403)
 
 
-class GuestMessageAPITests(APITestCase):
+    # TODO: put in a separate class for the Detail Msg API Endpoint
+
+    # def test_get_message_pk(self):
+    #     message = Message.objects.filter(guest=self.guest)[0]
+    #     self.client.login(username=self.admin.username, password=self.password)
+    #     response = self.client.get(reverse('concierge:api_messages', kwargs={'pk': message.pk}))
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class GuestMessageListAPIViewTests(APITestCase):
 
     def setUp(self):
-        self.password = '1234'
+        self.password = PASSWORD
         self.today = timezone.now().date()
-
-        # Hotel
-        self.hotel = create_hotel()
-
-        # create "Hotel Manager" Group
+        # Groups
         create._get_groups_and_perms()
-
-        # Admin
-        self.admin = mommy.make(User, username='admin')
-        self.admin.groups.add(Group.objects.get(name="hotel_admin"))
-        self.admin.set_password(self.password)
-        self.admin.save()
-        self.admin.profile.update_hotel(hotel=self.hotel)
-        # Hotel Admin ID
-        self.hotel.admin_id = self.admin.id
-        self.hotel.save()
-
+        # Hotel / User
+        self.hotel = create_hotel()
+        self.admin = create_hotel_user(
+            hotel=self.hotel,
+            username='admin',
+            group='hotel_admin'
+        )
         # Guest
-        self.guest = make_guests(hotel=self.hotel, number=1)[0] #b/c returns a list
-        
+        self.guests = make_guests(hotel=self.hotel)
+        self.guest = self.guests[0] #b/c returns a list
         # Messages
         self.messages = make_messages(
             hotel=self.hotel,
             user=self.admin,
             guest=self.guest
             )
+        # Hotel 2
+        self.hotel2 = create_hotel()
+        self.guests = make_guests(hotel=self.hotel2)
+        # Login
+        self.client.login(username=self.admin.username, password=self.password)
+
+    def tearDown(self):
+        self.client.logout()
+
+    def test_create(self):
+        self.assertEqual(Guest.objects.count(), 20)
+        self.assertEqual(Guest.objects.filter(hotel=self.hotel).count(), 10)
+
+    def test_response(self):
+        response = self.client.get(reverse('concierge:api_guest_messages'))
+        self.assertEqual(response.status_code, 200)
 
     def test_get(self):
-        self.client.login(username=self.admin.username, password=self.password)
         response = self.client.get(reverse('concierge:api_guest_messages'))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    # TODO: Test other guests can't be rendered
+        data = json.loads(response.content)
+        self.assertEqual(len(data), 10)
+        # Confirm all Guests belong to the User's Hotel
+        for d in data:
+            guest = Guest.objects.get(id=d['id'])
+            self.assertEqual(guest.hotel, self.admin.profile.hotel)
 
 
 class GuestAPITests(APITestCase):
@@ -283,7 +322,7 @@ class GuestAPITests(APITestCase):
 
     def test_update(self):
         self.client.login(username=self.admin.username, password=self.password)
-        self.data = serializers.GuestBasicSerializer(self.guest).data
+        self.data = serializers.GuestListSerializer(self.guest).data
         self.data.update({'name': 'changed'})
 
         response = self.client.get(reverse('concierge:api_guests', kwargs={'pk': self.guest.pk}), self.data)

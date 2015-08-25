@@ -20,17 +20,7 @@ class MessageGuestUserSerializer(serializers.ModelSerializer):
         fields = ('id', 'guest', 'user', 'read',)
 
 
-# class MessageBasicSerializer(serializers.ModelSerializer):
-#     '''
-#     Message info for GuestDetailView API.
-#     '''
-#     class Meta:
-#         model = Message
-#         fields = MESSAGE_FIELDS
-#         read_only_fields = ('created', 'modified',)
-
-
-class MessageBasicSerializer(serializers.ModelSerializer):
+class MessageRetrieveSerializer(serializers.ModelSerializer):
     '''
     ``user`` field isn't required b/c if Message is from the Guest, 
     then it doesn't have a ``user`` attr. 
@@ -43,7 +33,7 @@ class MessageBasicSerializer(serializers.ModelSerializer):
         read_only_fields = ('created', 'modified',)
 
 
-class MessageSerializer(serializers.ModelSerializer):
+class MessageListCreateSerializer(serializers.ModelSerializer):
     '''
     Used for AngularJs to post to List API to create new Messages.
     '''
@@ -77,7 +67,7 @@ class GuestBaseSerizer(serializers.ModelSerializer):
         read_only_fields = ('created', 'modified',)
 
 
-class GuestBasicSerializer(GuestBaseSerizer):
+class GuestListSerializer(GuestBaseSerizer):
     '''
     Guest List Create API Serializer
     '''
@@ -88,4 +78,4 @@ class GuestMessageSerializer(GuestBaseSerizer):
     '''
     GuestDetailView main Serializer
     '''
-    messages = MessageBasicSerializer(many=True, source='message_set')
+    messages = MessageRetrieveSerializer(many=True, source='message_set')

@@ -23,8 +23,8 @@ from concierge.helpers import process_incoming_message
 from concierge.forms import GuestForm
 from concierge.mixins import GuestListContextMixin
 from concierge.permissions import IsHotelObject, IsManagerOrAdmin, IsHotelUser
-from concierge.serializers import (MessageSerializer, GuestMessageSerializer,
-    GuestBasicSerializer, MessageBasicSerializer)
+from concierge.serializers import (MessageListCreateSerializer, GuestMessageSerializer,
+    GuestListSerializer, MessageRetrieveSerializer)
 from main.mixins import HotelUserMixin, HotelObjectMixin
 from utils import EmptyForm, DeleteButtonMixin
 
@@ -170,28 +170,23 @@ class GuestDeleteView(GuestBaseView, DeleteButtonMixin, TemplateView):
 ### MESSAGE ###
 
 class MessageListCreateAPIView(generics.ListCreateAPIView):
+    "All Messages records for a single Hotel."
     
     queryset = Message.objects.all()
-    serializer_class = MessageSerializer
+    serializer_class = MessageListCreateSerializer
     permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
 
     def list(self, request, *args, **kwargs):
-        """
-        Message records for the User's Hotel. (Same for all Viewsets)
-        try/except because AnonymousUser has no 'profile' attr.
-        """
-        try:
-            messages = Message.objects.filter(guest__hotel=request.user.profile.hotel)
-        except AttributeError:
-            raise Http404
-        serializer = MessageSerializer(messages, many=True)
+        "The User can only view their Hotel's Messages."
+        messages = Message.objects.filter(guest__hotel=request.user.profile.hotel)
+        serializer = MessageListCreateSerializer(messages, many=True)
         return Response(serializer.data)
 
 
 class MessageRetrieveAPIView(generics.RetrieveUpdateAPIView):
 
     queryset = Message.objects.all()
-    serializer_class = MessageBasicSerializer
+    serializer_class = MessageRetrieveSerializer
     permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
 
 
@@ -226,12 +221,12 @@ class GuestListCreateAPIView(generics.ListCreateAPIView):
     '''
 
     queryset = Guest.objects.all()
-    serializer_class = GuestBasicSerializer
+    serializer_class = GuestListSerializer
     permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
 
     def list(self, request):
         guests = Guest.objects.current().filter(hotel=request.user.profile.hotel)
-        serializer = GuestBasicSerializer(guests, many=True)
+        serializer = GuestListSerializer(guests, many=True)
         return Response(serializer.data)
 
     def perform_create(self, serializer):
@@ -241,5 +236,5 @@ class GuestListCreateAPIView(generics.ListCreateAPIView):
 class GuestRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
 
     queryset = Guest.objects.all()
-    serializer_class = GuestBasicSerializer
+    serializer_class = GuestListSerializer
     permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
