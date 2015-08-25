@@ -1,4 +1,4 @@
-# original .gitignore's
+# python
 *.py[co]
 *.swp
 *.db
@@ -16,3 +16,10 @@ digital_ocean.conf
 *id_rsa*
 so_*
 .idea/
+
+# angular
+logs/*
+!.gitkeep
+node_modules/
+tmp
+vendor/
