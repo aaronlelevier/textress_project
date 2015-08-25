@@ -1,18 +1,5 @@
 var indexControllers = angular.module('indexApp.controllers', []);
 
-indexControllers.controller('PhoneListCtrl', function PhoneListCtrl($scope) {
-    $scope.phones = [{
-        'name': 'Nexus S',
-        'snippet': 'Fast just got faster with Nexus S.'
-    }, {
-        'name': 'Motorola XOOM™ with Wi-Fi',
-        'snippet': 'The Next, Next Generation tablet.'
-    }, {
-        'name': 'MOTOROLA XOOM™',
-        'snippet': 'The Next, Next Generation tablet.'
-    }];
-});
-
 indexControllers.controller('PricingCtrl', ['$scope', 'Pricing', function($scope, Pricing) {
     //prices will be from a DRF REST endpoint, so when changed in the DB,
     //they are auto-reflected here
@@ -43,8 +30,4 @@ indexControllers.controller('PricingCtrl', ['$scope', 'Pricing', function($scope
         function(newValue) {
             return newValue;
         });
-}]);
-
-indexControllers.controller('FAQCtrl', ['$scope', 'FAQ', function($scope, FAQ) {
-    $scope.topics = FAQ.query();
 }]);
