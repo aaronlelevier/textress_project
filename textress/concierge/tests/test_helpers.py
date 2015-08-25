@@ -21,7 +21,7 @@ class ProcessFromMessageTests(TestCase):
         self.hotel.save()
         # Guest
         self.guest = make_guests(hotel=self.hotel, number=1)[0]
-        self.guest.phone_number = os.environ['TWILIO_PH_NUM_TEST']
+        self.guest.phone_number = os.environ['TWILIO_PHONE_NUMBER_TEST']
         self.guest.save()
 
     def test_create(self):

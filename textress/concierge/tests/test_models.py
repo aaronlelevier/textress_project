@@ -265,7 +265,7 @@ class MessageSendTests(TestCase):
         self.user = create_hotel_user(hotel=self.hotel)
         self.hotel.twilio_sid = os.environ['TWILIO_ACCOUNT_SID_TEST']
         self.hotel.twilio_auth_token = os.environ['TWILIO_AUTH_TOKEN_TEST']
-        self.hotel.twilio_phone_number = os.environ['TWILIO_PH_NUM_TEST']
+        self.hotel.twilio_phone_number = os.environ['TWILIO_PHONE_NUMBER_TEST']
         self.hotel.save()
         self.guest = make_guests(hotel=self.hotel, number=1)[0] # b/c returns list
         self.guest.phone_number = settings.DEFAULT_TO_PH
