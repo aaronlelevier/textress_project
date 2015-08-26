@@ -53,12 +53,10 @@ def verify_logout(request):
 
 class AccountView(LoginRequiredMixin, HotelUserMixin, SetHeadlineMixin, StaticContextMixin, TemplateView):
     """
-    cpanel Account Dashboard
-
-    - will use Paypal style *account not 100% setup* if setup needed. i.e. ph num.
+    Account Dashboard ~ User Home Page
     """
     headline = 'Dashboard'
-    static_context = {'headline_small': 'overview &amp; stats'}
+    static_context = {'headline_small': 'overview & stats'}
     template_name = 'cpanel/account.html'
 
 

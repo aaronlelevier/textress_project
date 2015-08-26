@@ -58,23 +58,41 @@ conciergeControllers.controller('GuestMsgPreviewCtrl', ['$scope', '$filter', '$s
         // Append Last Message object to each Guest in Array
         // LastMsg has: text, time, read/unread status
 
-        $scope.gm = function(message) {
-            $scope.guests = GuestMessages.query();
-        }
+    // GuestListView: Push incoming messsage onto Guest Messages array for all Guests
+    var initializing = true;
 
-        var initializing = true;
+    $scope.getMessage = function(message) {
 
-        $scope.getMessage = function(message) {
-            if (initializing) {
-                $timeout(function() {
-                    initializing = false;
-                });
-            } else {
-                $scope.gm(message);
+        var gm = function(message) {
+            // goal: convert to JSON in order to handle
+            if (typeof(message) !== "object") {
+                message = JSON.parse(message);
+            }
+
+            for (i = 0; i < $scope.guests.length; i++) {
+                if (message.guest == $scope.guests[i].id) {
+                    $scope.guest = $scope.guests[i]; // set as local $scope to the Ctrl otherwise
+                                                     // can't access it w/i `Message.get()` below
+                    Message.get({
+                        id: message.id
+                    }, function(response) {
+                        // Only append the Message if it belongs to the Guest
+                        // $scope.guests[i].messages.unshift(response);
+                        $scope.guest.messages.push(response);
+                    });
+                }
             }
         }
-    }
-]);
+
+        if (initializing) {
+            $timeout(function() {
+                initializing = false;
+            });
+        } else {
+            gm(message);
+        }
+    }    
+}]);
 
 // Use for single GuestDetail page w/ SMS messages. Send/Receive SMS
 // GuestUser = Guest

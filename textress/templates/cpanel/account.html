@@ -89,7 +89,7 @@
                                 <i class="fa fa-time bigger-110"></i>
                                 [[ guest.messages[0].created | date :'medium' ]]
                                 &nbsp;
-                                <span class="badge [[ (guest.messages[0].read === false) ? 'badge-new-msg' : 'badge-old-msg' ]] ">[[ guest.messages.length ]]</span>
+                                <span class="badge [[ (guest.messages | numRead) ? 'badge-new-msg' : 'badge-old-msg' ]]">[[ guest.messages | numRead ]]</span>
                             </div>
                         </a>
                     </li>
@@ -112,7 +112,6 @@ jQuery(document).ready(function($) {
         receive_message: receiveMessage,
         heartbeat_msg: {{ WS4REDIS_HEARTBEAT }}
     });
-    var billboard = $('#billboard');
 
     function receiveMessage(message) {
         // console.log('message made it to "account" page', message);
