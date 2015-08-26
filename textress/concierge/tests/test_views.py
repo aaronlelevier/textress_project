@@ -198,12 +198,9 @@ class MessagAPIViewTests(APITestCase):
 
     ### MessageListCreateAPIView
 
-    def test_list_response(self):
+    def test_list(self):
         response = self.client.get(reverse('concierge:api_messages'))
         self.assertEqual(response.status_code, 200)
-
-    def test_list_get(self):
-        response = self.client.get(reverse('concierge:api_messages'))
         data = json.loads(response.content)
         self.assertEqual(len(data), 10)
 
@@ -216,14 +213,10 @@ class MessagAPIViewTests(APITestCase):
 
     ### MessageRetrieveAPIView
 
-    def test_detail_response(self):
+    def test_detail(self):
         message = Message.objects.filter(hotel=self.hotel).first()
         response = self.client.get(reverse('concierge:api_messages', kwargs={'pk':message.pk}))
         self.assertEqual(response.status_code, 200)
-
-    def test_detail_data(self):
-        message = Message.objects.filter(hotel=self.hotel).first()
-        response = self.client.get(reverse('concierge:api_messages', kwargs={'pk':message.pk}))
         data = json.loads(response.content)
         self.assertEqual(data['id'], message.pk)
 
@@ -242,7 +235,7 @@ class MessagAPIViewTests(APITestCase):
         self.assertTrue(data['hidden'])
 
 
-class GuestMessageListAPIViewTests(APITestCase):
+class GuestMessageAPIViewTests(APITestCase):
 
     def setUp(self):
         self.password = PASSWORD
@@ -265,9 +258,18 @@ class GuestMessageListAPIViewTests(APITestCase):
             user=self.admin,
             guest=self.guest
             )
-        # Hotel 2
+
+        # Hotel2
         self.hotel2 = create_hotel()
-        self.guests = make_guests(hotel=self.hotel2)
+        self.admin2 = create_hotel_user(self.hotel2, username='admin2', group='hotel_admin')
+        self.guests2 = make_guests(hotel=self.hotel2)
+        self.guest2 = self.guests2[0]
+        self.messages = make_messages(
+            hotel=self.hotel2,
+            user=self.admin2,
+            guest=self.guest2
+            )
+
         # Login
         self.client.login(username=self.admin.username, password=self.password)
 
@@ -278,12 +280,11 @@ class GuestMessageListAPIViewTests(APITestCase):
         self.assertEqual(Guest.objects.count(), 20)
         self.assertEqual(Guest.objects.filter(hotel=self.hotel).count(), 10)
 
-    def test_response(self):
+    ### GuestMessageListAPIView
+
+    def test_list(self):
         response = self.client.get(reverse('concierge:api_guest_messages'))
         self.assertEqual(response.status_code, 200)
-
-    def test_get(self):
-        response = self.client.get(reverse('concierge:api_guest_messages'))
         data = json.loads(response.content)
         self.assertEqual(len(data), 10)
         # Confirm all Guests belong to the User's Hotel
@@ -291,48 +292,95 @@ class GuestMessageListAPIViewTests(APITestCase):
             guest = Guest.objects.get(id=d['id'])
             self.assertEqual(guest.hotel, self.admin.profile.hotel)
 
+    ### GuestMessageRetrieveAPIView
+
+    def test_detail(self):
+        guest = Guest.objects.filter(hotel=self.hotel).first()
+        response = self.client.get(reverse('concierge:api_guest_messages', kwargs={'pk':guest.pk}))
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertEqual(data['id'], guest.id)
+
 
 class GuestAPITests(APITestCase):
 
     def setUp(self):
+        self.password = PASSWORD
+        self.today = timezone.now().date()
         # Groups
         create._get_groups_and_perms()
-        self.password = PASSWORD
-        # User
+        # Hotel / User
         self.hotel = create_hotel()
-        self.admin = create_hotel_user(self.hotel, group='hotel_admin')
-        self.hotel.admin_id = self.admin.id
-        self.hotel.save()
-
+        self.admin = create_hotel_user(
+            hotel=self.hotel,
+            username='admin',
+            group='hotel_admin'
+        )
         # Guest
-        self.guest = make_guests(hotel=self.hotel, number=1)[0] #b/c returns a list
+        self.guests = make_guests(hotel=self.hotel)
+        self.guest = self.guests[0] #b/c returns a list
+        # Messages
+        self.messages = make_messages(
+            hotel=self.hotel,
+            user=self.admin,
+            guest=self.guest
+            )
 
-        self.data = {'name': 'mike', 'room_number': '123',
-                     'phone_number': settings.DEFAULT_TO_PH_2}
+        # Hotel2
+        self.hotel2 = create_hotel()
+        self.admin2 = create_hotel_user(self.hotel2, username='admin2', group='hotel_admin')
+        self.guests2 = make_guests(hotel=self.hotel2)
+        self.guest2 = self.guests2[0]
+        self.messages = make_messages(
+            hotel=self.hotel2,
+            user=self.admin2,
+            guest=self.guest2
+            )
 
-    # /api/guests/
+        self.data = {
+            'name': 'mike',
+            'room_number': '123',
+            'phone_number': settings.DEFAULT_TO_PH_2,
+            'messages': []
+        }
 
-    def test_get_list(self):
+        # Login
         self.client.login(username=self.admin.username, password=self.password)
+
+    def tearDown(self):
+        self.client.logout()
+
+    ### GuestListCreateAPIView
+
+    def test_list(self):
         response = self.client.get(reverse('concierge:api_guests'))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        for d in data:
+            guest = Guest.objects.get(id=d['id'])
+            self.assertEqual(guest.hotel, self.admin.profile.hotel)
 
     def test_create(self):
-        self.client.login(username=self.admin.username, password=self.password)
-        response = self.client.post(reverse('concierge:api_guests'), self.data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.client.post(reverse('concierge:api_guests'), self.data, format='json')
+        self.assertEqual(response.status_code, 201)
 
-    # /api/guests/<pk>/
+    ### GuestRetrieveUpdateAPIView
 
-    def test_get_guest_pk(self):
-        self.client.login(username=self.admin.username, password=self.password)
+    def test_get(self):
         response = self.client.get(reverse('concierge:api_guests', kwargs={'pk': self.guest.pk}))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertEqual(data['id'], self.guest.id)
+
+    def test_get_other_hotel_guest(self):
+        guest = Guest.objects.exclude(hotel=self.hotel).first()
+        self.assertIsInstance(guest, Guest)
+        response = self.client.get(reverse('concierge:api_guests', kwargs={'pk': guest.pk}))
+        self.assertEqual(response.status_code, 403)
 
     def test_update(self):
-        self.client.login(username=self.admin.username, password=self.password)
         self.data = serializers.GuestListSerializer(self.guest).data
         self.data.update({'name': 'changed'})
-
-        response = self.client.get(reverse('concierge:api_guests', kwargs={'pk': self.guest.pk}), self.data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.get(reverse('concierge:api_guests', kwargs={'pk': self.guest.pk}),
+            self.data, format='json')
+        self.assertEqual(response.status_code, 200)
