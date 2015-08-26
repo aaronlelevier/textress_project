@@ -154,7 +154,7 @@ class GuestViewTests(TestCase):
 # REST #
 ########
 
-class MessageListCreateAPIViewTests(APITestCase):
+class MessagAPIViewTests(APITestCase):
 
     def setUp(self):
         # Groups
@@ -172,8 +172,9 @@ class MessageListCreateAPIViewTests(APITestCase):
             guest=self.guest
             )
 
-        self.data = {'guest': self.guest.pk, 'user': self.admin.pk, 'hotel': self.hotel,
-            'to_ph': '+17754194000', 'body':'curl test', 'from_ph': '+17028324062'}
+        self.data = serializers.MessageRetrieveSerializer(
+            Message.objects.filter(hotel=self.hotel).first()
+            ).data
 
         # Hotel2
         self.hotel2 = create_hotel()
@@ -195,42 +196,50 @@ class MessageListCreateAPIViewTests(APITestCase):
         self.assertEqual(Message.objects.count(), 20)
         self.assertEqual(Message.objects.filter(hotel=self.hotel).count(), 10)
 
-    def test_response(self):
+    ### MessageListCreateAPIView
+
+    def test_list_response(self):
         response = self.client.get(reverse('concierge:api_messages'))
         self.assertEqual(response.status_code, 200)
 
-    def test_get(self):
+    def test_list_get(self):
         response = self.client.get(reverse('concierge:api_messages'))
         data = json.loads(response.content)
         self.assertEqual(len(data), 10)
 
-    def test_no_other_hotel_messages(self):
+    def test_list_no_other_hotel_messages(self):
         response = self.client.get(reverse('concierge:api_messages'))
         data = json.loads(response.content)
         for d in data:
             msg = Message.objects.get(id=d['id'])
             self.assertEqual(msg.hotel, self.admin.profile.hotel)
 
-    def test_no_profile(self):
-        user = mommy.make(User)
-        user.set_password(PASSWORD)
-        user.save()
+    ### MessageRetrieveAPIView
 
-        self.client.logout()
+    def test_detail_response(self):
+        message = Message.objects.filter(hotel=self.hotel).first()
+        response = self.client.get(reverse('concierge:api_messages', kwargs={'pk':message.pk}))
+        self.assertEqual(response.status_code, 200)
 
-        self.client.login(username=user.username, password=PASSWORD)
+    def test_detail_data(self):
+        message = Message.objects.filter(hotel=self.hotel).first()
+        response = self.client.get(reverse('concierge:api_messages', kwargs={'pk':message.pk}))
+        data = json.loads(response.content)
+        self.assertEqual(data['id'], message.pk)
 
-        response = self.client.get(reverse('concierge:api_messages'))
+    def test_detail_other_hotel_messages(self):
+        message = Message.objects.exclude(hotel=self.hotel).first()
+        self.assertIsInstance(message, Message)
+        response = self.client.get(reverse('concierge:api_messages', kwargs={'pk':message.pk}))
         self.assertEqual(response.status_code, 403)
 
-
-    # TODO: put in a separate class for the Detail Msg API Endpoint
-
-    # def test_get_message_pk(self):
-    #     message = Message.objects.filter(guest=self.guest)[0]
-    #     self.client.login(username=self.admin.username, password=self.password)
-    #     response = self.client.get(reverse('concierge:api_messages', kwargs={'pk': message.pk}))
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    def test_detail_put(self):
+        self.assertFalse(self.data['hidden'])
+        self.data['hidden'] = True
+        response = self.client.put(reverse('concierge:api_messages', kwargs={'pk':self.data['id']}),
+            self.data, format='json')
+        data = json.loads(response.content)
+        self.assertTrue(data['hidden'])
 
 
 class GuestMessageListAPIViewTests(APITestCase):

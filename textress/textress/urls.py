@@ -19,7 +19,7 @@ urlpatterns = patterns('',
     
     # DRF
     # url(r'api/v1/auth/login/', 'rest_framework_jwt.views.obtain_jwt_token'),
-    # url(r'api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
     # Textress Views
     url(r'^$', views.IndexView.as_view(), name='index'),
