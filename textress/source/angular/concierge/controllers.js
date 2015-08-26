@@ -1,6 +1,7 @@
 var conciergeControllers = angular.module('conciergeApp.controllers', ['conciergeApp.services']);
 
-conciergeControllers.controller('GuestListCtrl', ['$scope', 'Guest', function($scope, Guest) {
+conciergeControllers.controller('GuestListCtrl', ['$scope', '$timeout', 'Guest', 'Message',
+    function($scope, $timeout, Guest, Message) {
     // live
     $scope.guests = Guest.query();
 
@@ -11,9 +12,44 @@ conciergeControllers.controller('GuestListCtrl', ['$scope', 'Guest', function($s
         $scope.reverse = ($scope.predicate === predicate) ? !$scope.reverse : false;
         $scope.predicate = predicate;
     };
+
+    // GuestListView: Push incoming messsage onto Guest Messages array for all Guests
+    var initializing = true;
+
+    $scope.getMessage = function(message) {
+
+        var gm = function(message) {
+            // goal: convert to JSON in order to handle
+            if (typeof(message) !== "object") {
+                message = JSON.parse(message);
+            }
+
+            for (i = 0; i < $scope.guests.length; i++) {
+                if (message.guest == $scope.guests[i].id) {
+                    $scope.guest = $scope.guests[i]; // set as local $scope to the Ctrl otherwise
+                                                     // can't access it w/i `Message.get()` below
+                    Message.get({
+                        id: message.id
+                    }, function(response) {
+                        // Only append the Message if it belongs to the Guest
+                        // $scope.guests[i].messages.unshift(response);
+                        $scope.guest.messages.push(response);
+                    });
+                }
+            }
+        }
+
+        if (initializing) {
+            $timeout(function() {
+                initializing = false;
+            });
+        } else {
+            gm(message);
+        }
+    }    
 }]);
 
-// Dashboard page, where new messages should pop via a websocke to dispay to the User
+// Dashboard page, where new messages should pop via a websocket to dispay to the User
 conciergeControllers.controller('GuestMsgPreviewCtrl', ['$scope', '$filter', '$stateParams', '$timeout', 'Message', 'GuestMessages',
     function($scope, $filter, $stateParams, $timeout, Message, GuestMessages) {
 
