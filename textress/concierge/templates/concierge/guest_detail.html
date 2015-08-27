@@ -105,14 +105,14 @@
                 <h3>Messages</h3>
 
                 <ol class="discussion" ng-repeat="message in messages">
-                    <li class="[[ (message.user !== null) ? 'other':'self' ]]">
+                    <li class="[[ (message.user !== null) ? 'self':'other' ]]">
                         <div class="avatar">
                             <img style="max-width:40px;" ng-src="[[ (message.user !== null) ? '{{ MEDIA_URL }}{{ user.profile.thumbnail }}' : '{{ MEDIA_URL }}{{ object.thumbnail }}' ]]">
                         </div>
                         <div class="messages">
                             <h4>[[ message.body | limitTo : 100 ]]</h4> 
                         </div>
-                        <div class="[[ (message.user !== null) ? 'pull-right':'pull-left' ]]">
+                        <div class="[[ (message.user !== null) ? 'pull-left':'pull-right' ]]">
                             <small>[[ message.created | date:'medium' ]]</small>
                         </div>
                         <div ng-if="message.received !== true" class="alert alert-danger message_error">
