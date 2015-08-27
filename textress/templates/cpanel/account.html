@@ -83,11 +83,13 @@
                             <span class="desc"><strong>[[ guest.name ]]</strong></span>
                             &nbsp;
                             <span ng-if="guest.messages[0]">
-                                <q>[[ guest.messages[0].body ]]</q>
+                                <q>[[ guest.messages | orderBy:'-created' | lastMsg:'body' ]]</q>
                             </span>
                             <div class="time">
                                 <i class="fa fa-time bigger-110"></i>
-                                [[ guest.messages[0].created | date :'medium' ]]
+                                    <span ng-if="guest.messages[0]">
+                                        [[ guest.messages | orderBy:'-created' | lastMsg:'created' | date :'medium' ]]
+                                    </span>
                                 &nbsp;
                                 <span class="badge [[ (guest.messages | numRead) ? 'badge-new-msg' : 'badge-old-msg' ]]">[[ guest.messages | numRead ]]</span>
                             </div>

@@ -37,4 +37,11 @@ angular.module('conciergeFilters', [])
                 return guest.read === false;
             }).length
         }
+    })
+    .filter('lastMsg', function() {
+        return function(guestArr, field) {
+            return guestArr[0][field]
+        };
     });
+
+
