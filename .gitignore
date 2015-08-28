@@ -15,3 +15,7 @@ dump.rdb
 digital_ocean.conf
 *id_rsa*
 so_*
+
+# Add-ons
+.idea/
+node_modules/
