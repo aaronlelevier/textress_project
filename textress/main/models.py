@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.contrib.auth.models import User, Group
 from django.utils.text import slugify
+from django.utils.encoding import python_2_unicode_compatible
 from django.dispatch import receiver
 from django.db.models.signals import post_save, pre_delete
 from django.forms.models import model_to_dict
@@ -49,15 +50,21 @@ def profile_image(instance, filename):
     return '/'.join(['profile', filename])
 
 
+@python_2_unicode_compatible
 class Icon(models.Model):
     name = models.CharField(max_length=50, unique=True, blank=True, null=True)
     icon = models.ImageField(upload_to=profile_image, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.name:
-            self.name = self.icon.replace('.gif', '')
+            try:
+                self.name = self.icon.name.split('/')[1].replace('.gif', '')
+            except IndexError:
+                self.name = self.icon.name.replace('.gif', '')
         return super(Icon, self).save(*args, **kwargs)
 
+    def __str__(self):
+        return self.name
 
 #########
 # HOTEL #

@@ -79,7 +79,7 @@
                 <ul class="activities" ng-repeat="guest in guests | orderBy:'messages[0].read':false ">
                     <li>
                         <a class="activity" href="/guests/detail/[[ guest.id ]]/">
-                            <img ng-src="[[ guest.thumbnail ]]" class="profile_thumbnail">
+                            <img ng-src="[[ guest.icon.icon ]]" class="profile_thumbnail">
                             <span class="desc"><strong>[[ guest.name ]]</strong></span>
                             &nbsp;
                             <span ng-if="guest.messages[0]">

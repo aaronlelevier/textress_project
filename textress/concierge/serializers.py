@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 
 from concierge.models import Guest, Message
+from main.serializers import IconSerializer
 
 
 ### MESSAGE
@@ -59,9 +60,11 @@ class GuestBaseSerizer(serializers.ModelSerializer):
     Base Serializer for the 2 serializers below. The only difference for 
     the below is how they serialize related ``messages``.
     '''
+    icon = IconSerializer()
+    
     class Meta:
         model = Guest
-        fields = ('id', 'name', 'room_number', 'phone_number', 'thumbnail',
+        fields = ('id', 'name', 'room_number', 'phone_number', 'icon',
             'check_in', 'check_out', 'created', 'modified', 'hidden',
             'messages',)
         read_only_fields = ('created', 'modified',)

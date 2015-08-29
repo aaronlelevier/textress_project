@@ -1,7 +1,11 @@
+import os
+from os import listdir
+from os.path import isfile, join
+
 from django.forms.models import model_to_dict
 
 from concierge.models import Guest, Message, Reply
-from main.models import Hotel
+from main.models import Hotel, Icon
 from utils import login_messages
 
 
@@ -44,3 +48,17 @@ def process_incoming_message(data):
     reply = Reply.objects.process_reply(guest, hotel, data['Body'])
 
     return msg, reply, hotel
+
+
+def generate_icon_fixtures():
+    mypath = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)),
+        'media/icons')
+    print mypath
+    mypath = '/Users/aaron/Documents/djcode/textra_project/textress/media/icons/'
+    onlyfiles = [f for f in listdir(mypath) 
+                 if isfile(join(mypath,f))]
+    for i in Icon.objects.all():
+        i.delete()
+    for f in onlyfiles:
+        Icon.objects.get_or_create(icon='icons/{}'.format(f))

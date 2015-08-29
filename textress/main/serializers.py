@@ -2,7 +2,14 @@ from django.contrib.auth.models import User
 
 from rest_framework import serializers
 
-from main.models import Hotel
+from main.models import Hotel, Icon
+
+
+class IconSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Icon
+        fields = ('name', 'icon',)
 
 
 class UserSerializer(serializers.ModelSerializer):

@@ -21,11 +21,12 @@ Misc Install commands
     # Install all dependencies from above except `salt#master` on a server name `minion`
 
     # On the `minion` server, change the `/etc/salt/minion` file:
-    `# master: salt`
+    # master: salt
     # to ->
-    `master: <ip addrs of master>`
+    master: <ip addrs of master>
 
-    # Restart salt#minion: `service salt#minion restart`
+    # Restart salt#minion:
+    salt-minion restart
 
 
 Common Commands
