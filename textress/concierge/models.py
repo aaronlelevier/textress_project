@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 
-from main.models import Hotel, UserProfile, profile_image
+from main.models import Hotel, UserProfile, profile_image, Icon
 from sms.helpers import send_message
 from utils.models import AbstractBase, AbstractBaseQuerySet, AbstractBaseManager
 
@@ -103,7 +103,7 @@ class Guest(AbstractBase):
         help_text="Reply 'Y' to Confirm PH # for example.")
     stop = models.BooleanField(_("Stop"), blank=True, default=False,
         help_text="Reply 'S' to Stop receiving all messages.")
-    thumbnail = models.ImageField(upload_to=profile_image, null=True, blank=True)
+    icon = models.ForeignKey(Icon, blank=True, null=True)
 
     objects = GuestManager()
 

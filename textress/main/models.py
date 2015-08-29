@@ -41,6 +41,24 @@ class TwilioClient(object):
             settings.TWILIO_AUTH_TOKEN)
 
 
+########
+# ICON #
+########
+
+def profile_image(instance, filename):
+    return '/'.join(['profile', filename])
+
+
+class Icon(models.Model):
+    name = models.CharField(max_length=50, blank=True, null=True)
+    icon = models.ImageField(upload_to=profile_image, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.name:
+            self.name = self.icon.replace('.gif', '')
+        return super(Icon, self).save(*args, **kwargs)
+
+
 #########
 # HOTEL #
 #########
@@ -194,10 +212,6 @@ class Hotel(TwilioClient, AbstractBase):
         return self
 
 
-def profile_image(instance, filename):
-    return '/'.join(['profile', filename])
-
-
 class UserProfile(AbstractBase):
     """
     Admin User Reqs
@@ -213,7 +227,7 @@ class UserProfile(AbstractBase):
     user = models.OneToOneField(User, primary_key=True, related_name='profile')
     hotel = models.ForeignKey(Hotel, blank=True, null=True)
     msg_sign = models.CharField(_("Message Signature"), max_length=25, blank=True)
-    thumbnail = models.ImageField(upload_to=profile_image, null=True, blank=True)
+    icon = models.ForeignKey(Icon, blank=True, null=True)
 
     class Meta:
         permissions = (

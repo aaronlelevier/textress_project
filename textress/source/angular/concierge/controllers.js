@@ -49,7 +49,7 @@ conciergeControllers.controller('GuestListCtrl', ['$scope', '$timeout', 'Guest',
     }    
 }]);
 
-// Dashboard page, where new messages should pop via a websocket to dispay to the User
+// ``Dashboard page``: where new messages should pop via a websocket to dispay to the User
 conciergeControllers.controller('GuestMsgPreviewCtrl', ['$scope', '$filter', '$stateParams', '$timeout', 'Message', 'GuestMessages',
     function($scope, $filter, $stateParams, $timeout, Message, GuestMessages) {
 
