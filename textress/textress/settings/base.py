@@ -37,12 +37,12 @@ THIRD_PARTY_APPS = (
 )
 
 LOCAL_APPS = (
-    'main',
-    'contact',
-    'sms',
-    'concierge',
     'account',
+    'concierge',
+    'contact',
+    'main',
     'payment',
+    'sms',
     'utils',
 )
 

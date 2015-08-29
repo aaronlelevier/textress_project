@@ -50,7 +50,7 @@ def profile_image(instance, filename):
 
 
 class Icon(models.Model):
-    name = models.CharField(max_length=50, blank=True, null=True)
+    name = models.CharField(max_length=50, unique=True, blank=True, null=True)
     icon = models.ImageField(upload_to=profile_image, null=True, blank=True)
 
     def save(self, *args, **kwargs):
