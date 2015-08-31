@@ -60,7 +60,7 @@ class GuestBaseSerizer(serializers.ModelSerializer):
     Base Serializer for the 2 serializers below. The only difference for 
     the below is how they serialize related ``messages``.
     '''
-    icon = IconSerializer()
+    icon = IconSerializer(read_only=True)
     
     class Meta:
         model = Guest

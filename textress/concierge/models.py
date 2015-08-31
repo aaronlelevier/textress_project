@@ -120,7 +120,7 @@ class Guest(AbstractBase):
         TODO: Add logic so that all `phone_numbers` are distinct by Hotel. 
         Enforce this logic in the save override.
         '''
-        # TESTING ONLY:
+        # NOT TESTING ONLY:
         if 'test' not in sys.argv:
             if not self.icon:
                 self.icon = random.choice(Icon.objects.all())

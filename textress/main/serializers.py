@@ -7,6 +7,8 @@ from main.models import Hotel, Icon
 
 class IconSerializer(serializers.ModelSerializer):
 
+    # icon = serializers.ImageField()
+
     class Meta:
         model = Icon
         fields = ('name', 'icon',)

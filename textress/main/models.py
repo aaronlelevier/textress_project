@@ -1,3 +1,4 @@
+import sys
 import random
 import string
 
@@ -251,9 +252,10 @@ class UserProfile(AbstractBase):
             A. Take 1st letter of FName, Lname. i.e. Bob Cohen == -BC
             B. Use username. i.e. bobby == -bobby
         """
-        # TESTING ONLY:
-        if not self.thumbnail:
-            self.thumbnail = 'profile/54 Illustrated Flat Icons 1_3P9A3ey.gif'
+        # NOT TESTING ONLY:
+        if 'test' not in sys.argv:
+            if not self.icon:
+                self.icon = random.choice(Icon.objects.all())
             
         # Auto-Join to group of the Hotel for ``ws4redis`` Group Messaging.
         if self.hotel:
