@@ -47,6 +47,9 @@
                 <table class="table table-hover guests">
                     <tr>
                         <th>
+                            Icon
+                        </th>
+                        <th>
                             <a href="" class="no_decoration" ng-click="order('username')">Username</a>
                             <span class="sortorder" ng-show="predicate === 'username'" ng-class="{reverse:reverse}"></span>
                         </th>
@@ -68,7 +71,10 @@
                         <th>Delete</th>
                     </tr>
                     <tr ng-repeat="user in users | orderBy:predicate:reverse">
-                        <td><a href="/manage/users/update/[[ user.id ]]/">[[ user.username ]]</a></td>
+                        <td>
+                            <img ng-src="[[ user.profile.icon.icon ]]" class="circle-img" alt="" style="max-width:26px;">
+                        </td>
+                        <td><a href="/account/manage-users/update/[[ user.id ]]/">[[ user.username ]]</a></td>
                         <td>[[ user.first_name ]]</td>
                         <td>[[ user.last_name ]]</td>
                         <td>[[ user.email ]]</td>

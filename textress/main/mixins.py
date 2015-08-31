@@ -9,7 +9,15 @@ from braces.views import GroupRequiredMixin
 
 from main.helpers import get_user_hotel
 from main.models import Hotel
-from utils import dj_messages
+from utils import dj_messages, mixins
+
+
+class UserListContextMixin(mixins.BreadcrumbBaseMixin):
+
+    def __init__(self):
+        self.clip_icon = 'clip-users-2'
+        self.url = reverse('main:manage_user_list')
+        self.url_name = 'User List'
 
 
 class HotelContextMixin(object):

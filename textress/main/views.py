@@ -17,7 +17,8 @@ from concierge.permissions import (IsHotelObject, IsManagerOrAdmin, IsHotelUser,
 from main.models import Hotel, UserProfile, Subaccount, viewable_user_fields_dict
 from main.forms import UserCreateForm, HotelCreateForm, UserUpdateForm
 from main.mixins import (UserOnlyMixin, HotelUsersOnlyMixin,
-    MyHotelOnlyMixin, RegistrationContextMixin, HotelUserMixin, HotelContextMixin)
+    MyHotelOnlyMixin, RegistrationContextMixin, HotelUserMixin, HotelContextMixin,
+    UserListContextMixin)
 from main.serializers import UserSerializer, HotelSerializer
 from utils import dj_messages, login_messages, EmptyForm, DeleteButtonMixin
 
@@ -163,7 +164,7 @@ class RegisterHotelUpdateView(MyHotelOnlyMixin, RegisterHotelBaseView, UpdateVie
 # USERS #
 #########
 
-class UserDetailView(LoginRequiredMixin, SetHeadlineMixin, UserOnlyMixin, DetailView):
+class UserDetailView(LoginRequiredMixin, UserListContextMixin, SetHeadlineMixin, UserOnlyMixin, DetailView):
     '''User's DetailView of themself.'''
 
     headline = "My Profile"
@@ -195,8 +196,9 @@ class UserUpdateView(SetHeadlineMixin, LoginRequiredMixin, UserOnlyMixin, Update
 
 class MgrUserListView(SetHeadlineMixin, GroupRequiredMixin, HotelUserMixin, TemplateView):
     '''
-    Angular View. So can be a TemplateView since the Object List is 
-    generated from a REST Endpoint.
+    :Angular View:
+        So can be a TemplateView since the Object List is 
+        generated from a REST Endpoint.
 
     List all Users for a Hotel, except for the Admin, for the 
     Admin or Managers to `view/add/edit/delete.
