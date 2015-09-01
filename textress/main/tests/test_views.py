@@ -249,6 +249,14 @@ class ManageUsersTests(TestCase):
         response = self.client.get(reverse('main:manage_user_list'))
         self.assertEqual(response.status_code, 302)
 
+    def test_detail(self):
+        self.client.login(username=self.mgr.username, password=self.password)
+        response = self.client.get(reverse('main:manage_user_detail', kwargs={'pk':self.user.pk}))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['breadcrumbs'])
+        self.assertTrue(response.context['user_dict'])
+        self.assertTrue(response.context['hotel'])
+
     ### CREATE USER ###
 
     def test_create_user_get(self):
@@ -277,6 +285,11 @@ class ManageUsersTests(TestCase):
         new_user = User.objects.get(username='test_create')
         assert isinstance(new_user, User)
         self.assertRedirects(response, reverse('main:manage_user_list'))
+
+    def test_create_user_breadcrumbs(self):
+        self.client.login(username=self.mgr.username, password=self.password)
+        response = self.client.get(reverse('main:create_user'))
+        self.assertTrue(response.context['breadcrumbs'])
 
     ### CREATE MGR ###
 
@@ -308,6 +321,11 @@ class ManageUsersTests(TestCase):
         assert Group.objects.get(name="hotel_manager") in new_user.groups.all()
         self.assertRedirects(response, reverse('main:manage_user_list'))
 
+    def test_create_mgr_breadcrumbs(self):
+        self.client.login(username=self.mgr.username, password=self.password)
+        response = self.client.get(reverse('main:create_manager'))
+        self.assertTrue(response.context['breadcrumbs'])
+
 
     # NEXT: Add tests for "Update" from Mgr point of view
 
@@ -335,6 +353,11 @@ class ManageUsersTests(TestCase):
         assert fname != updated_user.first_name
         self.assertRedirects(response, reverse('main:manage_user_list'))
 
+    def test_update_breadcrumbs(self):
+        self.client.login(username=self.mgr.username, password=self.password)
+        response = self.client.get(reverse('main:manage_user_update', kwargs={'pk': self.user.pk}))
+        self.assertTrue(response.context['breadcrumbs'])
+
     def test_delete(self):
         # get
         self.client.login(username=self.mgr.username, password=self.password)
@@ -353,3 +376,8 @@ class ManageUsersTests(TestCase):
         with self.assertRaises(ValidationError):
             response = self.client.post(reverse('main:manage_user_delete',
                 kwargs={'pk': self.admin.pk}), follow=True)
+
+    def test_delete_breadcrumbs(self):
+        self.client.login(username=self.mgr.username, password=self.password)
+        response = self.client.get(reverse('main:manage_user_delete', kwargs={'pk': self.user.pk}))
+        self.assertTrue(response.context['breadcrumbs'])

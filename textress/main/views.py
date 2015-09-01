@@ -79,7 +79,8 @@ class RegisterAdminCreateView(RegisterAdminBaseView, CreateView):
         except (AttributeError, ObjectDoesNotExist):
             return super(RegisterAdminCreateView, self).dispatch(request, *args, **kwargs)
         else:
-            return HttpResponseRedirect(reverse('main:register_step1_update', kwargs={'pk': user.pk}))
+            return HttpResponseRedirect(reverse('main:register_step1_update',
+                kwargs={'pk': user.pk}))
 
     def form_valid(self, form):
         # Call super-override so ``User`` object is available
@@ -143,7 +144,8 @@ class RegisterHotelCreateView(RegisterHotelBaseView, CreateView):
         except (AttributeError, ObjectDoesNotExist):
             return super(RegisterHotelCreateView, self).dispatch(request, *args, **kwargs)
         else:
-            return HttpResponseRedirect(reverse('main:register_step2_update', kwargs={'pk': hotel.pk}))
+            return HttpResponseRedirect(reverse('main:register_step2_update',
+                kwargs={'pk': hotel.pk}))
 
     def form_valid(self, form):
         # Call super-override so ``Hotel`` object is available
@@ -160,11 +162,11 @@ class RegisterHotelUpdateView(MyHotelOnlyMixin, RegisterHotelBaseView, UpdateVie
     pass
 
 
-#########
-# USERS #
-#########
+##############
+# MY PROFILE #
+##############
 
-class UserDetailView(LoginRequiredMixin, UserListContextMixin, SetHeadlineMixin, UserOnlyMixin, DetailView):
+class UserDetailView(LoginRequiredMixin, SetHeadlineMixin, UserOnlyMixin, DetailView):
     '''User's DetailView of themself.'''
 
     headline = "My Profile"
@@ -208,7 +210,8 @@ class MgrUserListView(SetHeadlineMixin, GroupRequiredMixin, HotelUserMixin, Temp
     template_name = 'main/user_list.html'
 
 
-class UserCreateView(SetHeadlineMixin, LoginRequiredMixin, GroupRequiredMixin, CreateView):
+class UserCreateView(SetHeadlineMixin, LoginRequiredMixin, GroupRequiredMixin,
+    UserListContextMixin, CreateView):
     """
     Create a Normal Hotel User w/ no permissions.
     Auto-add all created Users to the Group of the Hotel
@@ -247,7 +250,8 @@ class ManagerCreateView(UserCreateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-class MgrUserDetailView(LoginRequiredMixin, SetHeadlineMixin, HotelUsersOnlyMixin, DetailView):
+class MgrUserDetailView(LoginRequiredMixin, SetHeadlineMixin, HotelUsersOnlyMixin,
+    UserListContextMixin, DetailView):
     '''User's DetailView of themself.'''
 
     headline = "User Profile"
@@ -261,7 +265,7 @@ class MgrUserDetailView(LoginRequiredMixin, SetHeadlineMixin, HotelUsersOnlyMixi
         return context
 
 
-class MgrUserUpdateView(SetHeadlineMixin, HotelUsersOnlyMixin, UpdateView):
+class MgrUserUpdateView(SetHeadlineMixin, HotelUsersOnlyMixin, UserListContextMixin, UpdateView):
     '''
     Manager/Admin view of Users.
 
@@ -280,7 +284,7 @@ class MgrUserUpdateView(SetHeadlineMixin, HotelUsersOnlyMixin, UpdateView):
 
 
 class MgrUserDeleteView(SetHeadlineMixin, DeleteButtonMixin, HotelUsersOnlyMixin,
-    GroupRequiredMixin, UpdateView):
+    GroupRequiredMixin, UserListContextMixin, UpdateView):
     '''
     A Mgr+ can delete any User for their Hotel except the AdminUser.
     '''
