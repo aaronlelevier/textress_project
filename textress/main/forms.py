@@ -37,7 +37,7 @@ class UserCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):
                          "@/./+/-/_ characters.")})
     password1 = forms.CharField(label=_("Password"),
         widget=forms.PasswordInput)
-    password2 = forms.CharField(label=_("Password confirmation"),
+    password2 = forms.CharField(label=_("Confirm Password"),
         widget=forms.PasswordInput,
         help_text=_("Enter the same password as above, for verification."))
 

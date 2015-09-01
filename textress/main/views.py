@@ -45,7 +45,7 @@ class HotelUpdateView(HotelUsersOnlyMixin, GroupRequiredMixin, SetHeadlineMixin,
         "Set Hotel as a form attr."
         kwargs = super(HotelUpdateView, self).get_form_kwargs()
         kwargs['hotel'] = self.object
-        return kwargs  
+        return kwargs
 
 
 ### REGISTRATION VIEWS ###
@@ -133,6 +133,12 @@ class RegisterHotelBaseView(GroupRequiredMixin, RegistrationContextMixin, View):
         context['step_number'] = 1
         context['step'] = context['steps'][context['step_number']]
         return context
+
+    def get_form_kwargs(self):
+        "Set Hotel as a form attr."
+        kwargs = super(RegisterHotelBaseView, self).get_form_kwargs()
+        kwargs['hotel'] = self.object
+        return kwargs
 
 
 class RegisterHotelCreateView(RegisterHotelBaseView, CreateView):
