@@ -41,6 +41,12 @@ class HotelUpdateView(HotelUsersOnlyMixin, GroupRequiredMixin, SetHeadlineMixin,
     def get_success_url(self):
         return reverse('main:hotel_update', kwargs={'pk': self.object.pk})
 
+    def get_form_kwargs(self):
+        "Set Hotel as a form attr."
+        kwargs = super(HotelUpdateView, self).get_form_kwargs()
+        kwargs['hotel'] = self.object
+        return kwargs  
+
 
 ### REGISTRATION VIEWS ###
 

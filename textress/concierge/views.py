@@ -107,7 +107,7 @@ class GuestDetailView(GuestBaseView, GuestListContextMixin, DetailView):
         return super(GuestDetailView, self).dispatch(*args, **kwargs)
 
 
-class GuestCreateView(GuestBaseView, CreateView):
+class GuestCreateView(GuestBaseView, GuestListContextMixin, CreateView):
     
     headline = "Add a Guest"
     template_name = 'cpanel/form.html'
@@ -121,23 +121,16 @@ class GuestCreateView(GuestBaseView, CreateView):
         return super(GuestCreateView, self).form_valid(form)
 
 
-class GuestUpdateView(GuestBaseView, UpdateView):
-    '''
-    TODO
-    ----
-    Add Js ph # prettifier
-    '''
+class GuestUpdateView(GuestBaseView, GuestListContextMixin, UpdateView):
+
     headline = "Update Guest"
     template_name = 'cpanel/form.html'
     model = Guest
     form_class = GuestForm
 
     def get_form_kwargs(self):
-        """This method is what injects forms with their keyword
-            arguments."""
-        # grab the current set of form #kwargs
+        "Set Guest as a form attr."
         kwargs = super(GuestUpdateView, self).get_form_kwargs()
-        # Update the kwargs with the user_id
         kwargs['guest'] = self.object
         return kwargs  
 

@@ -5,9 +5,9 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 from djangular.forms import NgFormValidationMixin
 from djangular.styling.bootstrap3.forms import Bootstrap3ModelForm
 
-from main.models import Hotel
 from concierge.models import validate_phone
-
+from main.models import Hotel
+from utils import ph_formatter
 
 class UserCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):
     '''
@@ -98,10 +98,25 @@ class HotelCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):
         'invalid_ph':_('Please enter a 10-digit phone number'),
     }
 
+    address_phone = forms.RegexField(r'^(\d{3})-(\d{3})-(\d{4})$',
+        label='Phone number',
+        error_messages={'invalid': 'Phone number have 10 digits'},
+        help_text='Allowed phone number format: 702-510-5555')
+
     class Meta:
         model = Hotel
         fields = ['name', 'address_phone', 'address_line1', 'address_line2',
             'address_city', 'address_state', 'address_zip']
+
+    def __init__(self, hotel=None, *args, **kwargs):
+        super(HotelCreateForm, self).__init__(*args, **kwargs)
+
+        try:
+            phone = hotel.address_phone
+        except AttributeError:
+            self.initial['address_phone'] = ""
+        else:
+            self.initial['address_phone'] = ph_formatter(getattr(hotel, 'address_phone', None))
 
     def clean_phone(self):
         """

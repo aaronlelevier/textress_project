@@ -28,7 +28,7 @@ def viewable_user_fields_dict(user):
     "A ``Dict`` of all viewable ``User` fields to be displayed in templates."
     user_dict = {}
     for k,v in model_to_dict(user).iteritems():
-        if k in ['username', 'first_name', 'last_name', 'is_active', 'email']:
+        if k in ['username', 'first_name', 'last_name', 'email']:
             user_dict.update({k:v})
     return user_dict
 
@@ -110,7 +110,7 @@ class Hotel(TwilioClient, AbstractBase):
     # Required
     name = models.CharField(_("Hotel Name"), unique=True, max_length=100)
     address_phone = models.CharField(_("Contact Phone Number"), unique=True, max_length=12,
-        help_text="10-digit phone number. i.e.: 7025101234")
+        help_text="Allowed phone number format: 702-510-5555")
     address_line1 = models.CharField(_("Address Line 1"), max_length=100)
     address_city = models.CharField(_("City"), max_length=100)
     address_state = models.CharField(_("State"), max_length=25, choices=STATES, default=STATES[0][0])
