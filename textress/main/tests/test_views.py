@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
@@ -27,7 +27,7 @@ def create_admin():
     return admin
 
 
-class RegistrationTests(TestCase):
+class RegistrationTests(TransactionTestCase):
 
     # fixtures = ['main.json', 'payment.json']
 
