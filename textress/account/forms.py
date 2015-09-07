@@ -12,7 +12,7 @@ from account.models import AcctCost
 # DEFAULT FORMS #
 #################
 
-class AcctCostForm(NgFormValidationMixin, Bootstrap3ModelForm):
+class AcctCostForm(Bootstrap3ModelForm):
     # djangular req
     form_name = 'acct_cost_create_form'
 
@@ -21,7 +21,7 @@ class AcctCostForm(NgFormValidationMixin, Bootstrap3ModelForm):
         fields = ['init_amt', 'balance_min', 'recharge_amt'] # TODO: add "auto-recharge" field
 
 
-class AcctCostUpdateForm(NgFormValidationMixin, Bootstrap3ModelForm):
+class AcctCostUpdateForm(Bootstrap3ModelForm):
     # djangular req
     form_name = 'acct_cost_update_form'
 
@@ -34,19 +34,19 @@ class AcctCostUpdateForm(NgFormValidationMixin, Bootstrap3ModelForm):
 # AUTH #
 ########
 
-class AuthenticationForm(NgFormValidationMixin, auth_forms.AuthenticationForm, Bootstrap3Form):
+class AuthenticationForm(auth_forms.AuthenticationForm, Bootstrap3Form):
     form_name = 'login_form'
 
 
-class PasswordResetForm(NgFormValidationMixin, auth_forms.PasswordResetForm, Bootstrap3Form):
+class PasswordResetForm(auth_forms.PasswordResetForm, Bootstrap3Form):
     form_name = 'pw_reset_form'
 
 
-class SetPasswordForm(NgFormValidationMixin, auth_forms.SetPasswordForm, Bootstrap3Form):
+class SetPasswordForm(auth_forms.SetPasswordForm, Bootstrap3Form):
     form_name = 'set_pw_form'
 
 
-class PasswordChangeForm(NgFormValidationMixin, auth_forms.PasswordChangeForm, Bootstrap3Form):
+class PasswordChangeForm(auth_forms.PasswordChangeForm, Bootstrap3Form):
     form_name = 'pw_change_form'
 
 

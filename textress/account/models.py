@@ -536,8 +536,11 @@ def update_balance(sender, instance=None, created=False, **kwargs):
     '''Update the current ``balance`` on the Account after the last 
     transaction has been saved.
 
+    Don't check the ``balance`` on the day of signup b/c will cause 
+    an infinte loop b/c nothing to check yet.
+
     :TODO: Drop this off to a Celery Task so doesn't cause an infinite loop.
     '''
-    if not instance.balance:
+    if not instance.balance and (instance.created.date != instance.modified.date):
         instance.balance = AcctTrans.objects.balance()
         instance.save()

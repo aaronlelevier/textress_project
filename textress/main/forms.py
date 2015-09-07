@@ -135,6 +135,3 @@ class HotelCreateForm(Bootstrap3ModelForm):
             raise forms.ValidationError("Hotel phone number exists.")
 
         return phone
-
-
-
