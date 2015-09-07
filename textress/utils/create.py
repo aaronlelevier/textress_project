@@ -43,8 +43,11 @@ def _get_groups_and_perms():
 
 ### GENERATORS
 
-def _generate_ph(numbers=10):
+def _generate_int(numbers=10):
     return ''.join([random.choice(string.digits) for x in range(numbers)])
+
+def _generate_ph(numbers=10):
+    return "{}-{}-{}".format(_generate_int(3), _generate_int(3), _generate_int(4))
 
 
 def _generate_name(letters=10):
