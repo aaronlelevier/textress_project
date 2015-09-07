@@ -258,10 +258,12 @@ class ChargeManager(StripeClient, models.Manager):
             # TODO: Do I need to raise a form here, or do anything to alert Users
             # if they are accessing a View on their own that calls this method?
             raise
-        else:
-            hotel.subaccount.update_status('active')
-            return self.create(card=card, customer=customer,
-                id=stripe_charge.id, amount=stripe_charge.amount)
+
+        hotel.get_or_create_subaccount()
+
+        hotel.subaccount.update_status('active')
+        return self.create(card=card, customer=customer,
+            id=stripe_charge.id, amount=stripe_charge.amount)
 
 
 class Charge(PmtAbstractBase):

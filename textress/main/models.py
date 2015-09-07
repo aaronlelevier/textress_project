@@ -219,6 +219,13 @@ class Hotel(TwilioClient, AbstractBase):
         self.save()
         return self
 
+    def get_or_create_subaccount(self):
+        """
+        Twilio Subaccount will only be created when a Payment has been 
+        made. No pre-create at the time of "Hotel Create" for example
+        """
+        Subaccount.objects.get_or_create(self)
+
 
 class UserProfile(AbstractBase):
     """
@@ -301,7 +308,7 @@ class UserProfile(AbstractBase):
 # SUBACCOUNT #
 ##############
 
-class SubaccountManager(models.Manager):
+class SubaccountManager(TwilioClient, models.Manager):
 
     def twilio_create(self, hotel):
         '''User Master sid/auth_token to create a Twilio Subaccount.'''
@@ -311,14 +318,26 @@ class SubaccountManager(models.Manager):
 
     def get_or_create(self, hotel, *args, **kwargs):
         try:
-            subaccount = self.get(sid=hotel.twilio_sid)
-            return subaccount, False
+            db_subaccount = self.get(sid=hotel.twilio_sid)
+            return db_subaccount, False
         except ObjectDoesNotExist:
-            subaccount = self.twilio_create(hotel)
-            db_subaccount = self.create(
-                hotel=hotel,
-                sid=subaccount.sid,
-                auth_token=subaccount.auth_token)
+            # Twilio
+            # If no "subaccount" exists for the Hotel, first try to use
+            # one of the "Test subaccounts" and rename it.
+            test_accounts = self.client.accounts.list(friendly_name="Test Hotel")
+            try:
+                subaccount = test_accounts[0]
+            except IndexError:
+                subaccount = self.twilio_create(hotel)
+
+            # DB
+            try:
+                db_subaccount = Subaccount.objects.get(sid=subaccount.sid)
+            except Subaccount.DoesNotExist:
+                db_subaccount = self.create(
+                    hotel=hotel,
+                    sid=subaccount.sid,
+                    auth_token=subaccount.auth_token)
 
             # update denormalized Twilio fields
             hotel.update_twilio(sid=subaccount.sid,

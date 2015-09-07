@@ -158,7 +158,7 @@ class TransType(AbstractBase):
 
 # use a lower charge amount in DEBUG:
 if settings.DEBUG:
-    INIT_CHARGE_AMT = 50
+    INIT_CHARGE_AMT = 100
 else:
     INIT_CHARGE_AMT = 500
 
