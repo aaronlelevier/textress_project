@@ -29,8 +29,6 @@ def create_admin():
 
 class RegistrationTests(TransactionTestCase):
 
-    # fixtures = ['main.json', 'payment.json']
-
     def setUp(self):
         create._get_groups_and_perms()
 
@@ -141,13 +139,13 @@ class HotelViewTests(TestCase):
         response = self.client.post(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}))
 
         # Dave changes his street address, and the change is saved in the DB
-        CREATE_HOTEL_DICT['address_line1'] = '123 My New Street Name' 
+        CREATE_HOTEL_DICT['address_phone'] = create._generate_ph()
         response = self.client.post(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}),
             CREATE_HOTEL_DICT, follow=True)
         # hotel info updated
         self.assertRedirects(response, reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}))
         updated_hotel = Hotel.objects.get(admin_id=self.user.pk)
-        self.assertNotEqual(self.hotel.address_line1, updated_hotel.address_line1)
+        self.assertNotEqual(self.hotel.address_phone, updated_hotel.address_phone)
         
         # success message
         m = list(response.context['messages'])

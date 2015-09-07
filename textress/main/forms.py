@@ -9,7 +9,8 @@ from concierge.models import validate_phone
 from main.models import Hotel
 from utils import ph_formatter
 
-class UserCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):
+
+class UserCreateForm(Bootstrap3ModelForm):
     '''
     Form used during Registration to Create the Admin User.
     '''
@@ -78,7 +79,7 @@ class UserCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):
         return user
 
 
-class UserUpdateForm(NgFormValidationMixin, Bootstrap3ModelForm):
+class UserUpdateForm(Bootstrap3ModelForm):
     '''
     Form used during Registration to Update the Admin User.
     '''
@@ -90,7 +91,7 @@ class UserUpdateForm(NgFormValidationMixin, Bootstrap3ModelForm):
         fields = ['first_name', 'last_name', 'email']
 
 
-class HotelCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):
+class HotelCreateForm(Bootstrap3ModelForm):
     # djangular req
     form_name = 'hotel_create_form'
 
@@ -112,15 +113,28 @@ class HotelCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):
         super(HotelCreateForm, self).__init__(*args, **kwargs)
 
         try:
-            phone = hotel.address_phone
+            address_phone = hotel.address_phone
         except AttributeError:
             self.initial['address_phone'] = ""
         else:
             self.initial['address_phone'] = ph_formatter(getattr(hotel, 'address_phone', None))
 
-    def clean_phone(self):
+    def clean_address_phone(self):
         """
         Return the Twilio formatted PH #
         """
-        phone = self.cleaned_data.get('address_phone')
-        return validate_phone(phone)
+        self.cleaned_data = super(HotelCreateForm, self).clean()
+
+        address_phone = self.cleaned_data.get('address_phone')
+
+        # returns a validated and formatted phone # ex: "+17025108888"
+        # all phone #'s saved to the DB in this format
+        phone = validate_phone(address_phone)
+
+        if Hotel.objects.filter(address_phone=phone).exists():
+            raise forms.ValidationError("Hotel phone number exists.")
+
+        return phone
+
+
+
