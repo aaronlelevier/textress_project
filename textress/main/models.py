@@ -223,8 +223,10 @@ class Hotel(TwilioClient, AbstractBase):
         """
         Twilio Subaccount will only be created when a Payment has been 
         made. No pre-create at the time of "Hotel Create" for example
+
+        :return: (object, created)
         """
-        Subaccount.objects.get_or_create(self)
+        return Subaccount.objects.get_or_create(self)
 
 
 class UserProfile(AbstractBase):
@@ -327,6 +329,7 @@ class SubaccountManager(TwilioClient, models.Manager):
             test_accounts = self.client.accounts.list(friendly_name="Test Hotel")
             try:
                 subaccount = test_accounts[0]
+                self.client.accounts.update(subaccount.sid, friendly_name=hotel.name)
             except IndexError:
                 subaccount = self.twilio_create(hotel)
 
