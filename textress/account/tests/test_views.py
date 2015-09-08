@@ -133,47 +133,44 @@ class RegistrationTests(TestCase):
         self.assertContains(response, 'Textress is currently Pre-Alpha with limited functionality')
 
 
-class RenderTests(TestCase):
+class AccountTests(TestCase):
     # Test Rending of view, template path is correct, url
     # User of each permission type needed
 
     def setUp(self):
         create._get_groups_and_perms()
-        self.password = '1234'
+        self.password = PASSWORD
 
-        # Admin
-        self.admin = User.objects.create_user('admin', settings.DEFAULT_FROM_EMAIL, self.password)
-        self.admin_group = Group.objects.get(name="hotel_admin")
-        self.admin.groups.add(self.admin_group)
-        self.admin.save()
-
-        # Manager
-        self.manager = User.objects.create_user('manager', settings.DEFAULT_FROM_EMAIL, self.password)
-        self.manager_group = Group.objects.get(name="hotel_manager")
-        self.manager.groups.add(self.manager_group)
-        self.manager.save()
-
-        # User
-        self.user = User.objects.create_user('user', settings.DEFAULT_FROM_EMAIL, self.password)
-
+        self.hotel = create_hotel()
+        self.admin = create_hotel_user(self.hotel, 'admin', 'hotel_admin')
+        self.manager = create_hotel_user(self.hotel, 'manager', 'hotel_manager')
+        self.user = create_hotel_user(self.hotel, 'user')
 
     ### inherit from - django.contrib.auth.forms
 
-    def test_account(self):
+    def test_account_logged_in(self):
         # Dave as a logged in User can access his account (profile) view
         self.client.login(username=self.user.username, password=self.password)
         response = self.client.get(reverse('account'))
         self.assertEqual(response.status_code, 200)
 
+    def test_account_logged_out(self):
         # logged out Dave cannot access it
-        self.client.logout()
         response = self.client.get(reverse('account'))
         self.assertEqual(response.status_code, 302)
+
+    def test_account_context(self):
+        self.client.login(username=self.user.username, password=self.password)
+        response = self.client.get(reverse('account'))
+        self.assertTrue(response.context['headline_small'])
+        # failing test
+        self.assertIsNone(self.hotel.twilio_ph_sid)
+        self.assertTrue(response.context['alerts'])
 
     def test_login(self):
         response = self.client.get(reverse('login'))
         self.assertEqual(response.status_code, 200)
-        assert response.context['form']
+        self.assertTrue(response.context['form'])
 
     ### 2 views for password change
 

@@ -51,13 +51,36 @@ def verify_logout(request):
 
 ### ACCOUNT VIEWS ###
 
-class AccountView(LoginRequiredMixin, HotelUserMixin, SetHeadlineMixin, StaticContextMixin, TemplateView):
+class AccountView(LoginRequiredMixin, HotelUserMixin, SetHeadlineMixin,
+    StaticContextMixin, TemplateView):
     """
     Account Dashboard ~ User Home Page
     """
     headline = 'Dashboard'
-    static_context = {'headline_small': 'overview & stats'}
+    static_context = {'headline_small': 'guest list & quick links'}
     template_name = 'cpanel/account.html'
+
+    def get_context_data(self, **kwargs):
+        """Show alert messages for pending actions needed before the 
+        Account can be fully functional."""
+        context = super(AccountView, self).get_context_data(**kwargs)
+        alerts = []
+        if not self.hotel.twilio_ph_sid:
+            alerts.append(
+                """
+                <div class="alert alert-warning">
+                    <a href="{}" class="no_decoration">
+                        <i class="fa fa-exclamation-triangle"></i>
+                        <strong>Warning!</strong> Best check yo self, you're not looking too good.
+                    </a>
+                    <button data-dismiss="alert" class="close">
+                        &times;
+                    </button>
+                </div>
+                """.format(reverse('sms:ph_num_add'))
+            )
+        context['alerts'] = alerts
+        return context
 
 
 ### REGISTRATION VIEWS ###

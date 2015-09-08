@@ -234,3 +234,8 @@ a.no_decoration {
     vertical-align: middle;
     float: none;
 }
+
+/* Padding */
+.margin10 {
+    margin: 10px;
+}

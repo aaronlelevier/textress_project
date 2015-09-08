@@ -237,6 +237,14 @@
                                 </div>
                                 {% endif %}
 
+                                {% if alerts %}
+                                    <div class="row margin10">
+                                        {% for alert in alerts %}
+                                            {{ alert|safe }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
                                 <div class="page-header">
                                     <h1>
                                         {{ headline }} 
