@@ -6,16 +6,15 @@ class AcctCostContextMixin(object):
         return context
 
 
-def alert_messages(messages, alerts=None):
+def alert_messages(messages):
     """Return a `list` of Alert messages in HTML when Users need to do 
     something before their Account is fully functional.
 
+    - keys: type, link, strong_message, message
+
     :messages: a ``list`` of ``dict's`` of messages to display.
-
-    - keys: type, info, icon, strong_message, message
     """
-
-    alerts = alerts or []
+    alerts =  []
 
     html_message = """
         <div class="alert alert-warning">
@@ -28,15 +27,16 @@ def alert_messages(messages, alerts=None):
             </button>
         </div>
         """
+
     icon_dict = {
-        'success': 'fa fa-check-circle'
-        'info': 'fa fa-info-circle'
-        'warning': 'fa fa-exclamation-triangle'
+        'success': 'fa fa-check-circle',
+        'info': 'fa fa-info-circle',
+        'warning': 'fa fa-exclamation-triangle',
         'danger': 'fa fa-times-circle'
     }
 
     # set the icon based on the alert type
-    [m['link'] = icon_dict['type'] for m in messages]
+    [m.update({'icon': icon_dict[m['type']]}) for m in messages]
     
     for message in messages:
         alerts.append(html_message.format(**message))

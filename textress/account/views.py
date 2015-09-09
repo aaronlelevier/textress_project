@@ -17,6 +17,7 @@ from braces.views import (LoginRequiredMixin, GroupRequiredMixin, SetHeadlineMix
 
 from account.forms import (AuthenticationForm, CloseAccountForm,
     CloseAcctConfirmForm, AcctCostForm, AcctCostUpdateForm)
+from account.mixins import alert_messages
 from account.models import AcctCost, AcctStmt, AcctTrans, Pricing
 from account.serializers import PricingSerializer
 from main.mixins import RegistrationContextMixin, AdminOnlyMixin, HotelUserMixin
@@ -62,24 +63,16 @@ class AccountView(LoginRequiredMixin, HotelUserMixin, SetHeadlineMixin,
 
     def get_context_data(self, **kwargs):
         """Show alert messages for pending actions needed before the 
-        Account can be fully functional."""
+        Account will be fully functional."""
         context = super(AccountView, self).get_context_data(**kwargs)
-        alerts = []
         if not self.hotel.twilio_ph_sid:
-            alerts.append(
-                """
-                <div class="alert alert-warning">
-                    <a href="{}" class="no_decoration">
-                        <i class="fa fa-exclamation-triangle"></i>
-                        <strong>Warning!</strong> Best check yo self, you're not looking too good.
-                    </a>
-                    <button data-dismiss="alert" class="close">
-                        &times;
-                    </button>
-                </div>
-                """.format(reverse('sms:ph_num_add'))
-            )
-        context['alerts'] = alerts
+            alert = {
+                'type': 'warning',
+                'link': reverse('sms:ph_num_add'),
+                'strong_message': 'Alert!',
+                'message': 'You need to purchase a phone number before you are able to send SMS.'
+            }
+            context['alerts'] = alert_messages(messages=[alert])
         return context
 
 

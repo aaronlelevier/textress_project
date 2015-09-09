@@ -1,5 +1,8 @@
-:next:
-    - see paper
+:bugs:
+- when going to "account" view, if no Hotel, throws an Attribute Error, but 
+I should be handling, or redirect?
+
+
 
 2015-08-21
 ----------

@@ -159,13 +159,10 @@ class AccountTests(TestCase):
         response = self.client.get(reverse('account'))
         self.assertEqual(response.status_code, 302)
 
-    def test_account_context(self):
+    def test_headline_context(self):
         self.client.login(username=self.user.username, password=self.password)
         response = self.client.get(reverse('account'))
         self.assertTrue(response.context['headline_small'])
-        # failing test
-        self.assertIsNone(self.hotel.twilio_ph_sid)
-        self.assertTrue(response.context['alerts'])
 
     def test_login(self):
         response = self.client.get(reverse('login'))
@@ -215,6 +212,11 @@ class AccountTests(TestCase):
         response = self.client.get(reverse('password_reset_complete'))
         self.assertEqual(response.status_code, 200)
 
+    def test_alert_phone_number(self):
+        self.client.login(username=self.user.username, password=self.password)
+        self.assertIsNone(self.hotel.twilio_ph_sid)
+        response = self.client.get(reverse('account'))
+        self.assertTrue(response.context['alerts'])
 
 class LoginTests(TestCase):
 
@@ -276,10 +278,10 @@ class PasswordResetTests(TestCase):
 class RoutingViewTests(TestCase):
 
     def setUp(self):
-        self.password = '1111'
-        self.user = User.objects.create_user('Bobby',
-            settings.DEFAULT_FROM_EMAIL, self.password)
-
+        self.password = PASSWORD
+        self.hotel = create_hotel()
+        self.user = create_hotel_user(self.hotel)
+        
     def test_private(self):
         # Not logged in get()
         response = self.client.get(reverse('private'))
