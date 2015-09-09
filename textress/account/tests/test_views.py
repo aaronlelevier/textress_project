@@ -217,6 +217,14 @@ class AccountTests(TestCase):
         self.assertIsNone(self.hotel.twilio_ph_sid)
         response = self.client.get(reverse('account'))
         self.assertTrue(response.context['alerts'])
+        # No alert if ``hotel.twilio_ph_sid``
+        self.hotel.twilio_ph_sid = 'some value'
+        self.hotel.save()
+        self.assertTrue(self.hotel.twilio_ph_sid)
+        response = self.client.get(reverse('account'))
+        with self.assertRaises(KeyError):
+            response.context['alerts']
+
 
 class LoginTests(TestCase):
 
@@ -281,7 +289,7 @@ class RoutingViewTests(TestCase):
         self.password = PASSWORD
         self.hotel = create_hotel()
         self.user = create_hotel_user(self.hotel)
-        
+
     def test_private(self):
         # Not logged in get()
         response = self.client.get(reverse('private'))
