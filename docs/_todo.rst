@@ -1,7 +1,9 @@
-:bugs:
+Bugs
+----
 - when going to "account" view, if no Hotel, throws an Attribute Error, but 
 I should be handling, or redirect?
 
+- url: 'payment:summary' - AcctStmt context / query is not correct
 
 
 2015-08-21

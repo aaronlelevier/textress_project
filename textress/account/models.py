@@ -281,9 +281,14 @@ class AcctStmt(AbstractBase):
     """
     Monthly usage stats for each hotel.
 
-    Level: One record per Hotel per Month.
+    :When are AcctStmt's generated?:
+        1. Daily
+        2. At first login for the day
+        3. After a month has ended
 
-    Purpose: Hotels will have a: Monthly and Daily view of their Usage.
+    :Level: One record per Hotel per Month.
+
+    :Purpose: Hotels will have a Monthly and Daily view of their Usage.
     """
     # Keys
     hotel = models.ForeignKey(Hotel, related_name='acct_stmt')

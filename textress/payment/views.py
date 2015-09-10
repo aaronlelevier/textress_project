@@ -111,20 +111,29 @@ class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
     template_name = 'payment/summary.html'
 
     def get(self, request, *args, **kwargs):
+        """
+        If no AcctStmt's exist for the Hotel, bypyass this section.
+        """
         context = self.get_context_data(**kwargs)
-        try:
-            date = request.GET.get('date')
-            year, month = date.split('-')
-            acct_stmt = AcctStmt.objects.get(year=year, month=month)  
-        except (KeyError, AttributeError):
-            acct_stmt = AcctStmt.objects.first()
-        finally:
-            context.update({
-                'year': acct_stmt.year,
-                'month': acct_stmt.month,
-                'acct_stmt': acct_stmt,
-                'sms_cost': acct_stmt.balance - context['phone_numbers_cost']
-            })
+
+        queryset = AcctStmt.objects.filter(hotel=self.hotel)
+        if queryset:
+            try:
+                date = request.GET.get('date')
+                year, month = date.split('-')
+                acct_stmt = queryset.get(year=year, month=month)  
+            except (KeyError, AttributeError):
+                acct_stmt = queryset.first()
+            finally:
+                context.update({
+                    'year': acct_stmt.year,
+                    'month': acct_stmt.month,
+                    'acct_stmt': acct_stmt,
+                    'sms_cost': acct_stmt.balance - context['phone_numbers_cost']
+                })
+        else:
+            context['acct_stmt'] = None
+
         return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):

@@ -26,53 +26,63 @@
         </div>
         <hr>
         <div class="row">
-            <div class="col-md-6">
-                <div class="row">
-                    <div class="col-sm-8">
-                        <h3 class="lead">Account Statement</h3>
+            {% if acct_stmt %}
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <h3 class="lead">Account Statement</h3>
+                        </div>
+                        <div class="col-md-4" style="margin-top: 20px;">
+                            <div class="btn btn-default btn-xs pull-right">
+                                <a class="btn dropdown-toggle no_decoration" data-toggle="dropdown" href="#">{{ acct_stmt }} <span class="caret"></span></a>
+                                    <ul class="dropdown-menu">
+                                        {% for as in acct_stmts %}
+                                        <li><a href="{% url 'payment:summary' %}?date={{ as.year }}-{{ as.month }}">{{ as.month_abbr }}</a></li>
+                                        {% endfor %}
+                                    </ul>
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-4" style="margin-top: 20px;">
-                        <div class="btn btn-default btn-xs pull-right">
-                            <a class="btn dropdown-toggle no_decoration" data-toggle="dropdown" href="#">{{ acct_stmt }} <span class="caret"></span></a>
-                                <ul class="dropdown-menu">
-                                    {% for as in acct_stmts %}
-                                    <li><a href="{% url 'payment:summary' %}?date={{ as.year }}-{{ as.month }}">{{ as.month_abbr }}</a></li>
-                                    {% endfor %}
-                                </ul>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table class="table table-hover">
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                    <th>Cost</th>
+                                </tr>
+                                <tr>
+                                    <td>SMS</td>
+                                    <td>{{ acct_stmt.total_sms }}</td>
+                                    <td>{{ sms_cost|stripe_money }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Phone Numbers</td>
+                                    <td>{{ phone_numbers.count }}</td>
+                                    <td>{{ phone_numbers_cost|stripe_money }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Total</strong></td>
+                                    <td></td>
+                                    <td><strong>{{ acct_stmt.balance|stripe_money }}</strong></td>
+                                </tr>
+                            </table>
+                            <a href="{% url 'acct_stmt_detail' year month %}">
+                                <p class="pull-right"><strong>View Usage Detail</strong></p>
                             </a>
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <table class="table table-hover">
-                            <tr>
-                                <th>Category</th>
-                                <th>Amount</th>
-                                <th>Cost</th>
-                            </tr>
-                            <tr>
-                                <td>SMS</td>
-                                <td>{{ acct_stmt.total_sms }}</td>
-                                <td>{{ sms_cost|stripe_money }}</td>
-                            </tr>
-                            <tr>
-                                <td>Phone Numbers</td>
-                                <td>{{ phone_numbers.count }}</td>
-                                <td>{{ phone_numbers_cost|stripe_money }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Total</strong></td>
-                                <td></td>
-                                <td><strong>{{ acct_stmt.balance|stripe_money }}</strong></td>
-                            </tr>
-                        </table>
-                        <a href="{% url 'acct_stmt_detail' year month %}">
-                            <p class="pull-right"><strong>View Usage Detail</strong></p>
-                        </a>
+            {% else %}
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h3 class="lead">No Account Statements Posted</h3>
+                        </div>
                     </div>
                 </div>
-            </div>
+            {% endif %}
             <div class="col-md-6">
                 <div class="row">
                     <h3 class="lead">Recent Payments</h3>

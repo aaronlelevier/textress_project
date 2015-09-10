@@ -1,13 +1,14 @@
 from django.conf import settings
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
+from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 
 from model_mommy import mommy
 
 from account.models import AcctCost, AcctStmt, AcctTrans, CHARGE_AMOUNTS, BALANCE_AMOUNTS
-from account.tests.factory import (CREATE_ACCTCOST_DICT, create_acct_stmts,
-    create_acct_trans)
+from account.tests.factory import (CREATE_ACCTCOST_DICT, create_acct_stmt,
+    create_acct_stmts, create_acct_trans)
 from main.models import Hotel
 from main.tests.factory import (CREATE_USER_DICT, CREATE_HOTEL_DICT, PASSWORD,
     create_hotel, create_hotel_user)
@@ -103,37 +104,31 @@ class PaymentEmailTests(TestCase):
         email.msg.send()
 
 
-class BillingTests(TestCase):
+class BillingSummaryTests(TransactionTestCase):
 
     def setUp(self):
+        # Users
+        create._get_groups_and_perms()
         self.password = PASSWORD
         self.hotel = create_hotel()
-
-        # create "Hotel Manager" Group
-        create._get_groups_and_perms()
-
-        # Users
         self.admin = create_hotel_user(hotel=self.hotel, username='admin', group='hotel_admin')
         self.user = create_hotel_user(hotel=self.hotel, username='user')
-
-        self.client.login(username=self.admin.username, password=PASSWORD)
-
         # Billing Stmt Fixtures
         self.acct_cost, created = AcctCost.objects.get_or_create(self.hotel)
         self.acct_stmts = create_acct_stmts(self.hotel)
         self.acct_trans = create_acct_trans(self.hotel)
         self.phone_number = mommy.make(PhoneNumber, hotel=self.hotel)
+        # Login
+        self.client.login(username=self.admin.username, password=PASSWORD)
 
     def tearDown(self):
         self.client.logout()
 
-    ### BillingSummaryView ###
-
-    def test_get_summmary(self):
+    def test_get(self):
         response = self.client.get(reverse('payment:summary'))
         self.assertEqual(response.status_code, 200)
 
-    def test_context_summary(self):
+    def test_context(self):
         response = self.client.get(reverse('payment:summary'))
         self.assertIsInstance(response.context['acct_stmt'], AcctStmt)
         # User's current fund's balance show's in context
@@ -142,6 +137,19 @@ class BillingTests(TestCase):
         self.assertIsInstance(response.context['acct_trans'][0], AcctTrans)
         self.assertIsInstance(response.context['acct_cost'], AcctCost)
         self.assertIsInstance(response.context['phone_numbers'][0], PhoneNumber)
+
+    def test_acct_stmts_preview_none(self):
+        [x.delete() for x in AcctStmt.objects.filter(hotel=self.hotel)]
+        response = self.client.get(reverse('payment:summary'))
+        self.assertFalse(response.context['acct_stmts'])
+        self.assertFalse(response.context['acct_stmt'])
+
+    def test_acct_stmts_preview_exist(self):
+        today = timezone.now().date()
+        create_acct_stmt(self.hotel, today.year, today.month)
+        response = self.client.get(reverse('payment:summary'))
+        self.assertTrue(response.context['acct_stmts'])
+        self.assertTrue(response.context['acct_stmt'])
 
 
 class CardUpdateTests(TestCase):
