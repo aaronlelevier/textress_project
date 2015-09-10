@@ -70,13 +70,28 @@ class AcctStmtViewTests(TestCase):
         
     ### ACCT COST
 
-    def test_acct_cost_update(self):
+    def test_acct_cost_update_get(self):
         acct_cost, created = AcctCost.objects.get_or_create(self.hotel)
         response = self.client.get(reverse('acct_cost_update', kwargs={'pk':acct_cost.pk}))
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['form'])
         self.assertTrue(response.context['breadcrumbs'])
 
+    def test_acct_cost_update_post(self):
+        data = {
+            'balance_min': BALANCE_AMOUNTS[0][0],
+            'recharge_amt': CHARGE_AMOUNTS[0][0],
+            'auto_recharge': True
+        }
+        acct_cost, created = AcctCost.objects.get_or_create(self.hotel)
+        response = self.client.post(reverse('acct_cost_update', kwargs={'pk':acct_cost.pk}),
+            data, follow=True)
+        self.assertRedirects(response, reverse('payment:summary'))
+
+        # success message from ``FormUpdateMessageMixin``
+        m = list(response.context['messages'])
+        self.assertEqual(len(m), 1)
+        
 
 class APITests(TestCase):
 

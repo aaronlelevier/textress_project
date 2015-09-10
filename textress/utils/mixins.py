@@ -1,3 +1,8 @@
+from django.views.generic import View
+
+from braces.views import FormValidMessageMixin
+
+
 class DeleteButtonMixin(object):
     "Color and Text for a Delete Button to display to User."
 
@@ -27,3 +32,9 @@ class BreadcrumbBaseMixin(object):
             </a>
         </li>'''.format(clip_icon=self.clip_icon, url=self.url, url_name=self.url_name)
         return context
+
+
+class FormUpdateMessageMixin(FormValidMessageMixin, View):
+
+    def get_form_valid_message(self):
+        return "{0} Updated".format(self.headline)

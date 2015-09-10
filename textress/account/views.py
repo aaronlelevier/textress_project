@@ -13,7 +13,7 @@ from django.views.generic.edit import ModelFormMixin
 from rest_framework import generics
 
 from braces.views import (LoginRequiredMixin, GroupRequiredMixin, SetHeadlineMixin,
-    StaticContextMixin)
+    StaticContextMixin, FormValidMessageMixin)
 
 from account.forms import (AuthenticationForm, CloseAccountForm,
     CloseAcctConfirmForm, AcctCostForm, AcctCostUpdateForm)
@@ -23,6 +23,7 @@ from account.serializers import PricingSerializer
 from main.mixins import RegistrationContextMixin, AdminOnlyMixin, HotelUserMixin
 from payment.mixins import BillingSummaryContextMixin
 from utils import email, login_messages
+from utils.mixins import FormUpdateMessageMixin
 
 
 ### ACCOUNT ERROR / REDIRCT ROUTING VIEWS ###
@@ -142,14 +143,14 @@ class RegisterAcctCostUpdateView(RegisterAcctCostBaseView, UpdateView):
 # ACCT COST #
 #############
 
-class AcctCostUpdateView(AdminOnlyMixin, BillingSummaryContextMixin, SetHeadlineMixin, UpdateView):
+class AcctCostUpdateView(AdminOnlyMixin, BillingSummaryContextMixin,
+    SetHeadlineMixin, FormUpdateMessageMixin, UpdateView):
 
     headline = "Payment Refill Settings"
     template_name = "cpanel/form.html"
     model = AcctCost
     form_class = AcctCostUpdateForm
     success_url = reverse_lazy('payment:summary')
-
 
 #############
 # ACCT STMT #
