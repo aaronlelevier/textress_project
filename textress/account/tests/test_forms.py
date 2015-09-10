@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 
@@ -51,15 +51,18 @@ class AuthTests(TestCase):
 class PasswordChangeFormTests(TestCase):
 
     def setUp(self):
-        self.password = '1111'
+        self.password = PASSWORD
         self.new_password = '2222'
-        self.user = User.objects.create_user('Bobby',
-            settings.DEFAULT_FROM_EMAIL, self.password)
-
-    def test_post(self):
-        # login w/ orig password
+        self.hotel = create_hotel()
+        self.user = create_hotel_user(self.hotel)
+        # Login
         self.client.login(username=self.user.username, password=self.password)
 
+    def test_get(self):
+        response = self.client.post(reverse('password_change'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_post(self):
         # change password
         response = self.client.post(reverse('password_change'),
             {'old_password': self.password,
@@ -77,7 +80,7 @@ class PasswordChangeFormTests(TestCase):
         assert response.context['user'].username == self.user.username
 
 
-class AcctCostUpdateTests(TestCase):
+class AcctCostUpdateTests(TransactionTestCase):
 
     def setUp(self):
         self.password = PASSWORD

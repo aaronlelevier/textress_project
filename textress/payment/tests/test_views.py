@@ -197,6 +197,9 @@ class CardUpdateTests(TestCase):
         self.assertRedirects(response, reverse('payment:card_list'))
         card = Card.objects.get(id=self.card.id)
         self.assertTrue(card.default)
+        # Success Message
+        m = list(response.context['messages'])
+        self.assertEqual(len(m), 1)
 
     def test_delete_card_view(self):
         response = self.client.get(reverse('payment:delete_card',
@@ -204,6 +207,9 @@ class CardUpdateTests(TestCase):
         self.assertRedirects(response, reverse('payment:card_list'))
         with self.assertRaises(Card.DoesNotExist):
             Card.objects.get(id=self.card.id)
+        # Success Message
+        m = list(response.context['messages'])
+        self.assertEqual(len(m), 1)
 
 
 

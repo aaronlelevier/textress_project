@@ -185,12 +185,17 @@ sent to {}. Thank you.".format(self.request.user.email)
 @login_required(login_url=reverse_lazy('login'))
 def set_default_card_view(request, pk):
     card = Card.objects.update_default(request.user.profile.hotel.customer, pk)
+    messages.success(request, '{0} ending in: {1} set as primary'.format(
+        card.brand, card.last4))
     return HttpResponseRedirect(reverse('payment:card_list'))
 
 
 @login_required(login_url=reverse_lazy('login'))
 def delete_card_view(request, pk):
+    card = Card.objects.get(pk=pk)
     Card.objects.delete_card(request.user.profile.hotel.customer, pk)
+    messages.success(request, '{0} ending in: {1} deleted'.format(
+        card.brand, card.last4))
     return HttpResponseRedirect(reverse('payment:card_list'))
 
 

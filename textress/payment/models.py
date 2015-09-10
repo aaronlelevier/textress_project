@@ -150,10 +150,12 @@ customer: {}".format(customer))
         `id_` is the "default card id"
         '''
         self._validate_card(customer, id_)
-        self._set_default(customer, id_)
+        # The defalt ``Card``
+        card = self._set_default(customer, id_)
         self._update_non_defaults(customer, id_)
         self._update_stripe_default(customer, id_)
-
+        return card
+        
     def stripe_create(self, customer, token=None):
         '''Only Create Card DB instance. The Stripe Card Obj is already
         created.
@@ -196,6 +198,9 @@ class Card(PmtAbstractBase):
     expires = models.CharField(_("Expires"), max_length=10, blank=True)
 
     objects = CardManager()
+
+    class Meta:
+        ordering = ('-default',)
 
     @property
     def stripe_object(self):

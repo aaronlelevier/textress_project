@@ -14,10 +14,8 @@ class CardListForm(StripeForm):
     add_card = forms.BooleanField(label='Add a Card',
         initial=False, required=False)
 
-    # def clean(self):
-    #     cd = super(CardListForm, self).clean()
-    #     return cd
 
+### TODO: May use the below "1x Pmt Form in the future?"
 
 # class StripeOneTimePaymentForm(CardListForm):
 #     '''
