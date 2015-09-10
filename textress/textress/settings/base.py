@@ -205,9 +205,8 @@ REST_FRAMEWORK = {
 # }
 
 # CELERY
-# BROKER_URL = 'redis://127.0.0.1:6379/0'
-# BROKER_TRANSPORT = 'redis'
-# CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+# BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+# CELERY_RESULT_BACKEND = 
 
 
 ### TWILIO
