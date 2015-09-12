@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
 
 from account.models import (
@@ -9,7 +9,7 @@ from account.tests import factory
 from main.tests.factory import create_hotel
 
 
-class FactoryTests(TestCase):
+class FactoryTests(TransactionTestCase):
 
     def setUp(self):
         self.hotel = create_hotel()
@@ -56,8 +56,4 @@ class FactoryTests(TestCase):
     def test_create_acct_trans(self):
         self.assertEqual(AcctTrans.objects.count(), 0)
         acct_trans = factory.create_acct_trans(self.hotel)
-        self.assertTrue(AcctTrans.objects.count() > 10) # roughly 30 test fixtures made for a month
-
-
-
-
+        self.assertTrue(AcctTrans.objects.count() > 10)
