@@ -1,7 +1,4 @@
-from datetime import date, timedelta
-
-from django.core.management.base import BaseCommand, CommandError
-from django.utils import timezone
+from django.core.management.base import BaseCommand
 
 from account.models import AcctStmt
 from main.models import Hotel
