@@ -334,7 +334,7 @@ class AcctTransQuerySet(models.query.QuerySet):
         return self.filter(hotel=hotel, insert_date__lt=first_of_month)
 
     def balance(self):
-        return self.aggregate(Sum('amount'))['amount__sum']
+        return self.aggregate(Sum('amount'))['amount__sum'] or 0
 
 
 class AcctTransManager(Dates, models.Manager):
@@ -442,8 +442,7 @@ class AcctTransManager(Dates, models.Manager):
         # get all hotel messages for the month based on "sent"
         sms_used = hotel.messages.monthly_all(insert_date).count()
         # vs. what has been accounted for
-        sms_used_prev = (self.monthly_trans(hotel=hotel)
-                             .aggregate(Max('sms_used'))['sms_used__max'])
+        sms_used_prev = self.sms_used_prev(hotel)
         
         values = {
             'sms_used': sms_used,
@@ -461,6 +460,17 @@ class AcctTransManager(Dates, models.Manager):
                 acct_tran = self.create(hotel=hotel, trans_type=trans_type, insert_date=insert_date,
                     **values)
                 return acct_tran, True
+
+    def sms_used_prev(self, hotel):
+        """
+        MTD SMS used by the Hotel.
+
+        If the Hotel hasn't sent any SMS, this will return "None", so 
+        always return "0" instead.
+        """
+        sms_used_prev = (self.monthly_trans(hotel=hotel)
+                             .aggregate(Max('sms_used'))['sms_used__max'])
+        return sms_used_prev or 0
 
     def get_or_create(self, hotel, trans_type, *args, **kwargs):
         """

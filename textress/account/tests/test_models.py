@@ -13,7 +13,7 @@ from account.models import (Dates, Pricing, TransType, AcctCost, AcctStmt, AcctT
     CHARGE_AMOUNTS, BALANCE_AMOUNTS)
 from account.tests.factory import create_acct_stmts, create_acct_trans
 from concierge.tests.factory import make_guests, make_messages
-from main.tests.factory import create_hotel
+from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
 from utils import create
 
 
@@ -123,25 +123,12 @@ class AcctStmtTests(TestCase):
     fixtures = ['trans_type.json']
 
     def setUp(self):
-        self.password = '1234'
+        self.password = PASSWORD
         self.today = timezone.now().date()
-
-        # Hotel
-        self.hotel = create_hotel()
-
-        # create "Hotel Manager" Group
         create._get_groups_and_perms()
-
-        # Admin
-        self.admin = mommy.make(User, username='admin')
-        self.admin.groups.add(Group.objects.get(name="hotel_admin"))
-        self.admin.set_password(self.password)
-        self.admin.save()
-        self.admin.profile.update_hotel(hotel=self.hotel)
-        # Hotel Admin ID
-        self.hotel.admin_id = self.admin.id
-        self.hotel.save()
-
+        self.hotel = create_hotel()
+        self.admin = create_hotel_user(self.hotel, 'admin')
+        
         # Guests (makes 10)
         self.guest = make_guests(hotel=self.hotel, number=1)[0] #b/c returns a list
 
@@ -209,15 +196,25 @@ class AcctStmtTests(TestCase):
         assert new_total_sms
         assert new_total_sms > total_sms
 
-    '''
-    TODO
-    ----
-    test: _balance
-          save() - test of actual method, not monkey-patch
 
-    '''
+class AcctStmtNewHotelTests(TestCase):
+    # Test Hotels that have only signed up, and don't have 
+    # any SMS sent yet
 
-        
+    # Contains all TransTypes
+    fixtures = ['trans_type.json']
+
+    def setUp(self):
+        self.password = PASSWORD
+        self.today = timezone.now().date()
+        create._get_groups_and_perms()
+        self.hotel = create_hotel()
+        self.admin = create_hotel_user(self.hotel, 'admin')
+
+    def test_sms_used_prev(self):
+        self.assertEqual(AcctTrans.objects.sms_used_prev(self.hotel), 0)
+
+
 class AcctTransTests(TestCase):
 
     # Contains all TransTypes
