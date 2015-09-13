@@ -1,4 +1,5 @@
 import datetime
+import pytz
 
 from django.db.models import Max, Sum
 from django.test import TestCase
@@ -19,6 +20,9 @@ from utils import create
 
 class DateTests(TestCase):
 
+    def setUp(self):
+        self.tzinfo = pytz.timezone(settings.TIME_ZONE)
+
     def test_all_dates(self):
         dates = Dates()
         now = timezone.now()
@@ -27,6 +31,23 @@ class DateTests(TestCase):
         assert dates._today == now.date()
         assert dates._year == now.year
         assert dates._month == now.month
+
+    def test_first_of_month(self):
+        dates = Dates()
+        first_of_month = dates.first_of_month(month=1, year=1)
+        self.assertEqual(
+            first_of_month,
+            datetime.datetime(day=1, month=1, year=1, tzinfo=self.tzinfo)
+        )
+
+    def test_first_of_month_defaul(self):
+        dates = Dates()
+        first_of_month = dates.first_of_month()
+        self.assertEqual(
+            first_of_month,
+            datetime.datetime(day=1, month=dates._today.month,
+                year=dates._today.year, tzinfo=self.tzinfo)
+        )
 
 
 class AbstractBaseTests(TestCase):
@@ -39,7 +60,6 @@ class AbstractBaseTests(TestCase):
 
 
 class PricingTests(TestCase):
-
     # NOTE: Am skipping testing save() b/c these are static Pricing Tiers
     #   that are created once and hardly ever changed.
 
@@ -80,9 +100,9 @@ class TransTypeTests(TestCase):
         sms_used = TransType.objects.get(name='sms_used')
         bulk_discount = TransType.objects.get(name='bulk_discount')
 
-        assert isinstance(init_amt, TransType)
-        assert str(init_amt) == init_amt.name
-        assert len(TransType.objects.all()) == 4
+        self.assertIsInstance(init_amt, TransType)
+        self.assertEqual(str(init_amt), init_amt.name)
+        self.assertEqual(len(TransType.objects.all()), 4)
 
 
 class AcctCostTests(TestCase):
@@ -91,7 +111,7 @@ class AcctCostTests(TestCase):
     '''
 
     def setUp(self):
-        self.password = '1234'
+        self.password = PASSWORD
         self.hotel = create_hotel()
 
     def test_create(self):
@@ -110,7 +130,7 @@ class AcctCostTests(TestCase):
             balance_min=BALANCE_AMOUNTS[2][0],
             recharge_amt=CHARGE_AMOUNTS[2][0]
             )
-        assert not created
+        self.assertFalse(created)
         assert acct_cost == new_acct_cost
         assert len(AcctCost.objects.all()) == 1
         assert new_acct_cost.balance_min == BALANCE_AMOUNTS[2][0]
@@ -119,8 +139,7 @@ class AcctCostTests(TestCase):
 
 class AcctStmtTests(TestCase):
 
-    # Contains all TransTypes
-    fixtures = ['trans_type.json']
+    fixtures = ['pricing.json', 'trans_type.json']
 
     def setUp(self):
         self.password = PASSWORD
@@ -157,22 +176,33 @@ class AcctStmtTests(TestCase):
 
     ### MANAGER TESTS ###
 
-    def test_get_or_create(self):
+    def test_get_or_create_current_month(self):
         # Should already exist
         acct_stmt, created = AcctStmt.objects.get_or_create(
             hotel=self.hotel,
             month=self.today.month,
             year=self.today.year
             )
-        assert acct_stmt
+        self.assertIsInstance(acct_stmt, AcctStmt)
+        self.assertTrue(created)
 
         acct_stmt, created = AcctStmt.objects.get_or_create(
             hotel=self.hotel,
             month=self.today.month,
             year=self.today.year
             )
-        assert acct_stmt
-        assert not created
+        self.assertIsInstance(acct_stmt, AcctStmt)
+        self.assertFalse(created)
+
+    # def test_get_or_create_previous_month(self):
+        
+    #     acct_stmt, created = AcctStmt.objects.get_or_create(
+    #         hotel=self.hotel,
+    #         month=self.today.month,
+    #         year=self.today.year
+    #         )
+    #     self.assertIsInstance(acct_stmt, AcctStmt)
+    #     self.assertTrue(created)
 
     def test_acct_trans_balance(self):
         acct_stmt, created = AcctStmt.objects.get_or_create(
@@ -342,6 +372,8 @@ class AcctTransTests(TestCase):
         self.assertIsNone(recharge_amt)
 
         # Create a fake charge to cause a call to ``.recharge()``
+        AcctTrans.objects.phone_number_charge(hotel=self.hotel, desc=settings.DEFAULT_TO_PH)
+        AcctTrans.objects.phone_number_charge(hotel=self.hotel, desc=settings.DEFAULT_TO_PH)
         AcctTrans.objects.phone_number_charge(hotel=self.hotel, desc=settings.DEFAULT_TO_PH)
         AcctTrans.objects.phone_number_charge(hotel=self.hotel, desc=settings.DEFAULT_TO_PH)
 

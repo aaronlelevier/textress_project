@@ -1,5 +1,6 @@
 import calendar
 import datetime
+import pytz
 
 from django.db import models
 from django.db.models import Max, Sum
@@ -35,6 +36,18 @@ class Dates(object):
     @property
     def _month(self):
         return self._now.month
+
+    def first_of_month(self, month=None, year=None):    
+        """
+        Return a timezone aware ``first_of_month`` datetime object. If no 
+        ``month`` or ``year`` are given, return for the current month.
+        """
+        if not all([month, year]):
+            month = self._today.month
+            year = self._today.year
+
+        tzinfo = pytz.timezone(settings.TIME_ZONE)
+        return datetime.datetime(day=1, year=year, month=month, tzinfo=tzinfo)
 
 
 class AbstractBase(Dates, models.Model):
@@ -227,7 +240,7 @@ class AcctCost(AbstractBase):
 # ACCT STMT #
 #############
 
-class AcctStmtManager(models.Manager):
+class AcctStmtManager(Dates, models.Manager):
 
     def acct_trans_balance(self, hotel, date):
         """
@@ -249,20 +262,31 @@ class AcctStmtManager(models.Manager):
 
         return balance
     
-    def get_or_create(self, hotel, month=timezone.now().month, year=timezone.now().year):
+    def get_or_create(self, hotel, month=None, year=None):
         """
         1 Stmt p/Hotel, p/Month, but updated daily upon User request.
 
-        Will get, create, or update - current month record.
+        Will get, create, or update: single Month's AcctStmt.
 
         Return: AcctStmt, created
         """
-        date = datetime.date(year, month, 1)
+        # default to current month if dates aren't supplied
+        
+        # if not all([month, year]):
+        #     today = timezone.now().date()
+        #     month = today.month
+        #     year = today.year
+
+        # tzinfo = pytz.timezone(settings.TIME_ZONE)
+        # date = datetime.datetime(day=1, year=year, month=month, tzinfo=tzinfo)
+
+        date = self.first_of_month(month, year)
+
         total_sms = hotel.messages.monthly_all(date=date).count()
 
         values = {
             'total_sms': total_sms,
-            'monthly_costs': 3, #Pricing.objects.get_cost(units=total_sms),
+            'monthly_costs': Pricing.objects.get_cost(units=total_sms),
             'balance': self.acct_trans_balance(hotel, date)
         }
         try:
@@ -377,10 +401,16 @@ class AcctTransManager(Dates, models.Manager):
         :desc: twilio ``phone_number`` as a string
         """
         self.check_balance(hotel)
-        trans_type, _ = TransType.objects.get_or_create(name='phone_number',
-            desc='phone_number')
-        acct_tran = self.create(hotel=hotel, trans_type=trans_type,
-            amount= -settings.PHONE_NUMBER_MONTHLY_COST, desc=desc)
+        trans_type, _ = TransType.objects.get_or_create(
+            name='phone_number',
+            desc='phone_number'
+        )
+        acct_tran = self.create(
+            hotel=hotel,
+            trans_type=trans_type,
+            amount = -settings.PHONE_NUMBER_MONTHLY_COST,
+            desc=desc
+        )
         return acct_tran
 
     def recharge(self, hotel, balance):

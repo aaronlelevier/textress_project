@@ -27,6 +27,12 @@ def last_month_end_dt():
 
 
 class Command(BaseCommand):
+    """
+
+    :note:
+        if prices in ``Pricing`` model are not loaded, 
+        this command will cause an infinite loop.
+    """
     help = "Update all Hotels' monthly Account Statements"
 
     def handle(self, *args, **options):
@@ -34,10 +40,15 @@ class Command(BaseCommand):
         last_month = last_month_end_dt()
 
         for hotel in Hotel.objects.all():
+            update_prev_month = False
+
             if hotel.created < this_month:
                 try:
-                    acct_stmt = AcctStmt.objects.get(hotel, month=last_month.month,
-                        year=last_month.year)
+                    acct_stmt = AcctStmt.objects.get(
+                        hotel=hotel,
+                        month=last_month.month,
+                        year=last_month.year
+                    )
                 except AcctStmt.DoesNotExist:
                     update_prev_month = True
                 else:
@@ -45,7 +56,11 @@ class Command(BaseCommand):
                         update_prev_month = True
 
                 if update_prev_month:
-                    acct_stmt, created = AcctStmt.objects.get_or_create(hotel=hotel)
+                    acct_stmt, created = AcctStmt.objects.get_or_create(
+                        hotel=hotel,
+                        month=last_month.month,
+                        year=last_month.year
+                    )
 
                     self.stdout.write("Hotel: {}; Account Statement: {} "
                         "successfully updated.".format(hotel, acct_stmt))

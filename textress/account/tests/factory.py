@@ -90,7 +90,7 @@ def create_acct_trans(hotel):
 
     '''
     # datetime
-    td = datetime.timedelta(days=-30)
+    td = datetime.timedelta(days=-1)
     next_day = datetime.timedelta(days=1)
     today = datetime.date.today()
     last_month = today + td

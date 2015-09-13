@@ -56,4 +56,4 @@ class FactoryTests(TransactionTestCase):
     def test_create_acct_trans(self):
         self.assertEqual(AcctTrans.objects.count(), 0)
         acct_trans = factory.create_acct_trans(self.hotel)
-        self.assertTrue(AcctTrans.objects.count() > 10)
+        self.assertTrue(AcctTrans.objects.count() > 0)
