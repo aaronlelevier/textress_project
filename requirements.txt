@@ -9,10 +9,11 @@ coverage==3.7.1
 cssselect==0.9.1
 decorator==4.0.2
 Django==1.8.4
-django-angular==0.7.15
+django-angular==0.7.14
 django-braces==1.8.1
 django-coverage==1.2.4
-django-extensions==1.5.5
+django-crispy-forms==1.5.1
+django-extensions==1.5.6
 django-filter==0.10.0
 django-nose==1.4.1
 django-redis-sessions==0.5.0
@@ -22,7 +23,10 @@ djangorestframework-jwt==1.6.0
 djrill==1.4.0
 docopt==0.6.2
 funcsigs==0.4
-functools32==3.2.3.post2
+
+#functools32==3.2.3.post2 # previous
+functools32
+
 gevent==1.0.2
 gnureadline==6.3.3
 greenlet==0.4.7
@@ -55,6 +59,7 @@ PyYAML==3.11
 pyzmq==14.7.0
 redis==2.10.3
 requests==2.7.0
+selenium==2.47.1
 simplegeneric==0.8.1
 six==1.9.0
 stripe==1.24.1
