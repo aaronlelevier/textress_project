@@ -8,14 +8,14 @@ I should be handling, or redirect?
 - Do I want to have a 'deleted' BaseModel flag? So Models are never 
 competely deleted from the DB?
 
-- Change to ".virtualenvs" standard convention of a location
-
-    - change 'django18_py2' to 'textress' for my virtualenv?
-
 - All Hotel's must have a valid ``AcctCost`` or else things like 
 ``./manage.py acct_stmt_update`` will fail
 
+- ``AcctPmtHistoryView`` - change paginator by Month
 
+    - add Month name to "Headline-small"
+
+    
 2015-08-21
 ----------
 :todo:

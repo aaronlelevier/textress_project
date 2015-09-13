@@ -270,33 +270,26 @@ class AcctStmtManager(Dates, models.Manager):
 
         Return: AcctStmt, created
         """
-        # default to current month if dates aren't supplied
-        
-        # if not all([month, year]):
-        #     today = timezone.now().date()
-        #     month = today.month
-        #     year = today.year
-
-        # tzinfo = pytz.timezone(settings.TIME_ZONE)
-        # date = datetime.datetime(day=1, year=year, month=month, tzinfo=tzinfo)
-
         date = self.first_of_month(month, year)
 
         total_sms = hotel.messages.monthly_all(date=date).count()
+        monthly_costs = (Pricing.objects.get_cost(units=total_sms) +
+            hotel.phonenumbers.count() * settings.PHONE_NUMBER_MONTHLY_COST)
+        balance = self.acct_trans_balance(hotel, date)
 
         values = {
             'total_sms': total_sms,
-            'monthly_costs': Pricing.objects.get_cost(units=total_sms),
-            'balance': self.acct_trans_balance(hotel, date)
+            'monthly_costs': monthly_costs,
+            'balance': balance
         }
         try:
-            acct_stmt = self.get(hotel=hotel, month=month, year=year)
+            acct_stmt = self.get(hotel=hotel, month=date.month, year=date.year)
             for k,v in values.items():
                 setattr(acct_stmt, k, v)
             acct_stmt.save()
             return acct_stmt, False
         except ObjectDoesNotExist:
-            acct_stmt = self.create(hotel=hotel, month=month, year=year,
+            acct_stmt = self.create(hotel=hotel, month=date.month, year=date.year,
                 **values)
             return acct_stmt, True
 

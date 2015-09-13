@@ -65,7 +65,7 @@
                                 <tr>
                                     <td><strong>Total</strong></td>
                                     <td></td>
-                                    <td><strong>{{ acct_stmt.balance|stripe_money }}</strong></td>
+                                    <td><strong>{{ total_montly_cost|stripe_money }}</strong></td>
                                 </tr>
                             </table>
                             <a href="{% url 'acct_stmt_detail' year month %}">

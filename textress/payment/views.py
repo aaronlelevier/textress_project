@@ -129,7 +129,8 @@ class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
                     'year': acct_stmt.year,
                     'month': acct_stmt.month,
                     'acct_stmt': acct_stmt,
-                    'sms_cost': acct_stmt.balance - context['phone_numbers_cost']
+                    'sms_cost': acct_stmt.monthly_costs - context['phone_numbers_cost'],
+                    'total_montly_cost': acct_stmt.monthly_costs
                 })
         else:
             context['acct_stmt'] = None

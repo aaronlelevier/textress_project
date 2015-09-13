@@ -2,6 +2,14 @@
 {% load staticfiles stripe_tags %}
 
 
+{% block breadcrumbs %}
+    {{ block.super }}
+    {% if breadcrumbs %}
+        {{ breadcrumbs|safe }}
+    {% endif %}
+{% endblock breadcrumbs %}
+
+
 {% block content %}
 
     <div class="row" style="margin-bottom:10px;">
