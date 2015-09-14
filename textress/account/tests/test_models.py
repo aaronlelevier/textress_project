@@ -18,19 +18,23 @@ from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
 from utils import create
 
 
-class DateTests(TestCase):
+class DatesTests(TestCase):
 
     def setUp(self):
         self.tzinfo = pytz.timezone(settings.TIME_ZONE)
+
+    def test_tzinfo(self):
+        dates = Dates()
+        self.assertTrue(hasattr(dates, 'tzinfo'))
 
     def test_all_dates(self):
         dates = Dates()
         now = timezone.now()
 
-        assert dates._now
-        assert dates._today == now.date()
-        assert dates._year == now.year
-        assert dates._month == now.month
+        self.assertTrue(dates._now)
+        self.assertEqual(dates._today, now.date())
+        self.assertEqual(dates._year, now.year)
+        self.assertEqual(dates._month, now.month)
 
     def test_first_of_month(self):
         dates = Dates()

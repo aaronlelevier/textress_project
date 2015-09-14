@@ -21,6 +21,8 @@ from main.models import Hotel
 
 class Dates(object):
 
+    tzinfo = pytz.timezone(settings.TIME_ZONE)
+
     @property
     def _now(self):
         return timezone.now()
@@ -46,8 +48,7 @@ class Dates(object):
             month = self._today.month
             year = self._today.year
 
-        tzinfo = pytz.timezone(settings.TIME_ZONE)
-        return datetime.datetime(day=1, year=year, month=month, tzinfo=tzinfo)
+        return datetime.datetime(day=1, year=year, month=month, tzinfo=self.tzinfo)
 
 
 class AbstractBase(Dates, models.Model):
