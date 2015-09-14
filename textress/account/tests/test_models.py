@@ -119,6 +119,10 @@ class AcctCostTests(TestCase):
         self.password = PASSWORD
         self.hotel = create_hotel()
 
+        # "other_hotel" has no affect on this one
+        self.hotel_2 = create_hotel()
+        AcctCost.objects.get_or_create(hotel=self.hotel_2)
+
     def test_create(self):
         # Dave starts with the "Default Amounts" when creating his ``AcctCost``
         acct_cost, created = AcctCost.objects.get_or_create(hotel=self.hotel)
@@ -128,7 +132,6 @@ class AcctCostTests(TestCase):
         self.assertEqual(acct_cost.balance_min, BALANCE_AMOUNTS[0][0])
         self.assertEqual(acct_cost.recharge_amt, CHARGE_AMOUNTS[0][0])
 
-
         # create new actually modifies original b/c p/ Hotel, singleton obj
         new_acct_cost, created = AcctCost.objects.get_or_create(
             hotel=self.hotel,
@@ -136,10 +139,19 @@ class AcctCostTests(TestCase):
             recharge_amt=CHARGE_AMOUNTS[2][0]
             )
         self.assertFalse(created)
-        assert acct_cost == new_acct_cost
-        assert len(AcctCost.objects.all()) == 1
-        assert new_acct_cost.balance_min == BALANCE_AMOUNTS[2][0]
-        assert new_acct_cost.recharge_amt == CHARGE_AMOUNTS[2][0]
+        self.assertEqual(acct_cost, new_acct_cost)
+        self.assertEqual(AcctCost.objects.filter(hotel=self.hotel).count(), 1)
+        self.assertEqual(new_acct_cost.balance_min, BALANCE_AMOUNTS[2][0])
+        self.assertEqual(new_acct_cost.recharge_amt, CHARGE_AMOUNTS[2][0])
+
+        # If a ``get_or_create`` is called w/ no kwargs, it returns the current
+        # ``acct_cost`` as is
+        acct_cost, created = AcctCost.objects.get_or_create(hotel=self.hotel)
+        self.assertFalse(created)
+        self.assertEqual(acct_cost, new_acct_cost)
+        self.assertEqual(AcctCost.objects.filter(hotel=self.hotel).count(), 1)
+        self.assertEqual(acct_cost.balance_min, BALANCE_AMOUNTS[2][0])
+        self.assertEqual(acct_cost.recharge_amt, CHARGE_AMOUNTS[2][0])
 
 
 class AcctStmtTests(TestCase):

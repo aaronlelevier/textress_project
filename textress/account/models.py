@@ -396,11 +396,13 @@ class AcctTransManager(Dates, models.Manager):
         """
         self.check_balance(hotel)
         trans_type, _ = TransType.objects.get_or_create(name='phone_number')
+        cost = settings.PHONE_NUMBER_MONTHLY_COST
+        
         acct_tran = self.create(
             hotel=hotel,
             trans_type=trans_type,
-            amount = -settings.PHONE_NUMBER_MONTHLY_COST,
-            desc="Initial phone number charge."
+            amount = -cost,
+            desc="Phone number charge of: {}".format(cost)
         )
         return acct_tran
 
