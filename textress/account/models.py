@@ -265,7 +265,7 @@ class AcctStmtManager(Dates, models.Manager):
     
     def get_or_create(self, hotel, month=None, year=None):
         """
-        1 Stmt p/Hotel, p/Month, but updated daily upon User request.
+        1 Stmt p/Hotel, p/Month, but updated daily until month end.
 
         Will get, create, or update: single Month's AcctStmt.
 
@@ -397,7 +397,7 @@ class AcctTransManager(Dates, models.Manager):
         self.check_balance(hotel)
         trans_type, _ = TransType.objects.get_or_create(name='phone_number')
         cost = settings.PHONE_NUMBER_MONTHLY_COST
-        
+
         acct_tran = self.create(
             hotel=hotel,
             trans_type=trans_type,
