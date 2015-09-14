@@ -395,15 +395,12 @@ class AcctTransManager(Dates, models.Manager):
         :desc: twilio ``phone_number`` as a string
         """
         self.check_balance(hotel)
-        trans_type, _ = TransType.objects.get_or_create(
-            name='phone_number',
-            desc='phone_number'
-        )
+        trans_type, _ = TransType.objects.get_or_create(name='phone_number')
         acct_tran = self.create(
             hotel=hotel,
             trans_type=trans_type,
             amount = -settings.PHONE_NUMBER_MONTHLY_COST,
-            desc=desc
+            desc="Initial phone number charge."
         )
         return acct_tran
 
