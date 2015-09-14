@@ -1,3 +1,4 @@
+import calendar
 import datetime
 import pytz
 
@@ -167,7 +168,6 @@ class AcctStmtTests(TestCase):
         
         # Guests (makes 10)
         self.guest = make_guests(hotel=self.hotel, number=1)[0] #b/c returns a list
-
         # Messages (makes 10)
         self.messages = make_messages(
             hotel=self.hotel,
@@ -179,19 +179,32 @@ class AcctStmtTests(TestCase):
         self.acct_stmts = create_acct_stmts(hotel=self.hotel)
         # Single AcctStmt
         self.acct_stmt = self.acct_stmts[0]
-
         # Supporting Models
         self.acct_cost = AcctCost.objects.get_or_create(hotel=self.hotel)
         self.acct_trans = create_acct_trans(hotel=self.hotel)
 
-    def test_get_absolute_url(self):
-        assert (self.acct_stmt.get_absolute_url() ==
-                reverse('acct_stmt_detail',
-                    kwargs={'year':self.acct_stmt.year, 'month':self.acct_stmt.month}
-                    )
-                )
+    ### MODEL TESTS
 
-    ### MANAGER TESTS ###
+    def test_get_absolute_url(self):
+        self.assertEqual(
+            self.acct_stmt.get_absolute_url(),
+            reverse('acct_stmt_detail', kwargs={'year':self.acct_stmt.year,
+                'month':self.acct_stmt.month})
+        )
+
+    def test_str(self):
+        self.assertEqual(
+            str(self.acct_stmt),
+            "{} {}".format(calendar.month_name[self.acct_stmt.month], self.acct_stmt.year)
+        )
+
+    def test_month_abbr(self):
+        self.assertEqual(
+            self.acct_stmt.month_abbr,
+            "{} {}".format(calendar.month_abbr[self.acct_stmt.month], self.acct_stmt.year)
+        )
+
+    ### MANAGER TESTS
 
     def test_get_or_create_current_month(self):
         # Should already exist
@@ -211,44 +224,11 @@ class AcctStmtTests(TestCase):
         self.assertIsInstance(acct_stmt, AcctStmt)
         self.assertFalse(created)
 
-    # def test_get_or_create_previous_month(self):
-        
-    #     acct_stmt, created = AcctStmt.objects.get_or_create(
-    #         hotel=self.hotel,
-    #         month=self.today.month,
-    #         year=self.today.year
-    #         )
-    #     self.assertIsInstance(acct_stmt, AcctStmt)
-    #     self.assertTrue(created)
-
-    def test_acct_trans_balance(self):
-        acct_stmt, created = AcctStmt.objects.get_or_create(
-            hotel=self.hotel,
-            month=self.today.month,
-            year=self.today.year
-            )
-
-        total_sms = acct_stmt.total_sms
-        assert total_sms
-
-        # Send 1 message, and "total_sms" for AcctStmt will change,
-        # But, "balance" will not unless triggering a re-fill
-        make_messages(hotel=self.hotel, user=self.admin, guest=self.guest, number=1)
-        acct_stmt, created = AcctStmt.objects.get_or_create(
-            hotel=self.hotel,
-            month=self.today.month,
-            year=self.today.year
-            )
-        new_total_sms = acct_stmt.total_sms
-        assert new_total_sms
-        assert new_total_sms > total_sms
-
 
 class AcctStmtNewHotelTests(TestCase):
     # Test Hotels that have only signed up, and don't have 
     # any SMS sent yet
 
-    # Contains all TransTypes
     fixtures = ['trans_type.json']
 
     def setUp(self):
@@ -257,39 +237,30 @@ class AcctStmtNewHotelTests(TestCase):
         create._get_groups_and_perms()
         self.hotel = create_hotel()
         self.admin = create_hotel_user(self.hotel, 'admin')
+        # Supporting Models
+        self.acct_cost = AcctCost.objects.get_or_create(hotel=self.hotel)
 
     def test_sms_used_prev(self):
+        acct_stmt, created = AcctStmt.objects.get_or_create(hotel=self.hotel)
+        self.assertIsInstance(acct_stmt,AcctStmt)
         self.assertEqual(AcctTrans.objects.sms_used_prev(self.hotel), 0)
 
 
 class AcctTransTests(TestCase):
 
-    # Contains all TransTypes
-    fixtures = ['trans_type.json']
+    fixtures = ['pricing.json', 'trans_type.json']
 
     def setUp(self):
-        self.password = '1234'
+        self.password = PASSWORD
         self.today = timezone.now().date()
 
-        # Hotel
-        self.hotel = create_hotel()
-
-        # create "Hotel Manager" Group
+        # Hotel / Admin User
         create._get_groups_and_perms()
-
-        # Admin
-        self.admin = mommy.make(User, username='admin')
-        self.admin.groups.add(Group.objects.get(name="hotel_admin"))
-        self.admin.set_password(self.password)
-        self.admin.save()
-        self.admin.profile.update_hotel(hotel=self.hotel)
-        # Hotel Admin ID
-        self.hotel.admin_id = self.admin.id
-        self.hotel.save()
+        self.hotel = create_hotel()
+        self.admin = create_hotel_user(hotel=self.hotel, group='hotel_admin')
 
         # Guest
         self.guest = make_guests(hotel=self.hotel, number=1)[0] #b/c returns a list
-
         # Messages
         self.messages = make_messages(
             hotel=self.hotel,
@@ -302,6 +273,7 @@ class AcctTransTests(TestCase):
         self.recharge_amt = TransType.objects.get(name='recharge_amt')
         self.sms_used = TransType.objects.get(name='sms_used')
         self.bulk_discount = TransType.objects.get(name='bulk_discount')
+        self.phone_number = TransType.objects.get(name='phone_number')
 
         # AcctStmt
         self.acct_stmts = create_acct_stmts(hotel=self.hotel)
