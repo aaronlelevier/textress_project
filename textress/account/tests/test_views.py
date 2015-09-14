@@ -18,6 +18,8 @@ from utils import create
 
 class AcctStmtViewTests(TestCase):
 
+    fixtures = ['pricing.json']
+
     def setUp(self):
         self.hotel = create_hotel()
         create._get_groups_and_perms()
@@ -31,6 +33,12 @@ class AcctStmtViewTests(TestCase):
         self.acct_trans = create_acct_trans(hotel=self.hotel)
         # Login
         self.client.login(username=self.admin.username, password=PASSWORD)
+
+        # Create other Hotel to show that the 1st main Hotel is not affected
+        # and all views / queries return the expected results
+        self.hotel_2 = create_hotel()
+        self.acct_stmt = create_acct_stmt(hotel=self.hotel_2, year=self.year, month=self.month)
+        self.acct_trans = create_acct_trans(hotel=self.hotel_2)
 
     def tearDown(self):
         self.client.logout()

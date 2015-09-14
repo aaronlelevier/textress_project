@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.utils.translation import ugettext_lazy as _
 from django.http import Http404, HttpResponseRedirect
+from django.conf import settings
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required
@@ -186,14 +187,13 @@ class AcctStmtDetailView(AdminOnlyMixin, SetHeadlineMixin, BillingSummaryContext
         # Use All Time Hotel Transactions to get the Balance
         all_trans = AcctTrans.objects.filter(hotel=self.hotel)
         # Table Context
-        context['init_balance'] = all_trans.previous_monthly_trans(
-            hotel=self.hotel, month=kwargs['month'], year=kwargs['year']
-            ).balance()
         context['monthly_trans'] = all_trans.monthly_trans(
             hotel=self.hotel, month=kwargs['month'], year=kwargs['year']
             ).order_by('-created')
+        context['init_balance'] = context['monthly_trans'].balance()
         # Normal Context
-        context['acct_stmt'] = AcctStmt.objects.get(month=kwargs['month'], year=kwargs['year'])
+        context['acct_stmt'] = (AcctStmt.objects.filter(hotel=self.hotel)
+                                                .get(month=kwargs['month'], year=kwargs['year']))
         context['acct_stmts'] = AcctStmt.objects.filter(hotel=self.hotel)
         context['balance'] = all_trans.balance()
         return context
@@ -206,7 +206,7 @@ class AcctPmtHistoryView(AdminOnlyMixin, SetHeadlineMixin, BillingSummaryContext
     headline = "Account Payments"
     model = AcctTrans
     template_name = "account/acct_pmt_history.html"
-    paginate_by = 2
+    paginate_by = 2 if settings.DEBUG else 10
 
     def get_queryset(self):
         queryset = AcctTrans.objects.filter(hotel=self.hotel,

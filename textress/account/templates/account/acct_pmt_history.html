@@ -1,7 +1,6 @@
 {% extends "cpanel/base-sidebar.html" %}
 {% load staticfiles stripe_tags %}
 
-
 {% block breadcrumbs %}
     {{ block.super }}
     {% if breadcrumbs %}
@@ -9,41 +8,7 @@
     {% endif %}
 {% endblock breadcrumbs %}
 
-
 {% block content %}
-
-    <div class="row" style="margin-bottom:10px;">
-        <div class="col-md-12">
-
-        {% if is_paginated %}
-            <div>
-                <ul class="pagination">
-                    <li>
-                        {% if page_obj.has_previous %}
-                            <a href="{% url 'acct_pmt_history' %}?page={{ page_obj.previous_page_number }}">Previous</a>
-                        {% else %}
-                            <a href="" onclick="return false;" style="color:grey;">Previous</a>
-                        {% endif %}
-                    </li>
-                    <li>
-                        {% for page in paginator.page_range %}
-                            <a href="{% url 'acct_pmt_history' %}?page={{ page }}">{{ page }}</a>
-                        {% endfor %}
-                    </li>
-                    <li>
-                        {% if page_obj.has_next %}
-                            <a href="{% url 'acct_pmt_history' %}?page={{ page_obj.next_page_number }}">Next</a>
-                        {% else %}
-                            <a href="" onclick="return false;" style="color:grey;">Next</a>
-                        {% endif %}
-                    </li>
-                </ul>
-            </div>
-        {% endif %}
-
-        </div>
-    </div>
-
     <div class="row">
         <div class="col-md-12">
             {% if object_list %}
@@ -66,32 +31,33 @@
             {% endif %}
         </div>
     </div>
-<!-- 
-<h4>Montly transaction details</h4>
-
-    <h5>Initial Balance</h5>
-    <p>{{ init_balance|stripe_money }}</p>
-
-    <h5>Credit</h5>
-    <ul>
-    {% for trans in monthly_trans.credit %}
-        <li>{{ trans }}</li>
-    {% empty %}
-        <li>No Credit Transactions</li>
-    {% endfor %}
-    </ul>
-    <p>Credit Total: {{ monthly_trans.credit.balance|stripe_money }}</p>
-
-    <h5>Debit</h5>
-    <ul>
-    {% for trans in monthly_trans.debit %}
-        <li>{{ trans }}</li>
-    {% empty %}
-        <li>No Debit Transactions</li>
-    {% endfor %}
-    </ul>
-    <p>Debit Total: {{ monthly_trans.debit.balance|stripe_money }}</p>
-
-    <h5>Balance: {{ balance|stripe_money }}</h5> -->
-
+    {% if is_paginated %}
+        <div class="row" style="margin-bottom:10px;">
+            <div class="col-md-12 text-center">
+                <div>
+                    <ul class="pagination">
+                        <li>
+                            {% if page_obj.has_previous %}
+                                <a href="{% url 'acct_pmt_history' %}?page={{ page_obj.previous_page_number }}">Previous</a>
+                            {% else %}
+                                <a href="" onclick="return false;" style="color:grey;">Previous</a>
+                            {% endif %}
+                        </li>
+                        <li>
+                            {% for page in paginator.page_range %}
+                                <a href="{% url 'acct_pmt_history' %}?page={{ page }}">{{ page }}</a>
+                            {% endfor %}
+                        </li>
+                        <li>
+                            {% if page_obj.has_next %}
+                                <a href="{% url 'acct_pmt_history' %}?page={{ page_obj.next_page_number }}">Next</a>
+                            {% else %}
+                                <a href="" onclick="return false;" style="color:grey;">Next</a>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 {% endblock content %}
