@@ -15,6 +15,16 @@ competely deleted from the DB?
 
     - add Month name to "Headline-small"
 
+- ``Pricing.get_cost`` calculates based off of 'daily units' but really needs 
+to calculate for the: 'monthly units' each time, and calculate the difference 
+b/c using tiered pricing
+
+    - account.models L#473
+
+- ``AcctStmt.objects.acct_trans_balance`` needs to be moved to AcctTrans Manager
+
+    - needs tests
+
     
 2015-08-21
 ----------

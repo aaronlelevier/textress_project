@@ -465,7 +465,8 @@ class AcctTransManager(Dates, models.Manager):
         # get all hotel messages for the month based on "sent"
         sms_used = hotel.messages.monthly_all(insert_date).count()
         # vs. what has been accounted for
-        sms_used_prev = self.sms_used_prev(hotel)
+        sms_used_prev = self.sms_used_prev(hotel, month=insert_date.month,
+            year=insert_date.year)
         
         values = {
             'sms_used': sms_used,
@@ -484,14 +485,14 @@ class AcctTransManager(Dates, models.Manager):
                     **values)
                 return acct_tran, True
 
-    def sms_used_prev(self, hotel):
+    def sms_used_prev(self, hotel, month, year):
         """
         MTD SMS used by the Hotel.
 
         If the Hotel hasn't sent any SMS, this will return "None", so 
         always return "0" instead.
         """
-        sms_used_prev = (self.monthly_trans(hotel=hotel)
+        sms_used_prev = (self.monthly_trans(hotel=hotel, month=month, year=year)
                              .aggregate(Max('sms_used'))['sms_used__max'])
         return sms_used_prev or 0
 
