@@ -37,7 +37,7 @@ def make_messages(hotel, user, guest, insert_date=None, number=10):
     Message.save = models.Model.save
 
     if not insert_date:
-        insert_date = timezone.now().date()
+        insert_date = timezone.now().date() - datetime.timedelta(days=1)
 
     for i in range(number):
 

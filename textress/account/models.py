@@ -6,7 +6,7 @@ from django.db import models
 from django.db.models import Max, Sum
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import ugettext, ugettext_lazy as _
@@ -48,7 +48,7 @@ class Dates(object):
             month = self._today.month
             year = self._today.year
 
-        return datetime.datetime(day=1, year=year, month=month, tzinfo=self.tzinfo)
+        return datetime.datetime(day=1, year=year, month=month, tzinfo=self.tzinfo).date()
 
 
 class AbstractBase(Dates, models.Model):
@@ -253,7 +253,7 @@ class AcctStmtManager(Dates, models.Manager):
 
         Return: `balance`
         """
-        sms_used, created = AcctTrans.objects.sms_used(hotel, insert_date=date)
+        sms_used = AcctTrans.objects.sms_used_mtd(hotel, insert_date=date)
 
         balance = AcctTrans.objects.filter(hotel=hotel).balance()
 
@@ -454,47 +454,59 @@ class AcctTransManager(Dates, models.Manager):
                 # enought to process the transaction.
                 return False
 
-    def sms_used(self, hotel, trans_type=None, insert_date=None):
-        '''
-        get_or_create() the `sms_used` record p/Hotel p/Day.
+    ### SMS_USED
 
-        Return: acct_tran, created
+    def sms_used_validate_insert_date(self, insert_date):
+        if insert_date >= self._today:
+            raise ValidationError("Can only calculate `sms_used` for prior dates. You "
+                                  "submitted: {}".format(insert_date))
+
+    def sms_used_validate_single_date_record(self, hotel, insert_date):
+        trans_type = TransType.objects.get(name='sms_used')
+        if self.filter(hotel=hotel, insert_date=insert_date, trans_type=trans_type).exists():
+            raise ValidationError("Only 1 `sms_used` record per Hotel per Day.")
+
+    def sms_used(self, hotel, insert_date=None):
         '''
+        SMS used by a Hotel for a single day. Only call after the 
+        day has ended, so it will be the final SMS count, and only 
+        calculated once.
+        '''
+        # pre-validation
+        self.sms_used_validate_insert_date(insert_date)
+        self.sms_used_validate_single_date_record(hotel, insert_date)
+
+        # static `trans_type`
         trans_type = TransType.objects.get(name='sms_used')
         
-        # get all hotel messages for the month based on "sent"
-        sms_used = hotel.messages.monthly_all(insert_date).count()
-        # vs. what has been accounted for
-        sms_used_prev = self.sms_used_prev(hotel, month=insert_date.month,
-            year=insert_date.year)
+        # SMS on ``insert_date`` (concierge.Message)
+        sms_used = hotel.messages.filter(insert_date=insert_date).count()
+        # vs. SMS MTD (account.AcctTrans)
+        sms_used_mtd = self.sms_used_mtd(hotel, insert_date)
         
-        values = {
-            'sms_used': sms_used,
-            'amount': Pricing.objects.get_cost(units=sms_used, units_prev=sms_used_prev)
-        }
-        if not sms_used:
-            return None, None
-        else:
-            try:
-                acct_tran = self.get(hotel=hotel, trans_type=trans_type, insert_date=insert_date)
-                for k,v in values.items():
-                    setattr(acct_tran, k, v)
-                return acct_tran.save(), False
-            except ObjectDoesNotExist:
-                acct_tran = self.create(hotel=hotel, trans_type=trans_type, insert_date=insert_date,
-                    **values)
-                return acct_tran, True
+        return self.create(
+            hotel=hotel,
+            trans_type=trans_type,
+            # TODO: Fix this calculation
+            amount=Pricing.objects.get_cost(units=sms_used, units_prev=sms_used_mtd),
+            sms_used=sms_used,
+            insert_date=insert_date
+        )
 
-    def sms_used_prev(self, hotel, month, year):
+    def sms_used_mtd(self, hotel, insert_date):
         """
         MTD SMS used by the Hotel.
 
         If the Hotel hasn't sent any SMS, this will return "None", so 
         always return "0" instead.
         """
-        sms_used_prev = (self.monthly_trans(hotel=hotel, month=month, year=year)
-                             .aggregate(Max('sms_used'))['sms_used__max'])
-        return sms_used_prev or 0
+        trans_type = TransType.objects.get(name="sms_used")
+        sms_used_mtd = (self.filter(trans_type=trans_type)
+                            .monthly_trans(hotel=hotel,
+                                           month=insert_date.month,
+                                           year=insert_date.year)
+                            .aggregate(Max('sms_used'))['sms_used__max'])
+        return sms_used_mtd or 0
 
     def get_or_create(self, hotel, trans_type, *args, **kwargs):
         """
@@ -511,28 +523,26 @@ class AcctTransManager(Dates, models.Manager):
         
         if trans_type.name == 'sms_used':
             sms_used = hotel.messages.filter(insert_date=insert_date).count()
-            acct_tran, created = self.sms_used(hotel, trans_type, insert_date)
-
+            acct_tran = self.sms_used(hotel, insert_date)
             # check if balance < 0, if so charge C.Card, and if fail, suspend Twilio Acct.
             # don't worry about raising an error here.  Twilio Acct will be suspended
             # and an email will be sent to myself and the Hotel of the C.Card Charge fail.
             recharge = self.check_balance(hotel)
+            return acct_tran, True
 
         elif trans_type.name in ('init_amt', 'recharge_amt'):
             amount = self.amount(hotel, trans_type)
             acct_tran = self.create(hotel=hotel, trans_type=trans_type,
                 insert_date=insert_date, amount=amount)
-            created = True
-
-        return acct_tran, created
+            return acct_tran, True
         
 
 class AcctTrans(AbstractBase):
     """
-    Account Transactions per day.
+    Account Transactions per: Hotel / TransType / Day.
 
-    :sms_used:
-        1 transaction p/ day for total sms used
+    :insert_date: `datetime` b/c some `trans_types` could happen more than 1x p/ day
+    :sms_used: 1 transaction p/ day for total sms used
 
     :Goal:
         To keep a running balance by day of how much the Hotel 
@@ -567,19 +577,28 @@ Amount: ${amount:.2f}".format(self=self, amount=self.amount/100.0)
         # For testing only
         if not self.insert_date:
             self.insert_date = timezone.now().date()
+
+        self.balance = self._balance
+
         return super(AcctTrans, self).save(*args, **kwargs)
 
+    @property
+    def _balance(self):
+        if self.balance:
+            return self.balance
+        else:
+            return AcctTrans.objects.filter(hotel=self.hotel).balance() + (self.amount or 0)
 
-@receiver(post_save, sender=AcctTrans)
-def update_balance(sender, instance=None, created=False, **kwargs):
-    '''Update the current ``balance`` on the Account after the last 
-    transaction has been saved.
+# @receiver(post_save, sender=AcctTrans)
+# def update_balance(sender, instance=None, created=False, **kwargs):
+#     '''Update the current ``balance`` on the Account after the last 
+#     transaction has been saved.
 
-    Don't check the ``balance`` on the day of signup b/c will cause 
-    an infinte loop b/c nothing to check yet.
+#     Don't check the ``balance`` on the day of signup b/c will cause 
+#     an infinte loop b/c nothing to check yet.
 
-    :TODO: Drop this off to a Celery Task so doesn't cause an infinite loop.
-    '''
-    if not instance.balance and (instance.created.date != instance.modified.date):
-        instance.balance = AcctTrans.objects.balance()
-        instance.save()
+#     :TODO: Drop this off to a Celery Task so doesn't cause an infinite loop.
+#     '''
+#     if not instance.balance: # and (instance.created.date != instance.modified.date): (why am i only updating past date records?)
+#         instance.balance = AcctTrans.objects.balance()
+#         instance.save()
