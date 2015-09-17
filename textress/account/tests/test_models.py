@@ -410,13 +410,3 @@ class AcctTransTests(TestCase):
 
     ### BALANCE
 
-    def test_balance_field(self):
-        at = AcctTrans.objects.filter(hotel=self.hotel, trans_type=self.sms_used).first()
-        print AcctTrans.objects.filter(hotel=self.hotel).balance()
-        print at.amount
-        print at.balance
-        self.assertIsNotNone(at.balance)
-
-    def test_property_balance(self):
-        at = AcctTrans.objects.filter(hotel=self.hotel, trans_type=self.sms_used).last()
-        self.assertIsNotNone(at._balance)

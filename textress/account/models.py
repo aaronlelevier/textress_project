@@ -578,27 +578,9 @@ Amount: ${amount:.2f}".format(self=self, amount=self.amount/100.0)
         if not self.insert_date:
             self.insert_date = timezone.now().date()
 
-        self.balance = self._balance
+        if not self.balance:
+            current_balance = AcctTrans.objects.filter(hotel=self.hotel).balance()
+            amount = self.amount or 0
+            self.balance = current_balance + amount
 
         return super(AcctTrans, self).save(*args, **kwargs)
-
-    @property
-    def _balance(self):
-        if self.balance:
-            return self.balance
-        else:
-            return AcctTrans.objects.filter(hotel=self.hotel).balance() + (self.amount or 0)
-
-# @receiver(post_save, sender=AcctTrans)
-# def update_balance(sender, instance=None, created=False, **kwargs):
-#     '''Update the current ``balance`` on the Account after the last 
-#     transaction has been saved.
-
-#     Don't check the ``balance`` on the day of signup b/c will cause 
-#     an infinte loop b/c nothing to check yet.
-
-#     :TODO: Drop this off to a Celery Task so doesn't cause an infinite loop.
-#     '''
-#     if not instance.balance: # and (instance.created.date != instance.modified.date): (why am i only updating past date records?)
-#         instance.balance = AcctTrans.objects.balance()
-#         instance.save()
