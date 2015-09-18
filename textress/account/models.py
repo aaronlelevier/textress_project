@@ -191,9 +191,9 @@ class AcctCostManager(models.Manager):
         Will - get, create, or update the AcctCost record for the Hotel.
         '''
         try:
-            acct_cost = AcctCost.objects.get(hotel=hotel)
-        except ObjectDoesNotExist:
-            acct_cost = AcctCost.objects.create(hotel=hotel, **kwargs)
+            acct_cost = self.get(hotel=hotel)
+        except AcctCost.DoesNotExist:
+            acct_cost = self.create(hotel=hotel, **kwargs)
             return acct_cost, True
         else:
             for k,v in kwargs.items():
@@ -369,26 +369,18 @@ class AcctTransManager(Dates, models.Manager):
         '''Sum `amount` for any queryset object.'''
         return self.get_queryset().balance()
 
-    def sms_used_max_date(self):
-        sms_used = TransType.objects.get(name='sms_used')
-        return (self.filter(trans_type=sms_used)
-                    .aggregate(Max('insert_date'))['insert_date__max'])
-
-    def sms_used_on_date(self, date):
-        return self.sms_used_max_date() == date
-
     def amount(self, hotel, trans_type):
         '''Return the Amount ($) based on the Hotel,TransType.'''
         acct_cost = AcctCost.objects.get(hotel=hotel)
         return getattr(acct_cost, trans_type.name)
 
-    def phone_number_charge(self, hotel, desc):
+    def phone_number_charge(self, hotel, phone_number):
         """
         Creates an AcctTrans charge for a PH.  This could be an initial 
         charge or monthly.
 
         :hotel: Hotel object
-        :desc: twilio ``phone_number`` as a string
+        :phone_number: twilio ``phone_number`` as a string
         """
         self.check_balance(hotel)
         trans_type, _ = TransType.objects.get_or_create(name='phone_number')
@@ -398,7 +390,7 @@ class AcctTransManager(Dates, models.Manager):
             hotel=hotel,
             trans_type=trans_type,
             amount = -cost,
-            desc="Phone number charge of: {}".format(cost)
+            desc="PH charge {} for PH#: {}".format(cost, phone_number)
         )
         return acct_tran
 

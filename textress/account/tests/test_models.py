@@ -362,7 +362,7 @@ class AcctTransTests(TestCase):
     def test_phone_number_charge(self):
         # set the ``desc`` as an arbitrary ph num string
         acct_tran = AcctTrans.objects.phone_number_charge(self.hotel,
-            desc=settings.DEFAULT_TO_PH)
+            phone_number=settings.DEFAULT_TO_PH)
         self.assertIsInstance(acct_tran, AcctTrans)
         self.assertEqual(acct_tran.amount, -settings.PHONE_NUMBER_MONTHLY_COST)
 
@@ -374,10 +374,10 @@ class AcctTransTests(TestCase):
         self.assertIsNone(recharge_amt)
 
         # Create a fake charge to cause a call to ``.recharge()``
-        AcctTrans.objects.phone_number_charge(hotel=self.hotel, desc=settings.DEFAULT_TO_PH)
-        AcctTrans.objects.phone_number_charge(hotel=self.hotel, desc=settings.DEFAULT_TO_PH)
-        AcctTrans.objects.phone_number_charge(hotel=self.hotel, desc=settings.DEFAULT_TO_PH)
-        AcctTrans.objects.phone_number_charge(hotel=self.hotel, desc=settings.DEFAULT_TO_PH)
+        AcctTrans.objects.phone_number_charge(hotel=self.hotel, phone_number=settings.DEFAULT_TO_PH)
+        AcctTrans.objects.phone_number_charge(hotel=self.hotel, phone_number=settings.DEFAULT_TO_PH)
+        AcctTrans.objects.phone_number_charge(hotel=self.hotel, phone_number=settings.DEFAULT_TO_PH)
+        AcctTrans.objects.phone_number_charge(hotel=self.hotel, phone_number=settings.DEFAULT_TO_PH)
 
         # the balance of credits is higher than the acct_cost.balance_min, so no recharge occurs
         # set balance=0 b/c min balance is 100, so this will trigger a recharge

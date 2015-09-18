@@ -44,4 +44,4 @@ def monthly_ph_charge():
             
             if today - last_charge.date > timedelta(days=30):
                 AcctTrans.objects.phone_number_charge(hotel,
-                    desc=phone.phone_number)
+                    phone_number=phone.phone_number)
