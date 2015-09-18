@@ -30,6 +30,7 @@
 <script src="{% static 'angular/index/app.js' %}"></script>
 <script src="{% static 'angular/index/services.js' %}"></script>
 <script src="{% static 'angular/index/controllers.js' %}"></script>
+<script src="{% static 'angular/index/filters.js' %}"></script>
 <script src="{% static 'angular/config.js' %}"></script>
 <!-- Angular: End -->
 {% endblock head_js %}
@@ -152,7 +153,7 @@
     </section>
 
     <section class="wrapper padding50" id="pricing">
-        <div class="container" ng-controller="PricingCtrl">
+        <div class="container" ng-controller="PricingCtrl" ng-cloak>
             <div class="row">
                 <h2 class="text-center">Pricing</h2>
             </div>
@@ -178,12 +179,11 @@
                         <li ng-repeat="volume in volumes"><a href="" ng-click="submit_volume(volume)">[[ volume ]]</a></li>
                     </ul>
                     <h4>SMS Volume: [[ volume ]]</h4>
-                    <h4>Cost: [[ calc_cost() | currency ]]</h4>
+                    <h4>Cost: [[ calc_cost() | stripe_money | currency ]]</h4>
                 </div>
 
                 <div class="col-sm-8">
-                    <h3 class="text-center">Cost Table</h3>
-                    <table class="table table-hover">
+                    <table class="table table-hover" style="margin-top:20px;">
                         <tr>
                             <th>Tier</th>
                             <th>Pricer per SMS</th>

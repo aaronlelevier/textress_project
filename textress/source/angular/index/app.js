@@ -3,5 +3,6 @@ angular.module('indexApp', [
         'ngResource',
         'indexApp.services',
         'indexApp.controllers',
+        'indexFilters',
         'config'
     ]);

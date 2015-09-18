@@ -66,32 +66,29 @@ class AbstractBase(Dates, models.Model):
 
 class PricingManager(models.Manager):
 
-    def get_cost(self, units, units_prev=0):
+    def get_cost(self, units, units_mtd=0):
         """
         Global Monthly Cost Calculator
         ------------------------------
         Get the cost of units used based upon the current ``Pricing`` 
         Tier.
 
-        units - current units used this month
-        units_prev - previous units balance calculated for this month
-
-        TODO
-        ----
-        Make this calculate the daily incremental cost for the month. 
-        So, will need to know where we are at in what tier b/4 calculating.
+        :units: sms used for the current day that we are expensing
+        :units_mtd: mtd sms used excluding the current day
         """
-        tiers = self.order_by('-end')
-        units_to_expense = units - units_prev
+        units_total = units + units_mtd
+        units_to_expense = units
         cost = 0
+
+        tiers = self.exclude(end__lte=units_mtd).order_by('start')
         while units_to_expense > 0:
             for t in tiers:
-                if units >= t.start:
-                    if units >= t.end:
+                if units_total >= t.start: # 2500 > 200
+                    if units_total >= t.end: # 2500 > 2200
                         # -1 b/c tier2 300-201=99 not 100 for ex
-                        units_to_subtract = t.end - (t.start if t.start == 0 else t.start-1)
+                        units_to_subtract = t.end - (units_mtd if units_mtd >= t.start-1 else t.start-1) # 2200 - 2000
                     else:
-                        units_to_subtract = units - (t.start if t.start == 0 else t.start-1)
+                        units_to_subtract = units_to_expense
                     cost += units_to_subtract * t.price
                     units_to_expense -= units_to_subtract
         return cost
@@ -106,7 +103,7 @@ class Pricing(AbstractBase):
         help_text="If blank, will be the Tier's Price per SMS")
     desc = models.CharField(_("Description"), max_length=255, blank=True,
         help_text="Used for Pricing Biz Page Description.")
-    price = models.DecimalField(_("Price per SMS"), max_digits=5, decimal_places=4,
+    price = models.DecimalField(_("Price per SMS"), max_digits=3, decimal_places=2,
         help_text="Price in $'s. Ex: 0.0525")
     start = models.PositiveIntegerField(_("SMS Start"), help_text="Min SMS per Tier")
     end = models.PositiveIntegerField(_("SMS End"), help_text="Max SMS per Tier")
@@ -118,7 +115,8 @@ class Pricing(AbstractBase):
         ordering = ('tier',)
 
     def __str__(self):
-        return "{0:.4f}".format(self.price)
+        return "Price per SMS: ${:.4f}; SMS range: {}-{}".format(
+            self.price, self.start, self.end)
 
     def save(self, *args, **kwargs):
         """Default ``tier_name`` with the exception of the 'Free Tier'. Middle 
@@ -474,7 +472,7 @@ class AcctTransManager(Dates, models.Manager):
             hotel=hotel,
             trans_type=trans_type,
             # TODO: Fix this calculation
-            amount=Pricing.objects.get_cost(units=sms_used, units_prev=sms_used_mtd),
+            amount=Pricing.objects.get_cost(units=sms_used, units_mtd=sms_used_mtd),
             sms_used=sms_used,
             insert_date=insert_date
         )

@@ -12,6 +12,7 @@ from django.views.generic.edit import FormView, CreateView, UpdateView
 from django.views.generic.edit import ModelFormMixin
 
 from rest_framework import generics
+from rest_framework.response import Response
 
 from braces.views import (LoginRequiredMixin, GroupRequiredMixin, SetHeadlineMixin,
     StaticContextMixin, FormValidMessageMixin)
@@ -327,6 +328,11 @@ class PricingListAPIView(generics.ListAPIView):
 
     queryset = Pricing.objects.all()
     serializer_class = PricingSerializer
+
+    def list(self, request):
+        queryset = self.get_queryset()
+        serializer = self.serializer_class(queryset, many=True)
+        return Response(serializer.data)
 
 
 class PricingRetrieveAPIView(generics.RetrieveAPIView):
