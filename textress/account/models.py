@@ -48,7 +48,8 @@ class Dates(object):
             month = self._today.month
             year = self._today.year
 
-        return datetime.datetime(day=1, year=year, month=month, tzinfo=self.tzinfo).date()
+        return datetime.datetime(day=1, year=year, month=month,
+            tzinfo=self.tzinfo).date()
 
 
 class AbstractBase(Dates, models.Model):
@@ -342,10 +343,12 @@ class AcctStmt(AbstractBase):
 
 class AcctTransQuerySet(models.query.QuerySet):
 
-    def monthly_trans(self, hotel, month, year):
+    def monthly_trans(self, hotel, date):
+        """Return all transactions for the Hotel that happened during 
+        the month of the supplied date."""
         return (self.filter(hotel=hotel,
-                            insert_date__month=month,
-                            insert_date__year=year))
+                            insert_date__month=date.month,
+                            insert_date__year=date.year))
 
     def previous_monthly_trans(self, hotel, month, year):
         first_of_month = datetime.date(int(year), int(month), 1)
@@ -360,9 +363,11 @@ class AcctTransManager(Dates, models.Manager):
     def get_queryset(self):
         return AcctTransQuerySet(self.model, self._db)
 
-    def monthly_trans(self, hotel, month=timezone.now().month, year=timezone.now().year):
-        return self.get_queryset().monthly_trans(hotel=hotel,
-            month=month, year=year)
+    def monthly_trans(self, hotel, date=None):
+        """Default to return the Hotel's current month's transactions 
+        if not date is supplied."""
+        date = date or self._today
+        return self.get_queryset().monthly_trans(hotel, date)
 
     def previous_monthly_trans(self, hotel, month, year):
         '''All transactions b/4 the `month` and `year`.'''
@@ -502,9 +507,7 @@ class AcctTransManager(Dates, models.Manager):
         """
         trans_type = TransType.objects.get(name="sms_used")
         sms_used_mtd = (self.filter(trans_type=trans_type)
-                            .monthly_trans(hotel=hotel,
-                                           month=insert_date.month,
-                                           year=insert_date.year)
+                            .monthly_trans(hotel=hotel, date=insert_date)
                             .aggregate(Max('sms_used'))['sms_used__max'])
         return sms_used_mtd or 0
 

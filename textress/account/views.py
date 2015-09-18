@@ -19,7 +19,7 @@ from braces.views import (LoginRequiredMixin, GroupRequiredMixin, SetHeadlineMix
 from account.forms import (AuthenticationForm, CloseAccountForm,
     CloseAcctConfirmForm, AcctCostForm, AcctCostUpdateForm)
 from account.mixins import alert_messages
-from account.models import AcctCost, AcctStmt, AcctTrans, Pricing
+from account.models import Dates, AcctCost, AcctStmt, AcctTrans, Pricing
 from account.serializers import PricingSerializer
 from main.mixins import RegistrationContextMixin, AdminOnlyMixin, HotelUserMixin
 from payment.mixins import BillingSummaryContextMixin
@@ -187,9 +187,9 @@ class AcctStmtDetailView(AdminOnlyMixin, SetHeadlineMixin, BillingSummaryContext
         # Use All Time Hotel Transactions to get the Balance
         all_trans = AcctTrans.objects.filter(hotel=self.hotel)
         # Table Context
-        context['monthly_trans'] = all_trans.monthly_trans(
-            hotel=self.hotel, month=kwargs['month'], year=kwargs['year']
-            ).order_by('-created')
+        _date = Dates().first_of_month(int(kwargs['month']), int(kwargs['year']))
+        context['monthly_trans'] = (all_trans.monthly_trans(self.hotel, _date)
+                                             .order_by('-created'))
         context['init_balance'] = context['monthly_trans'].balance()
         # Normal Context
         context['acct_stmt'] = (AcctStmt.objects.filter(hotel=self.hotel)
