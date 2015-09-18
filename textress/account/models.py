@@ -214,10 +214,7 @@ class AcctCost(AbstractBase):
         
         - ex: if DB record = 1000, then amount in dollars = 10.00
 
-    - Used to have a ``per_sms`` static cost here, and I was going to 
-    adjust billing at the end of the month for the ``bulk_discount``.  
-    
-    - NOW: will apply discounts as they happen through "Daily AcctTrans" 
+    - Will apply discounts as they happen through "Daily AcctTrans" 
     Records.
     """
     hotel = models.OneToOneField(Hotel, related_name='acct_cost')
@@ -369,11 +366,6 @@ class AcctTransManager(Dates, models.Manager):
         '''Sum `amount` for any queryset object.'''
         return self.get_queryset().balance()
 
-    def amount(self, hotel, trans_type):
-        '''Return the Amount ($) based on the Hotel,TransType.'''
-        acct_cost = AcctCost.objects.get(hotel=hotel)
-        return getattr(acct_cost, trans_type.name)
-
     def phone_number_charge(self, hotel, phone_number):
         """
         Creates an AcctTrans charge for a PH.  This could be an initial 
@@ -494,7 +486,7 @@ class AcctTransManager(Dates, models.Manager):
                             .aggregate(Max('sms_used'))['sms_used__max'])
         return sms_used_mtd or 0
 
-    def get_or_create(self, hotel, trans_type, *args, **kwargs):
+    def get_or_create(self, hotel, trans_type, date=None):
         """
         Use get_or_create, so as not to duplicate charges, or daily records
 
@@ -505,11 +497,11 @@ class AcctTransManager(Dates, models.Manager):
             based on usage.
 
         """
-        insert_date = kwargs.get('insert_date', self._today)
-        
+        date = date or self._today
+
         if trans_type.name == 'sms_used':
-            sms_used = hotel.messages.filter(insert_date=insert_date).count()
-            acct_tran = self.sms_used(hotel, insert_date)
+            sms_used = hotel.messages.filter(insert_date=date).count()
+            acct_tran = self.sms_used(hotel, date)
             # check if balance < 0, if so charge C.Card, and if fail, suspend Twilio Acct.
             # don't worry about raising an error here.  Twilio Acct will be suspended
             # and an email will be sent to myself and the Hotel of the C.Card Charge fail.
@@ -517,9 +509,13 @@ class AcctTransManager(Dates, models.Manager):
             return acct_tran, True
 
         elif trans_type.name in ('init_amt', 'recharge_amt'):
-            amount = self.amount(hotel, trans_type)
-            acct_tran = self.create(hotel=hotel, trans_type=trans_type,
-                insert_date=insert_date, amount=amount)
+            amount = getattr(hotel.acct_cost, trans_type.name)
+            acct_tran = self.create(
+                hotel=hotel,
+                trans_type=trans_type,
+                insert_date=date,
+                amount=amount
+            )
             return acct_tran, True
         
 
