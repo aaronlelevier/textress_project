@@ -75,6 +75,11 @@ class PricingManager(models.Manager):
 
         units - current units used this month
         units_prev - previous units balance calculated for this month
+
+        TODO
+        ----
+        Make this calculate the daily incremental cost for the month. 
+        So, will need to know where we are at in what tier b/4 calculating.
         """
         tiers = self.order_by('-end')
         units_to_expense = units - units_prev
@@ -436,12 +441,15 @@ class AcctTransManager(Dates, models.Manager):
 
     def sms_used_validate_insert_date(self, insert_date):
         if insert_date >= self._today:
-            raise ValidationError("Can only calculate `sms_used` for prior dates. You "
-                                  "submitted: {}".format(insert_date))
+            raise ValidationError(
+                "Can only calculate `sms_used` for prior dates. "
+                "You submitted: {}".format(insert_date))
 
     def sms_used_validate_single_date_record(self, hotel, insert_date):
         trans_type = TransType.objects.get(name='sms_used')
-        if self.filter(hotel=hotel, insert_date=insert_date, trans_type=trans_type).exists():
+        if self.filter(hotel=hotel,
+                       insert_date=insert_date,
+                       trans_type=trans_type).exists():
             raise ValidationError("Only 1 `sms_used` record per Hotel per Day.")
 
     def sms_used(self, hotel, insert_date=None):
@@ -488,9 +496,9 @@ class AcctTransManager(Dates, models.Manager):
         """
         Use get_or_create, so as not to duplicate charges, or daily records
 
+        `sms_used` - get's the SMS used for the day, and calculates the cost.
         `init_amt` - initial funding amount
         `recharge_amt` - recharge funding amount
-        `sms_used` - get's the SMS used for the day, and calculates the cost.
         """
         date = date or self._today
 
