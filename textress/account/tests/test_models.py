@@ -105,11 +105,10 @@ class TransTypeTests(TestCase):
         recharge_amt = TransType.objects.get(name='recharge_amt')
         sms_used = TransType.objects.get(name='sms_used')
         phone_number = TransType.objects.get(name='phone_number')
-        bulk_discount = TransType.objects.get(name='bulk_discount')
 
         self.assertIsInstance(init_amt, TransType)
         self.assertEqual(str(init_amt), init_amt.name)
-        self.assertEqual(TransType.objects.count(), 5)
+        self.assertEqual(TransType.objects.count(), 4)
 
 
 class AcctCostTests(TestCase):
@@ -274,7 +273,6 @@ class AcctTransTests(TestCase):
         self.init_amt = TransType.objects.get(name='init_amt')
         self.recharge_amt = TransType.objects.get(name='recharge_amt')
         self.sms_used = TransType.objects.get(name='sms_used')
-        self.bulk_discount = TransType.objects.get(name='bulk_discount')
         self.phone_number = TransType.objects.get(name='phone_number')
 
         # AcctStmt

@@ -138,7 +138,6 @@ TRANS_TYPES = [
     ('recharge_amt', 'recharge_amt'),
     ('sms_used', 'sms_used'),
     ('phone_number', 'phone_number'),
-    ('bulk_discount', 'bulk_discount')
 ]
 
 class TransType(AbstractBase):
@@ -151,7 +150,6 @@ class TransType(AbstractBase):
     3   recharge_amt    Recharge amount selected by the Hotel
     4   sms_used        daily deduction for sms used for that day; cache - sms used during the day to save DB trips
     5   phone_number    Monthly phone number cost. Is charged at the initial purchase of a phone number, and monthly after that.
-    6   bulk_discount   credit applied from previous months use based on bulk
 
     TODO:
         - cache `sms_used` during the day to save DB trips
@@ -493,9 +491,6 @@ class AcctTransManager(Dates, models.Manager):
         `init_amt` - initial funding amount
         `recharge_amt` - recharge funding amount
         `sms_used` - get's the SMS used for the day, and calculates the cost.
-        `bulk_discount` - amount is not predefined for this b/c will vary
-            based on usage.
-
         """
         date = date or self._today
 

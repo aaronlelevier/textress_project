@@ -31,22 +31,12 @@
 },
 {
   "fields": {
-    "desc": "credit applied from previous months use based on bulk",
-    "modified": "2015-01-04T23:28:28.339Z",
-    "name": "bulk_discount",
-    "created": "2015-01-04T23:28:28.339Z"
-  },
-  "model": "account.transtype",
-  "pk": 4
-},
-{
-  "fields": {
     "desc": "Monthly phone number cost. Is charged at the initial purchase of a phone number, and monthly after that.",
     "modified": "2015-08-19T12:37:20.468Z",
     "name": "phone_number",
     "created": "2015-08-19T12:37:20.468Z"
   },
   "model": "account.transtype",
-  "pk": 5
+  "pk": 4
 }
 ]
