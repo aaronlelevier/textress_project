@@ -306,16 +306,6 @@ class AcctTransTests(TestCase):
             )
         assert len(monthly_trans) == len(monthly_trans_mgr)
 
-    def test_previous_monthly_trans(self):
-        first_of_month = datetime.date(self.today.year, self.today.month, 1)
-        trans = AcctTrans.objects.filter(hotel=self.hotel, insert_date__lt=first_of_month)
-        trans_mgr = AcctTrans.objects.previous_monthly_trans(
-            hotel=self.hotel,
-            month=self.today.month,
-            year=self.today.year
-            )
-        assert len(trans) == len(trans_mgr)
-
     def test_balance(self):
         assert (AcctTrans.objects.balance() ==
                 AcctTrans.objects.aggregate(Sum('amount'))['amount__sum'])

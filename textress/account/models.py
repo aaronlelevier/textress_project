@@ -350,10 +350,6 @@ class AcctTransQuerySet(models.query.QuerySet):
                             insert_date__month=date.month,
                             insert_date__year=date.year))
 
-    def previous_monthly_trans(self, hotel, month, year):
-        first_of_month = datetime.date(int(year), int(month), 1)
-        return self.filter(hotel=hotel, insert_date__lt=first_of_month)
-
     def balance(self):
         return self.aggregate(Sum('amount'))['amount__sum'] or 0
 
@@ -368,11 +364,6 @@ class AcctTransManager(Dates, models.Manager):
         if not date is supplied."""
         date = date or self._today
         return self.get_queryset().monthly_trans(hotel, date)
-
-    def previous_monthly_trans(self, hotel, month, year):
-        '''All transactions b/4 the `month` and `year`.'''
-        return self.get_queryset().previous_monthly_trans(hotel=hotel,
-            month=month, year=year)
 
     def balance(self):
         '''Sum `amount` for any queryset object.'''
