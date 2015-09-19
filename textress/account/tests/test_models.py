@@ -293,7 +293,7 @@ class AcctTransTests(TestCase):
         self.init_amt = TransType.objects.get(name='init_amt')
         self.recharge_amt = TransType.objects.get(name='recharge_amt')
         self.sms_used = TransType.objects.get(name='sms_used')
-        self.phone_number = TransType.objects.get(name='phone_number')
+        self.phone_number_charge = TransType.objects.get(name='phone_number')
         # AcctStmt
         self.acct_stmts = create_acct_stmts(hotel=self.hotel)
         self.acct_stmt = self.acct_stmts[0]
@@ -305,7 +305,7 @@ class AcctTransTests(TestCase):
 
     ### CREATE TESTS
 
-    def test_create_acct_cost(self):
+    def test_create(self):
         # Guest
         self.assertEqual(Guest.objects.count(), 1)
         self.assertEqual(self.guest.hotel, self.hotel)
@@ -341,19 +341,29 @@ class AcctTransTests(TestCase):
 
     ### MANAGER TESTS
 
-    def test_init_amt_mgr(self):
-        acct_cost = AcctCost.objects.get(hotel=self.hotel)
-        acct_tran, created = AcctTrans.objects.get_or_create(
-            hotel=self.hotel, trans_type=self.init_amt)
-        assert acct_cost.init_amt == acct_tran.amount
+    ### Charges
 
-    def test_recharge_amt_mgr(self):
-        acct_cost = AcctCost.objects.get(hotel=self.hotel)
-        acct_tran, created = AcctTrans.objects.get_or_create(
-            hotel=self.hotel, trans_type=self.recharge_amt)
-        assert acct_cost.recharge_amt == acct_tran.amount
+    # 1. init_amt
 
-    ### SMS_USED
+    def test_init_amt(self):
+        acct_tran, created = AcctTrans.objects.get_or_create(
+            hotel=self.hotel,
+            trans_type=self.init_amt
+        )
+        self.assertEqual(acct_tran.trans_type, self.init_amt)
+        self.assertEqual(acct_tran.amount, self.acct_cost.init_amt)
+
+    # 2. recharge_amt
+
+    def test_recharge_amt(self):
+        acct_tran, created = AcctTrans.objects.get_or_create(
+            hotel=self.hotel,
+            trans_type=self.recharge_amt
+        )
+        self.assertEqual(acct_tran.trans_type, self.recharge_amt)
+        self.assertEqual(acct_tran.amount, self.acct_cost.recharge_amt)
+
+    # 3. sms_used
 
     def test_sms_used_validate_insert_date(self):
         with self.assertRaises(ValidationError):
@@ -388,14 +398,30 @@ class AcctTransTests(TestCase):
         self.assertEqual(AcctTrans.objects.sms_used_mtd(hotel=self.hotel,
             insert_date=self.yesterday), 10)
 
-    ### PHONE_NUMBER
+    def test_sms_used(self):
+        for ea in AcctTrans.objects.filter(hotel=self.hotel, trans_type=self.sms_used):
+            ea.delete()
+
+        acct_tran = AcctTrans.objects.sms_used(hotel=self.hotel, insert_date=self.yesterday)
+        self.assertEqual(acct_tran.trans_type, self.sms_used)
+
+        with self.assertRaises(ValidationError):
+            AcctTrans.objects.sms_used(hotel=self.hotel, insert_date=self.yesterday)
+
+    # 4. phone_number
 
     def test_phone_number_charge(self):
         # set the ``desc`` as an arbitrary ph num string
-        acct_tran = AcctTrans.objects.phone_number_charge(self.hotel,
-            phone_number=settings.DEFAULT_TO_PH)
+        acct_tran = AcctTrans.objects.phone_number_charge(
+            self.hotel,
+            phone_number=settings.DEFAULT_TO_PH
+        )
         self.assertIsInstance(acct_tran, AcctTrans)
+        self.assertEqual(acct_tran.hotel, self.hotel)
+        self.assertEqual(acct_tran.trans_type, self.phone_number_charge)
         self.assertEqual(acct_tran.amount, -settings.PHONE_NUMBER_MONTHLY_COST)
+
+    ### OTHER MANAGER TESTS
 
     def test_recharge(self):
         # ``recharge()`` returns None if it is not triggered

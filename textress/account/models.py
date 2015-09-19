@@ -463,15 +463,13 @@ class AcctTransManager(Dates, models.Manager):
         # static `trans_type`
         trans_type = TransType.objects.get(name='sms_used')
         
-        # SMS on ``insert_date`` (concierge.Message)
+        # SMS counts needed to get the daily incremental "sms_used" cost
         sms_used = hotel.messages.filter(insert_date=insert_date).count()
-        # vs. SMS MTD (account.AcctTrans)
         sms_used_mtd = self.sms_used_mtd(hotel, insert_date)
         
         return self.create(
             hotel=hotel,
             trans_type=trans_type,
-            # TODO: Fix this calculation
             amount=Pricing.objects.get_cost(units=sms_used, units_mtd=sms_used_mtd),
             sms_used=sms_used,
             insert_date=insert_date
