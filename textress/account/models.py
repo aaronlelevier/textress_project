@@ -257,7 +257,7 @@ class AcctStmtManager(Dates, models.Manager):
         balance = AcctTrans.objects.balance(hotel=hotel)
 
         if balance < hotel.acct_cost.balance_min:
-            recharge_amt = AcctTrans.objects.recharge(hotel, balance)
+            recharge_amt = AcctTrans.objects.recharge(hotel)
             balance = AcctTrans.objects.balance(hotel=hotel)
 
         return balance
@@ -390,7 +390,7 @@ class AcctTransManager(Dates, models.Manager):
         )
         return acct_tran
 
-    def recharge(self, hotel, balance):
+    def recharge(self, hotel):
         '''
         Should only occur if the ``balance`` is less than the ``balance_min`` 
         for the Hotel.
@@ -403,19 +403,30 @@ class AcctTransManager(Dates, models.Manager):
         :Return:
             acct_tran, created
         '''
+        balance = self.balance(hotel)
 
         if balance > hotel.acct_cost.balance_min:
             return None, False
         else:
-            amount = hotel.acct_cost.balance_min - balance
+            amount = self.amount_to_recharge(hotel, balance)
 
             # TODO: need to charge credit card here in order to "recharge"
             #   the account
 
             # should I set ``trans_type`` as a global VAR b/c doesn't change?
-            trans_type = get_object_or_404(TransType, name='recharge_amt')
-            acct_tran = self.create(hotel=hotel, trans_type=trans_type, amount=amount)
+            trans_type, _ = TransType.objects.get_or_create(name='recharge_amt')
+            acct_tran = self.create(
+                hotel=hotel,
+                trans_type=trans_type,
+                amount=amount
+            )
             return acct_tran, True
+
+    def amount_to_recharge(self, hotel, balance):
+        """
+        Amount below the ``Hotel.balance_min + Hotel.recharge_amt``
+        """
+        return (hotel.acct_cost.balance_min - balance) + hotel.acct_cost.recharge_amt
 
     def check_balance(self, hotel):
         '''
@@ -430,7 +441,7 @@ class AcctTransManager(Dates, models.Manager):
             return True
         else:
             if hotel.acct_cost.auto_recharge:
-                acct_tran, charged = self.recharge(hotel, balance)
+                acct_tran, charged = self.recharge(hotel)
                 return True
             else:
                 # ``auto_charge`` is OFF and the Account Balance is not 

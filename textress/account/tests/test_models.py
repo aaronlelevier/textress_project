@@ -443,7 +443,7 @@ class AcctTransTests(TestCase):
     def test_recharge(self):
         # ``recharge()`` returns None if it is not triggered
         old_balance = AcctTrans.objects.filter(hotel=self.hotel).balance()
-        recharge_amt, created = AcctTrans.objects.recharge(self.hotel, old_balance)
+        recharge_amt, created = AcctTrans.objects.recharge(self.hotel)
         self.assertIsNone(recharge_amt)
         self.assertFalse(created)
 
@@ -456,7 +456,7 @@ class AcctTransTests(TestCase):
         # set balance=0 b/c min balance is 100, so this will trigger a recharge
         current_balance = AcctTrans.objects.filter(hotel=self.hotel).balance()
         print "current_balance:", current_balance
-        recharge_amt, created = AcctTrans.objects.recharge(self.hotel, balance=current_balance)
+        recharge_amt, created = AcctTrans.objects.recharge(self.hotel)
         print('recharge w/ balance=0:', recharge_amt.amount)
         assert recharge_amt.amount
         assert recharge_amt
