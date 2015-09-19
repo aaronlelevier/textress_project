@@ -490,6 +490,8 @@ class AcctTransManager(Dates, models.Manager):
                             .aggregate(Max('sms_used'))['sms_used__max'])
         return sms_used_mtd or 0
 
+    ### GET_OR_CREATE
+
     def get_or_create(self, hotel, trans_type, date=None):
         """
         Use get_or_create, so as not to duplicate charges, or daily records

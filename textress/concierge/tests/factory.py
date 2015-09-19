@@ -30,7 +30,8 @@ def make_messages(hotel, user, guest, insert_date=None, number=10):
     Randomly choose if the Guest or User is sending the Message.
     Then fill in the details.
 
-    `number` - the number of sent messegas in the b/n the Guest n User.
+    :insert_date: if None, creates the `messegas` for yesterday
+    :number: the number of sent messegas in the b/n the Guest n User.
     '''
     # Monkey-patch Message so as not to send live SMS
     global Message
