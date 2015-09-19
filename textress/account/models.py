@@ -254,11 +254,11 @@ class AcctStmtManager(Dates, models.Manager):
         """
         sms_used = AcctTrans.objects.sms_used_mtd(hotel, insert_date=date)
 
-        balance = AcctTrans.objects.filter(hotel=hotel).balance()
+        balance = AcctTrans.objects.balance(hotel=hotel)
 
         if balance < hotel.acct_cost.balance_min:
             recharge_amt = AcctTrans.objects.recharge(hotel, balance)
-            balance = AcctTrans.objects.filter(hotel=hotel).balance()
+            balance = AcctTrans.objects.balance(hotel=hotel)
 
         return balance
     
@@ -348,7 +348,10 @@ class AcctTransQuerySet(models.query.QuerySet):
                             insert_date__month=date.month,
                             insert_date__year=date.year))
 
-    def balance(self):
+    def balance(self, hotel=None):
+        if hotel:
+            self = self.filter(hotel=hotel)
+
         return self.aggregate(Sum('amount'))['amount__sum'] or 0
 
 
@@ -363,9 +366,9 @@ class AcctTransManager(Dates, models.Manager):
         date = date or self._today
         return self.get_queryset().monthly_trans(hotel, date)
 
-    def balance(self):
+    def balance(self, hotel=None):
         '''Sum `amount` for any queryset object.'''
-        return self.get_queryset().balance()
+        return self.get_queryset().balance(hotel)
 
     def phone_number_charge(self, hotel, phone_number):
         """
@@ -400,9 +403,8 @@ class AcctTransManager(Dates, models.Manager):
         :Return:
             acct_tran, created
         '''
-        balance_ok = balance > hotel.acct_cost.balance_min
 
-        if balance_ok:
+        if balance > hotel.acct_cost.balance_min:
             return None, False
         else:
             amount = hotel.acct_cost.balance_min - balance
@@ -422,7 +424,7 @@ class AcctTransManager(Dates, models.Manager):
 
         :hotel: Hotel object
         '''
-        balance = AcctTrans.objects.filter(hotel=hotel).balance()
+        balance = AcctTrans.objects.balance(hotel=hotel)
 
         if balance > hotel.acct_cost.balance_min:
             return True
@@ -562,7 +564,7 @@ Amount: ${amount:.2f}".format(self=self, amount=self.amount/100.0)
             self.insert_date = timezone.now().date()
 
         if not self.balance:
-            current_balance = AcctTrans.objects.filter(hotel=self.hotel).balance()
+            current_balance = AcctTrans.objects.balance(hotel=self.hotel)
             amount = self.amount or 0
             self.balance = current_balance + amount
 

@@ -303,6 +303,11 @@ class AcctTransTests(TestCase):
         self.acct_trans = create_acct_trans(hotel=self.hotel)
         self.acct_tran = self.acct_trans[0]
 
+        # Hotel 2 - use to make sure "AcctTrans.balance" and other 
+        # methods don't conflict
+        self.hotel_2 = create_hotel()
+        self.acct_trans_2 = create_acct_trans(hotel=self.hotel_2)
+
     ### CREATE TESTS
 
     def test_create(self):
@@ -335,8 +340,20 @@ class AcctTransTests(TestCase):
 
     def test_balance(self):
         self.assertEqual(
+            AcctTrans.objects.filter(hotel=self.hotel).balance(),
+            AcctTrans.objects.filter(hotel=self.hotel).aggregate(Sum('amount'))['amount__sum']
+        )
+
+    def test_balance_hotel(self):
+        self.assertEqual(
+            AcctTrans.objects.balance(self.hotel),
+            AcctTrans.objects.filter(hotel=self.hotel).aggregate(Sum('amount'))['amount__sum']
+        )
+
+    def test_balance_unfiltered(self):
+        self.assertEqual(
             AcctTrans.objects.balance(),
-            AcctTrans.objects.aggregate(Sum('amount'))['amount__sum']
+            AcctTrans.objects.balance(self.hotel) + AcctTrans.objects.balance(self.hotel_2)
         )
 
     ### MANAGER TESTS
@@ -426,15 +443,14 @@ class AcctTransTests(TestCase):
     def test_recharge(self):
         # ``recharge()`` returns None if it is not triggered
         old_balance = AcctTrans.objects.filter(hotel=self.hotel).balance()
-        print('old_balance:', old_balance)
         recharge_amt, created = AcctTrans.objects.recharge(self.hotel, old_balance)
         self.assertIsNone(recharge_amt)
+        self.assertFalse(created)
 
         # Create a fake charge to cause a call to ``.recharge()``
-        AcctTrans.objects.phone_number_charge(hotel=self.hotel, phone_number=settings.DEFAULT_TO_PH)
-        AcctTrans.objects.phone_number_charge(hotel=self.hotel, phone_number=settings.DEFAULT_TO_PH)
-        AcctTrans.objects.phone_number_charge(hotel=self.hotel, phone_number=settings.DEFAULT_TO_PH)
-        AcctTrans.objects.phone_number_charge(hotel=self.hotel, phone_number=settings.DEFAULT_TO_PH)
+        for i in range(4):
+            AcctTrans.objects.phone_number_charge(hotel=self.hotel,
+                phone_number=settings.DEFAULT_TO_PH)
 
         # the balance of credits is higher than the acct_cost.balance_min, so no recharge occurs
         # set balance=0 b/c min balance is 100, so this will trigger a recharge

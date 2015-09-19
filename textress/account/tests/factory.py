@@ -109,12 +109,12 @@ def create_acct_trans(hotel):
 
     # Daily usage until `today` (start populating based on `last_month` date)
     insert_date = hotel.created
-    balance = AcctTrans.objects.filter(hotel=hotel).balance()
+    balance = AcctTrans.objects.balance(hotel=hotel)
 
     # Loop thro and create. Recharge Account if Balancd < 0
     while insert_date < today:
         trans = create_acct_tran(hotel=hotel, trans_type=sms_used, insert_date=insert_date)
-        balance = AcctTrans.objects.filter(hotel=hotel).balance()
+        balance = AcctTrans.objects.balance(hotel=hotel)
         if balance < 0:
             trans = create_acct_tran(hotel=hotel, trans_type=recharge_amt, insert_date=insert_date)
         insert_date += next_day
