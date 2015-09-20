@@ -1,0 +1,26 @@
+{% load stripe_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <p>Hello {{ user }},</p>
+
+        <p>Your payment for {{ amount|stripe_money }} has been processed.</p>
+
+        <br>
+        
+        <p>Hotel name: {{ hotel }}</p>
+
+        <br>
+
+        <p>Thank you</p>
+        
+    </div>
+</body>
+</html>  

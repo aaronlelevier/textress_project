@@ -22,8 +22,9 @@ class Email(object):
             'textress_phone': settings.TEXTRESS_PHONE_NUMBER,
             'textess_contact_email': from_email
         }
-        
-        c = self._update_context(c, extra_context)
+
+        if extra_context:
+            c.update(extra_context)
 
         self.subject = render_to_string(subject, c)
         self.from_email = from_email
@@ -39,13 +40,6 @@ class Email(object):
              return render_to_string(self.text_content, c)
         else:
             return html.strip_tags(render_to_string(html_content, c))
-
-    def _update_context(self, c, extra_context):
-        if isinstance(extra_context, dict):
-            c.update(extra_context)
-        elif extra_context:
-            raise TypeError("extra_context must be a dict, but it is a {}".format(type(extra_context)))
-        return c
 
     @property
     def msg(self):

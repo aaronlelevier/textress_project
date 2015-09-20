@@ -184,6 +184,15 @@ class Hotel(TwilioClient, AbstractBase):
         else:
             return False
 
+    @property
+    def admin(self):
+        """Return the Hotel's Admin as a User instance, so we can have access 
+        to the Hotel Admin's attrs."""
+        try:
+            return User.objects.get(id=self.admin_id)
+        except User.DoesNotExist:
+            return
+
     def get_absolute_url(self):
         return reverse('main:hotel_update', kwargs={'pk':self.pk})
 

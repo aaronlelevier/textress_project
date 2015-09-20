@@ -413,6 +413,18 @@ class AcctTransManager(Dates, models.Manager):
             amount=amount
         )
 
+    def send_account_charged_email(self, hotel, charge):
+        from utils.email import Email
+        hotel_admin = hotel.admin
+        email = Email(
+            to=hotel_admin.email,
+            from_email=settings.DEFAULT_EMAIL_BILLING,
+            subject='email/amount_charged_subject.txt',
+            html_content='email/amount_charged_email.html',
+            extra_context={'user':hotel_admin, 'amount': charge.amount, 'hotel': hotel}
+            )
+        email.msg.send()
+
     def amount_to_recharge(self, hotel, balance):
         """
         Amount below the ``Hotel.balance_min + Hotel.recharge_amt``
@@ -488,6 +500,8 @@ class AcctTransManager(Dates, models.Manager):
         day has ended, so it will be the final SMS count, and only 
         calculated once.
         '''
+        self.check_balance(hotel)
+
         # pre-validation
         self.sms_used_validate_insert_date(insert_date)
         self.sms_used_validate_single_date_record(hotel, insert_date)

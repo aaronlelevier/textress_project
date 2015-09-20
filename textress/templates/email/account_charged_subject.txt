@@ -1,0 +1,1 @@
+You have an authorized payment to {{ site_name }}

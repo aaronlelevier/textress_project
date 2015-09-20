@@ -64,6 +64,7 @@ class HotelTests(TestCase):
         self.password = PASSWORD
         self.hotel = create_hotel()
         self.dave_hotel = create_hotel()
+        self.admin = create_hotel_user(self.hotel, group="hotel_admin")
         self.user = create_hotel_user(self.hotel)
 
     def test_create(self):
@@ -118,6 +119,9 @@ class HotelTests(TestCase):
         customer = mommy.make(Customer)
         self.hotel = self.hotel.update_customer(customer)
         self.assertTrue(self.hotel.registration_complete)
+
+    def test_admin(self):
+        self.assertEqual(self.hotel.admin, self.admin)
 
     def test_activate(self):
         # TODO
