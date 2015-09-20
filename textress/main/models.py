@@ -232,15 +232,13 @@ class Hotel(TwilioClient, AbstractBase):
         return Subaccount.objects.get_or_create(self)
 
     def activate(self):
-        if not settings.DEBUG:
-            account = self.client.accounts.update(self.twilio_sid, status="active")
+        # account = self.client.accounts.update(self.twilio_sid, status="active")
         self.active = True
         self.save()
         return self
 
     def deactivate(self):
-        if not settings.DEBUG:
-            account = self.client.accounts.update(self.twilio_sid, status="suspended")
+        # account = self.client.accounts.update(self.twilio_sid, status="suspended")
         self.active = False
         self.save()
         return self
