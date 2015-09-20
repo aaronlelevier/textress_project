@@ -17,6 +17,7 @@ import stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 from main.models import Hotel
+from utils.exceptions import RechargeFailedExcp, AutoRechargeOffExcp
 
 
 class Dates(object):
@@ -50,6 +51,12 @@ class Dates(object):
 
         return datetime.datetime(day=1, year=year, month=month,
             tzinfo=self.tzinfo).date()
+
+    def last_month_end(self, date=None):
+        "Return the last month's ending date as a `date`."
+        date = date or self._today
+        return self.first_of_month(month=date.month,
+            year=date.year) - datetime.timedelta(days=1)
 
 
 class AbstractBase(Dates, models.Model):
@@ -366,9 +373,79 @@ class AcctTransManager(Dates, models.Manager):
         date = date or self._today
         return self.get_queryset().monthly_trans(hotel, date)
 
+    ### PRE-CREATE ACCT TRANS CHARGE METHODS
+
     def balance(self, hotel=None):
         '''Sum `amount` for any queryset object.'''
         return self.get_queryset().balance(hotel)
+
+    def recharge(self, hotel):
+        """
+        If this method is called, either A or B: 
+
+        A. recharge account:
+            - charge the c.card
+            - create AcctTrans w/ a recharge_amt TransType
+
+        B. raise error that ``recharge`` failed
+        """
+        balance = self.balance(hotel)
+        amount = self.amount_to_recharge(hotel, balance)
+
+        # try:
+        #     # charge c.card
+        # except:
+            # RechargeFailedExcp as e:
+            # # TODO: Email Admin, that 'auto_recharge' failed, so 
+            # #   the c.card needs to be updated
+            # hotel.deactivate()
+            # raise e("Recharge account failed.")
+        # else:
+        # should I set ``trans_type`` as a global VAR b/c doesn't change?
+
+        # TODO: send email, that the c.card was charged
+
+        trans_type, _ = TransType.objects.get_or_create(name='recharge_amt')
+        return self.create(
+            hotel=hotel,
+            trans_type=trans_type,
+            amount=amount
+        )
+
+    def amount_to_recharge(self, hotel, balance):
+        """
+        Amount below the ``Hotel.balance_min + Hotel.recharge_amt``
+        """
+        return (hotel.acct_cost.balance_min - balance) + hotel.acct_cost.recharge_amt
+
+    def check_balance(self, hotel):
+        """
+        Master Pre-Create AcctTrans method to call that checks 
+        `balance`, `auto_recharge`, and `c.card charging` ability 
+        before creating the actual AcctTrans.
+
+        :return: None if ok, or raise error.
+        """
+        balance = self.balance(hotel=hotel)
+
+        if balance > hotel.acct_cost.balance_min:
+            return
+        else:
+            if hotel.acct_cost.auto_recharge:
+                self.recharge(hotel)
+            else:
+                # ``auto_charge`` is OFF and the Account Balance is not 
+                # enough to process the transaction.
+
+                # TODO: make Email to send to Admin, to turn 'auto_rechage' ON,
+                #   or re-fill account
+                hotel.deactivate()
+                raise AutoRechargeOffExcp(
+                    "Auto-recharge is off, and the account doesn't have "
+                    "enough funds to process this transaction."
+                )
+
+    ### PHONE_NUMBER
 
     def phone_number_charge(self, hotel, phone_number):
         """
@@ -382,71 +459,12 @@ class AcctTransManager(Dates, models.Manager):
         trans_type, _ = TransType.objects.get_or_create(name='phone_number')
         cost = settings.PHONE_NUMBER_MONTHLY_COST
 
-        acct_tran = self.create(
+        return self.create(
             hotel=hotel,
             trans_type=trans_type,
             amount = -cost,
             desc="PH charge {} for PH#: {}".format(cost, phone_number)
         )
-        return acct_tran
-
-    def recharge(self, hotel):
-        '''
-        Should only occur if the ``balance`` is less than the ``balance_min`` 
-        for the Hotel.
-
-        :ex: 
-            acct_cost.balance_min = 1000
-            current balance = -25
-            recharge_amt - current balance = 1000-(-25) = 1025
-
-        :Return:
-            acct_tran, created
-        '''
-        balance = self.balance(hotel)
-
-        if balance > hotel.acct_cost.balance_min:
-            return None, False
-        else:
-            amount = self.amount_to_recharge(hotel, balance)
-
-            # TODO: need to charge credit card here in order to "recharge"
-            #   the account
-
-            # should I set ``trans_type`` as a global VAR b/c doesn't change?
-            trans_type, _ = TransType.objects.get_or_create(name='recharge_amt')
-            acct_tran = self.create(
-                hotel=hotel,
-                trans_type=trans_type,
-                amount=amount
-            )
-            return acct_tran, True
-
-    def amount_to_recharge(self, hotel, balance):
-        """
-        Amount below the ``Hotel.balance_min + Hotel.recharge_amt``
-        """
-        return (hotel.acct_cost.balance_min - balance) + hotel.acct_cost.recharge_amt
-
-    def check_balance(self, hotel):
-        '''
-        Returns a Boolean if the Account balance is more than the 
-        ``hotel.acct_cost.balance_min``
-
-        :hotel: Hotel object
-        '''
-        balance = AcctTrans.objects.balance(hotel=hotel)
-
-        if balance > hotel.acct_cost.balance_min:
-            return True
-        else:
-            if hotel.acct_cost.auto_recharge:
-                acct_tran, charged = self.recharge(hotel)
-                return True
-            else:
-                # ``auto_charge`` is OFF and the Account Balance is not 
-                # enought to process the transaction.
-                return False
 
     ### SMS_USED
 
@@ -483,7 +501,7 @@ class AcctTransManager(Dates, models.Manager):
         return self.create(
             hotel=hotel,
             trans_type=trans_type,
-            amount=Pricing.objects.get_cost(units=sms_used, units_mtd=sms_used_mtd),
+            amount= -Pricing.objects.get_cost(units=sms_used, units_mtd=sms_used_mtd),
             sms_used=sms_used,
             insert_date=insert_date
         )

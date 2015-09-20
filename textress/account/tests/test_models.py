@@ -17,8 +17,10 @@ from account.models import (Dates, Pricing, TransType, AcctCost, AcctStmt, AcctT
 from account.tests.factory import create_acct_stmts, create_acct_trans
 from concierge.models import Guest, Message
 from concierge.tests.factory import make_guests, make_messages
+from main.models import Subaccount
 from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
 from utils import create
+from utils.exceptions import AutoRechargeOffExcp
 
 
 class DatesTests(TestCase):
@@ -47,7 +49,7 @@ class DatesTests(TestCase):
             datetime.datetime(day=1, month=1,year=1, tzinfo=self.tzinfo).date()
         )
 
-    def test_first_of_month_defaul(self):
+    def test_first_of_month_default(self):
         dates = Dates()
         first_of_month = dates.first_of_month()
         self.assertEqual(
@@ -56,6 +58,12 @@ class DatesTests(TestCase):
                 year=dates._today.year, tzinfo=self.tzinfo).date()
         )
 
+    def test_last_month_end(self):
+        dates = Dates()
+        self.assertEqual(
+            dates.last_month_end(),
+            dates.first_of_month() - datetime.timedelta(days=1)
+        )
 
 class AbstractBaseTests(TestCase):
 
@@ -440,36 +448,68 @@ class AcctTransTests(TestCase):
 
     ### OTHER MANAGER TESTS
 
-    def test_recharge(self):
-        # ``recharge()`` returns None if it is not triggered
-        old_balance = AcctTrans.objects.filter(hotel=self.hotel).balance()
-        recharge_amt, created = AcctTrans.objects.recharge(self.hotel)
-        self.assertIsNone(recharge_amt)
-        self.assertFalse(created)
+    def test_recharge_success(self):
+        # this will set the current 'balance' to 0, so a recharge() call will
+        # trigger a 'recharge_amt' transaction
+        balance = AcctTrans.objects.balance(self.hotel)
+        AcctTrans.objects.create(
+            hotel=self.hotel,
+            amount= -balance,
+            trans_type=self.sms_used
+        )
+        acct_tran = AcctTrans.objects.recharge(self.hotel)
+        self.assertEqual(acct_tran.trans_type, self.recharge_amt)
 
-        # Create a fake charge to cause a call to ``.recharge()``
-        for i in range(4):
-            AcctTrans.objects.phone_number_charge(hotel=self.hotel,
-                phone_number=settings.DEFAULT_TO_PH)
+    def test_recharge_fail(self):
+        # TODO
+        pass
 
-        # the balance of credits is higher than the acct_cost.balance_min, so no recharge occurs
-        # set balance=0 b/c min balance is 100, so this will trigger a recharge
-        current_balance = AcctTrans.objects.filter(hotel=self.hotel).balance()
-        print "current_balance:", current_balance
-        recharge_amt, created = AcctTrans.objects.recharge(self.hotel)
-        print('recharge w/ balance=0:', recharge_amt.amount)
-        assert recharge_amt.amount
-        assert recharge_amt
-        assert recharge_amt.trans_type == self.recharge_amt
+    def test_amount_to_recharge(self):
+        balance = -100
+        amount_to_recharge = AcctTrans.objects.amount_to_recharge(self.hotel, balance)
+        self.assertEqual(
+            amount_to_recharge,
+            (self.hotel.acct_cost.balance_min - balance) + self.hotel.acct_cost.recharge_amt
+        )
 
-        new_balance = AcctTrans.objects.filter(hotel=self.hotel).balance()
+    def test_check_balance_ok(self):
+        self.assertTrue(AcctTrans.objects.balance(self.hotel) > self.hotel.acct_cost.balance_min)
+        self.assertIsNone(AcctTrans.objects.check_balance(self.hotel))
 
-        print('self.hotel.acct_cost.recharge_amt:', self.hotel.acct_cost.recharge_amt)
-        print('recharge_amt.amount:', recharge_amt.amount)
-        print('old_balance:', old_balance, 'new_balance:', new_balance)
-        print('balance_min:', self.hotel.acct_cost.balance_min)
-        print('new_balance:', new_balance)
-        self.assertTrue(new_balance >= self.hotel.acct_cost.balance_min)
+    def test_check_balance_recharge_triggered(self):
+        # set 'balance = 0'
+        balance = AcctTrans.objects.balance(self.hotel)
+        AcctTrans.objects.create(
+            hotel=self.hotel,
+            amount= -balance,
+            trans_type=self.sms_used
+        )
+        # Calling this method should not trigger a 'recharge()'
+        pre_trans = AcctTrans.objects.filter(hotel=self.hotel, trans_type=self.recharge_amt).count()
+        AcctTrans.objects.check_balance(self.hotel)
+        post_trans = AcctTrans.objects.filter(hotel=self.hotel, trans_type=self.recharge_amt).count()
+        self.assertEqual(pre_trans+1, post_trans)
 
-    ### BALANCE
+    def test_check_balance_auto_recharge_off(self):
+        # Twilio Subaccount
+        # subaccount, _ = Subaccount.objects.get_or_create(self.hotel)
+        # set 'balance = 0'
+        balance = AcctTrans.objects.balance(self.hotel)
+        AcctTrans.objects.create(
+            hotel=self.hotel,
+            amount= -balance,
+            trans_type=self.sms_used
+        )
+        self.acct_cost.auto_recharge = False
+        self.acct_cost.save()
+        # triggering a 'recharge()' will now raise an error b/c 'auto_recharge' is OFF
+        with self.assertRaises(AutoRechargeOffExcp):
+            AcctTrans.objects.check_balance(self.hotel)
+
+
+
+
+
+
+
 

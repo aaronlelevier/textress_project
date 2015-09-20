@@ -23,6 +23,11 @@ class RechargeAccountRequiredExcp(Exception):
         super(RechargeAccountRequiredExcp, self).__init__(
             "Unable to process transaction. Please recharge the account balance.")
 
+class RechargeFailedExcp(Exception):
+    pass
+
+class AutoRechargeOffExcp(Exception):
+    pass
 
 ### Concierge ###
 

@@ -9,6 +9,7 @@ from sms.models import PhoneNumber
 # account_sid = settings.TWILIO_ACCOUNT_SID
 # auth_token  = settings.TWILIO_AUTH_TOKEN
 # client = TwilioRestClient(account_sid, auth_token)
+
 # aaron hotel
 account_sid = settings.TWILIO_ACCOUNT_SID_TEST
 auth_token  = settings.TWILIO_AUTH_TOKEN_TEST

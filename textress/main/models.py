@@ -106,6 +106,9 @@ class Hotel(TwilioClient, AbstractBase):
     Denormalized Fields: twilio_sid, twilio_auth_token, phone_number(primary)
         Expl: for speed, so don't have to always access these models, and because
         there are multiple `phone_numbers` so know which one is the "primary"
+
+    :self.client: Master Account Twilio Client
+    :self._client: Subaccount Twilio Client
     """
     # Required
     name = models.CharField(_("Hotel Name"), unique=True, max_length=100)
@@ -227,6 +230,20 @@ class Hotel(TwilioClient, AbstractBase):
         :return: (object, created)
         """
         return Subaccount.objects.get_or_create(self)
+
+    def activate(self):
+        if not settings.DEBUG:
+            account = self.client.accounts.update(self.twilio_sid, status="active")
+        self.active = True
+        self.save()
+        return self
+
+    def deactivate(self):
+        if not settings.DEBUG:
+            account = self.client.accounts.update(self.twilio_sid, status="suspended")
+        self.active = False
+        self.save()
+        return self
 
 
 class UserProfile(AbstractBase):
@@ -379,23 +396,23 @@ class Subaccount(AbstractBase):
     def twilio_object(self):
         return self.client.accounts.get(self.sid)
 
-    def update_status(self, status):
-        '''Update the native Twilio Status, then the DB Status. Used for Hotel 
-        Subaccounts not in good standing, or closed.'''
+    # def update_status(self, status):
+    #     '''Update the native Twilio Status, then the DB Status. Used for Hotel 
+    #     Subaccounts not in good standing, or closed.'''
 
-        self.validate_status(status)
-        self.client.accounts.update(self.sid, status=status)
+    #     self.validate_status(status)
+    #     self.client.accounts.update(self.sid, status=status)
 
-        if status == 'active':
-            self.active = True
-        else:
-            self.active = False
+    #     if status == 'active':
+    #         self.active = True
+    #     else:
+    #         self.active = False
             
-        return self.save()    
+    #     return self.save()    
 
-    def validate_status(self, status):
-        if status not in (['active', 'suspended', 'closed']):
-            raise excp.InvalidSubaccountStatus("{} is an invalid status.".format(status))
+    # def validate_status(self, status):
+    #     if status not in (['active', 'suspended', 'closed']):
+    #         raise excp.InvalidSubaccountStatus("{} is an invalid status.".format(status))
 
 
 '''

@@ -26,8 +26,6 @@ class TwilioClientTests(TestCase):
 
 class HotelManagerTests(TestCase):
 
-    # fixtures = ['users.json', 'main.json', 'sms.json', 'payment.json']
-
     def setUp(self):
         create._get_groups_and_perms()
         self.password = '1234'
@@ -120,6 +118,14 @@ class HotelTests(TestCase):
         customer = mommy.make(Customer)
         self.hotel = self.hotel.update_customer(customer)
         self.assertTrue(self.hotel.registration_complete)
+
+    def test_activate(self):
+        # TODO
+        pass
+
+    def test_deactivate(self):
+        # TODO
+        pass
         
 
 class UserProfileTests(TestCase):
