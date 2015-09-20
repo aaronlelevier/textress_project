@@ -37,11 +37,3 @@ def signup_register_step4(hotel, token, email, amount):
             trans_type=trans_type, amount=amount)
 
         return customer, card, charge
-
-
-
-
-
-
-
-

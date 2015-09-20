@@ -17,6 +17,7 @@ import stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 from main.models import Hotel
+from payment.models import Charge
 from utils.exceptions import RechargeFailedExcp, AutoRechargeOffExcp
 
 
@@ -393,25 +394,21 @@ class AcctTransManager(Dates, models.Manager):
         balance = self.balance(hotel)
         amount = self.amount_to_recharge(hotel, balance)
 
-        # try:
-        #     # charge c.card
-        # except:
-            # RechargeFailedExcp as e:
-            # # TODO: Email Admin, that 'auto_recharge' failed, so 
-            # #   the c.card needs to be updated
-            # hotel.deactivate()
-            # raise e("Recharge account failed.")
-        # else:
-        # should I set ``trans_type`` as a global VAR b/c doesn't change?
+        try:
+            charge = Charge.objects.stripe_create(hotel, amount)
+        except stripe.error.CardError as e:
+              # Email Admin, that 'auto_recharge' failed, so the c.card needs to be updated
+              hotel.deactivate()
+              raise e("Recharge account failed.")
+        else:
+            # TODO: send email successfully charged, that the c.card was charged
 
-        # TODO: send email, that the c.card was charged
-
-        trans_type, _ = TransType.objects.get_or_create(name='recharge_amt')
-        return self.create(
-            hotel=hotel,
-            trans_type=trans_type,
-            amount=amount
-        )
+            trans_type, _ = TransType.objects.get_or_create(name='recharge_amt')
+            return self.create(
+                hotel=hotel,
+                trans_type=trans_type,
+                amount=amount
+            )
 
     def send_account_charged_email(self, hotel, charge):
         from utils.email import Email

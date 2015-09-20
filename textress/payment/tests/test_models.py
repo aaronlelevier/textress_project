@@ -4,8 +4,11 @@ from django.conf import settings
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
+from main.models import Subaccount
+from main.tests.factory import create_hotel
 from payment.models import StripeClient, Customer, Card, Charge, Refund
 from payment.tests import factory
+
 
 # Set Stripe Key for All tests
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -19,6 +22,13 @@ class StripeClientTests(TestCase):
         self.assertIsNotNone(sc.stripe.api_key)
 
 
+class PmtAbstractBaseTests(TestCase):
+
+    def test_short_pk(self):
+        self.customer = factory.customer()
+        self.assertEqual(len(self.customer.short_pk), 10)
+
+
 class CustomerTests(TestCase):
 
     def setUp(self):
@@ -27,8 +37,11 @@ class CustomerTests(TestCase):
     def test_stripe_attr(self):
         self.assertTrue(hasattr(self.customer, 'stripe'))
 
-    def test_stripe_object_attr(self):
-        self.assertTrue(hasattr(self.customer, 'stripe_object'))
+    def test_stripe_object(self):
+        self.assertIsInstance(
+            self.customer.stripe_object,
+            stripe.resource.Customer
+        )
 
     def test_get_all_charges(self):
         self.assertIsNotNone(self.customer.get_all_charges())
@@ -97,7 +110,10 @@ class CardTests(TestCase):
         self.assertTrue(self.card.default)
 
     def test_stripe_object_attr(self):
-        self.assertTrue(hasattr(self.card, 'stripe_object'))
+        self.assertIsInstance(
+            self.customer.stripe_object,
+            stripe.resource.Customer
+        )
 
     def test_expires(self):
         self.assertIsInstance(self.card.expires, str)
@@ -106,14 +122,42 @@ class CardTests(TestCase):
         self.assertTrue(self.card.image)
 
 
+class ChargeManagerTests(TestCase):
+
+    def setUp(self):
+        self.hotel = create_hotel()
+        self.customer = factory.customer()
+        self.card = factory.card(self.customer.id)
+        self.hotel.update_customer(self.customer)
+
+    def test_stripe_create(self):
+        amount = 1000
+        init_charges = stripe.Charge.all(customer=self.customer, limit=100)
+        charge = Charge.objects.stripe_create(self.hotel, amount)
+        post_charges = stripe.Charge.all(customer=self.customer, limit=100)
+
+        # Stripe charge posted
+        self.assertIsInstance(
+            stripe.Charge.retrieve(charge.id),
+            stripe.resource.Charge
+        )
+
+        # Subaccount now exists
+        self.assertIsInstance(self.hotel.subaccount, Subaccount)
+
+        # DB record created
+        self.assertIsInstance(charge, Charge)
+        self.assertEqual(charge.card, self.card)
+        self.assertEqual(charge.customer, self.customer)
+
+
 class ChargeTests(TestCase):
 
     def setUp(self):
         self.charge = factory.charge()
 
     def test_stripe_object_attr(self):
-        self.assertTrue(hasattr(self.charge, 'stripe_object'))
-
-
-
-
+        self.assertIsInstance(
+            self.charge.stripe_object,
+            stripe.resource.Charge
+        )
