@@ -98,7 +98,8 @@ class PricingManager(models.Manager):
                         units_to_subtract = units_to_expense
                     cost += units_to_subtract * t.price
                     units_to_expense -= units_to_subtract
-        return cost
+        # will be a 'debit' (account deduction), so always negative
+        return -cost
 
 
 class Pricing(AbstractBase):

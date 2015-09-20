@@ -93,33 +93,33 @@ class PricingTests(TestCase):
         tier1 = 200 * 0
         tier2 = 100 * 5.5
         result = tier1 + tier2 # 550
-        self.assertEqual(Pricing.objects.get_cost(units=300, units_mtd=0), result)
+        self.assertEqual(Pricing.objects.get_cost(units=300, units_mtd=0), -result)
 
     def test_cost_three_tiers(self):
         tier1 = 200 * 0
         tier2 = 2000 * 5.5
         tier3 = 300 * 5.25
         result = tier1 + tier2 + tier3 # 12575
-        self.assertEqual(Pricing.objects.get_cost(units=2500, units_mtd=0), result)
+        self.assertEqual(Pricing.objects.get_cost(units=2500, units_mtd=0), -result)
 
     ### MTD SMS tests
 
     def test_cost_mtd(self):
         result = 100 * 5.5
-        self.assertEqual(Pricing.objects.get_cost(units=100, units_mtd=200), result)
+        self.assertEqual(Pricing.objects.get_cost(units=100, units_mtd=200), -result)
 
     def test_cost_mtd_two_tiers(self):
         tier1 = 200 * 5.5
         tier2 = 300 * 5.25
         result = tier1 + tier2
-        self.assertEqual(Pricing.objects.get_cost(units=500, units_mtd=2000), result)
+        self.assertEqual(Pricing.objects.get_cost(units=500, units_mtd=2000), -result)
 
     def test_cost_mtd_three_tiers(self):
         tier1 = 100 * 0
         tier2 = 2000 * 5.5
         tier3 = 400 * 5.25
         result = tier1 + tier2 + tier3
-        self.assertEqual(Pricing.objects.get_cost(units=2500, units_mtd=100), result)
+        self.assertEqual(Pricing.objects.get_cost(units=2500, units_mtd=100), -result)
 
 
 class TransTypeTests(TestCase):
