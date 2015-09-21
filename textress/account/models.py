@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import sys
 import calendar
 import datetime
@@ -15,12 +17,13 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 
+from celery import shared_task
 import stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 from main.models import Hotel
 from payment.models import Charge
-from utils.email import Email
+from utils import email
 from utils.exceptions import RechargeFailedExcp, AutoRechargeOffExcp
 
 
@@ -403,12 +406,12 @@ class AcctTransManager(Dates, models.Manager):
             try:
                 charge = Charge.objects.stripe_create(hotel, amount)
             except stripe.error.CardError as e:
-                  self.send_charge_failed_email(hotel, amount)
+                  email.send_charge_failed_email(hotel, amount)
                   hotel.deactivate()
                   raise e("Recharge account failed.")
             else:
-                self.send_account_charged_email(hotel, charge)
-        
+                email.send_account_charged_email(hotel, charge)
+
         trans_type = cache.get('recharge_amt',
                                TransType.objects.get_or_create(name='recharge_amt')[0])
         return self.create(
@@ -416,54 +419,6 @@ class AcctTransManager(Dates, models.Manager):
             trans_type=trans_type,
             amount=amount
         )
-
-    ### EMAIL ALERTS
-
-    def send_account_charged_email(self, hotel, charge):
-        hotel_admin = hotel.admin
-        email = Email(
-            to=hotel_admin.email,
-            from_email=settings.DEFAULT_EMAIL_BILLING,
-            subject='email/account_charged/subject.txt',
-            html_content='email/account_charged/email.html',
-            extra_context={
-                'user': hotel_admin,
-                'charge': charge,
-                'hotel': hotel,
-                'SITE': settings.SITE
-                }
-            )
-        email.msg.send()
-
-    def send_auto_recharge_failed_email(self, hotel):
-        hotel_admin = hotel.admin
-        email = Email(
-            to=hotel_admin.email,
-            from_email=settings.DEFAULT_EMAIL_SUPPORT,
-            subject='email/auto_recharge_failed/subject.txt',
-            html_content='email/auto_recharge_failed/email.html',
-            extra_context={
-                'user':hotel_admin,
-                'hotel': hotel,
-                'SITE': settings.SITE
-                }
-            )
-        email.msg.send()
-
-    def send_charge_failed_email(self, hotel, amount):
-        hotel_admin = hotel.admin
-        email = Email(
-            to=hotel_admin.email,
-            from_email=settings.DEFAULT_EMAIL_BILLING,
-            subject='email/charge_failed/subject.txt',
-            html_content='email/charge_failed/email.html',
-            extra_context={
-                'user':hotel_admin,
-                'hotel': hotel,
-                'SITE': settings.SITE
-                }
-            )
-        email.msg.send()
 
     ### CHARGE ACCOUNT SUPPORT METHODS
 
@@ -491,7 +446,7 @@ class AcctTransManager(Dates, models.Manager):
             else:
                 # ``auto_charge`` is OFF and the Account Balance is not 
                 # enough to process the transaction.
-                self.send_auto_recharge_failed_email(hotel)
+                email.send_auto_recharge_failed_email(hotel)
                 hotel.deactivate()
                 raise AutoRechargeOffExcp(
                     "Auto-recharge is off, and the account doesn't have "

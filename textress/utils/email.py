@@ -1,8 +1,11 @@
+from __future__ import absolute_import
+
 from django.conf import settings
 from django.utils import html
 from django.template.loader import render_to_string
-
 from django.core.mail import EmailMultiAlternatives
+
+from celery import shared_task
 
 
 class Email(object):
@@ -47,3 +50,57 @@ class Email(object):
             self.to, self.bcc)
         msg.attach_alternative(self.html_content, "text/html")
         return msg
+
+
+### EMAILS
+
+@shared_task
+def send_account_charged_email(hotel, charge):
+    hotel_admin = hotel.admin
+    email = Email(
+        to=hotel_admin.email,
+        from_email=settings.DEFAULT_EMAIL_BILLING,
+        subject='email/account_charged/subject.txt',
+        html_content='email/account_charged/email.html',
+        extra_context={
+            'user': hotel_admin,
+            'charge': charge,
+            'hotel': hotel,
+            'SITE': settings.SITE
+            }
+        )
+    email.msg.send()
+
+
+@shared_task
+def send_auto_recharge_failed_email(hotel):
+    hotel_admin = hotel.admin
+    email = Email(
+        to=hotel_admin.email,
+        from_email=settings.DEFAULT_EMAIL_SUPPORT,
+        subject='email/auto_recharge_failed/subject.txt',
+        html_content='email/auto_recharge_failed/email.html',
+        extra_context={
+            'user':hotel_admin,
+            'hotel': hotel,
+            'SITE': settings.SITE
+            }
+        )
+    email.msg.send()
+
+
+@shared_task
+def send_charge_failed_email(hotel, amount):
+    hotel_admin = hotel.admin
+    email = Email(
+        to=hotel_admin.email,
+        from_email=settings.DEFAULT_EMAIL_BILLING,
+        subject='email/charge_failed/subject.txt',
+        html_content='email/charge_failed/email.html',
+        extra_context={
+            'user':hotel_admin,
+            'hotel': hotel,
+            'SITE': settings.SITE
+            }
+        )
+    email.msg.send()
