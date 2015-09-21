@@ -54,7 +54,7 @@ def test_send_auto_recharge_failed_email():
     user.save()
     mommy.make(AcctCost, hotel=hotel)
     # send
-    AcctTrans.objects.send_auto_recharge_failed_email(hotel, 1000)
+    AcctTrans.objects.send_auto_recharge_failed_email(hotel)
 
 
 def test_send_account_charged_email():
