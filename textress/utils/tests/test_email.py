@@ -6,6 +6,7 @@ from model_mommy import mommy
 
 from account.models import AcctTrans, AcctCost
 from main.tests.factory import create_hotel, create_hotel_user
+from payment.tests.factory import charge, customer
 from utils.email import Email
 
 
@@ -30,6 +31,8 @@ class EmailTests(TestCase):
 
 
 '''
+Email Test Sends
+----------------
 Manual email tests, ignored by test runner. Because doesn't send 
 email while running `unittest`.
 '''
@@ -42,6 +45,7 @@ def test_send_email():
         )
     return email.msg.send()
 
+
 def test_send_auto_recharge_failed_email():
     # setup
     hotel = create_hotel()
@@ -51,3 +55,29 @@ def test_send_auto_recharge_failed_email():
     mommy.make(AcctCost, hotel=hotel)
     # send
     AcctTrans.objects.send_auto_recharge_failed_email(hotel, 1000)
+
+
+def test_send_account_charged_email():
+    # setup
+    hotel = create_hotel()
+    user = create_hotel_user(hotel, group="hotel_admin")
+    user.email = settings.DEFAULT_FROM_EMAIL
+    user.save()
+    _customer = customer()
+    hotel.update_customer(_customer)
+    _charge = charge(_customer.id)
+    # send
+    AcctTrans.objects.send_account_charged_email(hotel, _charge)
+
+
+def test_send_charge_failed_email():
+    # setup
+    hotel = create_hotel()
+    user = create_hotel_user(hotel, group="hotel_admin")
+    user.email = settings.DEFAULT_FROM_EMAIL
+    user.save()
+    _customer = customer()
+    hotel.update_customer(_customer)
+    _charge = charge(_customer.id)
+    # send
+    AcctTrans.objects.send_charge_failed_email(hotel, 1000)
