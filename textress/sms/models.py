@@ -103,29 +103,40 @@ hotel: {}".format(hotel))
         :hotel: Hotel object
         :number: PhoneNumber object
         '''
-        number = self.client.phone_numbers.update(
-            number.sid, account_sid=hotel.twilio_sid)
+        number = self.client.phone_numbers.update(number.sid,
+            account_sid=hotel.twilio_sid,
+            sms_url="https://textress.com/api/receive/sms_url/")
+
         hotel.update_twilio_phone(ph_sid=number.sid,
             phone_number=number.phone_number)
+
+    def create_from_twilio(self, hotel, twilio_ph):
+        """Using a Twilio PH obj, create a DB record, and transfer 
+        the PH to the Hotel's Subaccount w/i Twilio."""
+
+        # DB create
+        number = self.create(hotel=hotel,
+            sid=twilio_ph.sid,
+            phone_number=twilio_ph.phone_number,
+            friendly_name=twilio_ph.friendly_name)
+
+        # Xfr Twilio PH to Hotel Subaccount
+        self.update_account_sid(hotel, number)
+
+        return number
 
     def purchase_number(self, hotel):
         '''
         Calls all logic for the Purchase of a New PhoneNumber.
         '''
-        _twilio_ph = self._twilio_purchase_number(hotel)
+        twilio_ph = self._twilio_purchase_number(hotel)
         
         # charge account on success
         acct_tran = AcctTrans.objects.phone_number_charge(hotel,
-            phone_number=_twilio_ph.phone_number)
+            phone_number=twilio_ph.phone_number)
 
         # DB create
-        number = self.create(hotel=hotel,
-            sid=_twilio_ph.sid,
-            phone_number=_twilio_ph.phone_number,
-            friendly_name=_twilio_ph.friendly_name)
-
-        # Xfr Twilio PH to Hotel Subaccount
-        self.update_account_sid(hotel, number)
+        number = self.create_from_twilio(hotel, twilio_ph)
 
         # Update default
         self.update_default(hotel, number.sid)

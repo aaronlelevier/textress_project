@@ -403,24 +403,6 @@ class Subaccount(AbstractBase):
     def twilio_object(self):
         return self.client.accounts.get(self.sid)
 
-    # def update_status(self, status):
-    #     '''Update the native Twilio Status, then the DB Status. Used for Hotel 
-    #     Subaccounts not in good standing, or closed.'''
-
-    #     self.validate_status(status)
-    #     self.client.accounts.update(self.sid, status=status)
-
-    #     if status == 'active':
-    #         self.active = True
-    #     else:
-    #         self.active = False
-            
-    #     return self.save()    
-
-    # def validate_status(self, status):
-    #     if status not in (['active', 'suspended', 'closed']):
-    #         raise excp.InvalidSubaccountStatus("{} is an invalid status.".format(status))
-
 
 '''
 DRF Token Auth

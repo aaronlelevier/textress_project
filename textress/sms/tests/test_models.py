@@ -8,6 +8,7 @@ from model_mommy import mommy
 from twilio.rest import TwilioRestClient
 from twilio.rest.resources.phone_numbers import PhoneNumber as TwilioPhoneNumber
 
+from main.models import Subaccount
 from main.tests.factory import create_hotel
 from sms.models import PhoneNumber
 from sms.tests.factory import create_phone_number
@@ -85,11 +86,6 @@ class PhoneNumberManagerTests(TestCase):
         self.assertIsInstance(ph, PhoneNumber)
         self.assertTrue(ph.default)
 
-    def test_update_account_sid(self):
-        # Don't test b/c only calling 1 hotel method
-        pass
-
-        
     # LIVE TEST
     # def test_twilio_purchase_number(self):
     #     twilio_ph = PhoneNumber.objects._twilio_purchase_number(self.hotel)
