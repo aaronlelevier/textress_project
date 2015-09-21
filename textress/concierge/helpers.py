@@ -30,9 +30,9 @@ def process_incoming_message(data):
 
     Return:
 
-    - msg - b/c will be converted to JSON and sent to client thro Redis
-    - reply - auto-reply to guest TODO: [need to move out of `ReceiveSMSView code]
-    - hotel - used for group messaging by Hotel.group_name
+    - msg: b/c will be converted to JSON and sent to client thro Redis
+    - reply: auto-reply to guest TODO: [need to move out of `ReceiveSMSView code]
+    - hotel: used for group messaging by Hotel.group_name
     '''
     hotel = Hotel.objects.get_by_phone(data['To'])
     
