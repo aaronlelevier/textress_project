@@ -505,11 +505,3 @@ class AcctTransTests(TestCase):
         # triggering a 'recharge()' will now raise an error b/c 'auto_recharge' is OFF
         with self.assertRaises(AutoRechargeOffExcp):
             AcctTrans.objects.check_balance(self.hotel)
-
-
-
-
-
-
-
-

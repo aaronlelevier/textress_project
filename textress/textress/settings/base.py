@@ -130,7 +130,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 SITE =  "textress.com"
 SITE_NAME = 'Textress'
-SITE_URL = "localhost:8000/"
+SITE_URL = "https://textress.com"
 
 
 ### STATIC ACCOUNT URLS ###

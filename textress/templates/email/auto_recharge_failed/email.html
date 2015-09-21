@@ -1,0 +1,19 @@
+{% load stripe_tags %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    </head>
+    <body>
+        <div class="container">
+            <p>Hello {{ user }},</p>
+            <p>Auto-recharge not enabled.  We attempted to refill your account for <strong>{{ amount|stripe_money }}</strong>, but the transaction didn't process.</p>
+            <p>In order to recharge your account, please go to your payment preferences using the link, and turn <em>auto-recharge</em> on.</p>
+            <p><a href="https://textress.com/payments/refill-settings/{{ hotel.acct_cost.pk }}/">{{ SITE }}{% url 'acct_cost_update' hotel.acct_cost.pk %}</a>
+        </p>
+        <br>
+        <p>Thank you</p>
+        
+    </div>
+</body>
+</html>
