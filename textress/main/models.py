@@ -86,9 +86,7 @@ class HotelManager(models.Manager):
         try:
             return self.get(twilio_phone_number=ph_num)
         except Hotel.DoesNotExist:
-            # TODO: Change to a Celery request to delete the `PhoneNumber`
-            # method: PhoneNumber.objects.delete(phone_number=address_phone)
-            return self.get(name=settings.TEXTRESS_HOTEL)
+            PhoneNumber.objects.delete_unknown_number(ph_num)
           
 
 class Hotel(TwilioClient, AbstractBase):

@@ -116,20 +116,33 @@ class GuestManagerTests(TestCase):
         with pytest.raises(ObjectDoesNotExist):
             Guest.objects.get_by_hotel_phone(self.hotel, 'wrong_num')
 
+    ## Guest.objects.get_by_phone
+
     def test_get_by_phone(self):
         guest = Guest.objects.get_by_phone(self.hotel, self.guest.phone_number)
-        assert isinstance(guest, Guest)
-        assert not guest.hidden
+        self.assertIsInstance(guest, Guest)
+        self.assertFalse(guest.hidden)
 
     def test_get_by_phone_archived(self):
         guest = Guest.objects.get_by_phone(self.hotel, self.archived_guest.phone_number)
-        assert isinstance(guest, Guest)
-        assert guest.hidden
+        self.assertIsInstance(guest, Guest)
+        self.assertTrue(guest.hidden)
 
-    def test_get_by_phone_unknown(self):
+    def test_get_by_phone_unknown_guest_get(self):
         # when the Hotel recieves an SMS from an unknown Guest
-        guest = Guest.objects.get_by_phone(self.hotel, create._generate_ph())
+        init_count = Guest.objects.count()
+        guest = Guest.objects.get_by_phone(self.hotel, self.unknown_guest.phone_number)
         self.assertEqual(guest.name, self.unknown_guest.name)
+        post_count = Guest.objects.count()
+        self.assertEqual(init_count, post_count)
+
+    def test_get_or_create_unknown_guest_create(self):
+        hotel2 = create_hotel()
+        init_count = Guest.objects.count()
+        guest = Guest.objects.get_by_phone(hotel2, create._generate_ph())
+        self.assertEqual(guest.name, self.unknown_guest.name)
+        post_count = Guest.objects.count()
+        self.assertEqual(init_count+1, post_count)
 
 
 class MessageManagerTests(TestCase):

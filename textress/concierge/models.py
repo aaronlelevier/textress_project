@@ -54,7 +54,7 @@ class GuestManager(AbstractBaseManager, models.Manager):
         '''
         try:
             return self.get(hotel=hotel, phone_number=phone_number)
-        except ObjectDoesNotExist:
+        except Guest.DoesNotExist:
             return self.create(
                 hotel=hotel,
                 name="Unknown Guest",
@@ -78,12 +78,12 @@ class GuestManager(AbstractBaseManager, models.Manager):
             return (self.get_queryset()
                         .current()
                         .get_by_hotel_phone(hotel, phone_number))
-        except ObjectDoesNotExist:
+        except Guest.DoesNotExist:
             try:
                 return (self.get_queryset()
                             .archived()
                             .get_by_hotel_phone(hotel, phone_number))
-            except ObjectDoesNotExist:
+            except Guest.DoesNotExist:
                 return self.get_or_create_unknown_guest(hotel, phone_number)
 
 
