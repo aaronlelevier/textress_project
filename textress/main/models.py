@@ -71,29 +71,21 @@ class Icon(models.Model):
 # HOTEL #
 #########
 
-class HotelQuerySet(models.query.QuerySet):
-    pass
-
-
 class HotelManager(models.Manager):
-
-    def get_queryset(self):
-        return HotelQuerySet(self.model, self._db)
 
     def textress(self):
         return self.get(name=settings.TEXTRESS_HOTEL)
 
     def get_by_phone(self, ph_num):
-        '''
-        TODO
-        ----
-        If `HotelPhoneNotFound` is triggered, I have a live Twilio
-        PhoneNumber that is not assigned to a Hotel, and needs to be
-        removed.
-        '''
+        """
+        Get the Hotel using it's `twilio_phone_number`. If it doesn't 
+        exist, delete the PhoneNumber.
+
+        :ph_num: the twilio formatted string of the PH. (ex: +17025551234)
+        """
         try:
             return self.get(twilio_phone_number=ph_num)
-        except ObjectDoesNotExist:
+        except Hotel.DoesNotExist:
             # TODO: Change to a Celery request to delete the `PhoneNumber`
             # method: PhoneNumber.objects.delete(phone_number=address_phone)
             return self.get(name=settings.TEXTRESS_HOTEL)

@@ -160,6 +160,24 @@ hotel: {}".format(hotel))
         
         return ph, created
 
+    def delete_unknown_number(self, ph_num):
+        """
+        Delete the PH in the DB and Twilio, or send an email to myself, if 
+        I need to manually delete it.
+
+        :ph_num: the twilio formatted string of the PH. (ex: +17025551234)
+        """
+        # Check if PH exists on the Master Account
+        try:
+            ph = PhoneNumber.objects.get(phone_number=ph_num)
+        except PhoneNumber.DoesNotExist:
+            email.send_delete_unknown_number_failed_email(ph_num)
+        else:
+            try:
+                self.client.phone_numbers.get(ph.sid).delete()
+            except TwilioRestException:
+                email.send_delete_unknown_number_failed_email(ph_num)
+
 
 class PhoneNumber(TwilioClient, TimeStampBaseModel):
     '''
