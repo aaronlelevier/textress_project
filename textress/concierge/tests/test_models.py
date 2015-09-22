@@ -177,6 +177,7 @@ class MessageManagerTests(TestCase):
             guest=self.guest,
             number=1
             )
+        self.message = self.messages[0]
 
         self.post_data = {
             u'Body': [u'Hey'], u'MessageSid': [u'SMa3376deff77d397cbcf502a6aa27889e'],
@@ -222,6 +223,33 @@ class MessageManagerTests(TestCase):
         manual_daily_all = Message.objects.filter(insert_date=self.today)
         mgr_daily_all = Message.objects.daily_all(date=self.today)
         assert len(manual_daily_all) == len(mgr_daily_all)
+
+    ### receive_message_post
+
+    def test_receive_message_post_get(self):
+        data = {}
+        data['SmsSid'] = self.message.sid
+        self.assertEqual(
+            Message.objects.receive_message_post(self.guest, data),
+            self.message
+        )
+
+    def test_receive_message_post_create(self):
+        # setup
+        msg = create._generate_name()
+        data = {}
+        data.update({
+            'SmsSid': 'bad sid',
+            'SmsStatus': 'sent',
+            'To': settings.DEFAULT_TO_PH,
+            'From': settings.DEFAULT_TO_PH,
+            'Body': msg
+        })
+        # test
+        self.assertIsInstance(
+            Message.objects.receive_message_post(self.guest, data),
+            Message
+        )
 
 
 class MessageTests(TestCase):

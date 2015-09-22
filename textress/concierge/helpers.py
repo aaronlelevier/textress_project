@@ -38,7 +38,7 @@ def process_incoming_message(data):
     
     guest = Guest.objects.get_by_phone(hotel, data['From'])
 
-    if hotel.is_textress and guest.is_unknown:
+    if guest.is_unknown:
         return Message.objects.create(guest=guest, hotel=hotel, to=data['From'],
             body=login_messages['hotel_not_found'])
 
