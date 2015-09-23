@@ -1,6 +1,5 @@
 import os
 import datetime
-import pytest
 
 from django.conf import settings
 from django.test import TestCase
@@ -41,7 +40,7 @@ class GuestTests(TestCase):
         assert isinstance(self.guest, Guest)
 
     def test_validate_phone_number_taken(self):
-        with pytest.raises(PhoneNumberInUse):
+        with self.assertRaises(PhoneNumberInUse):
             mommy.make(
                 Guest,
                 name="Unknown Guest",
@@ -50,7 +49,7 @@ class GuestTests(TestCase):
                 )
 
     def test_checkin_date_validation(self):
-        with pytest.raises(CheckOutDateException):
+        with self.assertRaises(CheckOutDateException):
             self.guest.check_out = timezone.now().date() + datetime.timedelta(days=-2)
             ci, co = self.guest.validate_check_in_out(self.guest.check_in, self.guest.check_out)
 
@@ -113,7 +112,7 @@ class GuestManagerTests(TestCase):
         assert isinstance(guest, Guest)
 
     def test_get_by_hotel_phone_fail(self):
-        with pytest.raises(ObjectDoesNotExist):
+        with self.assertRaises(ObjectDoesNotExist):
             Guest.objects.get_by_hotel_phone(self.hotel, 'wrong_num')
 
     ## Guest.objects.get_by_phone
@@ -328,90 +327,74 @@ class MessageSendTests(TestCase):
         # self.assertEqual(message.hotel, self.guest.hotel)
 
 
-class ReplyManagerTests(TestCase):
+class ReplyTests(TestCase):
 
     def setUp(self):
-        self.hotel = create_hotel()
-        self.textress = create_hotel(name=settings.TEXTRESS_HOTEL)
-
-        # reserved letter `Reply`. Can only be created if using "Textress Hotel" 
-        # as configured in the settings.py
-        self.stop_reply = mommy.make(Reply, hotel=self.textress, letter='S',
-            func_call='_stop')
-
-        # non-reserved letter `Reply`
-        self.help_reply = mommy.make(Reply, hotel=self.hotel, letter='H')
-
-        self.guest = make_guests(hotel=self.hotel, number=1)[0] # b/c returns list
-
+        self.letter_stop = "S"
+        self.letter_help = "H"
+        # Hotel
+        self.hotel_w_reply = create_hotel()
+        self.hotel_w_no_reply = create_hotel()
+        # Guest
+        self.guest = make_guests(hotel=self.hotel_w_reply, number=1)[0]
+        self.guest_w_no_reply = make_guests(hotel=self.hotel_w_no_reply, number=1)[0]
         # archived guest
-        self.archived_guest = mommy.make(Guest, hotel=self.hotel, hidden=True,
+        self.archived_guest = mommy.make(
+            Guest,
+            hotel=self.hotel_w_reply,
+            hidden=True,
             phone_number=settings.DEFAULT_TO_PH_2)
-
         # for resolving "Unknown Guest"
         self.unknown_guest = mommy.make(
             Guest,
             name="Unknown Guest",
-            hotel=self.hotel,
+            hotel=self.hotel_w_reply,
             phone_number=settings.DEFAULT_TO_PH_BAD
             )
+        # Reply
+        self.hotel_reply_H = mommy.make(Reply, hotel=self.hotel_w_reply, letter=self.letter_help)
+        self.system_reply_S = mommy.make(Reply, letter=self.letter_stop)
 
-    def test_reply_hotel(self):
-        reply = Reply.objects.get_hotel_reply('H', hotel=self.hotel)
-        assert isinstance(reply, Reply)
+    ### MANAGER TESTS
 
-    def test_reply_textress(self):
-        reply = Reply.objects.get_hotel_reply('S')
-        assert isinstance(reply, Reply)
+    def test_get_reply_hotel(self):
+        reply = Reply.objects.get_reply(self.hotel_w_reply, "H")
+        self.assertEqual(reply.hotel, self.hotel_w_reply)
 
-    def test_reply_none(self):
-        with pytest.raises(ObjectDoesNotExist):
-            Reply.objects.get_hotel_reply('N')
-
-    def test_get_reply(self):
-        reply = Reply.objects.get_reply(self.guest, self.hotel, 'H')
-        assert isinstance(reply, Reply)
-
-    def test_get_reply_default(self):
-        # the 'S' letter is reserved, so should resolve to the 
-        #   "Textress Hotel's" reserved replies container
-        reply = Reply.objects.get_reply(self.guest, self.hotel, 'S')
-        assert isinstance(reply, Reply)
-        assert reply.hotel.is_textress
+    def test_get_reply_system(self):
+        reply = Reply.objects.get_reply(self.hotel_w_no_reply, "S")
+        self.assertIsInstance(reply, Reply)
+        self.assertIsNone(reply.hotel)
 
     def test_get_reply_none(self):
-        with pytest.raises(ReplyNotFound):
-            reply = Reply.objects.get_reply(self.guest, self.hotel,
-                'This is a standard message.')
+        with self.assertRaises(ReplyNotFound):
+            Reply.objects.get_reply(self.hotel_w_no_reply, "X")
 
-    def test_exec_func_call(self):
-        assert not self.guest.stop
+    def test_check_for_data_update_stop(self):
+        self.assertFalse(self.guest.stop)
+        Reply.objects.check_for_data_update(self.guest, self.system_reply_S)
+        self.assertTrue(self.guest.stop)
 
-        Reply.objects.exec_func_call(self.guest, self.guest.hotel,
-            self.stop_reply)
-        guest = Guest.objects.get(pk=self.guest.id)
-        assert self.guest.stop
+    def test_check_for_data_update_no_stop(self):
+        self.assertFalse(self.guest.stop)
+        Reply.objects.check_for_data_update(self.guest, self.hotel_reply_H)
+        self.assertFalse(self.guest.stop)
 
-    def test_process_reply(self):
-        reply = Reply.objects.process_reply(self.guest, self.hotel, 'S')
-        assert isinstance(reply, Reply)
+    def test_process_reply_return_reply(self):
+        reply = Reply.objects.process_reply(self.guest, self.hotel_w_reply, self.letter_help)
+        self.assertIsInstance(reply, Reply)
 
-    def test_process_reply(self):
-        reply = Reply.objects.process_reply(self.guest, self.hotel, 'X')
-        assert not reply
+    def test_process_reply_return_none(self):
+        reply = Reply.objects.process_reply(self.guest, self.hotel_w_reply, "normal body of msg")
+        self.assertIsNone(reply)
 
-
-class ReplyTests(TestCase):
-
-    def setUp(self):
-        self.hotel = create_hotel()
+    ### MODEL TESTS
 
     def test_upper(self):
         letter = 'g'
-        reply = mommy.make(Reply, hotel=self.hotel, letter=letter)
-        assert reply.letter == letter.upper()
+        reply = mommy.make(Reply, hotel=self.hotel_w_no_reply, letter=letter)
+        self.assertEqual(reply.letter, letter.upper())
 
     def test_reserved_letter(self):
-        letter = 's'
         with self.assertRaises(ValidationError):
-            mommy.make(Reply, hotel=self.hotel, letter=letter)
+            mommy.make(Reply, hotel=self.hotel_w_no_reply, letter=self.letter_stop)

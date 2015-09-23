@@ -45,6 +45,8 @@ def process_incoming_message(data):
     # save message to DB
     msg = Message.objects.receive_message_post(guest, data)
 
+    # If a 'reply' is returned here, it is an auto-reply, and will 
+    # be sent back to the Guest.
     reply = Reply.objects.process_reply(guest, hotel, data['Body'])
 
     return msg, reply, hotel

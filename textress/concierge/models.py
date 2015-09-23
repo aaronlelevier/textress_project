@@ -343,47 +343,37 @@ class Message(AbstractBase):
 
 class ReplyManager(models.Manager):
 
-    def get_hotel_reply(self, letter, *args, **kwargs):
-        '''Hotel Specific Reply.'''
-        hotel = kwargs.get('hotel', Hotel.objects.textress())
+    def check_for_data_update(self, guest, reply):
+        "Currently only support 'stop messages'."
+        if reply.letter == "S":
+            guest.stop = True
+            guest.save()
 
-        try:
-            return self.filter(hotel=hotel).get(letter=letter)
-        except ObjectDoesNotExist:
-            raise
-
-    def exec_func_call(self, guest, hotel, reply):
-        '''Data changes'''
-        if reply.func_call and not hotel.is_textress:
-            try:
-                getattr(guest, reply.func_call)()
-            except AttributeError:
-                # TODO: add logging - b/c I added a guest Func that doesn't
-                #   have a `data change Reply` configured to it.
-                raise
-
-    def get_reply(self, guest, hotel, body):
+    def get_reply(self, hotel, body):
         '''
-        Reply resolution:
-            - try get() Hotel Reply
-            - try get() Textress default Reply
-            - no reply
+        Resolve Reply in this order:
+
+        - try get() Hotel Reply
+        - try get() system Reply
+        - no reply
         '''
         try:
-            return self.get_hotel_reply(hotel=hotel, letter=body)
-        except ObjectDoesNotExist:
+            return self.get(hotel=hotel, letter=body)
+        except Reply.DoesNotExist:
             try:
-                return self.get_hotel_reply(letter=body)
-            except ObjectDoesNotExist:
+                return self.get(letter=body)
+            except Reply.DoesNotExist:
                 raise ReplyNotFound
 
     def process_reply(self, guest, hotel, body):
+        """Check for an 'auto-reply'. If one exists, return it, and make 
+        an necessary data changes."""
         try:
-            reply = self.get_reply(guest, hotel, body)
+            reply = self.get_reply(hotel, body)
         except ReplyNotFound:
             return
         else:
-            self.exec_func_call(guest, hotel, reply)
+            self.check_for_data_update(guest, reply)
             return reply
 
 
@@ -397,14 +387,14 @@ class Reply(AbstractBase):
 
     `func_call` used for data changes only. doesn't return a auto-reply msg.
     '''
-    hotel = models.ForeignKey(Hotel)
+    hotel = models.ForeignKey(Hotel, blank=True, null=True)
     letter = models.CharField(_("Letter(s)"), max_length=25,
-        help_text="Letter(s) will be upper cased automatically. Single letters \
-        encouraged for shorter SMS, but not enforced.")
+        help_text="Letter(s) will be upper cased automatically. Single letters "
+                  "encouraged for shorter SMS, but not enforced.")
     message = models.CharField(_("Auto Reply Message"), max_length=320, blank=True)
     func_call = models.CharField(_("Function Call"), max_length=100, blank=True,
-        help_text="Configure the string name of a function call here for User \
-        requested data changes")
+        help_text="Configure the string name of a function call here for User "
+                  "requested data changes")
 
     objects = ReplyManager()
 
@@ -418,7 +408,8 @@ class Reply(AbstractBase):
 
     def save(self, *args, **kwargs):
         self.letter = self.letter.upper()
-        if not self.hotel.is_textress and self.reserved_letter(self.letter):
-            raise ValidationError("{} is a reserved letter, and can't be \
-                configured. Please use a different letter(s).".format(self.letter))
+        if self.hotel and self.reserved_letter(self.letter):
+            raise ValidationError(
+                "{} is a reserved letter, and can't be configured. "
+                "Please use a different letter(s).".format(self.letter))
         return super(Reply, self).save(*args, **kwargs)
