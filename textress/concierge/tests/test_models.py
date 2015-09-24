@@ -332,6 +332,7 @@ class ReplyTests(TestCase):
     def setUp(self):
         self.letter_stop = "S"
         self.letter_help = "H"
+        self.letter_reactivate = "Y"
         # Hotel
         self.hotel_w_reply = create_hotel()
         self.hotel_w_no_reply = create_hotel()
@@ -354,6 +355,7 @@ class ReplyTests(TestCase):
         # Reply
         self.hotel_reply_H = mommy.make(Reply, hotel=self.hotel_w_reply, letter=self.letter_help)
         self.system_reply_S = mommy.make(Reply, letter=self.letter_stop)
+        self.system_reply_Y = mommy.make(Reply, letter=self.letter_reactivate)
 
     ### MANAGER TESTS
 
@@ -380,6 +382,12 @@ class ReplyTests(TestCase):
         Reply.objects.check_for_data_update(self.guest, self.hotel_reply_H)
         self.assertFalse(self.guest.stop)
 
+    def test_check_for_data_update_reactivate(self):
+        self.guest.stop = True
+        self.guest.save()
+        Reply.objects.check_for_data_update(self.guest, self.system_reply_Y)
+        self.assertFalse(self.guest.stop)
+
     def test_process_reply_return_reply(self):
         reply = Reply.objects.process_reply(self.guest, self.hotel_w_reply, self.letter_help)
         self.assertIsInstance(reply, Reply)
@@ -395,6 +403,25 @@ class ReplyTests(TestCase):
         reply = mommy.make(Reply, hotel=self.hotel_w_no_reply, letter=letter)
         self.assertEqual(reply.letter, letter.upper())
 
-    def test_reserved_letter(self):
+    def test_reserved_letter_true(self):
+        self.assertTrue(Reply._reserved_letter("S"))
+
+    def test_reserved_letter_false(self):
+        self.assertFalse(Reply._reserved_letter("A"))
+
+    def test_validate_not_reserved_letter(self):
+        reply = mommy.make(Reply, hotel=self.hotel_w_reply, letter="A")
+        self.assertIsInstance(reply, Reply)
+
+    def test_validate_not_reserved_letter_raise(self):
         with self.assertRaises(ValidationError):
-            mommy.make(Reply, hotel=self.hotel_w_no_reply, letter=self.letter_stop)
+            mommy.make(Reply, hotel=self.hotel_w_reply, letter="S")
+    
+    def test_validate_unique_constraint(self):
+        reply = mommy.make(Reply, hotel=self.hotel_w_reply, letter="A")
+        self.assertIsInstance(reply, Reply)
+
+    def test_validate_unique_constraint_raise(self):
+        mommy.make(Reply, hotel=self.hotel_w_reply, letter="A")
+        with self.assertRaises(ValidationError):
+            mommy.make(Reply, hotel=self.hotel_w_reply, letter="A")

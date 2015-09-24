@@ -348,6 +348,9 @@ class ReplyManager(models.Manager):
         if reply.letter == "S":
             guest.stop = True
             guest.save()
+        elif reply.letter == "Y":
+            guest.stop = False
+            guest.save()
 
     def get_reply(self, hotel, body):
         '''
@@ -383,12 +386,17 @@ class Reply(AbstractBase):
     Guest's request.
 
     `reply` is for triggered replies to the `Guest` based on an incoming
-    SMS Hotel or Default `letter`
+    SMS Hotel or System `letter`
 
-    `func_call` used for data changes only. doesn't return a auto-reply msg.
+    :unique constraint: unique by Hotel, Letter
+
+    :system letters:
+
+    - "S" - stop - block all messages
+    - "Y" - reactivate - allow messages again
     '''
     hotel = models.ForeignKey(Hotel, blank=True, null=True)
-    letter = models.CharField(_("Letter(s)"), max_length=25,
+    letter = models.CharField(_("Letter(s)"), max_length=1,
         help_text="Letter(s) will be upper cased automatically. Single letters "
                   "encouraged for shorter SMS, but not enforced.")
     message = models.CharField(_("Auto Reply Message"), max_length=320, blank=True)
@@ -401,15 +409,37 @@ class Reply(AbstractBase):
     class Meta:
         verbose_name_plural = "Replies"
 
-    def reserved_letter(self, letter):
+    def save(self, *args, **kwargs):
+        # All Letters are uppercase by default
+        self.letter = self.letter.upper()
+        # Validators
+        self._validate_unique_constraint()
+        self._validate_not_reserved_letter()
+
+        return super(Reply, self).save(*args, **kwargs)
+
+    @staticmethod
+    def _reserved_letter(letter):
         '''Reserved letters that are not allowed to be used by the Hotel for
         custom configured replies.'''
         return letter in settings.RESERVED_REPLY_LETTERS
 
-    def save(self, *args, **kwargs):
-        self.letter = self.letter.upper()
-        if self.hotel and self.reserved_letter(self.letter):
+    def _validate_not_reserved_letter(self):
+        "System Letter's can't be used by a Hotel"
+        if self.hotel and self._reserved_letter(self.letter):
             raise ValidationError(
                 "{} is a reserved letter, and can't be configured. "
-                "Please use a different letter(s).".format(self.letter))
-        return super(Reply, self).save(*args, **kwargs)
+                "Please use a different letter(s).".format(self.letter)
+            )
+
+    def _validate_unique_constraint(self):
+        "Must be unique by Hotel, Letter"
+        try:
+            reply = Reply.objects.get(hotel=self.hotel, letter=self.letter)
+        except Reply.DoesNotExist:
+            return
+        else:
+            raise ValidationError(
+                "Reply with letter: '{}' with message: '{}' already "
+                "exists.".format(reply.letter, reply.message)
+            )
