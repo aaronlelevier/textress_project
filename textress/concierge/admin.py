@@ -16,5 +16,5 @@ class MessageAdmin(admin.ModelAdmin):
 
 @admin.register(Reply)
 class ReplyAdmin(admin.ModelAdmin):
-    list_display = ('hotel', 'letter', 'message', 'func_call',)
+    list_display = ('hotel', 'letter', 'message',)
     readonly_fields = ('created', 'modified')

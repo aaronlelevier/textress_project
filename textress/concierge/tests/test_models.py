@@ -192,29 +192,6 @@ class MessageManagerTests(TestCase):
         for message in Message.objects.current():
             assert message.hidden == False
 
-    def test_receive_message_already_in_db(self):
-        # when calling ``.receive_message()`` the initial DB count is the 
-        # same before and after b/c the Message already exists, so it does't
-        # create a new one.
-        init_count = Message.objects.count()
-        Message.objects.receive_message(guest=self.guest, data={'sid': self.messages[0].sid})
-        post_count = Message.objects.count()
-        self.assertEqual(init_count, post_count)
-
-    def test_receive_message_create(self):
-        # will create a Message because Twilio message not yet in the DB
-        data = {
-            "sid": "SM254a9f3f7604418fa8b06a90b7a8f82b",
-            "to": "+12813698851",
-            "from_": "+17024302691",
-            "body": "sent via unittest save() method",
-            "status": "undelivered",
-        }
-        init_count = Message.objects.count()
-        Message.objects.receive_message(guest=self.guest, data=data)
-        post_count = Message.objects.count()
-        self.assertEqual(init_count, post_count-1)
-
     def test_monthly_all(self):
         assert Message.objects.monthly_all(date=self.today)
 

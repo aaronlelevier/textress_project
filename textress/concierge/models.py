@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -87,6 +88,7 @@ class GuestManager(AbstractBaseManager, models.Manager):
                 return self.get_or_create_unknown_guest(hotel, phone_number)
 
 
+@python_2_unicode_compatible
 class Guest(AbstractBase):
     # Keys
     hotel = models.ForeignKey(Hotel)
@@ -199,17 +201,22 @@ class MessageManager(models.Manager):
 
     def receive_message(self, guest, data):
         """
-        Process SMS from Twilio API.  This is not for processing an 
-        SMS from an XML endpoint.  
+        Access the Twilio API, and get_or_create a Message Obj in the DB.
+
+        **Different from ``receive_message_post`` because when quering 
+        the Twilio API there are different *Keys* than POSTing to an XML
+        endpoint.**
 
         :guest: Guest Model object
         :data: Twilio Message object as a Dict
         :NOTES:
             Hotels will have an "Unknown" Guest Messages container, if they
             receive a Message from an unregistered ph #.
+
+        Return: Message Obj, Created (Boolean)
         """
         try:
-            return self.get(sid=data['sid'])
+            return self.get(sid=data['sid']), False
         except ObjectDoesNotExist:
             try:
                 db_message = self.create(
@@ -227,7 +234,7 @@ class MessageManager(models.Manager):
                 # this should be logged
                 print("{}, {}".format(e.__class__, e))
             else:
-                return db_message
+                return db_message, True
 
     def receive_message_post(self, guest, data):
         """
@@ -268,6 +275,7 @@ class MessageManager(models.Manager):
         return self.get_queryset().daily_all(date)
 
 
+@python_2_unicode_compatible
 class Message(AbstractBase):
     """
     All Messages belong to a Guest.
@@ -380,6 +388,7 @@ class ReplyManager(models.Manager):
             return reply
 
 
+@python_2_unicode_compatible
 class Reply(AbstractBase):
     '''
     Used for Auto-Replies to Hotel Guests, and data changes at the 
@@ -390,7 +399,7 @@ class Reply(AbstractBase):
 
     :unique constraint: unique by Hotel, Letter
 
-    :system letters:
+    :system letters: If Hotel == None, it is a System Reply
 
     - "S" - stop - block all messages
     - "Y" - reactivate - allow messages again
@@ -400,14 +409,14 @@ class Reply(AbstractBase):
         help_text="Letter(s) will be upper cased automatically. Single letters "
                   "encouraged for shorter SMS, but not enforced.")
     message = models.CharField(_("Auto Reply Message"), max_length=320, blank=True)
-    func_call = models.CharField(_("Function Call"), max_length=100, blank=True,
-        help_text="Configure the string name of a function call here for User "
-                  "requested data changes")
 
     objects = ReplyManager()
 
     class Meta:
         verbose_name_plural = "Replies"
+
+    def __str__(self):
+        return "Letter: {}; Hotel: {}".format(self.letter, self.hotel)
 
     def save(self, *args, **kwargs):
         # All Letters are uppercase by default

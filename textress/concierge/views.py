@@ -2,10 +2,11 @@ from twilio import twiml
 
 from django.contrib.auth.models import Group
 from django.shortcuts import render
+from django.utils import timezone
 from django.views.generic import View, DetailView, ListView, TemplateView
 from django.views.generic.edit import CreateView, UpdateView
 from django.core.urlresolvers import reverse
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.forms.models import model_to_dict
 
@@ -19,12 +20,13 @@ from ws4redis.redis_store import RedisMessage
 from ws4redis.publisher import RedisPublisher
 
 from concierge.models import Message, Guest
-from concierge.helpers import process_incoming_message
+from concierge.helpers import process_incoming_message, convert_to_json_and_publish_to_redis
 from concierge.forms import GuestForm
 from concierge.mixins import GuestListContextMixin
 from concierge.permissions import IsHotelObject, IsManagerOrAdmin, IsHotelUser
 from concierge.serializers import (MessageListCreateSerializer, GuestMessageSerializer,
     GuestListSerializer, MessageRetrieveSerializer)
+from concierge.tasks import merge_twilio_messages_to_db
 from main.mixins import HotelUserMixin, HotelObjectMixin
 from utils import EmptyForm, DeleteButtonMixin
 
@@ -33,8 +35,11 @@ class ReceiveSMSView(CsrfExemptMixin, TemplateView):
     '''
     Main SMS Receiving endpoint for url to be configured on Twilio.
     '''
-
     template_name = 'blank.html'
+
+    @csrf_exempt
+    def dispatch(self, *args, **kwargs):
+        return super(ReceiveSMSView, self).dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         return render(request, 'blank.html', content_type="text/xml")
@@ -43,24 +48,25 @@ class ReceiveSMSView(CsrfExemptMixin, TemplateView):
         # must return this to confirm SMS received for Twilio API
         resp = twiml.Response()
 
-        print request.POST
         # if a msg is returned, attach and reply to Guest
-        msg, reply, hotel = process_incoming_message(data=request.POST)
-        if reply:
-            resp.message(reply)
+        msg, reply = process_incoming_message(data=request.POST)
 
-        # convert to JSON, and publish to Redis
-        redis_publisher = RedisPublisher(facility='foobar', broadcast=True)
-        msg = JSONRenderer().render(model_to_dict(msg))
-        msg = RedisMessage(msg)
-        redis_publisher.publish_message(msg)
+        # Incoming Message from Guest
+        convert_to_json_and_publish_to_redis(msg)
 
-        return render(request, 'blank.html', {'resp': str(resp)},
-            content_type='text/xml')
+        # Auto-reply Logic
+        if reply and reply.message:
+            print "reply:", reply
+            resp.message(reply.message)
 
-    @csrf_exempt
-    def dispatch(self, *args, **kwargs):
-        return super(ReceiveSMSView, self).dispatch(*args, **kwargs)
+            # delay 30 seconds, query Twilio for this Guest, and find any 
+            # missing SMS for Today, and merge them into the DB
+            for msg in merge_twilio_messages_to_db(guest=msg.guest, date=timezone.now().date()):
+                # these SMS then need to be published to Redis for the Hotel or 
+                # Guest, and appear on the right side of Send/Receive in the GuestDetailView
+                convert_to_json_and_publish_to_redis(msg)
+
+        return HttpResponse(str(resp), content_type='text/xml')
 
 
 ###############

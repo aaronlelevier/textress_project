@@ -1,0 +1,50 @@
+[
+{
+  "fields": {
+    "created": "2015-09-25T13:25:29.662Z",
+    "hotel": null,
+    "modified": "2015-09-25T13:25:29.662Z",
+    "letter": "S",
+    "hidden": false,
+    "message": ""
+  },
+  "model": "concierge.reply",
+  "pk": 1
+},
+{
+  "fields": {
+    "created": "2015-09-25T13:25:29.699Z",
+    "hotel": null,
+    "modified": "2015-09-25T13:25:29.699Z",
+    "letter": "Y",
+    "hidden": false,
+    "message": ""
+  },
+  "model": "concierge.reply",
+  "pk": 2
+},
+{
+  "fields": {
+    "created": "2015-09-25T13:25:29.704Z",
+    "hotel": null,
+    "modified": "2015-09-25T13:25:29.704Z",
+    "letter": "H",
+    "hidden": false,
+    "message": "Please call xxx for help."
+  },
+  "model": "concierge.reply",
+  "pk": 3
+},
+{
+  "fields": {
+    "created": "2015-09-25T13:25:29.708Z",
+    "hotel": 1,
+    "modified": "2015-09-25T13:25:29.708Z",
+    "letter": "H",
+    "hidden": false,
+    "message": "Thanks for contacting Aaron's Hotel, please call xxx for help."
+  },
+  "model": "concierge.reply",
+  "pk": 4
+}
+]
