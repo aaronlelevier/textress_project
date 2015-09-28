@@ -40,7 +40,7 @@ class TwilioClient(object):
 
         # bring in Twilio and get API key from settings.py
         self.client = TwilioRestClient(settings.TWILIO_ACCOUNT_SID,
-            settings.TWILIO_AUTH_TOKEN)
+            settings.TWILIO_AUTH_TOKEN, timeout=None)
 
 
 ########
@@ -137,7 +137,7 @@ class Hotel(TwilioClient, AbstractBase):
     @property
     def _client(self):
         try:
-            return TwilioRestClient(self.twilio_sid, self.twilio_auth_token)
+            return TwilioRestClient(self.twilio_sid, self.twilio_auth_token, timeout=None)
         except TwilioRestException:
             # TODO: Add logging or forms.ValidationError here?
             raise

@@ -34,9 +34,11 @@ class ProcessFromMessageTests(TestCase):
         self.assertIsInstance(self.hotel._client, TwilioRestClient)
 
     def test_twilio_message(self):
+        # Direct Twilio API call
         self.assertIsInstance(self.hotel._client.messages.list(from_=self.guest.phone_number), list)
 
     def test_guest_twilio_messages(self):
+        # Helper Method that calls Twilio API
         self.assertIsInstance(helpers.guest_twilio_messages(self.guest, self.today), list)
 
     def test_merge_twilio_messages_to_db(self):
@@ -53,4 +55,7 @@ class ProcessFromMessageTests(TestCase):
             Message.objects.count() - 1,
             len(messages)
         )
+
+    # ``merge_twilio_messages_to_db_all`` - no test b/c simple forloop
+
 

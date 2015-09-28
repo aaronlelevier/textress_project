@@ -1,5 +1,3 @@
-from twilio import twiml
-
 from django.contrib.auth.models import Group
 from django.shortcuts import render
 from django.utils import timezone
@@ -10,12 +8,11 @@ from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.forms.models import model_to_dict
 
+from braces.views import LoginRequiredMixin, SetHeadlineMixin, CsrfExemptMixin
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework import generics, permissions
-
-from braces.views import LoginRequiredMixin, SetHeadlineMixin, CsrfExemptMixin
-
+from twilio import twiml
 from ws4redis.redis_store import RedisMessage
 from ws4redis.publisher import RedisPublisher
 
@@ -26,7 +23,7 @@ from concierge.mixins import GuestListContextMixin
 from concierge.permissions import IsHotelObject, IsManagerOrAdmin, IsHotelUser
 from concierge.serializers import (MessageListCreateSerializer, GuestMessageSerializer,
     GuestListSerializer, MessageRetrieveSerializer)
-from concierge.tasks import merge_twilio_messages_to_db
+from concierge.tasks import check_twilio_messages_to_merge
 from main.mixins import HotelUserMixin, HotelObjectMixin
 from utils import EmptyForm, DeleteButtonMixin
 
@@ -47,24 +44,21 @@ class ReceiveSMSView(CsrfExemptMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         # must return this to confirm SMS received for Twilio API
         resp = twiml.Response()
-
         # if a msg is returned, attach and reply to Guest
         msg, reply = process_incoming_message(data=request.POST)
-
         # Incoming Message from Guest
         convert_to_json_and_publish_to_redis(msg)
-
         # Auto-reply Logic
         if reply and reply.message:
             print "reply:", reply
             resp.message(reply.message)
-
-            # delay 30 seconds, query Twilio for this Guest, and find any 
-            # missing SMS for Today, and merge them into the DB
-            for msg in merge_twilio_messages_to_db(guest=msg.guest, date=timezone.now().date()):
-                # these SMS then need to be published to Redis for the Hotel or 
-                # Guest, and appear on the right side of Send/Receive in the GuestDetailView
-                convert_to_json_and_publish_to_redis(msg)
+            client = msg.guest.hotel._client
+            # delay 5 seconds, query Twilio for this Guest, and find any 
+            # missing SMS for Today, and merge them into the DB            
+            check_twilio_messages_to_merge.apply_async(
+                (msg.guest,),
+                countdown=5
+            )
 
         return HttpResponse(str(resp), content_type='text/xml')
 
@@ -98,6 +92,11 @@ class GuestDetailView(GuestBaseView, GuestListContextMixin, DetailView):
         goes to the Guests' DetailView."""
         self.object = self.get_object()
         Message.objects.filter(guest=self.object, read=False).update(read=True)
+
+        # test block
+        from concierge.tasks import check_twilio_messages_to_merge
+        check_twilio_messages_to_merge(self.object)
+
         return super(GuestDetailView, self).get(request, *args, **kwargs)
 
     def get_headline(self):

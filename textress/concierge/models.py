@@ -222,6 +222,7 @@ class MessageManager(models.Manager):
                 db_message = self.create(
                     guest=guest,
                     sid=data['sid'],
+                    created=data['date_sent'],
                     received=True,
                     status=data['status'],
                     to_ph=data['to'],

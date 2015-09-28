@@ -3,6 +3,7 @@ from os import listdir
 from os.path import isfile, join
 
 from django.forms.models import model_to_dict
+from django.utils import timezone
 
 from rest_framework.renderers import JSONRenderer
 from ws4redis.publisher import RedisPublisher
@@ -21,10 +22,13 @@ def convert_to_json_and_publish_to_redis(msg):
 
 
 def guest_twilio_messages(guest, date):
+    """
+    Return: Twilio messages in descending order.
+    """
     client = guest.hotel._client
-    for msg in (sorted(client.messages.list(from_=guest.phone_number, date=date),
-                       key=lambda message: message.date_sent))]
-    
+    return [msg for msg in (sorted(client.messages.list(to=guest.phone_number, date=date),
+                                   key=lambda message: message.date_sent, reverse=True))]
+
 
 def merge_twilio_messages_to_db(guest, date):
     """Adds Twilio Messages that are not in the DB to the DB.
@@ -37,6 +41,11 @@ def merge_twilio_messages_to_db(guest, date):
         if created:
             messages.append(obj)
     return messages
+
+
+def merge_twilio_messages_to_db_all(date=timezone.now().date()):
+    for guest in Guest.objects.current():
+        merge_twilio_messages_to_db(guest, date)
 
 
 def process_incoming_message(data):
@@ -57,20 +66,20 @@ def process_incoming_message(data):
 
     if guest.is_unknown:
         return Message.objects.create(guest=guest, hotel=hotel, to=data['From'],
-                                      body = login_messages['hotel_not_found'])
+                                      body=login_messages['hotel_not_found'])
 
     # save message to DB
-    msg=Message.objects.receive_message_post(guest, data)
+    msg = Message.objects.receive_message_post(guest, data)
 
     # If a 'reply' is returned here, it is an auto-reply, and will
     # be sent back to the Guest.
-    reply=Reply.objects.process_reply(guest, hotel, data['Body'])
+    reply = Reply.objects.process_reply(guest, hotel, data['Body'])
 
     return msg, reply
 
 
 def generate_icon_fixtures():
-    mypath=os.path.join(
+    mypath = os.path.join(
         os.path.dirname(os.path.dirname(__file__)),
         'media/icons')
 

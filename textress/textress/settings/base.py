@@ -95,8 +95,8 @@ DATABASES = {
         'NAME': os.environ['T17_DB_NAME'],
         'USER': os.environ['T17_DB_USER'],
         'PASSWORD': os.environ['T17_DB_PASSWORD'], 
-        'HOST': 'localhost',                      
-        'PORT': '5432',                      
+        'HOST': 'localhost',
+        'PORT': '5432',
         'OPTIONS': {},
     }
 }
@@ -203,10 +203,6 @@ REST_FRAMEWORK = {
 #     'JWT_ALLOW_REFRESH': True,
 #     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=14)
 # }
-
-# CELERY
-# BROKER_URL = 'amqp://guest:guest@localhost:5672//'
-# CELERY_RESULT_BACKEND = 
 
 
 ### TWILIO
