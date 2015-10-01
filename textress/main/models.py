@@ -71,24 +71,6 @@ class Icon(models.Model):
 # HOTEL #
 #########
 
-class HotelManager(models.Manager):
-
-    def textress(self):
-        return self.get(name=settings.TEXTRESS_HOTEL)
-
-    def get_by_phone(self, ph_num):
-        """
-        Get the Hotel using it's `twilio_phone_number`. If it doesn't 
-        exist, delete the PhoneNumber.
-
-        :ph_num: the twilio formatted string of the PH. (ex: +17025551234)
-        """
-        try:
-            return self.get(twilio_phone_number=ph_num)
-        except Hotel.DoesNotExist:
-            PhoneNumber.objects.delete_unknown_number(ph_num)
-          
-
 class Hotel(TwilioClient, AbstractBase):
     """
     `customer` ForeignKey is the entry point p/ Hotel to Stipe.
@@ -129,8 +111,6 @@ class Hotel(TwilioClient, AbstractBase):
     twilio_phone_number = models.CharField(_("Twilio Phone Number"), max_length=25, blank=True, null=True)
     twilio_ph_sid = models.CharField(_("Twilio Phone Number Sid"), max_length=100, blank=True, null=True)
 
-    objects = HotelManager()
-
     def __str__(self):
         return self.name
 
@@ -158,10 +138,6 @@ class Hotel(TwilioClient, AbstractBase):
     @property
     def area_code(self):
         return self.address_phone[2:5]
-
-    @property
-    def is_textress(self):
-        return self.name == settings.TEXTRESS_HOTEL
 
     @property
     def registration_complete(self):

@@ -10,6 +10,7 @@ from twilio import TwilioRestException
 
 from account.models import AcctTrans, TransType
 from main.models import Hotel, TwilioClient
+from utils import email
 from utils.exceptions import PhoneNumberNotDeletedExcp
 from utils.models import TimeStampBaseModel
 

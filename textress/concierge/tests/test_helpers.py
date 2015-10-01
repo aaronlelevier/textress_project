@@ -1,6 +1,7 @@
 import os
 
 from django.test import TestCase
+from django.conf import settings
 
 from model_mommy import mommy
 from twilio.rest.client import TwilioRestClient
@@ -55,6 +56,14 @@ class ProcessFromMessageTests(TestCase):
             Message.objects.count() - 1,
             len(messages)
         )
+
+    def test_get_by_phone(self):
+        hotel = helpers.get_hotel_by_twilio_phone(self.hotel.twilio_phone_number)
+        self.assertTrue(isinstance(hotel, Hotel))
+
+    def test_get_by_phone_fail(self):
+        hotel = helpers.get_hotel_by_twilio_phone('1') #invalid ph num
+        self.assertIsNone(hotel)
 
     # ``merge_twilio_messages_to_db_all`` - no test b/c simple forloop
 

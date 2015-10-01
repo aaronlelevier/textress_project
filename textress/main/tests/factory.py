@@ -24,7 +24,8 @@ CREATE_HOTEL_DICT = {
     'address_line1': '123 Some St.',
     'address_city': 'San Diego',
     'address_state': STATES[0][0],
-    'address_zip': '92131'
+    'address_zip': '92131',
+    'twilio_phone_number': create._generate_ph()
     }
 
 PASSWORD = '1234'

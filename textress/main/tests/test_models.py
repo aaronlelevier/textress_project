@@ -24,39 +24,6 @@ class TwilioClientTests(TestCase):
         self.assertIsInstance(tc.client, TwilioRestClient)
 
 
-class HotelManagerTests(TestCase):
-
-    def setUp(self):
-        create._get_groups_and_perms()
-        self.password = '1234'
-
-        # set User "aaron_test" from fixtures as an attr on this class
-        self.hotel = create_hotel()
-        self.user = create_hotel_user(hotel=self.hotel, username='aaron_test')
-        self.username = self.user.username
-
-        # Phone
-        self.ph_num = self.hotel.phonenumbers.default(hotel=self.hotel)
-
-        # Default Hotel
-        create_hotel(name=settings.TEXTRESS_HOTEL)
-
-    def test_get_by_phone(self):
-        hotel = Hotel.objects.get_by_phone(self.hotel.address_phone)
-        self.assertTrue(isinstance(hotel, Hotel))
-
-    def test_get_by_phone_fail(self):
-        # should return the Textres Hotel default object
-        hotel = Hotel.objects.get_by_phone('1') #invalid ph num
-        self.assertEqual(hotel, Hotel.objects.get(name=settings.TEXTRESS_HOTEL))
-
-    def test_textress(self):
-        # default Hotel object
-        hotel = Hotel.objects.textress()
-        self.assertTrue(isinstance(hotel, Hotel))
-        self.assertEqual(hotel.name, settings.TEXTRESS_HOTEL)
-
-
 class HotelTests(TestCase):
 
     def setUp(self):
@@ -103,14 +70,6 @@ class HotelTests(TestCase):
         self.assertIsNotNone(hotel.twilio_sid)
         self.assertIsNotNone(hotel.twilio_auth_token)
         self.assertEqual(hotel.twilio_sid, sid)
-
-    def test_is_textress(self):
-        try:
-            textress = Hotel.objects.get(name=settings.TEXTRESS_HOTEL)
-        except ObjectDoesNotExist:
-            textress = mommy.make(Hotel, name=settings.TEXTRESS_HOTEL,
-                address_phone=create._generate_ph())
-        self.assertTrue(textress.is_textress)
 
     def test_registration_complete(self):
         # Fails b/c existing Hotel doesn't have a Customer

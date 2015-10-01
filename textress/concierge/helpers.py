@@ -11,6 +11,7 @@ from ws4redis.redis_store import RedisMessage
 
 from concierge.models import Guest, Message, Reply
 from main.models import Hotel, Icon
+from sms.models import PhoneNumber
 from utils import login_messages
 
 
@@ -48,6 +49,13 @@ def merge_twilio_messages_to_db_all(date=timezone.now().date()):
         merge_twilio_messages_to_db(guest, date)
 
 
+def get_hotel_by_twilio_phone(ph_num):
+    try:
+        return Hotel.objects.get(twilio_phone_number=ph_num)
+    except Hotel.DoesNotExist:
+        PhoneNumber.objects.delete_unknown_number(ph_num)
+
+
 def process_incoming_message(data):
     '''
     `Hotel` to recieve the `Message` must be located, if not, reply
@@ -60,7 +68,8 @@ def process_incoming_message(data):
     - msg: b/c will be converted to JSON and sent to client thro Redis
     - reply: auto-reply to guest TODO: [need to move out of `ReceiveSMSView code]
     '''
-    hotel = Hotel.objects.get_by_phone(data['To'])
+    # hotel = Hotel.objects.get_by_phone(data['To'])
+    hotel = get_hotel_by_twilio_phone(data['To'])
 
     guest = Guest.objects.get_by_phone(hotel, data['From'])
 

@@ -155,7 +155,6 @@ DEFAULT_EMAIL_NOREPLY = 'noreply@textress.com'
 
 ### OTHER CONTACT INFO ###
 TEXTRESS_PHONE_NUMBER = os.environ['T17_PHONE_NUMBER']
-TEXTRESS_HOTEL = 'Aaron Test'
 
 COMPANY_NAME = "Textress"
 

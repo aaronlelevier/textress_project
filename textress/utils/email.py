@@ -111,9 +111,8 @@ def send_delete_unknown_number_failed_email(ph_num):
     """Email myself that a Twilio PH that wasn't registered to a 
     Hotel received an SMS, but I wasn't able to delete it, so I 
     need to delete it manually."""
-    hotel_admin = hotel.admin
     email = Email(
-        to=hotel_admin.email,
+        to=settings.DEFAULT_EMAIL_AARON,
         from_email=settings.DEFAULT_EMAIL_BILLING,
         subject='email/delete_unknown_number_failed/subject.txt',
         html_content='email/delete_unknown_number_failed/email.html',
