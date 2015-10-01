@@ -56,7 +56,7 @@ class ReceiveSMSView(CsrfExemptMixin, TemplateView):
             # delay 5 seconds, query Twilio for this Guest, and find any 
             # missing SMS for Today, and merge them into the DB            
             check_twilio_messages_to_merge.apply_async(
-                # (msg.guest,),
+                (msg.guest,),
                 countdown=5
             )
 
