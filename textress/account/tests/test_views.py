@@ -25,9 +25,9 @@ class AcctStmtViewTests(TestCase):
         create._get_groups_and_perms()
         self.admin = create_hotel_user(hotel=self.hotel, username='admin', group='hotel_admin')
         # dates
-        today = datetime.datetime.today()
-        self.year = today.year
-        self.month = today.month
+        self.today = datetime.datetime.today()
+        self.year = self.today.year
+        self.month = self.today.month
         # Account Data
         self.acct_stmt = create_acct_stmt(hotel=self.hotel, year=self.year, month=self.month)
         self.acct_trans = create_acct_trans(hotel=self.hotel)
@@ -55,7 +55,10 @@ class AcctStmtViewTests(TestCase):
             kwargs={'year': self.year, 'month': self.month}))
         self.assertTrue(response.context['acct_stmt'])
         self.assertTrue(response.context['acct_stmts'])
-        self.assertTrue(response.context['monthly_trans'])
+        # Because `monthly_trans` have a one day lag, so if today is the 1st
+        # of the month, there won't be any `monthly_trans` yet for this month.
+        if not self.today.day == 1:
+            self.assertTrue(response.context['monthly_trans'])
 
     def test_acct_stmt_detail_breadcrumbs(self):
         response = self.client.get(reverse('acct_stmt_detail',

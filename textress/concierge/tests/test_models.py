@@ -174,6 +174,7 @@ class MessageManagerTests(TestCase):
             hotel=self.hotel,
             user=self.admin,
             guest=self.guest,
+            insert_date=timezone.now().date(),
             number=1
             )
         self.message = self.messages[0]
@@ -190,15 +191,18 @@ class MessageManagerTests(TestCase):
 
     def test_current(self):
         for message in Message.objects.current():
-            assert message.hidden == False
+            self.assertEqual(message.hidden, False)
 
     def test_monthly_all(self):
-        assert Message.objects.monthly_all(date=self.today)
+        self.assertTrue(Message.objects.monthly_all(date=self.today))
 
     def test_daily_all(self):
         manual_daily_all = Message.objects.filter(insert_date=self.today)
         mgr_daily_all = Message.objects.daily_all(date=self.today)
-        assert len(manual_daily_all) == len(mgr_daily_all)
+        self.assertEqual(
+            manual_daily_all.count(),
+            mgr_daily_all.count()
+        )
 
     ### receive_message_post
 
