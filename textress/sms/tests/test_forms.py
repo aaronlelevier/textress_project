@@ -14,7 +14,7 @@ class FormTests(TestCase):
         # Hotel
         self.hotel = create_hotel()
         # Account
-        self.acct_cost, _ = AcctCost.objects.get_or_create(self.hotel, auto_recharge=False)
+        self.acct_cost, _ = AcctCost.objects.get_or_create(self.hotel, auto_recharge=True)
         self.init_amt = TransType.objects.create(name=TRANS_TYPES[0][0], desc=TRANS_TYPES[0][0])
         self.acct_trans, _ = AcctTrans.objects.get_or_create(self.hotel, self.init_amt)
         # User

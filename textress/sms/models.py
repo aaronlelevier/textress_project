@@ -18,14 +18,7 @@ from utils.models import TimeStampBaseModel
 # PHONE NUMBER #
 ################
 
-class PhoneNumberQuerySet(models.query.QuerySet):
-    pass
-
-
 class PhoneNumberManager(TwilioClient, models.Manager):
-
-    def get_queryset(self):
-        return PhoneNumberQuerySet(self.model, self._db)
 
     ### UPDATE PRIMARY
 
