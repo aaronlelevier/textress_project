@@ -23,6 +23,9 @@ class IndexView(CreateView):
 
     def get_context_data(self, **kwargs):
         # test: start
+        from django.conf import settings
+        print settings.DATABASES['default']['OPTIONS']
+        
         from .celery import db_test_query
         db_test_query.delay()
         # test: end

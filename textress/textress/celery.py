@@ -24,5 +24,8 @@ def debug_task(self):
 
 @app.task(bind=True)
 def db_test_query(self):
+    from django.conf import settings
+    print settings.DATABASES['default']['OPTIONS']
+    
     from account.models import Pricing
     return Pricing.objects.all()
