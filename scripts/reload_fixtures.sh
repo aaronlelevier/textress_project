@@ -1,4 +1,4 @@
-cd textress
+echo "MUST BE AT './manage.py' DIR LEVEL!"
 dropdb textress
 createdb textress
 ./manage.py migrate
