@@ -97,7 +97,6 @@ DATABASES = {
         'PASSWORD': os.environ['T17_DB_PASSWORD'], 
         'HOST': 'localhost',
         'PORT': '5432',
-        'OPTIONS': {},
     }
 }
 
