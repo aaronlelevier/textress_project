@@ -7,7 +7,7 @@ from celery import Celery
 from django.conf import settings
 
 # set the default Django settings module for the 'celery' program.
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'textress.settings.prod')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'textress.settings')
 
 app = Celery('textress', backend='redis://localhost', broker='amqp://')
 
@@ -25,7 +25,7 @@ def debug_task(self):
 @app.task(bind=True)
 def db_test_query(self):
     from django.conf import settings
-    print settings.DATABASES['default']['OPTIONS']
-    
+    print "Settings w/i Task:", settings.DATABASES['default']['OPTIONS']
+
     from account.models import Pricing
     return Pricing.objects.all()

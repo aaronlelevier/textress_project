@@ -2,14 +2,11 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
-from django.conf import settings
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('main', '0003_auto_20150711_0810'),
     ]
 
     operations = [
@@ -27,7 +24,6 @@ class Migration(migrations.Migration):
                 ('check_out', models.DateField(verbose_name='Check-out Date', blank=True)),
                 ('confirmed', models.BooleanField(default=False, help_text=b"Reply 'Y' to Confirm PH # for example.", verbose_name='Confirmed')),
                 ('stop', models.BooleanField(default=False, help_text=b"Reply 'S' to Stop receiving all messages.", verbose_name='Stop')),
-                ('hotel', models.ForeignKey(to='main.Hotel')),
             ],
             options={
                 'abstract': False,
@@ -50,12 +46,9 @@ class Migration(migrations.Migration):
                 ('cost', models.FloatField(null=True, blank=True)),
                 ('insert_date', models.DateField(null=True, verbose_name='Insert Date', blank=True)),
                 ('read', models.BooleanField(default=False, help_text=b'All messages are unread until rendered in a User View.', verbose_name='Read')),
-                ('guest', models.ForeignKey(to='concierge.Guest')),
-                ('hotel', models.ForeignKey(related_name='messages', blank=True, to='main.Hotel', null=True)),
-                ('user', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, help_text=b'NULL unless sent from a Hotel User.', null=True)),
             ],
             options={
-                'abstract': False,
+                'ordering': ('-created',),
             },
         ),
         migrations.CreateModel(
@@ -65,10 +58,8 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now=True)),
                 ('hidden', models.BooleanField(default=False, verbose_name='Hide')),
-                ('letter', models.CharField(help_text=b'Letter(s) will be upper cased automatically. Single letters         encouraged for shorter SMS, but not enforced.', max_length=25, verbose_name='Letter(s)')),
+                ('letter', models.CharField(help_text=b'Letter(s) will be upper cased automatically. Single letters encouraged for shorter SMS, but not enforced.', max_length=1, verbose_name='Letter(s)')),
                 ('message', models.CharField(max_length=320, verbose_name='Auto Reply Message', blank=True)),
-                ('func_call', models.CharField(help_text=b'Configure the string name of a function call here for User         requested data changes', max_length=100, verbose_name='Function Call', blank=True)),
-                ('hotel', models.ForeignKey(to='main.Hotel')),
             ],
             options={
                 'verbose_name_plural': 'Replies',

@@ -26,10 +26,17 @@ class Migration(migrations.Migration):
                 ('expires', models.CharField(max_length=10, verbose_name='Expires', blank=True)),
             ],
             options={
-                'ordering': ['-created'],
-                'abstract': False,
+                'ordering': ('-default',),
             },
             bases=(payment.models.StripeClient, models.Model),
+        ),
+        migrations.CreateModel(
+            name='CardImage',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(unique=True, max_length=100)),
+                ('image', models.ImageField(upload_to=payment.models.card_image_file)),
+            ],
         ),
         migrations.CreateModel(
             name='Charge',
@@ -87,5 +94,10 @@ class Migration(migrations.Migration):
             model_name='card',
             name='customer',
             field=models.ForeignKey(related_name='cards', to='payment.Customer'),
+        ),
+        migrations.AddField(
+            model_name='card',
+            name='image',
+            field=models.ForeignKey(blank=True, to='payment.CardImage', help_text=b'Auto-add the CardImage at save() based on Card.brand', null=True),
         ),
     ]
