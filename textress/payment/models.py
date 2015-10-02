@@ -252,6 +252,8 @@ class ChargeManager(StripeClient, models.Manager):
 
     def stripe_create(self, hotel, amount, currency='usd'):
         '''
+        TODO: break into smaller methods
+        
         Create Charge based on Stripe Customer ID. Don't need a card token"
         because only charging existing Customers.
         '''

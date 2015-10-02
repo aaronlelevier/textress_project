@@ -22,8 +22,8 @@ def signup_register_step4(hotel, token, email, amount):
 
         card = Card.objects.stripe_create(customer=customer)
 
-        charge = Charge.objects.stripe_create(hotel=hotel, card=card,
-            customer=customer, amount=amount, email=email)
+        charge = Charge.objects.stripe_create(
+            hotel=hotel, amount=amount)
             
     except stripe.error.StripeError:
         raise

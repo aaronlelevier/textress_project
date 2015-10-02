@@ -18,7 +18,7 @@ class AcctCostForm(Bootstrap3ModelForm):
 
     class Meta:
         model = AcctCost
-        fields = ['init_amt', 'balance_min', 'recharge_amt'] # TODO: add "auto-recharge" field
+        fields = ['init_amt', 'balance_min', 'recharge_amt', 'auto_recharge']
 
 
 class AcctCostUpdateForm(Bootstrap3ModelForm):

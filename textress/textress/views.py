@@ -22,13 +22,6 @@ class IndexView(CreateView):
     success_url = reverse_lazy('index')
 
     def get_context_data(self, **kwargs):
-        # test: start
-        from django.conf import settings
-        print "Settings in View:", settings.DATABASES['default']['OPTIONS']
-
-        from .celery import db_test_query
-        db_test_query.delay()
-        # test: end
         context = super(IndexView, self).get_context_data(**kwargs)
         context['topics'] = Topic.objects.prefetch_related('qas')
         return context
