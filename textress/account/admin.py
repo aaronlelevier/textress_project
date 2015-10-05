@@ -16,7 +16,7 @@ class TransTypeAdmin(admin.ModelAdmin):
 
 @admin.register(AcctCost)
 class AcctCostAdmin(admin.ModelAdmin):
-    list_display = ('hotel', 'init_amt', 'balance_min', 'recharge_amt',)
+    list_display = ('hotel', 'auto_recharge', 'init_amt', 'balance_min', 'recharge_amt',)
     readonly_fields = ('created', 'modified',)
 
 

@@ -1,6 +1,7 @@
 from django import forms
 
 from account.models import AcctTrans
+from utils.exceptions import AutoRechargeOffExcp
 
 
 class PhoneNumberAddForm(forms.Form):
@@ -11,7 +12,8 @@ class PhoneNumberAddForm(forms.Form):
 
     def clean(self):
         cd = super(PhoneNumberAddForm, self).clean()
-        balance_ok = AcctTrans.objects.check_balance(self.hotel)
-        if not balance_ok:
+        try:
+            AcctTrans.objects.check_balance(self.hotel)
+        except AutoRechargeOffExcp:
             raise forms.ValidationError("Form Error")
         return cd

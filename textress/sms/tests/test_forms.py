@@ -8,14 +8,14 @@ from sms.forms import PhoneNumberAddForm
 from utils import create
 
 
-class FormTests(TestCase):
+class PhoneNumberAddTests(TestCase):
 
     def setUp(self):
         # Hotel
         self.hotel = create_hotel()
         # Account
+        self.init_amt, _ = TransType.objects.get_or_create(name='init_amt')
         self.acct_cost, _ = AcctCost.objects.get_or_create(self.hotel, auto_recharge=True)
-        self.init_amt = TransType.objects.create(name=TRANS_TYPES[0][0], desc=TRANS_TYPES[0][0])
         self.acct_trans, _ = AcctTrans.objects.get_or_create(self.hotel, self.init_amt)
         # User
         create._get_groups_and_perms()
@@ -27,14 +27,19 @@ class FormTests(TestCase):
     def teardown(self):
         self.client.logout()
 
-    def test_form(self):
-        # Initial AcctCost is created with a balance of 200, but the PH 
-        # cost is 300, so this should raise an error when trying to buy 
-        # a new phone number.
+    def test_form_success(self):
+        # Auto-recharge = True, so this will succeed
+        response = self.client.post(reverse('sms:ph_num_add'))
+        self.assertEqual(response.status_code, 302)
+
+    def test_form_fail(self):
+        # setup
+        self.assertTrue(AcctTrans.objects.balance(self.hotel) < 300)
+        self.acct_cost.auto_recharge = False
+        self.acct_cost.save()
+        # test
         response = self.client.post(reverse('sms:ph_num_add'))
         self.assertEqual(response.status_code, 200) # 302 redirect would be a success. 
-                                                    # In this case goes back to form to display error
-
         m = list(response.context['messages'])
         self.assertEqual(len(m), 1)
         self.assertIn("or turn Auto-recharge ON", str(m[0]))
