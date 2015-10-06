@@ -275,10 +275,10 @@ class ChargeManager(StripeClient, models.Manager):
 
     def stripe_create(self, hotel, amount, currency='usd'):
         '''
-        Create Charge based on Stripe Customer ID. Don't need a card token"
+        Create Charge based on Stripe Customer ID. Don't need a card token
         because only charging existing Customers.
         '''
-        stripe_charge = self.stripe_charge(hotel, amount, currency)
+        stripe_charge = self._stripe_charge(hotel, amount, currency)
 
         # Twilio Subaccount
         hotel.get_or_create_subaccount()
