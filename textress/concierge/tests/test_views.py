@@ -18,6 +18,7 @@ from concierge.models import Guest, Message
 
 # Test Factory Imports
 from concierge import views, serializers
+from concierge.models import Reply
 from concierge.tests.factory import make_guests, make_messages
 from main.models import Hotel, UserProfile
 from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
@@ -148,6 +149,12 @@ class GuestViewTests(TestCase):
         # hide guest worked
         updated_guest = Guest.objects.get(pk=guest.pk)
         self.assertTrue(updated_guest.hidden)
+
+    ### ReplyView
+
+    def test_replies(self):
+        response = self.client.get(reverse('concierge:replies'))
+        self.assertEqual(response.status_code, 200)
 
 
 ########

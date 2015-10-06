@@ -9,9 +9,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.forms.models import model_to_dict
 
 from braces.views import LoginRequiredMixin, SetHeadlineMixin, CsrfExemptMixin
+from rest_framework import generics, permissions
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-from rest_framework import generics, permissions
 from twilio import twiml
 from ws4redis.redis_store import RedisMessage
 from ws4redis.publisher import RedisPublisher
@@ -159,6 +159,13 @@ class GuestDeleteView(GuestBaseView, DeleteButtonMixin, TemplateView):
         self.object = Guest.objects.get(pk=kwargs['pk'])
         self.object.hide()
         return HttpResponseRedirect(reverse('concierge:guest_list'))
+
+
+class ReplyView(IsManagerOrAdmin, TemplateView):
+    """
+    :Angular View: Handle all Reply create/edit/delete UI.
+    """
+    template_name = "concierge/replies.html"
 
 
 ########

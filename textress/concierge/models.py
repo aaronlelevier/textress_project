@@ -298,7 +298,7 @@ class Message(AbstractBase):
     from_ph = models.CharField(_("From"), max_length=12, blank=True,
         default=settings.PHONE_NUMBER)
     body = models.TextField(_("Message"), max_length=320)
-    reason = models.CharField(_("Error Code Reason"), max_length=100,
+    reason = models.CharField(_("Error Code Reason"), max_length=500,
         blank=True, null=True, help_text="Reason for failure of SMS send, else Null.")
     cost = models.FloatField(blank=True, null=True)
     # Auto fields
@@ -365,8 +365,8 @@ class ReplyManager(models.Manager):
         '''
         Resolve Reply in this order:
 
-        - try get() Hotel Reply
-        - try get() system Reply
+        - Hotel Reply
+        - System Reply
         - no reply
         '''
         try:

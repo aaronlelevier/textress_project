@@ -30,7 +30,7 @@
     "modified": "2015-09-25T13:25:29.704Z",
     "letter": "H",
     "hidden": false,
-    "message": "Please call xxx for help."
+    "message": "Please call the main hotel phone number for help. Sorry about the inconvenience."
   },
   "model": "concierge.reply",
   "pk": 3
@@ -42,7 +42,7 @@
     "modified": "2015-09-25T13:25:29.708Z",
     "letter": "H",
     "hidden": false,
-    "message": "Thanks for contacting Aaron's Hotel, please call xxx for help."
+    "message": "Thank you for contacting Aaron's Hotel, please call 775-419-4000 for to speak to our concierge."
   },
   "model": "concierge.reply",
   "pk": 4
