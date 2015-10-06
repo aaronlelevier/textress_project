@@ -250,13 +250,10 @@ class Card(PmtAbstractBase):
 
 class ChargeManager(StripeClient, models.Manager):
 
-    def stripe_create(self, hotel, amount, currency='usd'):
-        '''
-        TODO: break into smaller methods
-        
-        Create Charge based on Stripe Customer ID. Don't need a card token"
-        because only charging existing Customers.
-        '''
+    def _stripe_charge(self, hotel, amount, currency='usd'):
+        """
+        This method charges an existing Stripe Customer.
+        """
         try:
             stripe_charge = self.stripe.Charge.create(
                 amount=amount,
@@ -266,20 +263,33 @@ class ChargeManager(StripeClient, models.Manager):
         except self.stripe.error.CardError as e:
             raise e
 
-        # Twilio Subaccount
-        hotel.get_or_create_subaccount()
-        hotel.activate()
+        return stripe_charge
 
-        # DB Card
-        card = Card.objects.get(id=stripe_charge.card.id)
-
-        # DB Charge
+    def _db_create(self, card, hotel, stripe_charge):
         return self.create(
             card=card,
             customer=hotel.customer,
             id=stripe_charge.id,
             amount=stripe_charge.amount
         )
+
+    def stripe_create(self, hotel, amount, currency='usd'):
+        '''
+        Create Charge based on Stripe Customer ID. Don't need a card token"
+        because only charging existing Customers.
+        '''
+        stripe_charge = self.stripe_charge(hotel, amount, currency)
+
+        # Twilio Subaccount
+        hotel.get_or_create_subaccount()
+        hotel.activate()
+
+        # TODO: Will this always succeed, and does it grab the primary Card?
+        # DB Card
+        card = Card.objects.get(id=stripe_charge.card.id)
+
+        # DB Charge
+        return self._db_create(card, hotel, stripe_charge)
 
 
 class Charge(PmtAbstractBase):
