@@ -416,13 +416,13 @@ class ReplyAPITests(APITestCase):
         self.client.logout()
 
     def test_list(self):
-        response = self.client.get("/api/replies/")
+        response = self.client.get("/api/reply/")
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
         self.assertTrue(len(data) > 0) # system Reply fixtures returned
 
     def test_fields(self):
-        response = self.client.get("/api/replies/")
+        response = self.client.get("/api/reply/")
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
         reply = data[0]
@@ -432,7 +432,7 @@ class ReplyAPITests(APITestCase):
         reply["desc"]
 
     def test_list_only_system_or_hotel(self):
-        response = self.client.get("/api/replies/")
+        response = self.client.get("/api/reply/")
         data = json.loads(response.content)
         # Hotel Reply
         self.assertIn(self.reply.id, [x['id'] for x in data])
@@ -443,12 +443,12 @@ class ReplyAPITests(APITestCase):
         self.assertNotIn(self.reply_2.id, [x['id'] for x in data])
 
     def test_get(self):
-        response = self.client.get("/api/replies/{}/".format(self.reply.id))
+        response = self.client.get("/api/reply/{}/".format(self.reply.id))
         data = json.loads(response.content)
         self.assertEqual(data['message'], self.reply.message)
 
     def test_get_other_hotels_reply(self):
-        response = self.client.get("/api/replies/{}/".format(self.reply_2.id))
+        response = self.client.get("/api/reply/{}/".format(self.reply_2.id))
         self.assertEqual(response.status_code, 403)
 
     def test_create(self):
@@ -458,21 +458,21 @@ class ReplyAPITests(APITestCase):
             "message": "foo",
             "desc": "bar"
         }
-        response = self.client.post("/api/replies/", data, format='json')
+        response = self.client.post("/api/reply/", data, format='json')
         self.assertEqual(response.status_code, 201)
 
     def test_update(self):
         self.data["message"] = "foo"
-        response = self.client.put("/api/replies/{}/".format(self.reply.id),
+        response = self.client.put("/api/reply/{}/".format(self.reply.id),
             self.data, format='json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.data["message"], Reply.objects.get(id=self.reply.id).message)
 
     def test_delete(self):
-        response = self.client.delete("/api/replies/{}/".format(self.reply.id))
+        response = self.client.delete("/api/reply/{}/".format(self.reply.id))
         self.assertEqual(response.status_code, 204)
         self.assertFalse(Reply.objects.filter(id=self.reply.id).exists())
 
     def test_delete_other_hotel_reply_fails(self):
-        response = self.client.delete("/api/replies/{}/".format(self.reply_2.id))
+        response = self.client.delete("/api/reply/{}/".format(self.reply_2.id))
         self.assertEqual(response.status_code, 403)

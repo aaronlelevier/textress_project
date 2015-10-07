@@ -2,52 +2,53 @@ var conciergeControllers = angular.module('conciergeApp.controllers', ['concierg
 
 conciergeControllers.controller('GuestListCtrl', ['$scope', '$timeout', 'Guest', 'Message',
     function($scope, $timeout, Guest, Message) {
-    // live
-    $scope.guests = Guest.query();
+        // live
+        $scope.guests = Guest.query();
 
-    // Sorting for List
-    $scope.predicate = 'name';
-    $scope.reverse = true;
-    $scope.order = function(predicate) {
-        $scope.reverse = ($scope.predicate === predicate) ? !$scope.reverse : false;
-        $scope.predicate = predicate;
-    };
+        // Sorting for List
+        $scope.predicate = 'name';
+        $scope.reverse = true;
+        $scope.order = function(predicate) {
+            $scope.reverse = ($scope.predicate === predicate) ? !$scope.reverse : false;
+            $scope.predicate = predicate;
+        };
 
-    // GuestListView: Push incoming messsage onto Guest Messages array for all Guests
-    var initializing = true;
+        // GuestListView: Push incoming messsage onto Guest Messages array for all Guests
+        var initializing = true;
 
-    $scope.getMessage = function(message) {
+        $scope.getMessage = function(message) {
 
-        var gm = function(message) {
-            // goal: convert to JSON in order to handle
-            if (typeof(message) !== "object") {
-                message = JSON.parse(message);
-            }
+            var gm = function(message) {
+                // goal: convert to JSON in order to handle
+                if (typeof(message) !== "object") {
+                    message = JSON.parse(message);
+                }
 
-            for (i = 0; i < $scope.guests.length; i++) {
-                if (message.guest == $scope.guests[i].id) {
-                    $scope.guest = $scope.guests[i]; // set as local $scope to the Ctrl otherwise
-                                                     // can't access it w/i `Message.get()` below
-                    Message.get({
-                        id: message.id
-                    }, function(response) {
-                        // Only append the Message if it belongs to the Guest
-                        // $scope.guests[i].messages.unshift(response);
-                        $scope.guest.messages.push(response);
-                    });
+                for (i = 0; i < $scope.guests.length; i++) {
+                    if (message.guest == $scope.guests[i].id) {
+                        $scope.guest = $scope.guests[i]; // set as local $scope to the Ctrl otherwise
+                        // can't access it w/i `Message.get()` below
+                        Message.get({
+                            id: message.id
+                        }, function(response) {
+                            // Only append the Message if it belongs to the Guest
+                            // $scope.guests[i].messages.unshift(response);
+                            $scope.guest.messages.push(response);
+                        });
+                    }
                 }
             }
-        }
 
-        if (initializing) {
-            $timeout(function() {
-                initializing = false;
-            });
-        } else {
-            gm(message);
+            if (initializing) {
+                $timeout(function() {
+                    initializing = false;
+                });
+            } else {
+                gm(message);
+            }
         }
-    }    
-}]);
+    }
+]);
 
 // ``Dashboard page``: where new messages should pop via a websocket to dispay to the User
 conciergeControllers.controller('GuestMsgPreviewCtrl', ['$scope', '$filter', '$stateParams', '$timeout', 'Message', 'GuestMessages',
@@ -58,41 +59,42 @@ conciergeControllers.controller('GuestMsgPreviewCtrl', ['$scope', '$filter', '$s
         // Append Last Message object to each Guest in Array
         // LastMsg has: text, time, read/unread status
 
-    // GuestListView: Push incoming messsage onto Guest Messages array for all Guests
-    var initializing = true;
+        // GuestListView: Push incoming messsage onto Guest Messages array for all Guests
+        var initializing = true;
 
-    $scope.getMessage = function(message) {
+        $scope.getMessage = function(message) {
 
-        var gm = function(message) {
-            // goal: convert to JSON in order to handle
-            if (typeof(message) !== "object") {
-                message = JSON.parse(message);
-            }
+            var gm = function(message) {
+                // goal: convert to JSON in order to handle
+                if (typeof(message) !== "object") {
+                    message = JSON.parse(message);
+                }
 
-            for (i = 0; i < $scope.guests.length; i++) {
-                if (message.guest == $scope.guests[i].id) {
-                    $scope.guest = $scope.guests[i]; // set as local $scope to the Ctrl otherwise
-                                                     // can't access it w/i `Message.get()` below
-                    Message.get({
-                        id: message.id
-                    }, function(response) {
-                        // Only append the Message if it belongs to the Guest
-                        // $scope.guests[i].messages.unshift(response);
-                        $scope.guest.messages.push(response);
-                    });
+                for (i = 0; i < $scope.guests.length; i++) {
+                    if (message.guest == $scope.guests[i].id) {
+                        $scope.guest = $scope.guests[i]; // set as local $scope to the Ctrl otherwise
+                        // can't access it w/i `Message.get()` below
+                        Message.get({
+                            id: message.id
+                        }, function(response) {
+                            // Only append the Message if it belongs to the Guest
+                            // $scope.guests[i].messages.unshift(response);
+                            $scope.guest.messages.push(response);
+                        });
+                    }
                 }
             }
-        }
 
-        if (initializing) {
-            $timeout(function() {
-                initializing = false;
-            });
-        } else {
-            gm(message);
+            if (initializing) {
+                $timeout(function() {
+                    initializing = false;
+                });
+            } else {
+                gm(message);
+            }
         }
-    }    
-}]);
+    }
+]);
 
 // Use for single GuestDetail page w/ SMS messages. Send/Receive SMS
 // GuestUser = Guest
@@ -129,8 +131,8 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
             // `response` needed to get full object:
             // http://stackoverflow.com/questions/17131643/promise-on-angularjs-resource-save-action
             message.$save(function() {
-                    $scope.messages.unshift(message);
-                })
+                $scope.messages.unshift(message);
+            })
                 .then(function(response) {
                     console.log('typeof:', typeof(response), 'id:', response.id, 'response:', response);
                     console.log('Acutual msg being sent:', JSON.stringify(response));
@@ -165,7 +167,9 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
                         //  is being rendered in the GuestDetailView to the User
                         response.read = true;
                         response.user = null;
-                        Message.update({id:response.id}, response);
+                        Message.update({
+                            id: response.id
+                        }, response);
                         // Only append the Message if it belongs to the Guest
                         $scope.messages.unshift(response);
                     });
@@ -180,5 +184,12 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
                 gm(message);
             }
         }
+    }
+]);
+
+conciergeControllers.controller('ReplyCtrl', ['$scope', 'Reply',
+    function($scope, Reply) {
+        // live
+        $scope.replies = Reply.query();
     }
 ]);

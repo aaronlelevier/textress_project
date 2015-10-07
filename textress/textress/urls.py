@@ -13,7 +13,7 @@ admin.autodiscover()
 router = routers.DefaultRouter()
 
 # API
-router.register(r'replies', concierge_views.ReplyAPIView)
+router.register(r'reply', concierge_views.ReplyAPIView)
 
 
 urlpatterns = patterns('',
