@@ -88,4 +88,4 @@ class ReplySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reply
-        fields = ('id', 'hotel', 'letter', 'message',)
+        fields = ('id', 'hotel', 'letter', 'desc', 'message',)

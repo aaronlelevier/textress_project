@@ -421,6 +421,16 @@ class ReplyAPITests(APITestCase):
         data = json.loads(response.content)
         self.assertTrue(len(data) > 0) # system Reply fixtures returned
 
+    def test_fields(self):
+        response = self.client.get("/api/replies/")
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        reply = data[0]
+        reply["id"]
+        reply["hotel"]
+        reply["message"]
+        reply["desc"]
+
     def test_list_only_system_or_hotel(self):
         response = self.client.get("/api/replies/")
         data = json.loads(response.content)
@@ -445,7 +455,8 @@ class ReplyAPITests(APITestCase):
         data = {
             "hotel": self.hotel.id,
             "letter": "Z",
-            "message": "foo"
+            "message": "foo",
+            "desc": "bar"
         }
         response = self.client.post("/api/replies/", data, format='json')
         self.assertEqual(response.status_code, 201)
@@ -465,9 +476,3 @@ class ReplyAPITests(APITestCase):
     def test_delete_other_hotel_reply_fails(self):
         response = self.client.delete("/api/replies/{}/".format(self.reply_2.id))
         self.assertEqual(response.status_code, 403)
-
-
-
-
-
-

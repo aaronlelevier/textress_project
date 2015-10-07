@@ -162,10 +162,11 @@ class GuestDeleteView(GuestBaseView, DeleteButtonMixin, TemplateView):
         return HttpResponseRedirect(reverse('concierge:guest_list'))
 
 
-class ReplyView(IsManagerOrAdmin, TemplateView):
+class ReplyView(IsManagerOrAdmin, SetHeadlineMixin, HotelUserMixin, TemplateView):
     """
     :Angular View: Handle all Reply create/edit/delete UI.
     """
+    headline = "Auto Replies"
     template_name = "concierge/replies.html"
 
 

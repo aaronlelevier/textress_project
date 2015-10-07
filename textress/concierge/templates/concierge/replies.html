@@ -1,0 +1,66 @@
+{% extends "cpanel/base-sidebar.html" %}
+{% load staticfiles %}
+
+
+{% block head_js %}
+    {{ block.super }}
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular.min.js"></script>
+    <script src="{% static 'vendor/angular-resource/angular-resource.min.js' %}"></script>
+    <script src="{% static 'vendor/angular-route/angular-route.min.js' %}"></script>
+    <script src="{% static 'vendor/angular-ui-router/release/angular-ui-router.min.js' %}"></script>
+    <script src="{% static 'angular/concierge/app.js' %}"></script>
+    <script src="{% static 'angular/concierge/services.js' %}"></script>
+    <script src="{% static 'angular/main/services.js' %}"></script>
+    <script src="{% static 'angular/concierge/controllers.js' %}"></script>
+    <script src="{% static 'angular/concierge/filters.js' %}"></script>
+    <script src="{% static 'angular/config.js' %}"></script>
+    <script type="text/javascript">
+      // This allows you to access the current user id in your angular controllers.
+      angular
+          .module('conciergeApp.services')
+          .factory('CurrentUser', function() {
+            return {
+                id: "{{ user.id|default:'' }}",
+            }
+          });
+    </script>
+{% endblock head_js %}
+
+
+{% block angular_app %}
+    ng-app="conciergeApp"
+{% endblock %}
+
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-md-8">
+            <h4><strong>Single letters</strong> used to trigger an auto-reply for your guest.</h4>
+            <p>A letter can only be used once.  System Auto Reply letters are reserved.</p>
+        </div>
+    </div>
+
+    <br>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="user-left">
+                    <h4>System Auto Replies</h4>
+                    <table class="table table-hover guests">
+                    <tr>
+                        <th>Letter</th>
+                        <th>Description</th>
+                        <th>Message</th>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div>
+                    <p>by</p>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

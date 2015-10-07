@@ -1,6 +1,7 @@
 import sys
 import datetime
 import random
+import string
 
 from django.db import models
 from django.conf import settings
@@ -388,6 +389,7 @@ class ReplyManager(models.Manager):
             self.check_for_data_update(guest, reply)
             return reply
 
+REPLY_LETTERS = [(x,x) for x in string.ascii_uppercase]
 
 @python_2_unicode_compatible
 class Reply(AbstractBase):
@@ -407,8 +409,10 @@ class Reply(AbstractBase):
     '''
     hotel = models.ForeignKey(Hotel, blank=True, null=True)
     letter = models.CharField(_("Letter(s)"), max_length=1,
+        choices=REPLY_LETTERS, default=REPLY_LETTERS[0][0],
         help_text="Letter(s) will be upper cased automatically. Single letters "
                   "encouraged for shorter SMS, but not enforced.")
+    desc = models.CharField(_("Description"), max_length=254, blank=True)
     message = models.CharField(_("Auto Reply Message"), max_length=320, blank=True)
 
     objects = ReplyManager()

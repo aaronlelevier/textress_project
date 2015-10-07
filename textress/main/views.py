@@ -222,7 +222,7 @@ class MgrUserListView(SetHeadlineMixin, GroupRequiredMixin, HotelUserMixin, Temp
     template_name = 'main/user_list.html'
 
 
-class UserCreateView(SetHeadlineMixin, LoginRequiredMixin, GroupRequiredMixin,
+class UserCreateView(SetHeadlineMixin, HotelUserMixin, LoginRequiredMixin, GroupRequiredMixin,
     UserListContextMixin, CreateView):
     """
     Create a Normal Hotel User w/ no permissions.

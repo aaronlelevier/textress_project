@@ -26,10 +26,12 @@ guest_patterns = patterns('',
     url(r'^create/$', views.GuestCreateView.as_view(), name='guest_create'),
     url(r'^update/(?P<pk>\d+)/$', views.GuestUpdateView.as_view(), name='guest_update'),
     url(r'^delete/(?P<pk>\d+)/$', views.GuestDeleteView.as_view(), name='guest_delete'),
-    url(r'^auto-replies/$', views.ReplyView.as_view(), name='replies'),
     )
 
 urlpatterns = patterns('',
     url(r'^api/', include(api_patterns)),
     url(r'^guests/', include(guest_patterns)),
+    # No Prefix
+    url(r'^auto-replies/$', views.ReplyView.as_view(), name='replies'),
+
     )
