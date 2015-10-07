@@ -445,7 +445,8 @@ class Reply(AbstractBase):
     def _validate_unique_constraint(self):
         "Must be unique by Hotel, Letter"
         try:
-            reply = Reply.objects.get(hotel=self.hotel, letter=self.letter)
+            reply = (Reply.objects.exclude(id=self.id)
+                                  .get(hotel=self.hotel, letter=self.letter))
         except Reply.DoesNotExist:
             return
         else:

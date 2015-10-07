@@ -34,17 +34,5 @@
   },
   "model": "concierge.reply",
   "pk": 3
-},
-{
-  "fields": {
-    "created": "2015-09-25T13:25:29.708Z",
-    "hotel": 1,
-    "modified": "2015-09-25T13:25:29.708Z",
-    "letter": "H",
-    "hidden": false,
-    "message": "Thank you for contacting Aaron's Hotel, please call 775-419-4000 for to speak to our concierge."
-  },
-  "model": "concierge.reply",
-  "pk": 4
 }
 ]

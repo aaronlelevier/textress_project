@@ -13,6 +13,9 @@ api_patterns = patterns('',
     url(r'^guests/$', views.GuestListCreateAPIView.as_view(), name='api_guests'),
     url(r'^guests/(?P<pk>\d+)/$', views.GuestRetrieveUpdateAPIView.as_view(), name='api_guests'),
 
+    # url(r'^replies/$', views.ReplyAPIView, name='api_replies'),
+    # url(r'^replies/(?P<pk>\d+)/$', views.ReplyAPIView, name='api_replies'),
+
     # Receive Twilio Config'd URI
     url(r'^receive/sms_url/$', views.ReceiveSMSView.as_view(), name='receive_sms'),
     )

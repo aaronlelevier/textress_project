@@ -406,3 +406,11 @@ class ReplyTests(TestCase):
         mommy.make(Reply, hotel=self.hotel_w_reply, letter="A")
         with self.assertRaises(ValidationError):
             mommy.make(Reply, hotel=self.hotel_w_reply, letter="A")
+
+    def test_validate_unique_constraint_update_ok(self):
+        # save() for an existing "letter" shouldn't raise an error
+        # because it is still unique
+        reply = mommy.make(Reply, hotel=self.hotel_w_reply, letter="A")
+        reply.message = "foo"
+        reply.save()
+        self.assertEqual(Reply.objects.filter(hotel=self.hotel_w_reply, letter="A").count(), 1)

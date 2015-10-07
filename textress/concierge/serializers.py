@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
-from concierge.models import Guest, Message
+from concierge.models import Guest, Message, Reply
 from main.serializers import IconSerializer
 
 
@@ -82,3 +82,10 @@ class GuestMessageSerializer(GuestBaseSerizer):
     GuestDetailView main Serializer
     '''
     messages = MessageRetrieveSerializer(many=True, source='message_set')
+
+
+class ReplySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Reply
+        fields = ('id', 'hotel', 'letter', 'message',)

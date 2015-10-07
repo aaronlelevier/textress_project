@@ -7,22 +7,23 @@ from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.forms.models import model_to_dict
+from django.db.models import Q
 
 from braces.views import LoginRequiredMixin, SetHeadlineMixin, CsrfExemptMixin
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, viewsets
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from twilio import twiml
 from ws4redis.redis_store import RedisMessage
 from ws4redis.publisher import RedisPublisher
 
-from concierge.models import Message, Guest
+from concierge.models import Message, Guest, Reply
 from concierge.helpers import process_incoming_message, convert_to_json_and_publish_to_redis
 from concierge.forms import GuestForm
 from concierge.mixins import GuestListContextMixin
 from concierge.permissions import IsHotelObject, IsManagerOrAdmin, IsHotelUser
 from concierge.serializers import (MessageListCreateSerializer, GuestMessageSerializer,
-    GuestListSerializer, MessageRetrieveSerializer)
+    GuestListSerializer, MessageRetrieveSerializer, ReplySerializer)
 from concierge.tasks import check_twilio_messages_to_merge
 from main.mixins import HotelUserMixin, HotelObjectMixin
 from utils import EmptyForm, DeleteButtonMixin
@@ -181,7 +182,7 @@ class MessageListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = MessageListCreateSerializer
     permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
 
-    def list(self, request, *args, **kwargs):
+    def list(self, request):
         "The User can only view their Hotel's Messages."
         messages = Message.objects.filter(guest__hotel=request.user.profile.hotel)
         serializer = MessageListCreateSerializer(messages, many=True)
@@ -243,3 +244,22 @@ class GuestRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
     queryset = Guest.objects.all()
     serializer_class = GuestListSerializer
     permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
+
+
+### REPLY
+
+class ReplyAPIView(viewsets.ModelViewSet):
+
+    queryset = Reply.objects.all()
+    serializer_class = ReplySerializer
+    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject)
+
+    def list(self, request):
+        replies = Reply.objects.filter(
+            Q(hotel=self.request.user.profile.hotel) | \
+            Q(hotel__isnull=True)
+        )
+        serializer = ReplySerializer(replies, many=True)
+        return Response(serializer.data)
+
+

@@ -2,10 +2,19 @@ from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 
+from rest_framework import routers
+
+from concierge import views as concierge_views
 from textress import views
 
 
 admin.autodiscover()
+
+router = routers.DefaultRouter()
+
+# API
+router.register(r'replies', concierge_views.ReplyAPIView)
+
 
 urlpatterns = patterns('',
     # Admin
@@ -18,7 +27,7 @@ urlpatterns = patterns('',
     url(r'', include('sms.urls', namespace='sms')),
     
     # DRF
-    # url(r'api/v1/auth/login/', 'rest_framework_jwt.views.obtain_jwt_token'),
+    url(r'^api/', include(router.urls)),
     url(r'api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
     # Textress Views
