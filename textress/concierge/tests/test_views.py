@@ -449,7 +449,7 @@ class ReplyAPITests(APITestCase):
 
     def test_get_other_hotels_reply(self):
         response = self.client.get("/api/reply/{}/".format(self.reply_2.id))
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
 
     def test_create(self):
         data = {
@@ -475,4 +475,25 @@ class ReplyAPITests(APITestCase):
 
     def test_delete_other_hotel_reply_fails(self):
         response = self.client.delete("/api/reply/{}/".format(self.reply_2.id))
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_queryset(self):
+        response = self.client.get('/api/reply/?id={}'.format(self.reply.id))
+        data = json.loads(response.content)
+        self.assertEqual(len(data), 1)
+
+    def test_get_queryset_hotel(self):
+        response = self.client.get('/api/reply/?hotel={}'.format(self.hotel.id))
+        data = json.loads(response.content)
+        self.assertEqual(
+            len(data),
+            Reply.objects.filter(hotel=self.hotel).count()
+        )
+
+    def test_get_queryset_system_reply_only(self):
+        response = self.client.get('/api/reply/?hotel__isnull=True')
+        data = json.loads(response.content)
+        self.assertEqual(
+            len(data),
+            Reply.objects.filter(hotel__isnull=True).count()
+        )

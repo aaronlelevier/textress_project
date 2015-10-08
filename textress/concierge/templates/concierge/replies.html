@@ -21,6 +21,7 @@
           .factory('CurrentUser', function() {
             return {
                 id: "{{ user.id|default:'' }}",
+                hotel_id: "{{ hotel.id|default:'' }}",
             }
           });
     </script>
@@ -43,7 +44,7 @@
 
     <br>
 
-        <div class="row" ng-controller="ReplyCtrl">
+        <div class="row" ng-controller="ReplyCtrl" ng-cloak>
             <div class="col-sm-6">
                 <div class="user-left">
                     <h4>System Auto Replies</h4>
@@ -53,7 +54,21 @@
                             <th>Description</th>
                             <th>Message</th>
                         </tr>
-                        <tr ng-repeat="reply in replies">
+                        <tr ng-repeat="reply in system_replies">
+                            <td>[[ reply.letter ]]</td>
+                            <td>[[ reply.desc ]]</td>
+                            <td>[[ reply.message ]]</td>
+                        </tr>
+                    </table>
+                    <br>
+                    <h4>Hotel Auto Replies</h4>
+                    <table class="table table-hover guests">
+                        <tr>
+                            <th>Letter</th>
+                            <th>Description</th>
+                            <th>Message</th>
+                        </tr>
+                        <tr ng-repeat="reply in hotel_replies">
                             <td>[[ reply.letter ]]</td>
                             <td>[[ reply.desc ]]</td>
                             <td>[[ reply.message ]]</td>

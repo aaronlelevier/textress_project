@@ -27,6 +27,7 @@ from concierge.serializers import (MessageListCreateSerializer, GuestMessageSeri
 from concierge.tasks import check_twilio_messages_to_merge
 from main.mixins import HotelUserMixin, HotelObjectMixin
 from utils import EmptyForm, DeleteButtonMixin
+from utils.views import BaseModelViewSet
 
 
 class ReceiveSMSView(CsrfExemptMixin, TemplateView):
@@ -249,18 +250,19 @@ class GuestRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
 
 ### REPLY
 
-class ReplyAPIView(viewsets.ModelViewSet):
+class ReplyAPIView(BaseModelViewSet):
 
     queryset = Reply.objects.all()
     serializer_class = ReplySerializer
     permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject)
+    model = Reply
+    filter_fields = [f.name for f in model._meta.get_fields()]
 
-    def list(self, request):
-        replies = Reply.objects.filter(
+    def get_queryset(self):
+        queryset = super(ReplyAPIView, self).get_queryset()
+
+        queryset = queryset.filter(
             Q(hotel=self.request.user.profile.hotel) | \
             Q(hotel__isnull=True)
         )
-        serializer = ReplySerializer(replies, many=True)
-        return Response(serializer.data)
-
-
+        return queryset

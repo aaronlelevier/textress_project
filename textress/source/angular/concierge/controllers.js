@@ -187,9 +187,10 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
     }
 ]);
 
-conciergeControllers.controller('ReplyCtrl', ['$scope', 'Reply',
-    function($scope, Reply) {
-        // live
-        $scope.replies = Reply.query();
+conciergeControllers.controller('ReplyCtrl', ['$scope', 'Reply', 'CurrentUser',
+    function($scope, Reply, CurrentUser) {
+
+        $scope.system_replies = Reply.query({hotel__isnull: true});
+        $scope.hotel_replies = Reply.query({hotel: CurrentUser.hotel_id});
     }
 ]);
