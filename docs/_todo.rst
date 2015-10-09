@@ -1,3 +1,28 @@
+Notes w/ Scott
+--------------
+Required form fields should have a red asterisk
+
+Guest (for auto-reply), should be able to send an lowercase or upper case letter
+for an auto-reply.  ex: 'h', 'H'
+
+Auto-sent messages - should send on the Hotel's behalf, but are being sent on the
+Guest's behalf presently.
+
+Default "H" reply has grammar issue.
+
+Need a "W" welcome auto-reply to tell Guests how to use it for "H" for help for ex.
+
+Phone number input 
+
+    - auto add dashes or () to a User's PH #
+
+    - Dates w/ dashes in forms
+
+Credit card - auto put spaces after every 4 digits for easier reading of the c.card #
+
+Dashboard - formatting issue w/ Guest's Message text
+
+
 Bugs
 ----
 - when going to "account" view, if no Hotel, throws an Attribute Error, but 
