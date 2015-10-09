@@ -132,12 +132,11 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
             // http://stackoverflow.com/questions/17131643/promise-on-angularjs-resource-save-action
             message.$save(function() {
                 $scope.messages.unshift(message);
-            })
-                .then(function(response) {
-                    console.log('typeof:', typeof(response), 'id:', response.id, 'response:', response);
-                    console.log('Acutual msg being sent:', JSON.stringify(response));
-                    ws4redis.send_message(JSON.stringify(response));
-                });
+            }).then(function(response) {
+                console.log('typeof:', typeof(response), 'id:', response.id, 'response:', response);
+                console.log('Acutual msg being sent:', JSON.stringify(response));
+                ws4redis.send_message(JSON.stringify(response));
+            });
         }
 
         // set flag to not call gm() on page load using $timeout. So the 
@@ -187,10 +186,57 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
     }
 ]);
 
-conciergeControllers.controller('ReplyCtrl', ['$scope', 'Reply', 'CurrentUser',
-    function($scope, Reply, CurrentUser) {
+conciergeControllers.controller('ReplyCtrl', ['$scope', 'Reply', 'ReplyHotelLetters', 'CurrentUser',
+    function($scope, Reply, ReplyHotelLetters, CurrentUser) {
 
-        $scope.system_replies = Reply.query({hotel__isnull: true});
-        $scope.hotel_replies = Reply.query({hotel: CurrentUser.hotel_id});
+        $scope.hotel_id = CurrentUser.hotel_id;
+        $scope.reply = null;
+        $scope.letter = null;
+
+        $scope.system_replies = Reply.query({
+            hotel__isnull: true
+        });
+        $scope.hotel_replies = Reply.query({
+            hotel: $scope.hotel_id
+        });
+        $scope.hotel_letters = ReplyHotelLetters.query();
+
+        $scope.letterPicked = function(letter) {
+            Reply.query({
+                hotel: $scope.hotel_id,
+                letter: letter
+            }, function(response) {
+                if (response[0]) {
+                    $scope.reply = response[0];
+                }
+            });
+        }
+
+        $scope.saveReply = function(reply) {
+            if (reply.id) {
+                console.log(reply);
+                Reply.update({
+                    id: reply.id
+                }, reply);
+                // TODO: this "for loop" isn't firing....
+                for (var i=0; i < $scope.hotel_letters.length; i++) {
+                    if ($scope.hotel_letters[i].id == reply.id) {
+                        console.log(hotel_letters[i]);
+                        $scope.hotel_letters[i] = reply;
+                        break;
+                    }
+                }
+            } else {
+                var reply = new Reply({
+                    hotel: $scope.hotel_id,
+                    letter: reply.letter,
+                    desc: reply.desc,
+                    message: reply.message
+                });
+                reply.$save(function() {
+                    $scope.hotel_replies.unshift(reply);
+                });
+            }
+        }
     }
 ]);

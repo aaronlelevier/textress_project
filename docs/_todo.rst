@@ -22,6 +22,15 @@ Credit card - auto put spaces after every 4 digits for easier reading of the c.c
 
 Dashboard - formatting issue w/ Guest's Message text
 
+Saved Messages - that are common for the Concierge to send. Canned messages.  Saved 
+under the Hotel, for all Concierge's to use.
+
+MMS?
+
+Ask Concierges.  Do they like to call back, or is the whole conversation thro SMS?
+
+Maybe ask a designer about the UI
+
 
 Bugs
 ----

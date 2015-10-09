@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import Group
 from django.shortcuts import render
 from django.utils import timezone
@@ -11,6 +12,7 @@ from django.db.models import Q
 
 from braces.views import LoginRequiredMixin, SetHeadlineMixin, CsrfExemptMixin
 from rest_framework import generics, permissions, viewsets
+from rest_framework.decorators import list_route
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from twilio import twiml
@@ -266,3 +268,10 @@ class ReplyAPIView(BaseModelViewSet):
             Q(hotel__isnull=True)
         )
         return queryset
+
+    @list_route(methods=['GET'], url_path=r'hotel-letters')
+    def all_hotel_letters(self, request):
+        from concierge.models import REPLY_LETTERS
+        return Response([x[0] for x in REPLY_LETTERS 
+                           if x[0] not in settings.RESERVED_REPLY_LETTERS])
+

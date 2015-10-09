@@ -18,7 +18,7 @@ from concierge.models import Guest, Message
 
 # Test Factory Imports
 from concierge import views, serializers
-from concierge.models import Reply
+from concierge.models import Reply, REPLY_LETTERS
 from concierge.tests.factory import make_guests, make_messages
 from main.models import Hotel, UserProfile
 from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
@@ -497,3 +497,15 @@ class ReplyAPITests(APITestCase):
             len(data),
             Reply.objects.filter(hotel__isnull=True).count()
         )
+
+    ### detail_route / list_route
+
+    def test_all_hotel_letters(self):
+        response = self.client.get("/api/reply/hotel-letters/")
+        data = json.loads(response.content)
+        self.assertEqual(
+            len(data),
+            len([x[0] for x in REPLY_LETTERS 
+                      if x[0] not in settings.RESERVED_REPLY_LETTERS])
+        )
+        self.assertNotIn(settings.RESERVED_REPLY_LETTERS[0], data)

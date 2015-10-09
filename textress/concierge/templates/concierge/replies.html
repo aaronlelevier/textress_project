@@ -38,7 +38,7 @@
     <div class="row">
         <div class="col-md-8">
             <h4><strong>Single letters</strong> used to trigger an auto-reply for your guest.</h4>
-            <p>A letter can only be used once.  System Auto Reply letters are reserved.</p>
+            <p>All letters can only be used once. System Auto Reply letters are reserved.</p>
         </div>
     </div>
 
@@ -89,10 +89,9 @@
                                 Letter
                             </label>
                             <div class="col-sm-6">
-                                <select id="form-field-select-1" class="form-control">
+                                <select id="form-field-select-1" class="form-control" ng-model="reply.letter" ng-change="letterPicked(reply.letter)">
                                     <option value="">&nbsp;</option>
-                                    <option value="AL">Alabama</option>
-                                    <option value="AK">Alaska</option>
+                                    <option ng-repeat="letter in hotel_letters" value="[[ letter ]]">[[ letter ]]</option>
                                 </select>
                             </div>
                         </div>
@@ -104,7 +103,7 @@
                                 Description
                             </label>
                             <div class="col-sm-10">
-                                <textarea maxlength="254" class="form-control"></textarea>
+                                <textarea maxlength="254" class="form-control" ng-model="reply.desc">[[ reply.desc ]]</textarea>
                             </div>
                         </div>
                     </div>
@@ -114,22 +113,12 @@
                                 Message
                             </label>
                             <div class="col-sm-10">
-                                <textarea maxlength="254" class="form-control"></textarea>
+                                <textarea maxlength="254" class="form-control" ng-model="reply.message">[[ reply.message ]]</textarea>
                             </div>
                         </div>
                     </div>
                     <div class="row margin10">
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">
-                                Preview
-                            </label>
-                            <div class="col-sm-10">
-                                <p style="padding-top: 7px">Preview goes here....</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row margin10">
-                        <button class="btn btn-success btn-xs btn-block" type="submit" id="submit"/>
+                        <button class="btn btn-success btn-xs btn-block" type="submit" id="submit" ng-click="saveReply(reply)"/>
                             Submit
                         </button>
                     </div>
