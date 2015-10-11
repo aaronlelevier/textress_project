@@ -18,7 +18,7 @@ from concierge.models import Guest, Message
 
 # Test Factory Imports
 from concierge import views, serializers
-from concierge.models import Reply, REPLY_LETTERS
+from concierge.models import Reply, REPLY_LETTERS, TriggerType, Trigger
 from concierge.tests.factory import make_guests, make_messages
 from main.models import Hotel, UserProfile
 from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
@@ -509,3 +509,58 @@ class ReplyAPITests(APITestCase):
                       if x[0] not in settings.RESERVED_REPLY_LETTERS])
         )
         self.assertNotIn(settings.RESERVED_REPLY_LETTERS[0], data)
+
+
+class TriggerTypeTests(APITestCase):
+
+    def setUp(self):
+        self.hotel = create_hotel()
+        create._get_groups_and_perms()
+        self.admin = create_hotel_user(hotel=self.hotel, username='admin', group='hotel_admin')
+        # TriggerType
+        self.trigger_type = mommy.make(TriggerType)
+        # Login
+        self.client.login(username=self.admin.username, password=PASSWORD)
+
+    def tearDown(self):
+        self.client.logout()
+
+    def test_detail(self):
+        response = self.client.get('/api/trigger-type/{}/'.format(self.trigger_type.id))
+        data = json.loads(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            self.trigger_type.reply.letter,
+            data['reply']['letter']
+        )
+
+
+class TriggerTests(APITestCase):
+
+    def setUp(self):
+        self.hotel = create_hotel()
+        create._get_groups_and_perms()
+        self.admin = create_hotel_user(hotel=self.hotel, username='admin', group='hotel_admin')
+        # Trigger
+        self.trigger_type = mommy.make(TriggerType)
+        self.trigger = mommy.make(Trigger, type=self.trigger_type, hotel=self.hotel)
+        # Login
+        self.client.login(username=self.admin.username, password=PASSWORD)
+
+    def tearDown(self):
+        self.client.logout()
+
+    def test_list(self):
+        response = self.client.get('/api/trigger/')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertEqual(len(data), 1)
+
+    def test_detail(self):
+        response = self.client.get('/api/trigger/{}/'.format(self.trigger.id))
+        data = json.loads(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            self.trigger.type.id,
+            data['type']['id']
+        )

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
-from concierge.models import Guest, Message, Reply
+from concierge.models import Guest, Message, Reply, TriggerType, Trigger
 from main.serializers import IconSerializer
 
 
@@ -89,3 +89,21 @@ class ReplySerializer(serializers.ModelSerializer):
     class Meta:
         model = Reply
         fields = ('id', 'hotel', 'letter', 'desc', 'message',)
+
+
+class TriggerTypeSerializer(serializers.ModelSerializer):
+
+    reply = ReplySerializer(read_only=True)
+
+    class Meta:
+        model = TriggerType
+        fields = ('id', 'reply', 'name', 'human_name', 'desc',)
+
+
+class TriggerSerializer(serializers.ModelSerializer):
+
+    type = TriggerTypeSerializer(read_only=True)
+
+    class Meta:
+        model = Trigger
+        fields = ('id', 'type', 'hotel',)

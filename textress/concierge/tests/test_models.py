@@ -10,7 +10,7 @@ from django.utils import timezone
 
 from model_mommy import mommy
 
-from concierge.models import Message, Guest, Hotel, Reply
+from concierge.models import Message, Guest, Hotel, Reply, TriggerType, Trigger
 from concierge.tests.factory import make_guests, make_messages
 from main.tests.factory import create_hotel, create_hotel_user
 from utils import create
@@ -414,3 +414,40 @@ class ReplyTests(TestCase):
         reply.message = "foo"
         reply.save()
         self.assertEqual(Reply.objects.filter(hotel=self.hotel_w_reply, letter="A").count(), 1)
+
+
+class TriggerTypeTests(TestCase):
+
+    def test_str(self):
+        t = mommy.make(TriggerType)
+        self.assertEqual(str(t), t.name)
+
+    def test_human_name_save(self):
+        human_name = "check-in"
+        t = mommy.make(TriggerType, human_name=human_name)
+        self.assertEqual(t.human_name, human_name)
+
+    def test_human_name_default(self):
+        name = "check_in"
+        t = mommy.make(TriggerType, name=name)
+        self.assertEqual(t.human_name, "check in")
+
+
+class TriggerTests(TestCase):
+
+    def setUp(self):
+        self.hotel = create_hotel()
+        self.trigger = mommy.make(Trigger, hotel=self.hotel)
+
+    def test_str(self):
+        self.assertEqual(
+            str(self.trigger),
+            "Hotel: {}; Trigger Type:{}.".format(self.trigger.hotel, self.trigger.type)
+        )
+
+    def test_validate_type_hotel_unique_ok(self):
+        self.trigger._validate_type_hotel_unique()
+
+    def test_validate_type_hotel_unique_raise(self):
+        with self.assertRaises(ValidationError):
+            Trigger.objects.create(type=self.trigger.type, hotel=self.trigger.hotel)

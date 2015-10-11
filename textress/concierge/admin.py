@@ -1,7 +1,7 @@
 from django.contrib import admin
 
+from concierge.models import Guest, Message, Reply, TriggerType, Trigger
 
-from concierge.models import Guest, Message, Reply
 
 @admin.register(Guest)
 class GuestAdmin(admin.ModelAdmin):
@@ -18,3 +18,13 @@ class MessageAdmin(admin.ModelAdmin):
 class ReplyAdmin(admin.ModelAdmin):
     list_display = ('hotel', 'letter', 'message',)
     readonly_fields = ('created', 'modified')
+
+
+@admin.register(TriggerType)
+class TriggerType(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Trigger)
+class Trigger(admin.ModelAdmin):
+    pass

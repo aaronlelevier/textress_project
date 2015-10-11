@@ -10,7 +10,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.forms.models import model_to_dict
 from django.db.models import Q
 
-from braces.views import LoginRequiredMixin, SetHeadlineMixin, CsrfExemptMixin
+from braces.views import (LoginRequiredMixin, SetHeadlineMixin, CsrfExemptMixin,
+    StaticContextMixin)
 from rest_framework import generics, permissions, viewsets
 from rest_framework.decorators import list_route
 from rest_framework.renderers import JSONRenderer
@@ -19,13 +20,14 @@ from twilio import twiml
 from ws4redis.redis_store import RedisMessage
 from ws4redis.publisher import RedisPublisher
 
-from concierge.models import Message, Guest, Reply
+from concierge.models import Message, Guest, Reply, TriggerType, Trigger
 from concierge.helpers import process_incoming_message, convert_to_json_and_publish_to_redis
 from concierge.forms import GuestForm
 from concierge.mixins import GuestListContextMixin
 from concierge.permissions import IsHotelObject, IsManagerOrAdmin, IsHotelUser
 from concierge.serializers import (MessageListCreateSerializer, GuestMessageSerializer,
-    GuestListSerializer, MessageRetrieveSerializer, ReplySerializer)
+    GuestListSerializer, MessageRetrieveSerializer, ReplySerializer,
+    TriggerTypeSerializer, TriggerSerializer)
 from concierge.tasks import check_twilio_messages_to_merge
 from main.mixins import HotelUserMixin, HotelObjectMixin
 from utils import EmptyForm, DeleteButtonMixin
@@ -165,12 +167,14 @@ class GuestDeleteView(GuestBaseView, DeleteButtonMixin, TemplateView):
         return HttpResponseRedirect(reverse('concierge:guest_list'))
 
 
-class ReplyView(IsManagerOrAdmin, SetHeadlineMixin, HotelUserMixin, TemplateView):
+class ReplyView(IsManagerOrAdmin, SetHeadlineMixin, StaticContextMixin,
+    HotelUserMixin, TemplateView):
     """
     :Angular View: Handle all Reply create/edit/delete UI.
     """
     headline = "Auto Replies"
     template_name = "concierge/replies.html"
+    static_context = {'headline_small': '& Automatic Messaging'}
 
 
 ########
@@ -275,3 +279,23 @@ class ReplyAPIView(BaseModelViewSet):
         return Response([x[0] for x in REPLY_LETTERS 
                            if x[0] not in settings.RESERVED_REPLY_LETTERS])
 
+
+class TriggerTypeRetrieveView(generics.RetrieveAPIView):
+
+    queryset = TriggerType.objects.all()
+    serializer_class = TriggerTypeSerializer
+    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin,)
+
+
+class TriggerAPIView(BaseModelViewSet):
+
+    queryset = Trigger.objects.all()
+    serializer_class = TriggerSerializer
+    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject)
+    model = Trigger
+    filter_fields = [f.name for f in model._meta.get_fields()]
+
+    def get_queryset(self):
+        queryset = super(TriggerAPIView, self).get_queryset()
+        queryset = queryset.filter(hotel=self.request.user.profile.hotel)
+        return queryset

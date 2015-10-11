@@ -13,6 +13,11 @@ api_patterns = patterns('',
     url(r'^guests/$', views.GuestListCreateAPIView.as_view(), name='api_guests'),
     url(r'^guests/(?P<pk>\d+)/$', views.GuestRetrieveUpdateAPIView.as_view(), name='api_guests'),
 
+    # ``Reply`` API endpoint is in ``textress.urls``
+
+    url(r'^trigger-type/(?P<pk>\d+)/$', views.TriggerTypeRetrieveView.as_view(), name='api_trigger_type'),
+    # ``Trigger`` API endpoint is in ``textress.urls``
+
     # Receive Twilio Config'd URI
     url(r'^receive/sms_url/$', views.ReceiveSMSView.as_view(), name='receive_sms'),
     )

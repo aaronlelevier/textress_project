@@ -458,3 +458,65 @@ class Reply(AbstractBase):
                 "Reply with letter: '{}' with message: '{}' already "
                 "exists.".format(reply.letter, reply.message)
             )
+
+
+class TriggerType(AbstractBase):
+    """
+    Static table to hold "Trigger Types"
+
+    :Types:
+
+    - "check_in"
+    - "check_out"
+    """
+    reply = models.ForeignKey(Reply)
+    name = models.CharField(max_length=100, unique=True,
+        help_text="name to be referenced in the application code.")
+    human_name = models.CharField(max_length=100, blank=True)
+    desc = models.CharField(max_length=254, blank=True,
+        help_text="Use to store information about what each Trigger type "
+                  "will actually do. i.e. 'check_in' will be used to send "
+                  "welcome messages.")
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.human_name:
+            self.human_name = self.name.replace('_', ' ')
+        super(TriggerType, self).save(*args, **kwargs)
+
+
+class Trigger(AbstractBase):
+    """
+    Links Hotel's to a unique ``TriggerType``, to be specified when 
+    it will be called in the application code.
+
+    :unique constraint: must be unique by ``TriggerType`` and ``Hotel``
+
+    :Use cases:
+
+    1. At signup, check "check_in" Trigger if need to send?
+    2. Day after check-out, check "check_out" Trigger if need to send?
+    """
+    type = models.ForeignKey(TriggerType)
+    hotel = models.ForeignKey(Hotel)
+    active = models.BooleanField(blank=True, default=False)
+
+    def __str__(self):
+        return "Hotel: {}; Trigger Type:{}.".format(self.hotel, self.type)
+
+    def save(self, *args, **kwargs):
+        self._validate_type_hotel_unique()
+        return super(Trigger, self).save(*args, **kwargs)
+
+    def _validate_type_hotel_unique(self):
+        try:
+            trigger = (Trigger.objects.exclude(id=self.id)
+                                      .get(type=self.type, hotel=self.hotel))
+        except Trigger.DoesNotExist:
+            pass
+        else:
+            raise ValidationError(
+                "Unique constraint violated, this Trigger exists: {}"
+                .format(trigger))
