@@ -201,6 +201,13 @@ conciergeControllers.controller('ReplyCtrl', ['$scope', 'Reply', 'ReplyHotelLett
         });
         $scope.hotel_letters = ReplyHotelLetters.query();
 
+        $scope.$watch(function() {
+                return $scope.letter;
+            },
+            function(newValue) {
+                return newValue;
+            });
+
         $scope.letterPicked = function(letter) {
             Reply.query({
                 hotel: $scope.hotel_id,
@@ -208,35 +215,52 @@ conciergeControllers.controller('ReplyCtrl', ['$scope', 'Reply', 'ReplyHotelLett
             }, function(response) {
                 if (response[0]) {
                     $scope.reply = response[0];
+                } else {
+                    $scope.reply.desc = $scope.reply.message = null;
                 }
             });
         }
 
         $scope.saveReply = function(reply) {
             if (reply.id) {
-                console.log(reply);
                 Reply.update({
                     id: reply.id
                 }, reply);
-                // TODO: this "for loop" isn't firing....
-                for (var i=0; i < $scope.hotel_letters.length; i++) {
-                    if ($scope.hotel_letters[i].id == reply.id) {
-                        console.log(hotel_letters[i]);
-                        $scope.hotel_letters[i] = reply;
-                        break;
+                angular.forEach($scope.hotel_replies, function(u, i) {
+                    if (u.id === reply.id) {
+                        $scope.hotel_replies.splice(i, 1, reply);
                     }
-                }
+                })
             } else {
                 var reply = new Reply({
                     hotel: $scope.hotel_id,
                     letter: reply.letter,
-                    desc: reply.desc,
+                    desc: reply.desc || "",
                     message: reply.message
                 });
-                reply.$save(function() {
-                    $scope.hotel_replies.unshift(reply);
-                });
+                reply.$save(function(response) {
+                    console.log(response);
+                },
+                function(err) {
+                    console.log(err);
+                }).then(function(response) {
+                    $scope.hotel_replies.push(response);
+                });;
             }
+            $scope.reply = null;
+        }
+
+        $scope.deleteReply = function(reply) {
+
+            angular.forEach($scope.hotel_replies, function(u, i) {
+                if (u.id === reply.id) {
+                    $scope.hotel_replies.splice(i, 1);
+                }
+            })
+ 
+            reply.$remove({
+                id: reply.id
+            });
         }
     }
 ]);

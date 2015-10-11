@@ -14,7 +14,8 @@ angular.module('conciergeApp.services', ['ngResource'])
     .factory('Reply', ['$resource', function($resource) {
         return $resource('/api/reply/:id/', null,
             {
-                'update': {method: 'PATCH'}
+                'update': {method: 'PATCH'},
+                'remove': {method:'DELETE'}
             });
     }])
     .factory('ReplyHotelLetters', function($resource) {

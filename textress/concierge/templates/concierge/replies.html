@@ -54,7 +54,7 @@
                             <th>Description</th>
                             <th>Message</th>
                         </tr>
-                        <tr ng-repeat="reply in system_replies">
+                        <tr ng-repeat="reply in system_replies | orderBy: 'letter'">
                             <td>[[ reply.letter ]]</td>
                             <td>[[ reply.desc ]]</td>
                             <td>[[ reply.message ]]</td>
@@ -67,11 +67,15 @@
                             <th>Letter</th>
                             <th>Description</th>
                             <th>Message</th>
+                            <th>Delete?</th>
                         </tr>
-                        <tr ng-repeat="reply in hotel_replies">
+                        <tr ng-repeat="reply in hotel_replies | orderBy: 'letter'">
                             <td>[[ reply.letter ]]</td>
                             <td>[[ reply.desc ]]</td>
                             <td>[[ reply.message ]]</td>
+                            <td>
+                                <button type="button" class="btn btn-default btn-xs" style="margin-left:10px;" ng-click="deleteReply(reply)">X</button>
+                            </td>
                         </tr>
                     </table>    
                 </div>
@@ -81,15 +85,15 @@
                     <h4>Add or Edit Auto Replies</h4>
                 </div>
 
-                <form role="form" class="form-horizontal">
+                <form name="replyForm" role="form" class="form-horizontal">
 
                     <div class="row margin10">
                         <div class="form-group">
                             <label class="col-sm-2 control-label">
-                                Letter
+                                Letter <span class="symbol required"></span>
                             </label>
                             <div class="col-sm-6">
-                                <select id="form-field-select-1" class="form-control" ng-model="reply.letter" ng-change="letterPicked(reply.letter)">
+                                <select id="form-field-select-1" class="form-control" ng-model="reply.letter" ng-change="letterPicked(reply.letter)" required>
                                     <option value="">&nbsp;</option>
                                     <option ng-repeat="letter in hotel_letters" value="[[ letter ]]">[[ letter ]]</option>
                                 </select>
@@ -110,15 +114,15 @@
                     <div class="row margin10">
                         <div class="form-group">
                             <label class="col-sm-2 control-label">
-                                Message
+                                Message <span class="symbol required"></span>
                             </label>
                             <div class="col-sm-10">
-                                <textarea maxlength="254" class="form-control" ng-model="reply.message">[[ reply.message ]]</textarea>
+                                <textarea maxlength="254" class="form-control" ng-model="reply.message" required>[[ reply.message ]]</textarea>
                             </div>
                         </div>
                     </div>
                     <div class="row margin10">
-                        <button class="btn btn-success btn-xs btn-block" type="submit" id="submit" ng-click="saveReply(reply)"/>
+                        <button class="btn btn-success btn-xs btn-block" type="submit" id="submit" ng-click="saveReply(reply)" ng-disabled="replyForm.$invalid">
                             Submit
                         </button>
                     </div>

@@ -42,5 +42,3 @@ angular.module('conciergeFilters', [])
             return guestArr[0][field]
         };
     });
-
-
