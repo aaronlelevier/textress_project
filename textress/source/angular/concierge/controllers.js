@@ -239,11 +239,11 @@ conciergeControllers.controller('ReplyCtrl', ['$scope', 'Reply', 'ReplyHotelLett
                     message: reply.message
                 });
                 reply.$save(function(response) {
-                    console.log(response);
-                },
-                function(err) {
-                    console.log(err);
-                }).then(function(response) {
+                        console.log(response);
+                    },
+                    function(err) {
+                        console.log(err);
+                    }).then(function(response) {
                     $scope.hotel_replies.push(response);
                 });;
             }
@@ -257,10 +257,49 @@ conciergeControllers.controller('ReplyCtrl', ['$scope', 'Reply', 'ReplyHotelLett
                     $scope.hotel_replies.splice(i, 1);
                 }
             })
- 
+
             reply.$remove({
                 id: reply.id
             });
         }
+    }
+]);
+
+conciergeControllers.controller('TriggerCtrl', ['$scope', 'Reply', 'Trigger', 'TriggerType', 'CurrentUser',
+    function($scope, Reply, Trigger, TriggerType, CurrentUser) {
+
+        $scope.hotel_id = CurrentUser.hotel_id;
+        $scope.trigger_type = $scope.trigger = null;
+
+        $scope.hotel_replies = Reply.query({
+            hotel: $scope.hotel_id
+        });
+
+        $scope.trigger_types = TriggerType.query();
+
+        $scope.triggers = Trigger.query({
+            hotel: $scope.hotel_id
+        })
+
+        $scope.triggerTypePicked = function(id) {
+            console.log(id);
+            Trigger.query({
+                hotel: $scope.hotel_id,
+                type: id
+            }, function(response) {
+                if (response[0]) {
+                //     $scope.trigger_type = response[0];
+                    // $scope.trigger = Trigger.get({
+                    //     hotel: $scope.hotel_id,
+                    //     type: $scope.trigger_type.id
+                    // });
+                } else {
+                    $scope.reply.letter = null;
+                }
+            });
+        }
+
+        // $scope.saveTrigger = function(trigger) {
+        // }
     }
 ]);

@@ -469,7 +469,6 @@ class TriggerType(AbstractBase):
     - "check_in"
     - "check_out"
     """
-    reply = models.ForeignKey(Reply)
     name = models.CharField(max_length=100, unique=True,
         help_text="name to be referenced in the application code.")
     human_name = models.CharField(max_length=100, blank=True)
@@ -498,9 +497,12 @@ class Trigger(AbstractBase):
 
     1. At signup, check "check_in" Trigger if need to send?
     2. Day after check-out, check "check_out" Trigger if need to send?
+
+    :Reply FK: b/c Hotel's can configure the Reply letter they want.
     """
     type = models.ForeignKey(TriggerType)
     hotel = models.ForeignKey(Hotel)
+    reply = models.ForeignKey(Reply)
     active = models.BooleanField(blank=True, default=False)
 
     def __str__(self):

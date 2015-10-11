@@ -15,7 +15,7 @@ router = routers.DefaultRouter()
 # API
 router.register(r'reply', concierge_views.ReplyAPIView)
 router.register(r'trigger', concierge_views.TriggerAPIView)
-
+router.register(r'trigger-type', concierge_views.TriggerTypeAPIView)
 
 urlpatterns = patterns('',
     # Admin

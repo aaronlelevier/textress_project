@@ -35,6 +35,10 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return queryset
 
     def list(self, request):
+        """
+        Changes the structure of the List API data, so no more 'results', 'count', 
+        'next', 'prev'.  Only An array of objects.
+        """
         queryset = self.get_queryset()
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data)

@@ -280,7 +280,7 @@ class ReplyAPIView(BaseModelViewSet):
                            if x[0] not in settings.RESERVED_REPLY_LETTERS])
 
 
-class TriggerTypeRetrieveView(generics.RetrieveAPIView):
+class TriggerTypeAPIView(BaseModelViewSet):
 
     queryset = TriggerType.objects.all()
     serializer_class = TriggerTypeSerializer

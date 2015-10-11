@@ -439,6 +439,11 @@ class TriggerTests(TestCase):
         self.hotel = create_hotel()
         self.trigger = mommy.make(Trigger, hotel=self.hotel)
 
+    def test_foreign_keys(self):
+        self.assertIsInstance(self.trigger.hotel, Hotel)
+        self.assertIsInstance(self.trigger.type, TriggerType)
+        self.assertIsInstance(self.trigger.reply, Reply)
+
     def test_str(self):
         self.assertEqual(
             str(self.trigger),

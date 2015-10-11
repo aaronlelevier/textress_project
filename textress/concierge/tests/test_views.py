@@ -529,10 +529,6 @@ class TriggerTypeTests(APITestCase):
         response = self.client.get('/api/trigger-type/{}/'.format(self.trigger_type.id))
         data = json.loads(response.content)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            self.trigger_type.reply.letter,
-            data['reply']['letter']
-        )
 
 
 class TriggerTests(APITestCase):
@@ -556,11 +552,19 @@ class TriggerTests(APITestCase):
         data = json.loads(response.content)
         self.assertEqual(len(data), 1)
 
-    def test_detail(self):
+    def test_detail_type(self):
         response = self.client.get('/api/trigger/{}/'.format(self.trigger.id))
         data = json.loads(response.content)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             self.trigger.type.id,
             data['type']['id']
+        )
+
+    def test_detail_reply(self):
+        response = self.client.get('/api/trigger/{}/'.format(self.trigger.id))
+        data = json.loads(response.content)
+        self.assertEqual(
+            self.trigger.reply.letter,
+            data['reply']['letter']
         )

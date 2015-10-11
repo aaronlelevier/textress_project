@@ -93,17 +93,16 @@ class ReplySerializer(serializers.ModelSerializer):
 
 class TriggerTypeSerializer(serializers.ModelSerializer):
 
-    reply = ReplySerializer(read_only=True)
-
     class Meta:
         model = TriggerType
-        fields = ('id', 'reply', 'name', 'human_name', 'desc',)
+        fields = ('id', 'name', 'human_name', 'desc',)
 
 
 class TriggerSerializer(serializers.ModelSerializer):
 
     type = TriggerTypeSerializer(read_only=True)
+    reply = ReplySerializer(read_only=True)
 
     class Meta:
         model = Trigger
-        fields = ('id', 'type', 'hotel',)
+        fields = ('id', 'type', 'reply', 'hotel',)

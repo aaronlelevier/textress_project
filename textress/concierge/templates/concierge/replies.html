@@ -131,21 +131,87 @@
                 </div>
             </div>
 
-    <hr>
+            <hr>
 
-    <div class="row">
-        <div class="col-md-8">
-            <h3>Automatic Messaging</h3>
-        </div> 
-    </div>
-    <div class="row">
-        <div class="col-md-8">
-            <h4><strong>Built-in</strong> system generated messages that will be sent based on certain events.</h4>
-        </div>
-    </div>
+            <div class="row">
+                <div class="col-md-8">
+                    <h3>Automatic Messaging</h3>
+                </div> 
+            </div>
+            <div class="row">
+                <div class="col-md-8">
+                    <h4><strong>Built-in</strong> system generated messages that will be sent based on certain events.</h4>
+                </div>
+            </div>
 
-    <br>
+            <br>
 
+            <div class="row" ng-controller="TriggerCtrl" ng-cloak>
+                <div class="col-md-6">
+                    <div class="user-left">
+                        <br>
+                        <h4>Hotel Auto Replies</h4>
+                        <table class="table table-hover">
+                            <tr>
+                                <th>Trigger</th>
+                                <th>Reply Letter</th>
+                                <th>Reply Message</th>
+                                <th>Delete?</th>
+                            </tr>
+                            <tr ng-repeat="trigger in triggers | orderBy: 'human_name'">
+                                <td>[[ trigger.type.human_name]]</td>
+                                <td>[[ trigger.reply.letter ]]</td>
+                                <td>[[ trigger.reply.message ]]</td>
+                                <td>
+                                    <button type="button" class="btn btn-default btn-xs" style="margin-left:10px;" ng-click="deleteTrigger(trigger)">X</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <form name="triggerForm" role="form" class="form-horizontal">
+
+                        <div class="row margin10">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">
+                                    Trigger <span class="symbol required"></span>
+                                </label>
+                                <div class="col-sm-6">
+                                    <select id="form-field-select-1" class="form-control" ng-model="trigger.type" ng-change="triggerTypePicked(trigger.type)" required>
+                                        <option value="">&nbsp;</option>
+                                        <option ng-repeat="tt in trigger_types" value="[[ tt.id ]]">[[ tt.human_name ]]</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row margin10">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">
+                                    Reply Letter <span class="symbol required"></span>
+                                </label>
+                                <div class="col-sm-6">
+                                    <select id="form-field-select-1" class="form-control" ng-model="reply" ng-change="letterPicked(reply.letter)" required>
+                                        <option value="">&nbsp;</option>
+                                        <option ng-repeat="reply in hotel_replies" value="[[ reply.letter ]]">[[ trigger.reply.letter ]]</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row margin10">
+                            <p>[[ reply.message ]]</p>
+                        </div>
+                        <div class="row margin10">
+                            <button class="btn btn-success btn-xs btn-block" type="button" id="submit" ng-click="saveTrigger(trigger)" ng-disabled="triggerForm.$invalid">
+                                Submit
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
 
         </div>
     </div>
