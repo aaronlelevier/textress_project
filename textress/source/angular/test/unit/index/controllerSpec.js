@@ -1,21 +1,17 @@
 /* jasmine specs for controllers go here */
-describe('mainApp controllers', function() {
+describe('PricingCtrl', function() {
 
-  describe('UserListCtrl', function(){
-
-    beforeEach(module('mainApp'));
-
-    it('UserListCtrl:', inject(function($controller) {
-      var scope = {},
-          ctrl = $controller('UserListCtrl', {$scope:scope});
-      expect(scope.twoTimesTwo).toBe(4);
-      expect(scope.predicate).toBe('username');
-      expect(scope.reverse).toBe(true);
-      // .order()
-      scope.order('not pred');
-      expect(scope.reverse).toBe(false);
-      expect(scope.predicate).toBe('not pred');
+    beforeEach(module('indexApp'));
+    beforeEach(inject(function($rootScope, $controller) {
+        scope = $rootScope.$new();
+        ctrl = $controller('PricingCtrl', {
+            $scope: scope
+        });
     }));
 
-  });
+    it('init values', function() {
+        expect(scope.volumes.length).toBe(4);
+        expect(scope.volume).toBe("");
+    });
+
 });
