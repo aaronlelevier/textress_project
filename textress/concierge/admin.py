@@ -22,9 +22,9 @@ class ReplyAdmin(admin.ModelAdmin):
 
 @admin.register(TriggerType)
 class TriggerType(admin.ModelAdmin):
-    pass
+    list_display = ('id', 'name', 'human_name', 'desc',)
 
 
 @admin.register(Trigger)
 class Trigger(admin.ModelAdmin):
-    pass
+    list_display = ('id', 'hotel', 'type', 'reply')

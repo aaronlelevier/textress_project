@@ -269,7 +269,7 @@ conciergeControllers.controller('TriggerCtrl', ['$scope', 'Reply', 'Trigger', 'T
     function($scope, Reply, Trigger, TriggerType, CurrentUser) {
 
         $scope.hotel_id = CurrentUser.hotel_id;
-        $scope.trigger_type = $scope.trigger = null;
+        $scope.trigger_type = $scope.trigger = $scope.reply = null;
 
         $scope.hotel_replies = Reply.query({
             hotel: $scope.hotel_id
@@ -277,29 +277,31 @@ conciergeControllers.controller('TriggerCtrl', ['$scope', 'Reply', 'Trigger', 'T
 
         $scope.trigger_types = TriggerType.query();
 
-        $scope.triggers = Trigger.query({
-            hotel: $scope.hotel_id
-        })
+        $scope.triggers = Trigger.query();
 
-        $scope.triggerTypePicked = function(id) {
-            console.log(id);
-            Trigger.query({
-                hotel: $scope.hotel_id,
-                type: id
-            }, function(response) {
-                if (response[0]) {
-                //     $scope.trigger_type = response[0];
-                    // $scope.trigger = Trigger.get({
-                    //     hotel: $scope.hotel_id,
-                    //     type: $scope.trigger_type.id
-                    // });
-                } else {
-                    $scope.reply.letter = null;
-                }
-            });
-        }
+        // $scope.$watch(function() {
+        //         return $scope.trigger;
+        //     },
+        //     function(newValue) {
+        //         return newValue;
+        //     });
 
-        // $scope.saveTrigger = function(trigger) {
-        // }
+        // $scope.triggerTypePicked = function(trigger_type) {
+        //     console.log(trigger_type);
+        //     Trigger.query({
+        //         type: trigger_type.id
+        //     }, function(response) {
+        //         if (response) {
+        //             console.log(response);
+        //             $scope.trigger = response;
+        //             console.log("trigger:", $scope.trigger);
+        //             console.log("trigger.type:", $scope.trigger.type);
+        //             console.log("trigger.reply:", $scope.trigger.reply);
+        //             // $scope.reply = $scope.trigger.reply;
+        //         } else {
+        //             $scope.trigger.reply = null;
+        //         }
+        //     });
+        // };
     }
 ]);

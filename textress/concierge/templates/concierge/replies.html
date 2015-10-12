@@ -158,8 +158,8 @@
                                 <th>Reply Message</th>
                                 <th>Delete?</th>
                             </tr>
-                            <tr ng-repeat="trigger in triggers | orderBy: 'human_name'">
-                                <td>[[ trigger.type.human_name]]</td>
+                            <tr ng-repeat="trigger in triggers | orderBy: 'type.human_name'">
+                                <td>[[ trigger.type.human_name ]]</td>
                                 <td>[[ trigger.reply.letter ]]</td>
                                 <td>[[ trigger.reply.message ]]</td>
                                 <td>
@@ -179,9 +179,9 @@
                                     Trigger <span class="symbol required"></span>
                                 </label>
                                 <div class="col-sm-6">
-                                    <select id="form-field-select-1" class="form-control" ng-model="trigger.type" ng-change="triggerTypePicked(trigger.type)" required>
+                                    <select id="form-field-select-1" class="form-control" ng-model="trigger_type" ng-change="triggerTypePicked(trigger_type)" required>
                                         <option value="">&nbsp;</option>
-                                        <option ng-repeat="tt in trigger_types" value="[[ tt.id ]]">[[ tt.human_name ]]</option>
+                                        <option ng-repeat="trigger_type in trigger_types" value="[[ trigger_type ]]">[[ trigger_type.human_name ]]</option>
                                     </select>
                                 </div>
                             </div>
@@ -192,15 +192,22 @@
                                     Reply Letter <span class="symbol required"></span>
                                 </label>
                                 <div class="col-sm-6">
-                                    <select id="form-field-select-1" class="form-control" ng-model="reply" ng-change="letterPicked(reply.letter)" required>
+                                    <select id="form-field-select-1" class="form-control" ng-model="trigger.reply" ng-change="replyPicked(trigger.reply)" required>
                                         <option value="">&nbsp;</option>
-                                        <option ng-repeat="reply in hotel_replies" value="[[ reply.letter ]]">[[ trigger.reply.letter ]]</option>
+                                        <option ng-repeat="reply in hotel_replies" value="[[ reply ]]">[[ reply.letter ]]</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
                         <div class="row margin10">
-                            <p>[[ reply.message ]]</p>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">
+                                    Reply Message
+                                </label>
+                                <div class="col-sm-6" style="margin-top:7px">
+                                    <em>[[ reply.message ]]</em>
+                                </div>
+                            </div>
                         </div>
                         <div class="row margin10">
                             <button class="btn btn-success btn-xs btn-block" type="button" id="submit" ng-click="saveTrigger(trigger)" ng-disabled="triggerForm.$invalid">
