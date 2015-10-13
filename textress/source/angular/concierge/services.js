@@ -33,12 +33,12 @@ angular.module('conciergeApp.services', ['ngResource'])
     .factory('Trigger', ['$resource',
         function($resource) {
             return $resource('/api/trigger/:id/', null, {
-                'update': {
-                    method: 'PATCH'
-                },
-                'remove': {
-                    method: 'DELETE'
-                }
+                'get':    {method:'GET'},
+                'save':   {method:'POST'},
+                'query':  {method:'GET', isArray:true},
+                'remove': {method:'DELETE'},
+                'delete': {method:'DELETE'},
+                'update': {method: 'PATCH'},
             });
         }
     ]);

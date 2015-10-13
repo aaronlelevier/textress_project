@@ -271,37 +271,48 @@ conciergeControllers.controller('TriggerCtrl', ['$scope', 'Reply', 'Trigger', 'T
         $scope.hotel_id = CurrentUser.hotel_id;
         $scope.trigger_type = $scope.trigger = $scope.reply = null;
 
-        $scope.hotel_replies = Reply.query({
-            hotel: $scope.hotel_id
-        });
-
+        $scope.hotel_replies = Reply.query({hotel: $scope.hotel_id});
         $scope.trigger_types = TriggerType.query();
+        $scope.triggers = Trigger.query(); // nested w/ 'type' n 'reply'
 
-        $scope.triggers = Trigger.query();
+        $scope.$watch(function() {
+                return $scope.trigger;
+            },
+            function(newValue) {
+                return newValue;
+            }, true);
 
-        // $scope.$watch(function() {
-        //         return $scope.trigger;
-        //     },
-        //     function(newValue) {
-        //         return newValue;
-        //     });
+        $scope.$watch(function() {
+                return $scope.reply;
+            },
+            function(newValue) {
+                return newValue;
+            });
 
-        // $scope.triggerTypePicked = function(trigger_type) {
-        //     console.log(trigger_type);
-        //     Trigger.query({
-        //         type: trigger_type.id
-        //     }, function(response) {
-        //         if (response) {
-        //             console.log(response);
-        //             $scope.trigger = response;
-        //             console.log("trigger:", $scope.trigger);
-        //             console.log("trigger.type:", $scope.trigger.type);
-        //             console.log("trigger.reply:", $scope.trigger.reply);
-        //             // $scope.reply = $scope.trigger.reply;
-        //         } else {
-        //             $scope.trigger.reply = null;
-        //         }
-        //     });
-        // };
+        $scope.triggerTypePicked = function(trigger_type) {
+            trigger_type = JSON.parse(trigger_type); // cuz sent from view.html as a string
+
+            Trigger.query({
+                type__id: trigger_type.id
+            }, function(response) {
+                if (response[0]) {
+                    $scope.trigger = response[0];
+                    $scope.reply = $scope.trigger.reply;
+                } else {
+                    $scope.reply = null;
+                }
+            });
+        }
+
+        $scope.replyPicked = function(reply) {
+            // console.log(typeof(reply), reply);
+            reply = JSON.parse(reply);
+
+            Reply.get({
+                id: reply.id
+            }, function(response) {
+                $scope.reply = response;
+            });
+        }
     }
 ]);

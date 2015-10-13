@@ -192,9 +192,9 @@
                                     Reply Letter <span class="symbol required"></span>
                                 </label>
                                 <div class="col-sm-6">
-                                    <select id="form-field-select-1" class="form-control" ng-model="trigger.reply" ng-change="replyPicked(trigger.reply)" required>
-                                        <option value="">&nbsp;</option>
-                                        <option ng-repeat="reply in hotel_replies" value="[[ reply ]]">[[ reply.letter ]]</option>
+                                    <select id="form-field-select-1" class="form-control" ng-model="reply" ng-change="replyPicked(reply)" ng-placeholder="reply.letter" ng-options="reply in hotel_replies" required>
+                                        <!-- <option value="reply">[[ reply.letter ]]</option>
+                                        <option ng-repeat="reply in hotel_replies" value="[[ reply ]]">[[ reply.letter ]]</option> -->
                                     </select>
                                 </div>
                             </div>
