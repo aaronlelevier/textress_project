@@ -271,7 +271,9 @@ conciergeControllers.controller('TriggerCtrl', ['$scope', 'Reply', 'Trigger', 'T
         $scope.hotel_id = CurrentUser.hotel_id;
         $scope.trigger_type = $scope.trigger = $scope.reply = null;
 
-        $scope.hotel_replies = Reply.query({hotel: $scope.hotel_id});
+        $scope.hotel_replies = Reply.query({
+            hotel: $scope.hotel_id
+        });
         $scope.trigger_types = TriggerType.query();
         $scope.triggers = Trigger.query(); // nested w/ 'type' n 'reply'
 
@@ -290,23 +292,26 @@ conciergeControllers.controller('TriggerCtrl', ['$scope', 'Reply', 'Trigger', 'T
             });
 
         $scope.triggerTypePicked = function(trigger_type) {
-            trigger_type = JSON.parse(trigger_type); // cuz sent from view.html as a string
+            if (trigger_type) {
+                trigger_type = JSON.parse(trigger_type); // cuz sent from view.html as a string
 
-            Trigger.query({
-                type__id: trigger_type.id
-            }, function(response) {
-                if (response[0]) {
+                Trigger.query({
+                    type__id: trigger_type.id
+                }, function(response) {
                     $scope.trigger = response[0];
                     $scope.reply = $scope.trigger.reply;
-                } else {
-                    $scope.reply = null;
-                }
-            });
+                    console.log($scope.reply);
+                }, function(error) {
+
+                });
+            }
         }
 
         $scope.replyPicked = function(reply) {
-            // console.log(typeof(reply), reply);
+            console.log(reply);
+            console.log(typeof(reply), reply);
             reply = JSON.parse(reply);
+            console.log(typeof(reply), reply);
 
             Reply.get({
                 id: reply.id
