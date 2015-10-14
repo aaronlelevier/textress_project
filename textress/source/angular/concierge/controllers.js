@@ -293,30 +293,76 @@ conciergeControllers.controller('TriggerCtrl', ['$scope', 'Reply', 'Trigger', 'T
 
         $scope.triggerTypePicked = function(trigger_type) {
             if (trigger_type) {
-                trigger_type = JSON.parse(trigger_type); // cuz sent from view.html as a string
+                var trigger_type = JSON.parse(trigger_type); // cuz sent from view.html as a string
 
                 Trigger.query({
                     type__id: trigger_type.id
-                }, function(response) {
-                    $scope.trigger = response[0];
-                    $scope.reply = $scope.trigger.reply;
-                    console.log($scope.reply);
-                }, function(error) {
-
+                }).$promise.then(function(response) {
+                    if (response[0]) {
+                        $scope.trigger = response[0];
+                        $scope.reply = $scope.trigger.reply;
+                    } else {
+                        $scope.trigger = $scope.reply = null;
+                    }
                 });
+            } else {
+                $scope.trigger = null;
             }
         }
 
-        $scope.replyPicked = function(reply) {
-            console.log(reply);
-            console.log(typeof(reply), reply);
-            reply = JSON.parse(reply);
-            console.log(typeof(reply), reply);
+        $scope.saveTrigger = function(trigger_type, reply) {
 
-            Reply.get({
-                id: reply.id
-            }, function(response) {
-                $scope.reply = response;
+            // trigger, trigger_type, and reply -> are all local VARs that are objects
+            var trigger = $scope.trigger;
+            var trigger_type = JSON.parse(trigger_type);
+
+            if (trigger) {
+
+                Trigger.update({
+                    id: trigger.id
+                }, {
+                    type: trigger_type.id,
+                    reply: reply.id
+                });
+
+                trigger.reply = reply;
+                trigger.type = trigger_type;
+
+                angular.forEach($scope.triggers, function(u, i) {
+                    if (u.id === trigger.id) {
+                        $scope.triggers.splice(i, 1, trigger);
+                    }
+                });
+
+            } else {
+                var trigger = new Trigger({
+                    hotel: $scope.hotel_id,
+                    type: trigger_type.id,
+                    reply: reply.id
+                });
+                trigger.$save(function(response) {
+                        console.log(response);
+                    },
+                    function(err) {
+                        console.log(err);
+                    }).then(function(response) {
+                    response.reply = reply;
+                    response.type = trigger_type;
+                    $scope.triggers.push(response);
+                });;
+            }
+            $scope.trigger_type = $scope.reply = null;
+        }
+
+        $scope.deleteTrigger = function(trigger) {
+            angular.forEach($scope.triggers, function(u, i) {
+                if (u.id === trigger.id) {
+                    $scope.triggers.splice(i, 1);
+                }
+            })
+
+            trigger.$remove({
+                id: trigger.id
             });
         }
     }

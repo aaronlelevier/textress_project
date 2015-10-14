@@ -27,7 +27,7 @@ from concierge.mixins import GuestListContextMixin
 from concierge.permissions import IsHotelObject, IsManagerOrAdmin, IsHotelUser
 from concierge.serializers import (MessageListCreateSerializer, GuestMessageSerializer,
     GuestListSerializer, MessageRetrieveSerializer, ReplySerializer,
-    TriggerTypeSerializer, TriggerSerializer)
+    TriggerTypeSerializer, TriggerSerializer, TriggerCreateSerializer)
 from concierge.tasks import check_twilio_messages_to_merge
 from main.mixins import HotelUserMixin, HotelObjectMixin
 from utils import EmptyForm, DeleteButtonMixin
@@ -294,6 +294,12 @@ class TriggerAPIView(BaseModelViewSet):
     permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject)
     model = Trigger
     filter_fields = [f.name for f in model._meta.get_fields()]
+
+    def get_serializer_class(self):
+        if self.action in ('create', 'update', 'partial_update'):
+            return TriggerCreateSerializer
+        else:
+            return TriggerSerializer
 
     def get_queryset(self):
         queryset = super(TriggerAPIView, self).get_queryset()
