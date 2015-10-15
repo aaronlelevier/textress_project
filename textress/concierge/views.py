@@ -56,7 +56,6 @@ class ReceiveSMSView(CsrfExemptMixin, TemplateView):
         convert_to_json_and_publish_to_redis(msg)
         # Auto-reply Logic
         if reply and reply.message:
-            print "reply:", reply
             resp.message(reply.message)
             client = msg.guest.hotel._client
             # delay 5 seconds, query Twilio for this Guest, and find any 

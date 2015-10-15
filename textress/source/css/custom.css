@@ -239,3 +239,9 @@ a.no_decoration {
 .margin10 {
     margin: 10px;
 }
+
+input[required="required"]::after {
+    content: "*";
+    color: red;
+    ...
+}

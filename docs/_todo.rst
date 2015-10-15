@@ -1,8 +1,10 @@
 Notes w/ Scott
 --------------
-Required form fields should have a red asterisk
+# Required form fields should have a red asterisk
 
-Guest (for auto-reply), should be able to send an lowercase or upper case letter
+    - submitted `issue <https://github.com/jrief/django-angular/issues/129>`_
+
+NEXT: Guest (for auto-reply), should be able to send an lowercase or upper case letter
 for an auto-reply.  ex: 'h', 'H'
 
 Auto-sent messages - should send on the Hotel's behalf, but are being sent on the

@@ -141,6 +141,6 @@ class HotelCreateForm(Bootstrap3ModelForm):
 
         if self.hotel:
             qs = qs.exclude(id=self.hotel.id)
-            
+
         if qs.exists():
             raise forms.ValidationError("Hotel phone number exists.")

@@ -370,6 +370,9 @@ class ReplyManager(models.Manager):
         - System Reply
         - no reply
         '''
+        # cast as uppercase so case-insensitve when receiving from the Guest
+        body = body.upper()
+
         try:
             return self.get(hotel=hotel, letter=body)
         except Reply.DoesNotExist:
@@ -388,6 +391,7 @@ class ReplyManager(models.Manager):
         else:
             self.check_for_data_update(guest, reply)
             return reply
+
 
 REPLY_LETTERS = [(x,x) for x in string.ascii_uppercase]
 
