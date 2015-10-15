@@ -34,3 +34,15 @@ class FactoryTests(TestCase):
         user = factory.create_hotel_user(hotel, group=group)
         self.assertIsInstance(user, User)
         self.assertIsNotNone(user.groups.filter(name=group))
+        self.assertEqual(hotel.admin_id, user.id)
+        self.assertEqual(hotel, user.profile.hotel)
+
+    def test_create_hotel_random_name(self):
+        hotel = factory.create_hotel()
+        hotel2 = factory.create_hotel()
+        self.assertNotEqual(hotel.name, hotel2.name)
+
+    def test_create_hotel_random_address_phone(self):
+        hotel = factory.create_hotel()
+        hotel2 = factory.create_hotel()
+        self.assertNotEqual(hotel.address_phone, hotel2.address_phone)

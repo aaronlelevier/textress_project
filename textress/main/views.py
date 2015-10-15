@@ -39,7 +39,7 @@ class HotelUpdateView(HotelUsersOnlyMixin, GroupRequiredMixin, SetHeadlineMixin,
     form_valid_message = dj_messages['hotel_updated']
 
     def get_success_url(self):
-        return reverse('main:hotel_update', kwargs={'pk': self.object.pk})
+        return reverse('main:user_detail', kwargs={'pk': self.request.user.pk})
 
     def get_form_kwargs(self):
         "Set Hotel as a form attr."

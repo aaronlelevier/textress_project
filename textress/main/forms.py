@@ -29,23 +29,20 @@ class UserCreateForm(Bootstrap3ModelForm):
     last_name = forms.CharField(label=_("Last Name"), required=True)
     email = forms.EmailField(label=_("Email"), required=True)
 
-    username = forms.RegexField(label=_("Username"), max_length=30,
-        regex=r'^[\w.@+-_]+$',
+    username = forms.RegexField(label=_("Username"), max_length=30, regex=r'^[\w.@+-_]+$',
         help_text=_("Required. 30 characters or fewer. Letters, digits and "
-                      "@/./+/-/_ only."),
+                    "@/./+/-/_ only."),
         error_messages={
             'invalid': _("This value may contain only letters, numbers and "
                          "@/./+/-/_ characters.")})
-    password1 = forms.CharField(label=_("Password"),
-        widget=forms.PasswordInput)
-    password2 = forms.CharField(label=_("Confirm Password"),
-        widget=forms.PasswordInput,
+    password1 = forms.CharField(label=_("Password"), widget=forms.PasswordInput)
+    password2 = forms.CharField(label=_("Confirm Password"), widget=forms.PasswordInput,
         help_text=_("Enter the same password as above, for verification."))
 
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'email',
-            'username', 'password1', 'password2',)
+                  'username', 'password1', 'password2',)
 
     def clean_username(self):
         # Since User.username is unique, this check is redundant,
@@ -96,28 +93,29 @@ class HotelCreateForm(Bootstrap3ModelForm):
     form_name = 'hotel_create_form'
 
     error_messages = {
-        'invalid_ph':_('Please enter a 10-digit phone number'),
+        'invalid_ph': _('Please enter a 10-digit phone number'),
     }
 
-    address_phone = forms.RegexField(r'^(\d{3})-(\d{3})-(\d{4})$',
-        label='Phone number',
+    address_phone = forms.RegexField(r'^(\d{3})-(\d{3})-(\d{4})$', label='Phone number',
         error_messages={'invalid': 'Phone number have 10 digits'},
         help_text='Allowed phone number format: 702-510-5555')
 
     class Meta:
         model = Hotel
         fields = ['name', 'address_phone', 'address_line1', 'address_line2',
-            'address_city', 'address_state', 'address_zip']
+                  'address_city', 'address_state', 'address_zip']
 
     def __init__(self, hotel=None, *args, **kwargs):
         super(HotelCreateForm, self).__init__(*args, **kwargs)
+        self.hotel = hotel
 
         try:
             address_phone = hotel.address_phone
         except AttributeError:
             self.initial['address_phone'] = ""
         else:
-            self.initial['address_phone'] = ph_formatter(getattr(hotel, 'address_phone', None))
+            self.initial['address_phone'] = ph_formatter(
+                getattr(hotel, 'address_phone', None))
 
     def clean_address_phone(self):
         """
@@ -131,7 +129,18 @@ class HotelCreateForm(Bootstrap3ModelForm):
         # all phone #'s saved to the DB in this format
         phone = validate_phone(address_phone)
 
-        if Hotel.objects.filter(address_phone=phone).exists():
-            raise forms.ValidationError("Hotel phone number exists.")
+        self._validate_phone_in_use(phone)
 
         return phone
+
+    def _validate_phone_in_use(self, phone):
+        """Silently pass if the Hotel is updating something, but leaving 
+        the PH # as is."""
+
+        qs = Hotel.objects.filter(address_phone=phone)
+
+        if self.hotel:
+            qs = qs.exclude(id=self.hotel.id)
+            
+        if qs.exists():
+            raise forms.ValidationError("Hotel phone number exists.")

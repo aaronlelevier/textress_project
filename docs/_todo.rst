@@ -32,6 +32,10 @@ Ask Concierges.  Do they like to call back, or is the whole conversation thro SM
 Maybe ask a designer about the UI
 
 
+** SMS - need a 2nd PH # most likely assigned to the "Test Hotel" to get SMS
+Tests to not error out b/c of the `sms.tests.factor` **
+
+
 Bugs
 ----
 - when going to "account" view, if no Hotel, throws an Attribute Error, but 
