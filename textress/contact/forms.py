@@ -2,11 +2,9 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 from djangular.forms import NgFormValidationMixin
-from djangular.styling.bootstrap3.forms import (Bootstrap3Form,
-    Bootstrap3ModelForm)
 
 from contact.models import Contact, Newsletter
-
+from utils.forms import Bootstrap3Form, Bootstrap3ModelForm
 
 class ContactForm(Bootstrap3ModelForm):
 

@@ -3,18 +3,18 @@ from django.contrib.auth.models import User
 from django.utils.translation import ugettext, ugettext_lazy as _
 
 from djangular.forms import NgFormValidationMixin
-from djangular.styling.bootstrap3.forms import Bootstrap3ModelForm
 
 from concierge.models import validate_phone
 from main.models import Hotel
 from utils import ph_formatter
+from utils.forms import Bootstrap3ModelForm
 
 
 class UserCreateForm(Bootstrap3ModelForm):
     '''
     Form used during Registration to Create the Admin User.
     '''
-    # djangular req
+    # djangular requires this
     form_name = 'user_create_form'
 
     # UserCreationForm
@@ -80,8 +80,11 @@ class UserUpdateForm(Bootstrap3ModelForm):
     '''
     Form used during Registration to Update the Admin User.
     '''
-    # djangular req
     form_name = 'admin_update_form'
+
+    first_name = forms.CharField(label=_("First Name"), required=True)
+    last_name = forms.CharField(label=_("Last Name"), required=True)
+    email = forms.EmailField(label=_("Email"), required=True)
 
     class Meta:
         model = User
@@ -89,7 +92,8 @@ class UserUpdateForm(Bootstrap3ModelForm):
 
 
 class HotelCreateForm(Bootstrap3ModelForm):
-    # djangular req
+    "Used for Hotel Update/Create"
+
     form_name = 'hotel_create_form'
 
     error_messages = {

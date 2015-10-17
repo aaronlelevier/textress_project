@@ -6,6 +6,7 @@ dj_messages = {
     'contact_thanks': "Thank you for contacting us.  We look forward to speaking with you.",
     'contact_not_sent': "Contact email not sent, please check the errors below",
     'hotel_updated': "Hotel info successfully updated",
+    'profile_updated': "Profile info successfully updated",
     # Hotel
     'no_hotel': "No Hotel associated with this account.",
     'hotel_not_active': "The Hotel associated with this account is not active.",

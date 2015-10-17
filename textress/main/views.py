@@ -192,16 +192,18 @@ class UserDetailView(LoginRequiredMixin, SetHeadlineMixin, UserOnlyMixin, Detail
         return context
 
 
-class UserUpdateView(SetHeadlineMixin, LoginRequiredMixin, UserOnlyMixin, UpdateView):
+class UserUpdateView(SetHeadlineMixin, FormValidMessageMixin, LoginRequiredMixin,
+    UserOnlyMixin, UpdateView):
     '''User's UpdateView of themself.'''
 
     headline = "Update Profile"
     model = User
     form_class = UserUpdateForm
     template_name = 'cpanel/form.html'
+    form_valid_message = dj_messages['profile_updated']
 
     def get_success_url(self):
-        return reverse('account')
+        return reverse('main:user_detail', kwargs={'pk': self.request.user.pk})
 
 
 ################

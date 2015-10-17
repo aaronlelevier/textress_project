@@ -54,7 +54,8 @@ def create_hotel_user(hotel, username=None, group=None):
     if not username:
         username = create._generate_name()
 
-    user = mommy.make(User, username=username, password=PASSWORD)
+    user = mommy.make(User, username=username, password=PASSWORD,
+        first_name=username, last_name=username, email="{}@mail.com".format(username))
 
     if group:
         g = Group.objects.get(name=group)

@@ -192,43 +192,45 @@ class UserViewTests(TestCase):
         self.mgr = create_hotel_user(hotel=self.hotel, username='mgr', group='hotel_manager')
         self.user = create_hotel_user(hotel=self.hotel, username='user')
 
-    def test_create(self):
-        # both have a hotel attr
-        assert isinstance(self.user.profile.hotel, Hotel)
-        assert isinstance(self.mgr.profile.hotel, Hotel)
-
-        # mgr is a "hotel_manager"
-        mgr_group = Group.objects.get(name="hotel_manager")
-        assert mgr_group in self.mgr.groups.all()
-
-    def test_update(self):
-        # User can update
-        fname = self.user.first_name
-
-        # Mgr can't Access
-        self.client.login(username=self.mgr.username, password=self.password)
-        response = self.client.get(reverse('main:user_update', kwargs={'pk': self.user.pk}))
-        self.assertEqual(response.status_code, 403)
-
-        # Login n Get
-        self.client.logout()
-        self.client.login(username=self.user.username, password=self.password)
-        response = self.client.get(reverse('main:user_update', kwargs={'pk': self.user.pk}))
-        self.assertEqual(response.status_code, 200)
-
-        # Post
-        response = self.client.post(reverse('main:user_update', kwargs={'pk': self.user.pk}),
-            {'first_name': 'new name', 'last_name': self.user.last_name, 'email': self.user.email},
-            follow=True)
-        # User updated n redirects
-        updated_user = User.objects.get(username=self.user.username)
-        self.assertNotEqual(fname, updated_user.first_name)
-        self.assertRedirects(response, reverse('account'))
-
     def test_user_detail(self):
         self.client.login(username=self.user.username, password=self.password)
         response = self.client.get(reverse('main:user_detail', kwargs={'pk': self.user.pk}))
         self.assertEqual(response.status_code, 200)
+
+    def test_create(self):
+        # both have a hotel attr
+        self.assertIsInstance(self.user.profile.hotel, Hotel)
+        self.assertIsInstance(self.mgr.profile.hotel, Hotel)
+
+        # mgr is a "hotel_manager"
+        mgr_group = Group.objects.get(name="hotel_manager")
+        self.assertIn(mgr_group, self.mgr.groups.all())
+
+    def test_update_get(self):
+        self.client.login(username=self.user.username, password=self.password)
+        response = self.client.get(reverse('main:user_update', kwargs={'pk': self.user.pk}))
+        self.assertEqual(response.status_code, 200)
+
+    def test_update_post_success(self):
+        fname = self.user.first_name
+
+        self.client.login(username=self.user.username, password=self.password)
+        response = self.client.post(reverse('main:user_update', kwargs={'pk': self.user.pk}),
+            {'first_name': 'new name', 'last_name': self.user.last_name, 'email': self.user.email},
+            follow=True)
+
+        self.assertRedirects(response, reverse('main:user_detail', kwargs={'pk': self.user.pk}))
+        updated_user = User.objects.get(username=self.user.username)
+        self.assertNotEqual(fname, updated_user.first_name)
+
+        m = list(response.context['messages'])
+        self.assertEqual(len(m), 1)
+        self.assertEqual(str(m[0]), dj_messages['profile_updated'])
+
+    def test_update_other_users_cant_access(self):
+        self.client.login(username=self.mgr.username, password=self.password)
+        response = self.client.get(reverse('main:user_update', kwargs={'pk': self.user.pk}))
+        self.assertEqual(response.status_code, 403)
 
 
 class ManageUsersTests(TestCase):
