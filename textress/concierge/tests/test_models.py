@@ -152,22 +152,12 @@ class MessageManagerTests(TestCase):
 
         # Hotel
         self.hotel = create_hotel()
-
         # create "Hotel Manager" Group
         create._get_groups_and_perms()
-
         # Admin
-        self.admin = mommy.make(User, username='admin')
-        self.admin.groups.add(Group.objects.get(name="hotel_admin"))
-        self.admin.set_password(self.password)
-        self.admin.save()
-        self.admin.profile.update_hotel(hotel=self.hotel)
-        # Hotel Admin ID
-        self.hotel.admin_id = self.admin.id
-        self.hotel.save()
-
+        self.admin = create_hotel_user(self.hotel, username='admin', group='hotel_admin')
         # Guest
-        self.guest = make_guests(hotel=self.hotel, number=1)[0] #b/c returns a list
+        self.guest = make_guests(hotel=self.hotel, number=1)[0]
 
         # Messages
         self.messages = make_messages(
@@ -179,13 +169,34 @@ class MessageManagerTests(TestCase):
             )
         self.message = self.messages[0]
 
+        self.twilio_data = {
+            'sid': "SMa3376deff77d397cbcf502a6aa27889e",
+            'date_sent': '2015-10-17',
+            'status': 'sent',
+            'to': self.guest.phone_number,
+            'from_': self.guest.phone_number,
+            'body': 'foo'
+        }
+
         self.post_data = {
-            u'Body': [u'Hey'], u'MessageSid': [u'SMa3376deff77d397cbcf502a6aa27889e'],
-            u'FromZip': [u''], u'SmsStatus': [u'received'], u'SmsMessageSid': [u'SMa3376deff77d397cbcf502a6aa27889e'],
-            u'AccountSid': [u'AC7036cf7d16a460884ff84c0a5a99a008'], u'FromCity': [u''], u'ApiVersion': [u'2010-04-01'],
-            u'To': [u'+17024302691'], u'From': [u'+17754194000'], u'NumMedia': [u'0'], u'ToZip': [u'89106'],
-            u'ToCountry': [u'US'], u'NumSegments': [u'1'], u'ToState': [u'NV'],
-            u'SmsSid': [u'SMa3376deff77d397cbcf502a6aa27889e'], u'ToCity': [u'LAS VEGAS'], u'FromState': [u'NV'],
+            u'Body': [u'Hey'],
+            u'MessageSid': [u'SMa3376deff77d397cbcf502a6aa27889e'],
+            u'FromZip': [u''],
+            u'SmsStatus': [u'received'],
+            u'SmsMessageSid': [u'SMa3376deff77d397cbcf502a6aa27889e'],
+            u'AccountSid': [u'AC7036cf7d16a460884ff84c0a5a99a008'],
+            u'FromCity': [u''],
+            u'ApiVersion': [u'2010-04-01'],
+            u'To': [u'+17024302691'],
+            u'From': [u'+17754194000'],
+            u'NumMedia': [u'0'],
+            u'ToZip': [u'89106'],
+            u'ToCountry': [u'US'],
+            u'NumSegments': [u'1'],
+            u'ToState': [u'NV'],
+            u'SmsSid': [u'SMa3376deff77d397cbcf502a6aa27889e'],
+            u'ToCity': [u'LAS VEGAS'],
+            u'FromState': [u'NV'],
             u'FromCountry': [u'US']
             }
 
@@ -204,11 +215,33 @@ class MessageManagerTests(TestCase):
             mgr_daily_all.count()
         )
 
+    ### receive_message (twilio API data)
+
+    def test_receive_message_get(self):
+        self.twilio_data.update({'sid': self.message.sid})
+        msg, created = Message.objects.receive_message(guest=self.guest, data=self.twilio_data)
+        self.assertIsInstance(msg, Message)
+        self.assertFalse(created)
+
+    def test_receive_message_create(self):
+        msg, created = Message.objects.receive_message(guest=self.guest, data=self.twilio_data)
+        self.assertIsInstance(msg, Message)
+        self.assertIsNone(msg.user)
+        self.assertTrue(created)
+
+    def test_receive_message_create_with_user(self):        
+        self.hotel.twilio_phone_number = settings.DEFAULT_TO_PH
+        self.hotel.save()
+        self.twilio_data['from_'] = self.hotel.twilio_phone_number
+        msg, created = Message.objects.receive_message(guest=self.guest, data=self.twilio_data)
+        self.assertIsInstance(msg, Message)
+        self.assertIsInstance(msg.user, User)
+        self.assertTrue(created)
+
     ### receive_message_post
 
     def test_receive_message_post_get(self):
-        data = {}
-        data['SmsSid'] = self.message.sid
+        data = {'SmsSid': self.message.sid}
         self.assertEqual(
             Message.objects.receive_message_post(self.guest, data),
             self.message
@@ -217,19 +250,17 @@ class MessageManagerTests(TestCase):
     def test_receive_message_post_create(self):
         # setup
         msg = create._generate_name()
-        data = {}
-        data.update({
+        data = {
             'SmsSid': 'bad sid',
             'SmsStatus': 'sent',
             'To': settings.DEFAULT_TO_PH,
             'From': settings.DEFAULT_TO_PH,
             'Body': msg
-        })
+        }
         # test
-        self.assertIsInstance(
-            Message.objects.receive_message_post(self.guest, data),
-            Message
-        )
+        db_message = Message.objects.receive_message_post(self.guest, data)
+        self.assertIsInstance(db_message, Message)
+        self.assertIsNone(db_message.user)
 
 
 class MessageTests(TestCase):

@@ -220,17 +220,28 @@ class MessageManager(models.Manager):
             return self.get(sid=data['sid']), False
         except ObjectDoesNotExist:
             try:
-                db_message = self.create(
-                    guest=guest,
-                    sid=data['sid'],
-                    created=data['date_sent'],
-                    received=True,
-                    status=data['status'],
-                    to_ph=data['to'],
-                    from_ph=data['from_'],
-                    body=data['body']
-                    )
-            except (ObjectDoesNotExist, Exception) as e:
+                kwargs = {
+                    "guest": guest,
+                    "sid": data['sid'],
+                    "created": data['date_sent'],
+                    "received": True,
+                    "status": data['status'],
+                    "to_ph": data['to'],
+                    "from_ph": data['from_'],
+                    "body": data['body']
+                }
+
+                # ``receive_message`` shouldn't have a User, unless it's an auto-reply 
+                # Message, in which case use the Hotel's Admin User b/c the Message is 
+                # coming from the Hotel.
+                if data['from_'] == guest.hotel.twilio_phone_number:
+                    kwargs.update({
+                        "user": guest.hotel.get_admin()
+                    })
+
+                db_message = self.create(**kwargs)
+
+            except Exception as e:
                 # TODO: only reaches this point if the received Twilio Message
                 #   failed to save to the DB.
                 # this should be logged

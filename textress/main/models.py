@@ -173,6 +173,12 @@ class Hotel(TwilioClient, AbstractBase):
         self.save()
         return self
 
+    def get_admin(self):
+        try:
+            return User.objects.get(id=self.admin_id)
+        except User.DoesNotExist:
+            return
+
     def update_customer(self, customer):
         self.customer = customer
         self.save()

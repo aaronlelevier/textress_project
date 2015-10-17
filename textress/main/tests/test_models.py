@@ -52,6 +52,16 @@ class HotelTests(TestCase):
         hotel = self.hotel.set_admin_id(self.user)
         self.assertEqual(self.hotel.admin_id, self.user.pk)
 
+    def test_get_admin(self):
+        hotel = self.hotel.set_admin_id(self.user)
+        self.assertEqual(self.user, self.hotel.get_admin())
+
+    def test_get_admin_none(self):
+        self.hotel.admin_id = None
+        self.assertIsNone(self.hotel.admin_id)
+        self.hotel.save()
+        self.assertIsNone(self.hotel.get_admin())
+
     def test_update_customer(self):
         customer = mommy.make(Customer)
         self.assertIsInstance(customer, Customer)

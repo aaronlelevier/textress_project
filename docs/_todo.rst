@@ -36,6 +36,8 @@ remove the triangle on one near avatar
 
 Test "guest.is_unknown" messages
 
+Review TODOs scattered throughout code
+
 
 Bugs
 ----

@@ -18,6 +18,7 @@ from utils import login_messages
 def convert_to_json_and_publish_to_redis(msg):
     redis_publisher = RedisPublisher(facility='foobar', broadcast=True)
     msg = JSONRenderer().render(model_to_dict(msg))
+    print msg
     msg = RedisMessage(msg)
     redis_publisher.publish_message(msg)
 
