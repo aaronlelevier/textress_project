@@ -2,6 +2,10 @@ Notes w/ Scott
 --------------
 Check-out hooks
 
+    - Put a ``delete(override=True)`` method on a Base Model class
+
+        - Include a hook for "check-out" send message
+
     - Need a "W" welcome auto-reply to tell Guests how to use it for "H" for help for ex.
 
 Phone number input

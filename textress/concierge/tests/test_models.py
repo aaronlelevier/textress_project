@@ -63,11 +63,11 @@ class GuestTests(TestCase):
         guest.save()
 
         guest = Guest.objects.get(pk=guest.id)
-        assert not guest.confirmed
+        self.assertFalse(guest.confirmed)
 
         guest._confirmed()
         guest = Guest.objects.get(pk=guest.id)
-        assert guest.confirmed
+        self.assertTrue(guest.confirmed)
 
     def test_stop(self):
         guest = self.guest
@@ -75,11 +75,11 @@ class GuestTests(TestCase):
         guest.save()
 
         guest = Guest.objects.get(pk=guest.id)
-        assert not guest.stop
+        self.assertFalse(guest.stop)
 
         guest._stop()
         guest = Guest.objects.get(pk=guest.id)
-        assert guest.stop
+        self.assertTrue(guest.stop)
 
     def test_is_unknown(self):
         assert self.unknown_guest.is_unknown
