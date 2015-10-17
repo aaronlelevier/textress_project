@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+import sys
 import re
 import requests
 import xmltodict
 
-import twilio
-from twilio.rest import TwilioRestClient
-
 from django import forms
 from django.conf import settings
+
+import twilio
+from twilio.rest import TwilioRestClient
 
 
 sms_messages = {
@@ -57,12 +57,13 @@ def send_text(text):
 
 def send_message(hotel, to, body):
     """
-    Send Message for Concierge App.
-
-    Use `hotel` to connect the correct Twilio Client.
+    Main Send Message Twilio function call.
     """
-    client = TwilioRestClient(hotel.twilio_sid, hotel.twilio_auth_token)
+    # so not sending live SMS with ``./manage.py test``
+    if 'test' in sys.argv:
+        return True
 
+    client = TwilioRestClient(hotel.twilio_sid, hotel.twilio_auth_token)
     try:
         message = client.messages.create(
             to=to,

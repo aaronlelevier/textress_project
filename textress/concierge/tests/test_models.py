@@ -464,6 +464,29 @@ class TriggerTypeTests(TestCase):
         self.assertEqual(t.human_name, "check in")
 
 
+class TriggerTypeTests(TestCase):
+
+    def setUp(self):
+        self.hotel = create_hotel()
+        self.guest = make_guests(self.hotel, number=1)[0]
+        self.trigger = mommy.make(Trigger, hotel=self.hotel, type__name="check_in")
+
+    def test_check_in(self):
+        twilio_msg = Trigger.objects.check_in(self.guest, "check_in")
+        self.assertIsNotNone(twilio_msg)
+
+    def test_check_in_stop_works(self):
+        self.guest.stop = True
+        self.guest.save()
+        twilio_msg = Trigger.objects.check_in(self.guest, "check_in")
+        self.assertIsNone(twilio_msg)
+
+    def test_check_in_not_configured(self):
+        self.trigger.delete()
+        twilio_msg = Trigger.objects.check_in(self.guest, "check_in")
+        self.assertIsNone(twilio_msg)
+
+
 class TriggerTests(TestCase):
 
     def setUp(self):

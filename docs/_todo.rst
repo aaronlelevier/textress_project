@@ -1,13 +1,10 @@
 Notes w/ Scott
 --------------
-Auto-sent messages - should send on the Hotel's behalf, but are being sent on the
-Guest's behalf presently.
+Check-out hooks
 
-Default "H" reply has grammar issue.
+    - Need a "W" welcome auto-reply to tell Guests how to use it for "H" for help for ex.
 
-Need a "W" welcome auto-reply to tell Guests how to use it for "H" for help for ex.
-
-Phone number input 
+Phone number input
 
     - auto add dashes or () to a User's PH #
 

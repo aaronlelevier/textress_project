@@ -128,6 +128,7 @@ class GuestCreateView(GuestBaseView, GuestListContextMixin, CreateView):
         self.object = form.save(commit=False)
         self.object.hotel = self.hotel
         self.object.save()
+        Trigger.objects.check_in(self.object, "check_in")
         return super(GuestCreateView, self).form_valid(form)
 
 

@@ -344,7 +344,6 @@ class Message(AbstractBase):
                 self.read = True
             except TwilioRestException as e:
                 self.reason = e.__dict__['msg']
-                # raise ValidationError(self.reason)
 
         self.hotel = self.guest.hotel or self.user.profile.hotel
 
@@ -500,6 +499,18 @@ class TriggerType(AbstractBase):
             self.human_name = self.name.replace('_', ' ')
         super(TriggerType, self).save(*args, **kwargs)
 
+class TriggerManager(models.Manager):
+
+    def check_in(self, guest, trigger_type_name):
+        try:
+            trigger = self.get(hotel=guest.hotel, type__name=trigger_type_name)
+        except Trigger.DoesNotExist:
+            return
+        else:
+            if not guest.stop:
+                return Message.objects.create(to_ph=guest.phone_number, guest=guest,
+                    user=guest.hotel.get_admin(), body=trigger.reply.message)
+
 
 class Trigger(AbstractBase):
     """
@@ -519,6 +530,8 @@ class Trigger(AbstractBase):
     hotel = models.ForeignKey(Hotel)
     reply = models.ForeignKey(Reply)
     active = models.BooleanField(blank=True, default=False)
+
+    objects = TriggerManager()
 
     def __str__(self):
         return "Hotel: {}; Trigger Type:{}.".format(self.hotel, self.type)

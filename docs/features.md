@@ -19,3 +19,11 @@ Client side validation
 
 Guest (for auto-reply), can send an lowercase or uppercase letter for an auto-reply.
 ex: 'h', 'H'.  These auto-replies are configured at the Hotel level.
+
+Unread messages pop on screen
+
+Counts of unread and total messages
+
+Guest with unread messages show first
+
+** Check-in ** Message hook - for use with a "Welcom" message for example
