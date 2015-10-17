@@ -1,12 +1,5 @@
 Notes w/ Scott
 --------------
-# Required form fields should have a red asterisk
-
-    - submitted `issue <https://github.com/jrief/django-angular/issues/129>`_
-
-NEXT: Guest (for auto-reply), should be able to send an lowercase or upper case letter
-for an auto-reply.  ex: 'h', 'H'
-
 Auto-sent messages - should send on the Hotel's behalf, but are being sent on the
 Guest's behalf presently.
 
@@ -33,9 +26,15 @@ Ask Concierges.  Do they like to call back, or is the whole conversation thro SM
 
 Maybe ask a designer about the UI
 
-
 ** SMS - need a 2nd PH # most likely assigned to the "Test Hotel" to get SMS
 Tests to not error out b/c of the `sms.tests.factor` **
+
+django-constance : ability to change settings.py file w/i an admin form
+
+GuestDetailView messages : change to blue / grey w/ the grey having black text, and 
+remove the triangle on one near avatar
+
+Test "guest.is_unknown" messages
 
 
 Bugs

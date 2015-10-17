@@ -114,10 +114,6 @@ class Guest(AbstractBase):
     def __str__(self):
         return self.name
 
-    @property
-    def is_unknown(self):
-        return self.name == "Unknown Guest"
-
     def save(self, *args, **kwargs):
         '''
         TODO: Add logic so that all `phone_numbers` are distinct by Hotel. 
@@ -137,6 +133,10 @@ class Guest(AbstractBase):
             self.check_in, self.check_out)
 
         return super(Guest, self).save(*args, **kwargs)
+
+    @property
+    def is_unknown(self):
+        return self.name == "Unknown Guest"
 
     @staticmethod
     def validate_phone_number_taken(phone_number):
