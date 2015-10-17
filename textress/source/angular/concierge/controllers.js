@@ -165,7 +165,7 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
                         // Message should be marked as 'read=true' at this point because 
                         //  is being rendered in the GuestDetailView to the User
                         response.read = true;
-                        response.user = null;
+                        response.user = response.user || null;
                         Message.update({
                             id: response.id
                         }, response);
