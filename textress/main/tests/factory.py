@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.auth.models import User, Group
 
 from model_mommy import mommy
+from twilio.rest import TwilioRestClient
 
 from main.models import Hotel, Subaccount
 from utils import create
@@ -87,10 +88,17 @@ def make_subaccount(hotel, live=False):
     If not "live", override Subaccount.save() so don't create a 
     live Twilio Subaccount.
     '''
-    global Subaccount
-    
     if live:
-        return Subaccount.objects.create(hotel=hotel)
+        client = TwilioRestClient(settings.TWILIO_ACCOUNT_SID,
+            settings.TWILIO_AUTH_TOKEN)
+
+        subaccount = client.accounts.list()[0]
+
+        return Subaccount.objects.create(
+            hotel=hotel,
+            sid=subaccount.sid,
+            auth_token=subaccount.auth_token)
     else:
+        global Subaccount
         Subaccount.save = models.Model.save
         return mommy.make(Subaccount, hotel=hotel)

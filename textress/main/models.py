@@ -185,6 +185,7 @@ class Hotel(TwilioClient, AbstractBase):
         return self
 
     def update_twilio(self, sid, auth_token):
+        """Denormalized Twilio REST API attrs."""
         self.twilio_sid = sid
         self.twilio_auth_token = auth_token
         self.save()
@@ -370,6 +371,11 @@ class Subaccount(AbstractBase):
 
     def __str__(self):
         return self.sid
+
+    def save(self, *args, **kwargs):
+        return super(Subaccount, self).save(*args, **kwargs)
+        # denormalize Twilio attrs on Hotel
+        self.hotel.update_twilio(self.sid, self.auth_token)
 
     @property
     def twilio_object(self):

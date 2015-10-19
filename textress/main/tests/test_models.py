@@ -11,7 +11,8 @@ from model_mommy import mommy
 from twilio.rest import TwilioRestClient
 
 from main.models import TwilioClient, Hotel, UserProfile, Subaccount
-from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
+from main.tests.factory import (create_hotel, create_hotel_user, PASSWORD,
+    make_subaccount)
 from payment.models import Customer
 from utils import create
 
@@ -95,7 +96,9 @@ class HotelTests(TestCase):
     def test_get_or_create_subaccount(self):
         with self.assertRaises(Subaccount.DoesNotExist):
             Subaccount.objects.get(hotel=self.hotel)
-            
+
+        make_subaccount(self.hotel, live=True)
+
         self.hotel.get_or_create_subaccount()
         self.assertIsInstance(self.hotel.subaccount, Subaccount)
 
@@ -158,50 +161,30 @@ class SubaccountTests(TestCase):
     def setUp(self):
         self.password = '1234'
         self.today = timezone.now().date()
-
-        # Twilio Test Sid
-        # name='sub_test_865'
-        self.test_sid = os.environ['TWILIO_ACCOUNT_SID_TEST']
-        self.test_auth_token = os.environ['TWILIO_AUTH_TOKEN_TEST']
-
-        # Hotel
-        randint = random.randint(0,1000)
-        self.hotel = create_hotel(name="sub_test_{}".format(randint))
-
-        # create "Hotel Manager" Group
         create._get_groups_and_perms()
-
-        # Admin
-        self.admin = mommy.make(User, username='admin')
-        self.admin.groups.add(Group.objects.get(name="hotel_admin"))
-        self.admin.set_password(self.password)
-        self.admin.save()
-        self.admin.profile.update_hotel(hotel=self.hotel)
-        # Hotel Admin ID
-        self.hotel.admin_id = self.admin.id
-        self.hotel.save()
+        self.hotel = create_hotel()
+        self.admin = create_hotel_user(self.hotel, username='admin', group='hotel_admin')
 
         self.client = TwilioRestClient(settings.TWILIO_ACCOUNT_SID,
             settings.TWILIO_AUTH_TOKEN)
 
+        self.sub = make_subaccount(self.hotel, live=True)
+
+        # Not live
+        self.hotel_not_live = create_hotel()
+        self.sub_not_live = make_subaccount(self.hotel_not_live)
+
     ### Manager Tests ###
 
     def test_twilio_connection(self):
-        assert isinstance(self.client, TwilioRestClient)
+        self.assertIsInstance(self.client, TwilioRestClient)
 
-    def test_get(self):
-        hotel = Hotel.objects.first()
-
-        # Get
-        sub = Subaccount.objects.create(
-            hotel=hotel,
-            sid=self.test_sid,
-            auth_token=self.test_auth_token)
+    def test_get_or_create_already_created(self):
+        sub, created = Subaccount.objects.get_or_create(hotel=self.hotel)
         self.assertIsInstance(sub, Subaccount)
-
-        sub_2, created = Subaccount.objects.get_or_create(hotel=hotel)
         self.assertFalse(created)
-        self.assertEqual(sub, sub_2)
 
-        # the DB instance is created, but the Twilio Instance is not
-        self.assertEqual(len(self.client.accounts.list(friendly_name=hotel.name)), 0)
+    def test_post_save(self):
+        self.assertEqual(self.hotel.twilio_sid, self.sub.sid)
+        self.assertEqual(self.hotel.twilio_auth_token, self.sub.auth_token)
+        self.assertIsInstance(self.hotel._client, TwilioRestClient)

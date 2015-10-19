@@ -1,7 +1,10 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 
-from main.models import Hotel, UserProfile
+from twilio import TwilioRestException
+from twilio.rest import TwilioRestClient
+
+from main.models import Hotel, UserProfile, Subaccount
 from main.tests import factory
 from utils import create
 
@@ -46,3 +49,18 @@ class FactoryTests(TestCase):
         hotel = factory.create_hotel()
         hotel2 = factory.create_hotel()
         self.assertNotEqual(hotel.address_phone, hotel2.address_phone)
+
+    def test_make_subaccount_live(self):
+        hotel = factory.create_hotel()
+        sub = factory.make_subaccount(hotel, live=True)
+        self.assertIsInstance(sub, Subaccount)
+        self.assertTrue(sub.twilio_object)
+        self.assertIsInstance(sub.client, TwilioRestClient)
+
+    def test_make_subaccount_not_live(self):
+        hotel = factory.create_hotel()
+        sub = factory.make_subaccount(hotel)
+        self.assertIsInstance(sub, Subaccount)
+
+        with self.assertRaises(TwilioRestException):
+            self.assertTrue(sub.twilio_object)

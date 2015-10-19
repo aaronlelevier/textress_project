@@ -8,6 +8,8 @@ Check-out hooks
 
     - Need a "W" welcome auto-reply to tell Guests how to use it for "H" for help for ex.
 
+Check ``main.models.Subaccount`` TODO - b/c I think I'm already doing that
+
 Phone number input
 
     - auto add dashes or () to a User's PH #
