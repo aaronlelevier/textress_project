@@ -9,13 +9,12 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 
 from main.models import Hotel, UserProfile, profile_image, Icon
 from sms.helpers import send_message
-from utils.models import AbstractBase, AbstractBaseQuerySet, AbstractBaseManager
+from utils.models import BaseModel, BaseQuerySet, BaseManager
 
 from twilio import TwilioRestException
 from utils import validate_phone
@@ -27,7 +26,7 @@ from utils.exceptions import (CheckOutDateException, ValidSenderException,
 # GUEST #
 #########
 
-class GuestQuerySet(AbstractBaseQuerySet):
+class GuestQuerySet(BaseQuerySet):
     
     def get_by_hotel_phone(self, hotel, phone_number):
         '''
@@ -41,7 +40,7 @@ class GuestQuerySet(AbstractBaseQuerySet):
             raise
 
 
-class GuestManager(AbstractBaseManager, models.Manager):
+class GuestManager(BaseManager, models.Manager):
 
     def get_queryset(self):
         return GuestQuerySet(self.model, self._db)
@@ -89,8 +88,7 @@ class GuestManager(AbstractBaseManager, models.Manager):
                 return self.get_or_create_unknown_guest(hotel, phone_number)
 
 
-@python_2_unicode_compatible
-class Guest(AbstractBase):
+class Guest(BaseModel):
     # Keys
     hotel = models.ForeignKey(Hotel)
     # Fields
@@ -98,7 +96,7 @@ class Guest(AbstractBase):
         help_text="Full name of the Guest as you would like to call them.",
         max_length=110)
     room_number = models.CharField(_("Room Number"), max_length=10)
-    phone_number = models.CharField(_("Phone Number"), unique=True, max_length=12,
+    phone_number = models.CharField(_("Phone Number"), max_length=12,
         help_text="10 Digit Phone Number. Example: 7025101234")
     check_in = models.DateField(_("Check-in Date"), blank=True,
         help_text="If left blank, Check-in Date will be today.")
@@ -124,30 +122,35 @@ class Guest(AbstractBase):
             if not self.icon:
                 self.icon = random.choice(Icon.objects.all())
 
-        if not self.id:
-            self.validate_phone_number_taken(self.phone_number)
-
         self.phone_number = validate_phone(self.phone_number)
+
+        self.validate_phone_number_taken()
 
         self.check_in, self.check_out = self.validate_check_in_out(
             self.check_in, self.check_out)
 
         return super(Guest, self).save(*args, **kwargs)
 
+    def delete(self, *args, **kwargs):
+        if not self.stop:
+            Trigger.objects.send_message(self, "check_out")
+        return super(Guest, self).delete(*args, **kwargs)
+
     @property
     def is_unknown(self):
         return self.name == "Unknown Guest"
 
-    @staticmethod
-    def validate_phone_number_taken(phone_number):
+    def validate_phone_number_taken(self):
         '''Ph # isn't being used by any other current Guests.
 
         :TODO: 
             1. Should this raise a Form Error instead? Like `validate_phone`?
             2. Need a 2nd Validator that validates the PH format == '+17027284769'
         '''
-        if Guest.objects.current().filter(phone_number=phone_number):
-            raise PhoneNumberInUse("{} is currently in use.".format(phone_number))
+        if (Guest.objects.current().filter(hotel=self.hotel, phone_number=self.phone_number)
+                                   .exclude(id=self.id)
+                                   .exists()):
+            raise PhoneNumberInUse("{} is currently in use.".format(self.phone_number))
 
     def validate_check_in_out(self, check_in, check_out):
         if not check_in:
@@ -288,8 +291,7 @@ class MessageManager(models.Manager):
         return self.get_queryset().daily_all(date)
 
 
-@python_2_unicode_compatible
-class Message(AbstractBase):
+class Message(BaseModel):
     """
     All Messages belong to a Guest.
     guest_id/user_id - 1 and only 1 populated for the Sender.
@@ -405,8 +407,8 @@ class ReplyManager(models.Manager):
 
 REPLY_LETTERS = [(x,x) for x in string.ascii_uppercase]
 
-@python_2_unicode_compatible
-class Reply(AbstractBase):
+
+class Reply(BaseModel):
     '''
     Used for Auto-Replies to Hotel Guests, and data changes at the 
     Guest's request.
@@ -474,7 +476,7 @@ class Reply(AbstractBase):
             )
 
 
-class TriggerType(AbstractBase):
+class TriggerType(BaseModel):
     """
     Static table to hold "Trigger Types"
 
@@ -501,7 +503,7 @@ class TriggerType(AbstractBase):
 
 class TriggerManager(models.Manager):
 
-    def check_in(self, guest, trigger_type_name):
+    def send_message(self, guest, trigger_type_name):
         try:
             trigger = self.get(hotel=guest.hotel, type__name=trigger_type_name)
         except Trigger.DoesNotExist:
@@ -512,7 +514,7 @@ class TriggerManager(models.Manager):
                     user=guest.hotel.get_admin(), body=trigger.reply.message)
 
 
-class Trigger(AbstractBase):
+class Trigger(BaseModel):
     """
     Links Hotel's to a unique ``TriggerType``, to be specified when 
     it will be called in the application code.

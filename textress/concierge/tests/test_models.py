@@ -18,73 +18,6 @@ from utils.exceptions import (CheckOutDateException, PhoneNumberInUse,
     ReplyNotFound)
 
 
-class GuestTests(TestCase):
-
-    def setUp(self):
-        self.hotel = create_hotel()
-        self.guest = make_guests(hotel=self.hotel, number=1)[0] # b/c returns list
-
-        # archived guest
-        self.archived_guest = mommy.make(Guest, hotel=self.hotel, hidden=True,
-            phone_number=settings.DEFAULT_TO_PH_2)
-
-        # for resolving "Unknown Guest"
-        self.unknown_guest = mommy.make(
-            Guest,
-            name="Unknown Guest",
-            hotel=self.hotel,
-            phone_number=settings.DEFAULT_TO_PH_BAD
-            )
-
-    def test_guest(self):
-        assert isinstance(self.guest, Guest)
-
-    def test_validate_phone_number_taken(self):
-        with self.assertRaises(PhoneNumberInUse):
-            mommy.make(
-                Guest,
-                name="Unknown Guest",
-                hotel=self.hotel,
-                phone_number=settings.DEFAULT_TO_PH_BAD
-                )
-
-    def test_checkin_date_validation(self):
-        with self.assertRaises(CheckOutDateException):
-            self.guest.check_out = timezone.now().date() + datetime.timedelta(days=-2)
-            ci, co = self.guest.validate_check_in_out(self.guest.check_in, self.guest.check_out)
-
-    def test_get_absolute_url(self):
-        assert (self.guest.get_absolute_url() ==
-                reverse('concierge:guest_detail', kwargs={'pk':self.guest.pk}))
-
-    def test_confirmed(self):
-        guest = self.guest
-        guest.confirmed = False
-        guest.save()
-
-        guest = Guest.objects.get(pk=guest.id)
-        self.assertFalse(guest.confirmed)
-
-        guest._confirmed()
-        guest = Guest.objects.get(pk=guest.id)
-        self.assertTrue(guest.confirmed)
-
-    def test_stop(self):
-        guest = self.guest
-        guest.stop = False
-        guest.save()
-
-        guest = Guest.objects.get(pk=guest.id)
-        self.assertFalse(guest.stop)
-
-        guest._stop()
-        guest = Guest.objects.get(pk=guest.id)
-        self.assertTrue(guest.stop)
-
-    def test_is_unknown(self):
-        assert self.unknown_guest.is_unknown
-
-
 class GuestManagerTests(TestCase):
 
     def setUp(self):
@@ -142,6 +75,94 @@ class GuestManagerTests(TestCase):
         self.assertEqual(guest.name, self.unknown_guest.name)
         post_count = Guest.objects.count()
         self.assertEqual(init_count+1, post_count)
+
+
+class GuestTests(TestCase):
+
+    def setUp(self):
+        self.hotel = create_hotel()
+        self.guest = make_guests(hotel=self.hotel, number=1)[0] # b/c returns list
+
+        # archived guest
+        self.archived_guest = mommy.make(Guest, hotel=self.hotel, hidden=True,
+            phone_number=settings.DEFAULT_TO_PH_2)
+
+        # for resolving "Unknown Guest"
+        self.unknown_guest = mommy.make(
+            Guest,
+            name="Unknown Guest",
+            hotel=self.hotel,
+            phone_number=settings.DEFAULT_TO_PH_BAD
+            )
+
+    # utils.models .delete() : start
+
+    def test_delete(self):
+        guest = make_guests(hotel=self.hotel, number=1)[0]
+        self.assertFalse(guest.hidden)
+        guest.delete()
+        self.assertTrue(guest.hidden)
+
+    def test_delete_override(self):
+        guest = make_guests(hotel=self.hotel, number=1)[0]
+        guest.delete(override=True)
+        with self.assertRaises(Guest.DoesNotExist):
+            Guest.objects.get(id=guest.id)
+
+    # utils.models .delete() : end
+
+    # TODO
+    # def test_delete_check_out_message(self):
+    # def test_delete_check_out_message_dont_send(self):
+
+    def test_guest(self):
+        assert isinstance(self.guest, Guest)
+
+    def test_validate_phone_number_taken(self):
+        with self.assertRaises(PhoneNumberInUse):
+            mommy.make(
+                Guest,
+                name="Unknown Guest",
+                hotel=self.hotel,
+                phone_number=settings.DEFAULT_TO_PH_BAD
+                )
+
+    def test_checkin_date_validation(self):
+        with self.assertRaises(CheckOutDateException):
+            self.guest.check_out = timezone.now().date() + datetime.timedelta(days=-2)
+            ci, co = self.guest.validate_check_in_out(self.guest.check_in, self.guest.check_out)
+
+    def test_get_absolute_url(self):
+        assert (self.guest.get_absolute_url() ==
+                reverse('concierge:guest_detail', kwargs={'pk':self.guest.pk}))
+
+    def test_confirmed(self):
+        guest = self.guest
+        guest.confirmed = False
+        guest.save()
+
+        guest = Guest.objects.get(pk=guest.id)
+        self.assertFalse(guest.confirmed)
+
+        guest._confirmed()
+        guest = Guest.objects.get(pk=guest.id)
+        self.assertTrue(guest.confirmed)
+
+    def test_stop(self):
+        guest = self.guest
+        guest.stop = False
+        guest.save()
+
+        guest = Guest.objects.get(pk=guest.id)
+        self.assertFalse(guest.stop)
+
+        guest._stop()
+        guest = Guest.objects.get(pk=guest.id)
+        self.assertTrue(guest.stop)
+
+    def test_is_unknown(self):
+        self.assertFalse(self.guest.is_unknown)
+        self.assertTrue(self.unknown_guest.is_unknown)
 
 
 class MessageManagerTests(TestCase):
@@ -472,18 +493,18 @@ class TriggerTypeTests(TestCase):
         self.trigger = mommy.make(Trigger, hotel=self.hotel, type__name="check_in")
 
     def test_check_in(self):
-        twilio_msg = Trigger.objects.check_in(self.guest, "check_in")
+        twilio_msg = Trigger.objects.send_message(self.guest, "check_in")
         self.assertIsNotNone(twilio_msg)
 
     def test_check_in_stop_works(self):
         self.guest.stop = True
         self.guest.save()
-        twilio_msg = Trigger.objects.check_in(self.guest, "check_in")
+        twilio_msg = Trigger.objects.send_message(self.guest, "check_in")
         self.assertIsNone(twilio_msg)
 
     def test_check_in_not_configured(self):
-        self.trigger.delete()
-        twilio_msg = Trigger.objects.check_in(self.guest, "check_in")
+        self.trigger.delete(override=True)
+        twilio_msg = Trigger.objects.send_message(self.guest, "check_in")
         self.assertIsNone(twilio_msg)
 
 

@@ -21,7 +21,7 @@ from rest_framework.authtoken.models import Token
 from payment.models import Customer
 from utils import validate_phone, dj_messages, exceptions as excp
 from utils.data import STATES, HOTEL_TYPES
-from utils.models import AbstractBase
+from utils.models import BaseModel
 
 
 def viewable_user_fields_dict(user):
@@ -71,7 +71,7 @@ class Icon(models.Model):
 # HOTEL #
 #########
 
-class Hotel(TwilioClient, AbstractBase):
+class Hotel(TwilioClient, BaseModel):
     """
     `customer` ForeignKey is the entry point p/ Hotel to Stipe.
 
@@ -226,7 +226,7 @@ class Hotel(TwilioClient, AbstractBase):
         return self
 
 
-class UserProfile(AbstractBase):
+class UserProfile(BaseModel):
     """
     Admin User Reqs
     ---------------
@@ -346,7 +346,7 @@ class SubaccountManager(TwilioClient, models.Manager):
             return db_subaccount, True
         
 
-class Subaccount(AbstractBase):
+class Subaccount(BaseModel):
     """
     Twilio Subaccount
     -----------------

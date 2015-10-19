@@ -22,7 +22,7 @@ class StripeClientTests(TestCase):
         self.assertIsNotNone(sc.stripe.api_key)
 
 
-class PmtAbstractBaseTests(TestCase):
+class PmtBaseModelTests(TestCase):
 
     def test_short_pk(self):
         self.customer = factory.customer()

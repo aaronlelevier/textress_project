@@ -65,9 +65,9 @@ class DatesTests(TestCase):
             dates.first_of_month() - datetime.timedelta(days=1)
         )
 
-class AbstractBaseTests(TestCase):
+class BaseModelTests(TestCase):
 
-    def test_AbstractBase_properties(self):
+    def test_properties(self):
         # auto fields work
         price = mommy.make(Pricing)
         self.assertIsInstance(price.created, datetime.datetime)

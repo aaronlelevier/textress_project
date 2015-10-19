@@ -25,53 +25,7 @@ from main.models import Hotel
 from payment.models import Charge
 from utils import email
 from utils.exceptions import RechargeFailedExcp, AutoRechargeOffExcp
-
-
-class Dates(object):
-
-    tzinfo = pytz.timezone(settings.TIME_ZONE)
-
-    @property
-    def _now(self):
-        return timezone.now()
-
-    @property
-    def _today(self):
-        return self._now.date()
-
-    @property
-    def _year(self):
-        return self._now.year
-
-    @property
-    def _month(self):
-        return self._now.month
-
-    def first_of_month(self, month=None, year=None):    
-        """
-        Return a timezone aware ``first_of_month`` datetime object. If no 
-        ``month`` or ``year`` are given, return for the current month.
-        """
-        if not all([month, year]):
-            month = self._today.month
-            year = self._today.year
-
-        return datetime.datetime(day=1, year=year, month=month,
-            tzinfo=self.tzinfo).date()
-
-    def last_month_end(self, date=None):
-        "Return the last month's ending date as a `date`."
-        date = date or self._today
-        return self.first_of_month(month=date.month,
-            year=date.year) - datetime.timedelta(days=1)
-
-
-class AbstractBase(Dates, models.Model):
-    created = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        abstract = True
+from utils.models import Dates, TimeStampBaseModel
 
 
 ###########
@@ -109,7 +63,7 @@ class PricingManager(models.Manager):
         return -cost
 
 
-class Pricing(AbstractBase):
+class Pricing(TimeStampBaseModel):
     """Pricing Tiers that gradually decrease in Price as Volumes increase. 
     Based on monthly volumes."""
 
@@ -158,7 +112,7 @@ TRANS_TYPES = [
     ('phone_number', 'phone_number'),
 ]
 
-class TransType(AbstractBase):
+class TransType(TimeStampBaseModel):
     """Name and Description for different transaction types.
 
     Types (to start):
@@ -218,7 +172,7 @@ class AcctCostManager(models.Manager):
             return acct_cost, False
 
 
-class AcctCost(AbstractBase):
+class AcctCost(TimeStampBaseModel):
     """
     Initial Charge and Recharge configuration settings here.
 
@@ -309,7 +263,7 @@ class AcctStmtManager(Dates, models.Manager):
             return acct_stmt, True
 
 
-class AcctStmt(AbstractBase):
+class AcctStmt(TimeStampBaseModel):
     """
     Monthly usage stats for each hotel.
 
@@ -565,7 +519,7 @@ class AcctTransManager(Dates, models.Manager):
             return acct_tran, True
         
 
-class AcctTrans(AbstractBase):
+class AcctTrans(TimeStampBaseModel):
     """
     Account Transactions per: Hotel / TransType / Day.
 

@@ -18,7 +18,7 @@ class StripeClient(object):
         self.stripe = stripe
 
 
-class PmtAbstractBase(StripeClient, models.Model):
+class PmtBaseModel(StripeClient, models.Model):
     """
     Add `stripe` attr to all Payment Models, and set Stripe API Key.
 
@@ -38,7 +38,7 @@ class PmtAbstractBase(StripeClient, models.Model):
     def save(self, *args, **kwargs):
         if self.id:
             self.short_pk = self._short_pk
-        return super(PmtAbstractBase, self).save(*args, **kwargs)
+        return super(PmtBaseModel, self).save(*args, **kwargs)
 
     @property
     def _short_pk(self):
@@ -71,7 +71,7 @@ class CustomerManager(StripeClient, models.Manager):
             return customer
 
 
-class Customer(PmtAbstractBase):
+class Customer(PmtBaseModel):
     """
     Stripe Customer Object access point.
     """
@@ -186,7 +186,7 @@ customer: {}".format(customer))
         card.delete()
 
 
-class Card(PmtAbstractBase):
+class Card(PmtBaseModel):
     # Keys
     customer = models.ForeignKey(Customer, related_name='cards')
     image = models.ForeignKey(CardImage, blank=True, null=True,
@@ -292,7 +292,7 @@ class ChargeManager(StripeClient, models.Manager):
         return self._db_create(card, hotel, stripe_charge)
 
 
-class Charge(PmtAbstractBase):
+class Charge(PmtBaseModel):
     # Keys
     card = models.ForeignKey(Card)
     customer = models.ForeignKey(Customer)
@@ -313,7 +313,7 @@ class Charge(PmtAbstractBase):
 # REFUND #
 ##########
 
-class Refund(PmtAbstractBase):
+class Refund(PmtBaseModel):
     # Key
     charge = models.ForeignKey(Charge, related_name='refunds')
     # Fields
