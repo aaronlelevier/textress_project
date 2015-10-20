@@ -244,3 +244,7 @@ label.required::after {
     content: " *";
     color: red;
 }
+
+.message-time {
+    color: #999999;
+}

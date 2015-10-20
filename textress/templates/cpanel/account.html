@@ -76,26 +76,40 @@
 
         <div class="col-sm-8" ng-controller="GuestMsgPreviewCtrl" id="GuestMsgPreviewCtrl" ng-cloak>
             <div class="panel-body panel-scroll" style="height:300px">
-                <ul class="activities" ng-repeat="guest in guests | orderBy:'messages[0].read':false ">
-                    <li>
-                        <a class="activity" href="/guests/detail/[[ guest.id ]]/">
+
+            <table class="table table-hover guests">
+                <tr>
+                    <th>Icon</th>
+                    <th>Guest</th>
+                    <th>Last Message</th>
+                    <th>Date Time</th>
+                    <th>Unread</th>
+                </tr>
+                <!-- <a class="activity" href="/guests/detail/[[ guest.id ]]/"> -->
+                    <tr class="activities" ng-repeat="guest in guests | orderBy:'messages[0].read':false">
+                        <td>
                             <img ng-src="[[ guest.icon.icon ]]" class="profile_thumbnail">
-                            <span class="desc"><strong>[[ guest.name ]]</strong></span>
-                            &nbsp;
-                            <span ng-if="guest.messages[0]">
-                                <q>[[ guest.messages | orderBy:'-created' | lastMsg:'body' ]]</q>
+                        </td>
+                        <td>
+                            <a ng-href="/guests/detail/[[ guest.id ]]/">
+                                <strong>[[ guest.name ]]</strong>
+                            </a>
+                        </td>
+                        <td>
+                            <q ng-if="guest.messages[0]">[[ guest.messages | orderBy:'-created' | lastMsg:'body' ]]</q>
+                        </td>
+                        <td>
+                            <span class="message-time" ng-if="guest.messages[0]">
+                                [[ guest.messages | orderBy:'-created' | lastMsg:'created' | date :'medium' ]]
                             </span>
-                            <div class="time">
-                                <i class="fa fa-time bigger-110"></i>
-                                    <span ng-if="guest.messages[0]">
-                                        [[ guest.messages | orderBy:'-created' | lastMsg:'created' | date :'medium' ]]
-                                    </span>
-                                &nbsp;
-                                <span class="badge [[ (guest.messages | numRead) ? 'badge-new-msg' : 'badge-old-msg' ]]">[[ guest.messages | numRead ]]</span>
-                            </div>
-                        </a>
-                    </li>
-                </ul>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge [[ (guest.messages | numRead) ? 'badge-new-msg' : 'badge-old-msg' ]]">[[ guest.messages | numRead ]]</span>
+                        </td>
+                    </tr>
+                <!-- </a> -->
+            </table>
+
             </div>
         </div>
 

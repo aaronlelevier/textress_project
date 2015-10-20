@@ -111,7 +111,7 @@ class GuestTests(TestCase):
 
     # utils.models .delete() : end
 
-    # TODO
+    # TODO: 
     # def test_delete_check_out_message(self):
     # def test_delete_check_out_message_dont_send(self):
 
