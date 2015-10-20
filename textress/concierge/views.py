@@ -157,13 +157,13 @@ class GuestDeleteView(GuestBaseView, DeleteButtonMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(GuestDeleteView, self).get_context_data(**kwargs)
         self.object = Guest.objects.get(pk=kwargs['pk'])
-        context['addit_info'] = "<div><h4>Are you sure that you want to delete \
-        {}?</h4></div>".format(self.object)
+        context['addit_info'] = "<div><h1 class='lead'>Are you sure that you want to delete \
+        <strong>{}</strong>?</h1></div>".format(self.object)
         return context
 
     def post(self, request, *args, **kwargs):
         self.object = Guest.objects.get(pk=kwargs['pk'])
-        self.object.hide()
+        self.object.delete()
         return HttpResponseRedirect(reverse('concierge:guest_list'))
 
 

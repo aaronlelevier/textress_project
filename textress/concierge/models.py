@@ -133,6 +133,7 @@ class Guest(BaseModel):
 
     def delete(self, *args, **kwargs):
         if not self.stop:
+            # TODO: call a Celery Task here to do this??
             Trigger.objects.send_message(self, "check_out")
         return super(Guest, self).delete(*args, **kwargs)
 
