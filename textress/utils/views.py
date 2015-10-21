@@ -1,8 +1,10 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
 
+from utils.mixins import DestroyModelMixin
 
-class BaseModelViewSet(viewsets.ModelViewSet):
+
+class BaseModelViewSet(DestroyModelMixin, viewsets.ModelViewSet):
     
     queryset = None
     serializer_class = None

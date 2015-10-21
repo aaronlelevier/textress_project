@@ -2,6 +2,7 @@ import os
 import datetime
 
 from django.conf import settings
+from django.db import models
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
@@ -10,7 +11,8 @@ from django.utils import timezone
 
 from model_mommy import mommy
 
-from concierge.models import Message, Guest, Hotel, Reply, TriggerType, Trigger
+from concierge.models import (Message, Guest, Hotel, Reply, TriggerType, Trigger,
+    trigger_send_message)
 from concierge.tests.factory import make_guests, make_messages
 from main.tests.factory import create_hotel, create_hotel_user
 from utils import create
@@ -110,10 +112,6 @@ class GuestTests(TestCase):
             Guest.objects.get(id=guest.id)
 
     # utils.models .delete() : end
-
-    # TODO: 
-    # def test_delete_check_out_message(self):
-    # def test_delete_check_out_message_dont_send(self):
 
     def test_guest(self):
         assert isinstance(self.guest, Guest)
@@ -493,18 +491,18 @@ class TriggerTypeTests(TestCase):
         self.trigger = mommy.make(Trigger, hotel=self.hotel, type__name="check_in")
 
     def test_check_in(self):
-        twilio_msg = Trigger.objects.send_message(self.guest, "check_in")
+        twilio_msg = Trigger.objects.send_message(self.guest.id, "check_in")
         self.assertIsNotNone(twilio_msg)
 
     def test_check_in_stop_works(self):
         self.guest.stop = True
         self.guest.save()
-        twilio_msg = Trigger.objects.send_message(self.guest, "check_in")
+        twilio_msg = Trigger.objects.send_message(self.guest.id, "check_in")
         self.assertIsNone(twilio_msg)
 
     def test_check_in_not_configured(self):
         self.trigger.delete(override=True)
-        twilio_msg = Trigger.objects.send_message(self.guest, "check_in")
+        twilio_msg = Trigger.objects.send_message(self.guest.id, "check_in")
         self.assertIsNone(twilio_msg)
 
 
@@ -512,7 +510,13 @@ class TriggerTests(TestCase):
 
     def setUp(self):
         self.hotel = create_hotel()
-        self.trigger = mommy.make(Trigger, hotel=self.hotel)
+        self.guest = make_guests(hotel=self.hotel, number=1)[0]
+        self.trigger_type = mommy.make(TriggerType, name="check_out")
+        self.reply_letter = "T"
+        self.hotel_reply = mommy.make(Reply, hotel=self.hotel, letter=self.reply_letter,
+            message="Thank you for staying")
+        self.trigger = mommy.make(Trigger, hotel=self.hotel, type=self.trigger_type,
+            reply=self.hotel_reply)
 
     def test_foreign_keys(self):
         self.assertIsInstance(self.trigger.hotel, Hotel)
@@ -531,3 +535,11 @@ class TriggerTests(TestCase):
     def test_validate_type_hotel_unique_raise(self):
         with self.assertRaises(ValidationError):
             Trigger.objects.create(type=self.trigger.type, hotel=self.trigger.hotel)
+
+
+    def test_delete_check_out_message_unit_test(self):
+        global Message
+        Message.save = models.Model.save
+
+        ret = trigger_send_message.apply(args=(self.guest.id, 'check_out')).get()
+        self.assertIsInstance(ret, Message)

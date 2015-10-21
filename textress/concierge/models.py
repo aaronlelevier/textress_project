@@ -12,12 +12,13 @@ from django.utils import timezone
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 
+from celery import shared_task
+from twilio import TwilioRestException
+
 from main.models import Hotel, UserProfile, profile_image, Icon
 from sms.helpers import send_message
-from utils.models import BaseModel, BaseQuerySet, BaseManager
-
-from twilio import TwilioRestException
 from utils import validate_phone
+from utils.models import BaseModel, BaseQuerySet, BaseManager
 from utils.exceptions import (CheckOutDateException, ValidSenderException,
     PhoneNumberInUse, ReplyNotFound)
 
@@ -132,9 +133,8 @@ class Guest(BaseModel):
         return super(Guest, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        if not self.stop:
-            # TODO: call a Celery Task here to do this??
-            Trigger.objects.send_message(self, "check_out")
+        if not self.stop and not settings.DEBUG:
+            trigger_send_message.delay(self.id, "check_out")
         return super(Guest, self).delete(*args, **kwargs)
 
     @property
@@ -177,6 +177,11 @@ class Guest(BaseModel):
     def _stop(self):
         self.stop = True
         return self.save()
+
+
+@shared_task
+def trigger_send_message(guest_id, trigger_type_name):
+    return Trigger.objects.send_message(guest_id, trigger_type_name)
 
 
 ###########
@@ -504,7 +509,9 @@ class TriggerType(BaseModel):
 
 class TriggerManager(models.Manager):
 
-    def send_message(self, guest, trigger_type_name):
+    def send_message(self, guest_id, trigger_type_name):
+        guest = Guest.objects.get(id=guest_id)
+
         try:
             trigger = self.get(hotel=guest.hotel, type__name=trigger_type_name)
         except Trigger.DoesNotExist:

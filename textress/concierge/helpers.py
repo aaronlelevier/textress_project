@@ -9,7 +9,7 @@ from rest_framework.renderers import JSONRenderer
 from ws4redis.publisher import RedisPublisher
 from ws4redis.redis_store import RedisMessage
 
-from concierge.models import Guest, Message, Reply
+from concierge.models import Guest, Message, Reply, Trigger
 from main.models import Hotel, Icon
 from sms.models import PhoneNumber
 from utils import login_messages

@@ -5,8 +5,7 @@ from django.utils import timezone
 from celery import shared_task
 from model_mommy import mommy 
 
-from concierge.helpers import (
-    merge_twilio_messages_to_db, convert_to_json_and_publish_to_redis)
+from concierge.helpers import merge_twilio_messages_to_db, convert_to_json_and_publish_to_redis
 from contact.models import Contact
 
 

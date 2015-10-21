@@ -136,7 +136,7 @@ class UserViewTests(TestCase):
         # User updated n redirects
         updated_user = User.objects.get(username=self.user.username)
         self.assertNotEqual(fname, updated_user.first_name)
-        self.assertRedirects(response, reverse('account'))
+        self.assertRedirects(response, reverse('main:user_detail', kwargs={'pk': self.user.pk}))
 
 
 class ManageUsersTests(TestCase):

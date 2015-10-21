@@ -93,11 +93,11 @@ class GuestViewTests(TestCase):
 
     def test_delete_guests(self):
         # No guests
-        [g.delete() for g in Guest.objects.all()]
+        [g.delete(override=True) for g in Guest.objects.all()]
         self.assertEqual(Guest.objects.count(), 0)
 
     def test_create(self):
-        [g.delete() for g in Guest.objects.all()]
+        [g.delete(override=True) for g in Guest.objects.all()]
 
         # Login n Create a Guest
         response = self.client.post(reverse('concierge:guest_create'),
@@ -468,8 +468,10 @@ class ReplyAPITests(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.data["message"], Reply.objects.get(id=self.reply.id).message)
 
+    # tests: ``from utils.mixins import DestroyModelMixin``
     def test_delete(self):
-        response = self.client.delete("/api/reply/{}/".format(self.reply.id))
+        response = self.client.delete("/api/reply/{}/".format(self.reply.id),
+            {'override':True}, format='json')
         self.assertEqual(response.status_code, 204)
         self.assertFalse(Reply.objects.filter(id=self.reply.id).exists())
 
