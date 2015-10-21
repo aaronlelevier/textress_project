@@ -85,7 +85,7 @@ class Hotel(TwilioClient, BaseModel):
     # Required
     name = models.CharField(_("Hotel Name"), unique=True, max_length=100)
     address_phone = models.CharField(_("Contact Phone Number"), unique=True, max_length=12,
-        help_text="Allowed phone number format: 702-510-5555")
+        help_text="Allowed phone number format: (702) 510-5555")
     address_line1 = models.CharField(_("Address Line 1"), max_length=100)
     address_city = models.CharField(_("City"), max_length=100)
     address_state = models.CharField(_("State"), max_length=25, choices=STATES, default=STATES[0][0])

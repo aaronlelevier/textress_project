@@ -58,6 +58,9 @@
         <script src="{% static 'clipone/admin/clip-one/assets/plugins/less/less-1.5.0.min.js' %}"></script>
         <script src="{% static 'clipone/admin/clip-one/assets/plugins/jquery-cookie/jquery.cookie.js' %}"></script>
         <script src="{% static 'clipone/admin/clip-one/assets/plugins/bootstrap-colorpalette/js/bootstrap-colorpalette.js' %}"></script>
+
+        <script src="{% static 'clipone/admin/clip-one/assets/plugins/jquery.maskedinput/src/jquery.maskedinput.js' %}"></script>
+
         <script src="{% static 'clipone/admin/clip-one/assets/js/main.js' %}"></script>
         <script src="{% static 'js/custom.js' %}"></script>
         {% endblock main_js %}
@@ -70,6 +73,12 @@
         <script>
             jQuery(document).ready(function() {
                 Main.init();
+            });
+            jQuery(function($){
+               $("#id_address_phone").mask("(999) 999-9999");
+               $("#id_phone_number").mask("(999) 999-9999");
+               $("#id_check_in").mask("9999-99-99");
+               $("#id_check_out").mask("9999-99-99");
             });
         </script>
         {% endblock init_js %}

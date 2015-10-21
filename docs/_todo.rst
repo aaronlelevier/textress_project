@@ -1,22 +1,7 @@
 Notes w/ Scott
 --------------
-Check-out hooks
-
-    - Put a ``delete(override=True)`` method on a Base Model class
-
-        - Include a hook for "check-out" send message
-
-    - Need a "W" welcome auto-reply to tell Guests how to use it for "H" for help for ex.
-
-Check ``main.models.Subaccount`` TODO - b/c I think I'm already doing that
-
-Phone number input
-
-    - auto add dashes or () to a User's PH #
-
-    - Dates w/ dashes in forms
-
-Credit card - auto put spaces after every 4 digits for easier reading of the c.card #
+(also use ``jquery.maskedinput``)
+    - Credit card - auto put spaces after every 4 digits for easier reading of the c.card #
 
 Dashboard - formatting issue w/ Guest's Message text
 

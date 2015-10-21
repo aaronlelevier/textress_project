@@ -98,7 +98,7 @@ class Guest(BaseModel):
         max_length=110)
     room_number = models.CharField(_("Room Number"), max_length=10)
     phone_number = models.CharField(_("Phone Number"), max_length=12,
-        help_text="10 Digit Phone Number. Example: 7025101234")
+        help_text="Allowed phone number format: (702) 510-5555")
     check_in = models.DateField(_("Check-in Date"), blank=True,
         help_text="If left blank, Check-in Date will be today.")
     check_out = models.DateField(_("Check-out Date"), blank=True)
