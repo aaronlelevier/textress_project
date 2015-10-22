@@ -1,19 +1,5 @@
 Notes w/ Scott
 --------------
-(also use ``jquery.maskedinput``)
-    - Credit card - auto put spaces after every 4 digits for easier reading of the c.card #
-
-Dashboard - formatting issue w/ Guest's Message text
-
-Saved Messages - that are common for the Concierge to send. Canned messages.  Saved 
-under the Hotel, for all Concierge's to use.
-
-MMS?
-
-Ask Concierges.  Do they like to call back, or is the whole conversation thro SMS?
-
-Maybe ask a designer about the UI
-
 ** SMS - need a 2nd PH # most likely assigned to the "Test Hotel" to get SMS
 Tests to not error out b/c of the `sms.tests.factor` **
 
@@ -27,6 +13,23 @@ Test "guest.is_unknown" messages
 Review TODOs scattered throughout code
 
 Make each each Angular Apps links an ".html" include block, to remove duplication
+
+
+Before Production
+-----------------
+Enable Phone Number purchasing
+
+
+Enhancements
+------------
+Canned Messages
+
+    - per Hotel, per User
+
+    - Saved Messages - that are common for the Concierge to send. Canned messages.  Saved
+    under the Hotel, for all Concierge's to use.
+
+MMS - None for Beta version
 
 
 Bugs

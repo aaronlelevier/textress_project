@@ -14,6 +14,10 @@ Red asterisk for `required`
 
 Client side validation
 
+#### Payment
+
+Credit card - auto put spaces after every 4 digits for easier reading of the c.card #
+
 
 ## Auto Replies
 
@@ -26,4 +30,4 @@ Counts of unread and total messages
 
 Guest with unread messages show first
 
-** Check-in ** Message hook - for use with a "Welcom" message for example
+** Check-in ** Message hook - for use with a "Welcome" message for example
