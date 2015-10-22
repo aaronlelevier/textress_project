@@ -28,3 +28,11 @@ def month_name(month_number):
 @register.filter
 def format_snake_case(snake_case):
     return snake_case.replace('_',' ')
+
+
+@register.filter
+def first_word(words):
+    try:
+        return words.split(' ')[0]
+    except IndexError:
+        return

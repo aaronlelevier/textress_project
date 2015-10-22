@@ -87,8 +87,8 @@
                 <div class="row well" style="background-color:white;">
                     <div class="col-sm-7" style="padding:0px;margin:0px;">
                         <img src="{{ MEDIA_URL }}{{ c.image.image }}" style="max-width:40px;"> 
-                        <span style="margin-left:5px"><small>{{ c.brand }} ending in</small> {{ c.last4 }}</span>
-                        <span style="margin-left:5px"><small>Expires:</small> {{ c.expires }}</span>
+                        <span style="margin-left:5px"><small>{{ c.brand|first_word }} ending in: </small>{{ c.last4 }}</span>
+                        <span style="margin-left:5px"><small>Expires: </small>{{ c.expires }}</span>
                     </div>
                     <div class="col-sm-3 text-center">
                         {% if c.default %}
@@ -167,6 +167,9 @@
                         <div class="form-group">
                             <div class="controls">
                                 <div class="pull-right">
+                                    <button onclick="window.history.back()" type="button" class="btn btn-default">
+                                        Cancel
+                                    </button>
                                     <input type="submit" value="Submit" class="btn btn-primary" />
                                 </div>
                             </div>
@@ -199,22 +202,29 @@
 
 
 {% block page_js %}
-<script type="text/javascript">
-// Add a Card hide logic
-$(document).ready(function(){
-    $('#id_add_card').click(function(){
-        $("#add_card").toggle();
-        if ($("#current_cards").is(":visible")){
-            $("#current_cards").hide();
-        }
-        else {
-            $("#current_cards").show();
-        }
+    <script type="text/javascript">
+        // Add a Card hide logic
+        $(document).ready(function(){
+            $('#id_add_card').click(function(){
+                $("#add_card").toggle();
+                if ($("#current_cards").is(":visible")){
+                    $("#current_cards").hide();
+                }
+                else {
+                    $("#current_cards").show();
+                }
+            });
+        });
+        // Input Helpers
+        $(function() {
+            $('#id_other_amount').maskMoney();
+        });
+    </script>
+
+    <script src="{% static 'clipone/admin/clip-one/assets/plugins/jquery.payment.min.js' %}"></script>
+    <script>
+    jQuery(function($) {
+        $('#card').payment('formatCardNumber');
     });
-});
-// Input Helpers
-$(function() {
-    $('#id_other_amount').maskMoney();
-});
-</script>
+    </script>
 {% endblock page_js %}

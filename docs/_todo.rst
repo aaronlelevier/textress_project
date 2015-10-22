@@ -26,6 +26,8 @@ Test "guest.is_unknown" messages
 
 Review TODOs scattered throughout code
 
+Make each each Angular Apps links an ".html" include block, to remove duplication
+
 
 Bugs
 ----
