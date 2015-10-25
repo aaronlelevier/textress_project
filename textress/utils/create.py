@@ -7,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
+from django.utils import timezone
 
 from model_mommy import mommy
 
@@ -46,12 +47,18 @@ def _get_groups_and_perms():
 def _generate_int(numbers=10):
     return ''.join([random.choice(string.digits) for x in range(numbers)])
 
+
 def _generate_ph(numbers=10):
-    return "{}-{}-{}".format(_generate_int(3), _generate_int(3), _generate_int(4))
+    return "({}) {}-{}".format(_generate_int(3), _generate_int(3), _generate_int(4))
 
 
 def _generate_name(letters=10):
     return ''.join([random.choice(string.ascii_letters) for x in range(letters)])
+
+
+def _generate_date(date=None):
+    date = date or timezone.now().date()
+    return date.strftime("%Y-%m-%d")
 
 
 def _phone_numbers():

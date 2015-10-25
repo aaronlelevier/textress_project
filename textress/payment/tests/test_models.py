@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.core.exceptions import ValidationError
 
 from main.models import Subaccount
-from main.tests.factory import create_hotel
+from main.tests.factory import create_hotel, make_subaccount
 from payment.models import StripeClient, Customer, Card, Charge, Refund
 from payment.tests import factory
 
@@ -126,6 +126,7 @@ class ChargeManagerTests(TestCase):
 
     def setUp(self):
         self.hotel = create_hotel()
+        self.subaccount = make_subaccount(self.hotel)
         self.customer = factory.customer()
         self.card = factory.card(self.customer.id)
         self.hotel.update_customer(self.customer)

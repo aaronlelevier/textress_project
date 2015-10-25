@@ -35,4 +35,4 @@ class SendMessageTests(TestCase):
     def test_send_message(self):
         message = send_message(hotel=self.hotel, to=settings.DEFAULT_TO_PH,
             body='sms.test.test_helpers msg')
-        self.assertIsInstance(message, TwilioMessage)
+        self.assertTrue(message)

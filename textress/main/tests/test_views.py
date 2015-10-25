@@ -67,6 +67,7 @@ class RegistrationTests(TransactionTestCase):
         # Dave creates a Hotel
         response = self.client.post(reverse('main:register_step2'),
             CREATE_HOTEL_DICT, follow=True)
+        print response
         self.assertRedirects(response, reverse('register_step3'))
 
         # User set as Admin and Hotel properly linked

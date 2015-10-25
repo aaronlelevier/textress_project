@@ -27,17 +27,6 @@ from utils import create, dj_messages
 from main.tests.factory import create_hotel
 
 
-def number(limit=10):
-    ret = ''.join([str(x) for d in range(limit) 
-                           for x in random.choice(string.digits)])
-    return "{}-{}-{}".format(ret[:3], ret[3:6], ret[6:])
-
-
-def today():
-    d = timezone.now().date()
-    return d.strftime("%Y-%m-%d")
-
-
 class GuestViewTests(TestCase):
 
     def setUp(self):
@@ -103,10 +92,10 @@ class GuestViewTests(TestCase):
         response = self.client.post(reverse('concierge:guest_create'),
             {'hotel':self.user.profile.hotel,
             'name': 'Test Guest',
-            'room_number': number(5),
-            'phone_number': number(),
-            'check_in': today(),
-            'check_out': today()},
+            'room_number': create._generate_int(5),
+            'phone_number': create._generate_ph(),
+            'check_in': create._generate_date(),
+            'check_out': create._generate_date()},
             follow=True)
 
         # Now 1 guest
@@ -122,10 +111,10 @@ class GuestViewTests(TestCase):
         guest_info_dict = {
             'hotel': self.guest.hotel,
             'name': self.guest.name,
-            'room_number': number(5),
-            'phone_number': number(),
-            'check_in': today(),
-            'check_out': today()
+            'room_number': create._generate_int(5),
+            'phone_number': create._generate_ph(),
+            'check_in': create._generate_date(),
+            'check_out': create._generate_date()
             }
 
         # update in View

@@ -1,10 +1,5 @@
 Notes w/ Scott
 --------------
-** SMS - need a 2nd PH # most likely assigned to the "Test Hotel" to get SMS
-Tests to not error out b/c of the `sms.tests.factor` **
-
-django-constance : ability to change settings.py file w/i an admin form
-
 GuestDetailView messages : change to blue / grey w/ the grey having black text, and 
 remove the triangle on one near avatar
 
@@ -14,10 +9,12 @@ Review TODOs scattered throughout code
 
 Make each each Angular Apps links an ".html" include block, to remove duplication
 
+django-constance : ability to change settings.py file w/i an admin form
+
 
 Before Production
 -----------------
-Enable Phone Number purchasing
+Enable Phone Number purchasing - ** use an ``if settings.DEBUG`` case stmt here
 
 
 Enhancements
