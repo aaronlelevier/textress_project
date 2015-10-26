@@ -40,6 +40,15 @@ class GuestQuerySet(BaseQuerySet):
         except ObjectDoesNotExist:
             raise
 
+    def archive(self):
+        """
+        Archive all Guests that are past their Check-out date.
+
+        This Job will scheduled to run daily, as to keep the Guest Lists clean, 
+        and free of checked out guests.
+        """
+        pass
+
 
 class GuestManager(BaseManager, models.Manager):
 
@@ -87,6 +96,9 @@ class GuestManager(BaseManager, models.Manager):
                             .get_by_hotel_phone(hotel, phone_number))
             except Guest.DoesNotExist:
                 return self.get_or_create_unknown_guest(hotel, phone_number)
+
+    def archive(self):
+        self.get_queryset().archive()
 
 
 class Guest(BaseModel):

@@ -183,12 +183,15 @@ class ReplyView(IsManagerOrAdmin, SetHeadlineMixin, StaticContextMixin,
 
 ### MESSAGE ###
 
+DEFAULT_PERMISSIONS = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
+
+
 class MessageListCreateAPIView(generics.ListCreateAPIView):
     "All Messages records for a single Hotel."
     
     queryset = Message.objects.all()
     serializer_class = MessageListCreateSerializer
-    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
+    permission_classes = DEFAULT_PERMISSIONS
 
     def list(self, request):
         "The User can only view their Hotel's Messages."
@@ -201,7 +204,7 @@ class MessageRetrieveAPIView(generics.RetrieveUpdateAPIView):
 
     queryset = Message.objects.all()
     serializer_class = MessageRetrieveSerializer
-    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
+    permission_classes = DEFAULT_PERMISSIONS
 
 
 ### GUEST ###
@@ -210,7 +213,7 @@ class GuestMessageListAPIView(generics.ListAPIView):
     """Filter for Guests for the User's Hotel only."""
     queryset = Guest.objects.all()
     serializer_class = GuestMessageSerializer
-    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
+    permission_classes = DEFAULT_PERMISSIONS
 
     def list(self, request):
         try:
@@ -225,7 +228,7 @@ class GuestMessageRetrieveAPIView(generics.RetrieveAPIView):
 
     queryset = Guest.objects.all()
     serializer_class = GuestMessageSerializer
-    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
+    permission_classes = DEFAULT_PERMISSIONS
 
 
 class GuestListCreateAPIView(generics.ListCreateAPIView):
@@ -236,10 +239,10 @@ class GuestListCreateAPIView(generics.ListCreateAPIView):
 
     queryset = Guest.objects.all()
     serializer_class = GuestListSerializer
-    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
+    permission_classes = DEFAULT_PERMISSIONS
 
     def list(self, request):
-        guests = Guest.objects.current().filter(hotel=request.user.profile.hotel)
+        guests = Guest.objects.filter(hotel=request.user.profile.hotel)
         serializer = GuestListSerializer(guests, many=True)
         return Response(serializer.data)
 
@@ -251,7 +254,7 @@ class GuestRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
 
     queryset = Guest.objects.all()
     serializer_class = GuestListSerializer
-    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
+    permission_classes = DEFAULT_PERMISSIONS
 
 
 ### REPLY
@@ -260,7 +263,7 @@ class ReplyAPIView(BaseModelViewSet):
 
     queryset = Reply.objects.all()
     serializer_class = ReplySerializer
-    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject)
+    permission_classes = DEFAULT_PERMISSIONS
     model = Reply
     filter_fields = [f.name for f in model._meta.get_fields()]
 
@@ -291,7 +294,7 @@ class TriggerAPIView(BaseModelViewSet):
 
     queryset = Trigger.objects.all()
     serializer_class = TriggerSerializer
-    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject)
+    permission_classes = DEFAULT_PERMISSIONS
     model = Trigger
     filter_fields = [f.name for f in model._meta.get_fields()]
 

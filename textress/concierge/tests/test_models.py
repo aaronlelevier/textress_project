@@ -78,6 +78,23 @@ class GuestManagerTests(TestCase):
         post_count = Guest.objects.count()
         self.assertEqual(init_count+1, post_count)
 
+    def test_archive(self):
+        # setup
+        yesterday = timezone.now().date() - datetime.timedelta(days=1)
+        self.unknown_guest = mommy.make(
+            Guest,
+            name="Checked-out Guest",
+            hotel=self.hotel,
+            check_in=yesterday,
+            check_out=yesterday,
+            phone_number=create._generate_ph()
+        )
+        init_count = Guest.objects.filter(check_out__lte=yesterday, hidden=False).count()
+        self.assertTrue(init_count > 0)
+        # test
+        Guest.objects.archive()
+        self.assertEqual(Guest.objects.filter(check_out__lte=yesterday, hidden=False).count(), 0)
+
 
 class GuestTests(TestCase):
 

@@ -1,15 +1,41 @@
 Notes w/ Scott
 --------------
-GuestDetailView messages : change to blue / grey w/ the grey having black text, and 
-remove the triangle on one near avatar
 
-Test "guest.is_unknown" messages
+:Current vs Archived:
+
+    Guest Logic
+
+    A Guest is showing on the Dashboard that isn't on the GuestList
+
+:Unknown Guests:
+
+    Test "guest.is_unknown" messages
+
+Remove live SMS to me and Yuki in test code
 
 Review TODOs scattered throughout code
 
 Make each each Angular Apps links an ".html" include block, to remove duplication
 
-django-constance : ability to change settings.py file w/i an admin form
+django-constance:
+    
+    - Reason: To be able to turn certain settings ON / OFF on a per Hotel Basis
+
+    - Example: Email alerts for Messages that haven't been responed too for over "X"
+    # of minutes
+
+    - Original Func: ability to change settings.py file w/i an admin form
+
+    - JsonB - Should this Just be a JsonB field in each Hotel object ??
+
+My Account: 
+
+    - change name to be "Account Info", with 2 sub categories ->
+
+        1. Update Profile Info
+        2. Update Hotel Info
+
+Manage Users: - User List needs a field for "Group" of the User. i.e. admin, manager, etc...
 
 
 Before Production
