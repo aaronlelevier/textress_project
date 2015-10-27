@@ -38,9 +38,21 @@ class GuestManagerTests(TestCase):
             phone_number=settings.DEFAULT_TO_PH_BAD
             )
 
+        self.yesterday = timezone.now().date() - datetime.timedelta(days=1)
+
+        # checked-out Guest tests
+        self.guest_to_archive = mommy.make(
+            Guest,
+            name=create._generate_name(),
+            hotel=self.hotel,
+            check_in=self.yesterday,
+            check_out=self.yesterday,
+            phone_number=create._generate_ph()
+        )
+
     def test_guests(self):
-        assert len(Guest.objects.current()) == 2
-        assert len(Guest.objects.archived()) == 1
+        self.assertEqual(Guest.objects.current().count(), 3)
+        self.assertEqual(Guest.objects.archived().count(), 1)
 
     def test_get_by_hotel_phone(self):
         guest = Guest.objects.get_by_hotel_phone(self.hotel, self.guest.phone_number)
@@ -80,20 +92,19 @@ class GuestManagerTests(TestCase):
 
     def test_archive(self):
         # setup
-        yesterday = timezone.now().date() - datetime.timedelta(days=1)
-        self.unknown_guest = mommy.make(
-            Guest,
-            name="Checked-out Guest",
-            hotel=self.hotel,
-            check_in=yesterday,
-            check_out=yesterday,
-            phone_number=create._generate_ph()
-        )
-        init_count = Guest.objects.filter(check_out__lte=yesterday, hidden=False).count()
+        init_count = Guest.objects.filter(
+            check_out__lte=self.yesterday, hidden=False).count()
         self.assertTrue(init_count > 0)
         # test
         Guest.objects.archive()
-        self.assertEqual(Guest.objects.filter(check_out__lte=yesterday, hidden=False).count(), 0)
+        self.assertEqual(Guest.objects.filter(
+            check_out__lte=self.yesterday, hidden=False).count(), 0)
+
+    def test_need_to_archive(self):
+        self.assertEqual(
+            Guest.objects.filter(check_out__lte=self.yesterday, hidden=False).count(),
+            Guest.objects.need_to_archive().count()
+        )
 
 
 class GuestTests(TestCase):
@@ -115,6 +126,7 @@ class GuestTests(TestCase):
             )
 
     # utils.models .delete() : start
+    # NOTE: will send live SMS b/c ``if 'test' in sys`` is ignored by Celery delated calls
 
     def test_delete(self):
         guest = make_guests(hotel=self.hotel, number=1)[0]

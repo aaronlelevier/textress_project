@@ -47,7 +47,11 @@ class GuestQuerySet(BaseQuerySet):
         This Job will scheduled to run daily, as to keep the Guest Lists clean, 
         and free of checked out guests.
         """
-        pass
+        self.need_to_archive().update(hidden=True)
+
+    def need_to_archive(self):
+        today = timezone.now().date()
+        return self.filter(check_out__lt=today, hidden=False)
 
 
 class GuestManager(BaseManager, models.Manager):
@@ -100,6 +104,9 @@ class GuestManager(BaseManager, models.Manager):
     def archive(self):
         self.get_queryset().archive()
 
+    def need_to_archive(self):
+        return self.get_queryset().need_to_archive()
+
 
 class Guest(BaseModel):
     # Keys
@@ -145,8 +152,8 @@ class Guest(BaseModel):
         return super(Guest, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        if not self.stop and not settings.DEBUG:
-            trigger_send_message.delay(self.id, "check_out")
+        # if not self.stop and not settings.DEBUG:
+        #     trigger_send_message.delay(self.id, "check_out")
         return super(Guest, self).delete(*args, **kwargs)
 
     @property

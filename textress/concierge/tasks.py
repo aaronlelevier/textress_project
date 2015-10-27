@@ -6,7 +6,7 @@ from celery import shared_task
 from model_mommy import mommy 
 
 from concierge.helpers import merge_twilio_messages_to_db, convert_to_json_and_publish_to_redis
-from contact.models import Contact
+from concierge.models import Guest
 
 
 @shared_task
@@ -15,3 +15,8 @@ def check_twilio_messages_to_merge(guest, date=None):
 
     for msg in merge_twilio_messages_to_db(guest=guest, date=date):
         convert_to_json_and_publish_to_redis(msg)
+
+
+@shared_task
+def archive_guests():
+    Guest.objects.archive()

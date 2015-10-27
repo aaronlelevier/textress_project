@@ -7,6 +7,7 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 
 import pytz
 
+
 class Dates(object):
 
     tzinfo = pytz.timezone(settings.TIME_ZONE)
