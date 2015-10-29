@@ -5,7 +5,6 @@
     "hotel": null,
     "modified": "2015-09-25T13:25:29.662Z",
     "letter": "S",
-    "hidden": false,
     "message": ""
   },
   "model": "concierge.reply",
@@ -17,7 +16,6 @@
     "hotel": null,
     "modified": "2015-09-25T13:25:29.699Z",
     "letter": "Y",
-    "hidden": false,
     "message": ""
   },
   "model": "concierge.reply",
@@ -29,7 +27,6 @@
     "hotel": null,
     "modified": "2015-09-25T13:25:29.704Z",
     "letter": "H",
-    "hidden": false,
     "message": "Please call the main hotel phone number for help. Sorry about the inconvenience."
   },
   "model": "concierge.reply",

@@ -56,10 +56,8 @@ class TimeStampBaseModel(Dates, models.Model):
 
 
 class BaseQuerySet(models.query.QuerySet):
-    
+
     def current(self):
-        # TODO: create logic on current for must be within the c/i  - c/o dates
-        #   or make a daily job to archive c/o guests to ``hidden=True``
         return self.filter(hidden=False)
 
     def archived(self):
@@ -67,7 +65,6 @@ class BaseQuerySet(models.query.QuerySet):
 
 
 class BaseManager(models.Manager):
-    "Only returns 'none-hidden' records."
 
     def get_queryset(self):
         return BaseQuerySet(self.model, using=self._db).filter(hidden=False)
@@ -79,10 +76,12 @@ class BaseManager(models.Manager):
         return self.get_queryset().archived()
 
 
-class BaseModel(TimeStampBaseModel):
+class BaseModel(models.Model):
     """Base model to keep track of Model edits and hide Model objects
     if necessary."""
-    hidden = models.BooleanField(_("Hide"), blank=True, default=False)
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
+    hidden = models.BooleanField(_("Hidden"), blank=True, default=False)
 
     objects = BaseManager()
     objects_all = models.Manager()
@@ -105,3 +104,10 @@ class BaseModel(TimeStampBaseModel):
         self.hidden = True 
         self.save()
         return self
+
+
+class Tester(BaseModel):
+    """
+    Concrete model used to test ``BaseModel``
+    """
+    pass

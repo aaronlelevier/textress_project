@@ -5,7 +5,7 @@ from concierge.models import Guest, Message, Reply, TriggerType, Trigger
 
 @admin.register(Guest)
 class GuestAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'hotel',)
+    list_display = ('name', 'pk', 'hotel', 'hidden',)
 
 
 @admin.register(Message)

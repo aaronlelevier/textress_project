@@ -31,6 +31,7 @@ from concierge.serializers import (MessageListCreateSerializer, GuestMessageSeri
 from concierge.tasks import check_twilio_messages_to_merge
 from main.mixins import HotelUserMixin, HotelObjectMixin
 from utils import EmptyForm, DeleteButtonMixin
+from utils.mixins import DestroyModelMixin
 from utils.views import BaseModelViewSet
 
 
@@ -250,7 +251,15 @@ class GuestListCreateAPIView(generics.ListCreateAPIView):
         serializer.save(hotel=self.request.user.profile.hotel)
 
 
-class GuestRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
+class GuestRetrieveUpdateAPIView(DestroyModelMixin,
+                                 generics.RetrieveUpdateDestroyAPIView):
+
+    queryset = Guest.objects.all()
+    serializer_class = GuestListSerializer
+    permission_classes = DEFAULT_PERMISSIONS
+
+
+class GuestAPIView(viewsets.ModelViewSet):
 
     queryset = Guest.objects.all()
     serializer_class = GuestListSerializer

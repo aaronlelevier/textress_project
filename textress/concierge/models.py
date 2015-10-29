@@ -18,7 +18,7 @@ from twilio import TwilioRestException
 from main.models import Hotel, UserProfile, profile_image, Icon
 from sms.helpers import send_message
 from utils import validate_phone
-from utils.models import BaseModel, BaseQuerySet, BaseManager
+from utils.models import BaseModel, BaseQuerySet, BaseManager, TimeStampBaseModel
 from utils.exceptions import (CheckOutDateException, ValidSenderException,
     PhoneNumberInUse, ReplyNotFound)
 
@@ -54,10 +54,10 @@ class GuestQuerySet(BaseQuerySet):
         return self.filter(check_out__lt=today, hidden=False)
 
 
-class GuestManager(BaseManager, models.Manager):
+class GuestManager(BaseManager):
 
     def get_queryset(self):
-        return GuestQuerySet(self.model, self._db)
+        return GuestQuerySet(self.model, self._db).filter(hidden=False)
 
     def get_by_hotel_phone(self, hotel, phone_number):
         return self.get_queryset().get_by_hotel_phone(hotel, phone_number)
@@ -433,7 +433,7 @@ class ReplyManager(models.Manager):
 REPLY_LETTERS = [(x,x) for x in string.ascii_uppercase]
 
 
-class Reply(BaseModel):
+class Reply(TimeStampBaseModel):
     '''
     Used for Auto-Replies to Hotel Guests, and data changes at the 
     Guest's request.
@@ -501,7 +501,7 @@ class Reply(BaseModel):
             )
 
 
-class TriggerType(BaseModel):
+class TriggerType(TimeStampBaseModel):
     """
     Static table to hold "Trigger Types"
 
@@ -541,7 +541,7 @@ class TriggerManager(models.Manager):
                     user=guest.hotel.get_admin(), body=trigger.reply.message)
 
 
-class Trigger(BaseModel):
+class Trigger(TimeStampBaseModel):
     """
     Links Hotel's to a unique ``TriggerType``, to be specified when 
     it will be called in the application code.

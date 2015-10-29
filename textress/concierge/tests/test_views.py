@@ -136,7 +136,7 @@ class GuestViewTests(TestCase):
             {}, follow=True)
         self.assertRedirects(response, reverse('concierge:guest_list'))
         # hide guest worked
-        updated_guest = Guest.objects.get(pk=guest.pk)
+        updated_guest = Guest.objects_all.get(pk=guest.pk)
         self.assertTrue(updated_guest.hidden)
 
     ### ReplyView
@@ -381,6 +381,16 @@ class GuestAPITests(APITestCase):
             self.data, format='json')
         self.assertEqual(response.status_code, 200)
 
+    # tests: ``from utils.mixins import DestroyModelMixin``
+
+    def test_delete(self):
+        self.assertFalse(self.guest.hidden)
+        init_count = Guest.objects.count()
+        response = self.client.delete('/api/guests/{}/'.format(self.guest.pk))
+        self.assertEqual(response.status_code, 204)
+        post_count = Guest.objects.count()
+        self.assertEqual(init_count, post_count+1)
+
 
 class ReplyAPITests(APITestCase):
 
@@ -456,13 +466,6 @@ class ReplyAPITests(APITestCase):
             self.data, format='json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.data["message"], Reply.objects.get(id=self.reply.id).message)
-
-    # tests: ``from utils.mixins import DestroyModelMixin``
-    def test_delete(self):
-        response = self.client.delete("/api/reply/{}/".format(self.reply.id),
-            {'override':True}, format='json')
-        self.assertEqual(response.status_code, 204)
-        self.assertFalse(Reply.objects.filter(id=self.reply.id).exists())
 
     def test_delete_other_hotel_reply_fails(self):
         response = self.client.delete("/api/reply/{}/".format(self.reply_2.id))
