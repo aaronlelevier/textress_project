@@ -67,7 +67,7 @@ class BaseQuerySet(models.query.QuerySet):
 class BaseManager(models.Manager):
 
     def get_queryset(self):
-        return BaseQuerySet(self.model, using=self._db).filter(hidden=False)
+        return BaseQuerySet(self.model, using=self._db)
 
     def current(self):
         return self.get_queryset().current()
@@ -84,7 +84,6 @@ class BaseModel(models.Model):
     hidden = models.BooleanField(_("Hidden"), blank=True, default=False)
 
     objects = BaseManager()
-    objects_all = models.Manager()
 
     class Meta:
         abstract = True

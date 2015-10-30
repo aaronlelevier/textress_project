@@ -116,7 +116,7 @@ class GuestViewTests(TestCase):
             {}, follow=True)
         self.assertRedirects(response, reverse('concierge:guest_list'))
         # hide guest worked
-        updated_guest = Guest.objects_all.get(pk=guest.pk)
+        updated_guest = Guest.objects.get(pk=guest.pk)
         self.assertTrue(updated_guest.hidden)
 
     ### ReplyView

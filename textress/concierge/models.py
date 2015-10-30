@@ -57,7 +57,7 @@ class GuestQuerySet(BaseQuerySet):
 class GuestManager(BaseManager):
 
     def get_queryset(self):
-        return GuestQuerySet(self.model, self._db).filter(hidden=False)
+        return GuestQuerySet(self.model, self._db)
 
     def get_by_hotel_phone(self, hotel, phone_number):
         return self.get_queryset().get_by_hotel_phone(hotel, phone_number)

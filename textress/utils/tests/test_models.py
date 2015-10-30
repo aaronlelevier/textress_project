@@ -18,9 +18,10 @@ class TesterTests(TestCase):
         self.assertFalse(obj.hidden)
         obj.delete(override=True)
         with self.assertRaises(Tester.DoesNotExist):
-            Tester.objects_all.get(id=obj.id)
+            Tester.objects.get(id=obj.id)
 
     def test_delete_query_with_all(self):
         obj = mommy.make(Tester)
         obj.delete()
-        self.assertEqual(Tester.objects.count(), 0)
+        self.assertEqual(Tester.objects.archived().count(), 1)
+        self.assertEqual(Tester.objects.current().count(), 0)

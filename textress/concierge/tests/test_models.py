@@ -52,6 +52,8 @@ class GuestManagerTests(TestCase):
 
     def test_guests(self):
         self.assertEqual(Guest.objects.current().count(), 3)
+
+        self.assertTrue(self.archived_guest.hidden)
         self.assertEqual(Guest.objects.archived().count(), 1)
 
     def test_get_by_hotel_phone(self):
@@ -526,11 +528,6 @@ class TriggerTypeTests(TestCase):
     def test_check_in_stop_works(self):
         self.guest.stop = True
         self.guest.save()
-        twilio_msg = Trigger.objects.send_message(self.guest.id, "check_in")
-        self.assertIsNone(twilio_msg)
-
-    def test_check_in_not_configured(self):
-        self.trigger.delete(override=True)
         twilio_msg = Trigger.objects.send_message(self.guest.id, "check_in")
         self.assertIsNone(twilio_msg)
 
