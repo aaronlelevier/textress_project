@@ -44,11 +44,9 @@ class FormUpdateMessageMixin(FormValidMessageMixin, View):
 
 
 class DestroyModelMixin(object):
-
     """
-    Destroy a model instance, extended to handle `override` kwarg.
+    Pass `override` kwarg to do a permanent ``delete``, else ``hide``.
     """
-
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         override = request.data.get('override', None)

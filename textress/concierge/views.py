@@ -14,6 +14,7 @@ from braces.views import (LoginRequiredMixin, SetHeadlineMixin, CsrfExemptMixin,
     StaticContextMixin)
 from rest_framework import generics, permissions, viewsets
 from rest_framework.decorators import list_route
+from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from twilio import twiml
@@ -187,25 +188,24 @@ class ReplyView(IsManagerOrAdmin, SetHeadlineMixin, StaticContextMixin,
 DEFAULT_PERMISSIONS = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
 
 
-class MessageListCreateAPIView(generics.ListCreateAPIView):
-    "All Messages records for a single Hotel."
+class MessageAPIView(viewsets.ModelViewSet):
     
     queryset = Message.objects.all()
-    serializer_class = MessageListCreateSerializer
     permission_classes = DEFAULT_PERMISSIONS
+
+    def get_serializer_class(self):
+        if self.action in ('create', 'list'):
+            return MessageListCreateSerializer
+        elif self.action in ('retrieve', 'update', 'partial_update'):
+            return MessageRetrieveSerializer
+        elif self.action == 'remove':
+            raise MethodNotAllowed(self.action)
 
     def list(self, request):
         "The User can only view their Hotel's Messages."
         messages = Message.objects.filter(guest__hotel=request.user.profile.hotel)
         serializer = MessageListCreateSerializer(messages, many=True)
         return Response(serializer.data)
-
-
-class MessageRetrieveAPIView(generics.RetrieveUpdateAPIView):
-
-    queryset = Message.objects.all()
-    serializer_class = MessageRetrieveSerializer
-    permission_classes = DEFAULT_PERMISSIONS
 
 
 ### GUEST ###
