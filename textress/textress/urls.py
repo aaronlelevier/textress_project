@@ -4,7 +4,7 @@ from django.contrib import admin
 
 from rest_framework import routers
 
-from concierge import views as concierge_views
+from concierge import views_api as concierge_views
 from textress import views
 
 
@@ -13,7 +13,8 @@ admin.autodiscover()
 router = routers.DefaultRouter()
 
 # API
-router.register(r'guest', concierge_views.GuestAPIView)
+router.register(r'guests', concierge_views.GuestAPIView)
+router.register(r'guest-messages', concierge_views.GuestMessagesAPIView)
 router.register(r'messages', concierge_views.MessageAPIView)
 router.register(r'reply', concierge_views.ReplyAPIView)
 router.register(r'trigger', concierge_views.TriggerAPIView)

@@ -153,7 +153,7 @@ class GuestMessageAPIViewTests(APITestCase):
     def tearDown(self):
         self.client.logout()
 
-    def test_create(self):
+    def test_setup_data(self):
         self.assertEqual(Guest.objects.count(), 20)
         self.assertEqual(Guest.objects.filter(hotel=self.hotel).count(), 10)
 
@@ -179,7 +179,7 @@ class GuestMessageAPIViewTests(APITestCase):
         self.assertEqual(data['id'], guest.id)
 
 
-class GuestAPITests(APITestCase):
+class GuestAPIViewTests(APITestCase):
 
     def setUp(self):
         self.password = PASSWORD
@@ -237,43 +237,47 @@ class GuestAPITests(APITestCase):
             guest = Guest.objects.get(id=d['id'])
             self.assertEqual(guest.hotel, self.admin.profile.hotel)
 
-    def test_create(self):
-        response = self.client.post('/api/guests/', self.data, format='json')
-        self.assertEqual(response.status_code, 201)
-
-    ### GuestRetrieveUpdateAPIView
-
-    def test_get(self):
+    def test_detail(self):
         response = self.client.get('/api/guests/{}/'.format(self.guest.pk))
-        self.assertEqual(response.status_code, 200)
-        data = json.loads(response.content)
-        self.assertEqual(data['id'], self.guest.id)
+        self.assertEqual(response.status_code, 405)
 
-    def test_get_other_hotel_guest(self):
-        guest = Guest.objects.exclude(hotel=self.hotel).first()
-        self.assertIsInstance(guest, Guest)
-        response = self.client.get('/api/guests/{}/'.format(guest.pk))
-        self.assertEqual(response.status_code, 403)
+    # def test_create(self):
+    #     response = self.client.post('/api/guests/', self.data, format='json')
+    #     self.assertEqual(response.status_code, 201)
 
-    def test_update(self):
-        self.data = serializers.GuestListSerializer(self.guest).data
-        self.data.update({'name': 'changed'})
-        response = self.client.get('/api/guests/{}/'.format(self.guest.pk),
-            self.data, format='json')
-        self.assertEqual(response.status_code, 200)
+    # ### GuestRetrieveUpdateAPIView
 
-    # tests: ``from utils.mixins import DestroyModelMixin``
+    # def test_get(self):
+    #     response = self.client.get('/api/guests/{}/'.format(self.guest.pk))
+    #     self.assertEqual(response.status_code, 200)
+    #     data = json.loads(response.content)
+    #     self.assertEqual(data['id'], self.guest.id)
 
-    def test_delete(self):
-        self.assertFalse(self.guest.hidden)
-        init_count = Guest.objects.count()
-        response = self.client.delete('/api/guests/{}/'.format(self.guest.pk))
-        self.assertEqual(response.status_code, 204)
-        post_count = Guest.objects.count()
-        self.assertEqual(init_count, post_count+1)
+    # def test_get_other_hotel_guest(self):
+    #     guest = Guest.objects.exclude(hotel=self.hotel).first()
+    #     self.assertIsInstance(guest, Guest)
+    #     response = self.client.get('/api/guests/{}/'.format(guest.pk))
+    #     self.assertEqual(response.status_code, 403)
+
+    # def test_update(self):
+    #     self.data = serializers.GuestListSerializer(self.guest).data
+    #     self.data.update({'name': 'changed'})
+    #     response = self.client.get('/api/guests/{}/'.format(self.guest.pk),
+    #         self.data, format='json')
+    #     self.assertEqual(response.status_code, 200)
+
+    # # tests: ``from utils.mixins import DestroyModelMixin``
+
+    # def test_delete(self):
+    #     self.assertFalse(self.guest.hidden)
+    #     init_count = Guest.objects.count()
+    #     response = self.client.delete('/api/guests/{}/'.format(self.guest.pk))
+    #     self.assertEqual(response.status_code, 204)
+    #     post_count = Guest.objects.count()
+    #     self.assertEqual(init_count, post_count+1)
 
 
-class ReplyAPITests(APITestCase):
+class ReplyAPIViewTests(APITestCase):
 
     fixtures = ['reply.json']
 
@@ -386,7 +390,7 @@ class ReplyAPITests(APITestCase):
         self.assertNotIn(settings.RESERVED_REPLY_LETTERS[0], data)
 
 
-class TriggerTypeTests(APITestCase):
+class TriggerTypeAPIViewTests(APITestCase):
 
     def setUp(self):
         self.hotel = create_hotel()
@@ -406,7 +410,7 @@ class TriggerTypeTests(APITestCase):
         self.assertEqual(response.status_code, 200)
 
 
-class TriggerTests(APITestCase):
+class TriggerAPIViewTests(APITestCase):
 
     def setUp(self):
         self.hotel = create_hotel()
