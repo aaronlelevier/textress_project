@@ -148,6 +148,9 @@ class GuestTests(TestCase):
         assert isinstance(self.guest, Guest)
 
     def test_validate_phone_number_taken(self):
+        self.assertTrue(Guest.objects.current().filter(
+            phone_number=settings.DEFAULT_TO_PH_BAD).exists())
+
         with self.assertRaises(PhoneNumberInUse):
             mommy.make(
                 Guest,

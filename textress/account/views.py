@@ -169,9 +169,8 @@ class AcctStmtListView(AdminOnlyMixin, SetHeadlineMixin, ListView):
         return AcctStmt.objects.filter(hotel=self.hotel)
 
     def get(self, request, *args, **kwargs):
-        '''Ensure the current month's AcctStmt is up to date.
-
-        TODO: Make this a daiy job, and not in the View.get()
+        '''
+        Ensure the current month's AcctStmt is up to date.
         '''
         # acct_stmt = update_current_acct_stmt(hotel=self.hotel)
         return super(AcctStmtListView, self).get(request, *args, **kwargs)
@@ -219,6 +218,8 @@ class AcctPmtHistoryView(AdminOnlyMixin, SetHeadlineMixin, BillingSummaryContext
 ##############
 # CLOSE ACCT #
 ##############
+
+# TODO: Implement the "Close Account" views or don't ??
 
 class CloseAcctView(AdminOnlyMixin, SetHeadlineMixin, FormView):
     '''
@@ -268,8 +269,7 @@ class CloseAcctConfirmView(AdminOnlyMixin, SetHeadlineMixin, FormView):
 
     def form_valid(self, form):
         '''
-        TODO: dispatch request to Celery
-            - Send email that "request has been submitted"
+        Send email that "request has been submitted"
         '''
         msg = email.close_account_email(self.request.user)
         msg.send()

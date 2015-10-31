@@ -66,7 +66,7 @@ def process_incoming_message(data):
     Return:
 
     - msg: b/c will be converted to JSON and sent to client thro Redis
-    - reply: auto-reply to guest TODO: [need to move out of `ReceiveSMSView code]
+    - reply: auto-reply to guest
     '''
     # hotel = Hotel.objects.get_by_phone(data['To'])
     hotel = get_hotel_by_twilio_phone(data['To'])

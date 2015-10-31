@@ -10,7 +10,7 @@ from utils import ph_formatter, validate_phone
 from utils.forms import Bootstrap3ModelForm
 
 
-class GuestForm(Bootstrap3ModelForm):
+class GuestForm(NgFormValidationMixin, Bootstrap3ModelForm):
 
     form_name = 'guest_form'
 
@@ -20,11 +20,13 @@ class GuestForm(Bootstrap3ModelForm):
         help_text='Allowed phone number format: (702) 510-5555')
     check_in = forms.DateField(label='Check-in Date',
         initial=timezone.now(),
-        widget=forms.DateInput(attrs={'validate-date': '^(\d{4})-(\d{1,2})-(\d{1,2})$'}),
+        # not allowing 1st of month, and raising a form error instead, so for the time being,
+        # just use jqery.maskedinput
+        # widget=forms.DateInput(attrs={'validate-date': r'^(\d{4})-(\d{1,2})-(\d{1,2})$'}),
         help_text='Allowed date format: yyyy-mm-dd')
     check_out = forms.DateField(label='Check-out Date',
         initial=timezone.now()+datetime.timedelta(days=1),
-        widget=forms.DateInput(attrs={'validate-date': '^(\d{4})-(\d{1,2})-(\d{1,2})$'}),
+        # widget=forms.DateInput(attrs={'validate-date': r'^(\d{4})-(\d{1,2})-(\d{1,2})$'}),
         help_text='Allowed date format: yyyy-mm-dd')
     
     class Meta:

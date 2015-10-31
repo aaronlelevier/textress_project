@@ -122,9 +122,6 @@ class TransType(TimeStampBaseModel):
     3   recharge_amt    Recharge amount selected by the Hotel
     4   sms_used        daily deduction for sms used for that day; cache - sms used during the day to save DB trips
     5   phone_number    Monthly phone number cost. Is charged at the initial purchase of a phone number, and monthly after that.
-
-    TODO:
-        - cache `sms_used` during the day to save DB trips
     """
     name = models.CharField(_("Name"), unique=True, max_length=50)
     desc = models.CharField(_("Description"), max_length=255)

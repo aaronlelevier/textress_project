@@ -165,7 +165,6 @@ class Guest(BaseModel):
 
         :TODO: 
             1. Should this raise a Form Error instead? Like `validate_phone`?
-            2. Need a 2nd Validator that validates the PH format == '+17027284769'
         '''
         if (Guest.objects.current().filter(hotel=self.hotel, phone_number=self.phone_number)
                                    .exclude(id=self.id)

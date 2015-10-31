@@ -112,6 +112,7 @@ class GuestCreateView(GuestBaseView, GuestListContextMixin, CreateView):
         self.object = form.save(commit=False)
         self.object.hotel = self.hotel
         self.object.save()
+        # TODO: convert this Trigger to a Celery task
         Trigger.objects.send_message(self.object.id, "check_in")
         return super(GuestCreateView, self).form_valid(form)
 

@@ -1,5 +1,8 @@
 Notes w/ Scott
 --------------
+:html include angular:
+
+    Make each each Angular Apps links an ".html" include block, to remove duplication
 
 :Current vs Archived:
 
@@ -11,13 +14,17 @@ Notes w/ Scott
 
     Test "guest.is_unknown" messages
 
-Remove live SMS to me and Yuki in test code
-
 Review TODOs scattered throughout code
 
-Make each each Angular Apps links an ".html" include block, to remove duplication
+:all emails sent via Celery:
 
-django-constance:
+:Close account views:
+
+    Do I want to make this a simple View, or require Hotel to call me?
+
+    If implemented, review all Close Account Views at ``account.views``
+
+:django_constance:
     
     - Reason: To be able to turn certain settings ON / OFF on a per Hotel Basis
 
@@ -42,17 +49,33 @@ Before Production
 -----------------
 Enable Phone Number purchasing - ** use an ``if settings.DEBUG`` case stmt here
 
+Remove "Beta limited functionality warning" in signup form wizard, and test at:
+
+    ``account.tests.test_views.RegistrationTests.test_register_step3``
+
 
 Enhancements
 ------------
-Canned Messages
+:Canned Messages:
 
     - per Hotel, per User
 
     - Saved Messages - that are common for the Concierge to send. Canned messages.  Saved
     under the Hotel, for all Concierge's to use.
 
-MMS - None for Beta version
+:MMS:
+
+    None for Beta version
+
+:Redis Cache SMS Used:
+
+    For every "X" number of SMS Used, check if Account needs to be recharged. i.e. every 100
+
+    Entry points: ``send_message`` / ``receive_message``
+
+    Use python-redis
+
+    Key pattern in Redis to store this info: ``<hotel.id>:sms``
 
 
 Bugs
