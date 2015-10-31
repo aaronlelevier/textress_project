@@ -1,22 +1,28 @@
-Notes w/ Scott
---------------
-:html include angular:
-
-    Make each each Angular Apps links an ".html" include block, to remove duplication
-
-:Current vs Archived:
-
-    Guest Logic
-
-    A Guest is showing on the Dashboard that isn't on the GuestList
-
+Final Beta todo's
+-----------------
 :Unknown Guests:
 
     Test "guest.is_unknown" messages
 
-Review TODOs scattered throughout code
+:Signup form wizard:
 
-:all emails sent via Celery:
+    review tests
+
+    reCaptcha - signup online
+
+:Angular Tests:
+
+:Celery:
+
+    all emails sent via 
+
+    All SMS
+
+    Other non-pertinent tasks??
+
+:Review TODOs: 
+
+    scattered throughout code
 
 :Close account views:
 
@@ -35,14 +41,30 @@ Review TODOs scattered throughout code
 
     - JsonB - Should this Just be a JsonB field in each Hotel object ??
 
-My Account: 
+:My Account:
 
     - change name to be "Account Info", with 2 sub categories ->
 
         1. Update Profile Info
         2. Update Hotel Info
 
-Manage Users: - User List needs a field for "Group" of the User. i.e. admin, manager, etc...
+:Manage Users:
+
+    User List needs a field for "Group" of the User. i.e. admin, manager, etc...
+
+:Accounting:
+
+    Make sure all balances of funds line up
+
+:Redis Cache SMS Used:
+
+    For every "X" number of SMS Used, check if Account needs to be recharged. i.e. every 100
+
+    Entry points: ``send_message`` / ``receive_message``
+
+    Use python-redis
+
+    Key pattern in Redis to store this info: ``<hotel.id>:sms``
 
 
 Before Production
@@ -66,16 +88,6 @@ Enhancements
 :MMS:
 
     None for Beta version
-
-:Redis Cache SMS Used:
-
-    For every "X" number of SMS Used, check if Account needs to be recharged. i.e. every 100
-
-    Entry points: ``send_message`` / ``receive_message``
-
-    Use python-redis
-
-    Key pattern in Redis to store this info: ``<hotel.id>:sms``
 
 
 Bugs

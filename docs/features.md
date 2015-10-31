@@ -16,10 +16,14 @@ Client side validation
 
 #### Payment
 
-Credit card - auto put spaces after every 4 digits for easier reading of the c.card #
+Credit card - auto put spaces after every 4 digits for easier reading of the c.card number
+
+### Guests
+
+Auto-hiding of checked-out Guests
 
 
-## Auto Replies
+### Auto Replies
 
 Guest (for auto-reply), can send an lowercase or uppercase letter for an auto-reply.
 ex: 'h', 'H'.  These auto-replies are configured at the Hotel level.
