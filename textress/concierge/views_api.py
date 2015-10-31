@@ -20,7 +20,7 @@ DEFAULT_PERMISSIONS = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObj
 
 class MessageAPIView(viewsets.ModelViewSet):
     
-    queryset = Message.objects.all()
+    queryset = Message.objects.current()
     permission_classes = DEFAULT_PERMISSIONS
 
     def get_serializer_class(self):
@@ -28,12 +28,12 @@ class MessageAPIView(viewsets.ModelViewSet):
             return MessageListCreateSerializer
         elif self.action in ('retrieve', 'update', 'partial_update'):
             return MessageRetrieveSerializer
-        elif self.action == 'remove':
+        else:
             raise MethodNotAllowed(self.action)
 
     def list(self, request):
         "The User can only view their Hotel's Messages."
-        messages = Message.objects.filter(guest__hotel=request.user.profile.hotel)
+        messages = Message.objects.current().filter(guest__hotel=request.user.profile.hotel)
         serializer = MessageListCreateSerializer(messages, many=True)
         return Response(serializer.data)
 
@@ -41,12 +41,12 @@ class MessageAPIView(viewsets.ModelViewSet):
 class GuestMessagesAPIView(viewsets.ModelViewSet):
     """Filter for Guests for the User's Hotel only."""
 
-    queryset = Guest.objects.all()
+    queryset = Guest.objects.current()
     permission_classes = DEFAULT_PERMISSIONS
 
     def list(self, request):
         try:
-            guests = Guest.objects.filter(hotel=request.user.profile.hotel)
+            guests = Guest.objects.current().filter(hotel=request.user.profile.hotel)
         except AttributeError:
             raise Http404
         serializer = GuestMessageSerializer(guests, many=True)
@@ -61,11 +61,11 @@ class GuestMessagesAPIView(viewsets.ModelViewSet):
 
 class GuestAPIView(viewsets.ModelViewSet):
 
-    queryset = Guest.objects.all()
+    queryset = Guest.objects.current()
     permission_classes = DEFAULT_PERMISSIONS
 
     def list(self, request):
-        guests = Guest.objects.filter(hotel=request.user.profile.hotel)
+        guests = Guest.objects.current().filter(hotel=request.user.profile.hotel)
         serializer = GuestListSerializer(guests, many=True)
         return Response(serializer.data)
 

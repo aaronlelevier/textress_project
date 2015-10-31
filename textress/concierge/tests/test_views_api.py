@@ -71,6 +71,22 @@ class MessagAPIViewTests(APITestCase):
             msg = Message.objects.get(id=d['id'])
             self.assertEqual(msg.hotel, self.admin.profile.hotel)
 
+    def test_list_no_deleted(self):
+        response = self.client.get('/api/messages/')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        message = Message.objects.get(id=data[0]['id'])
+        message.delete()
+        self.assertTrue(message.hidden)
+        # Deleted
+        response = self.client.get('/api/messages/')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertNotIn(
+            message.id,
+            [x['id'] for x in data]
+        )
+
     def test_create(self):
         data = {
             'top_ph': self.guest.phone_number,
@@ -169,6 +185,23 @@ class GuestMessageAPIViewTests(APITestCase):
             guest = Guest.objects.get(id=d['id'])
             self.assertEqual(guest.hotel, self.admin.profile.hotel)
 
+    def test_list_no_deleted_guests(self):
+        response = self.client.get('/api/guest-messages/')
+        data = json.loads(response.content)
+        self.assertIn(
+            self.guest.id,
+            [x['id'] for x in data]
+        )
+        # Delete
+        self.guest.delete()
+        self.assertTrue(self.guest.hidden)
+        response = self.client.get('/api/guest-messages/')
+        data = json.loads(response.content)
+        self.assertNotIn(
+            self.guest.id,
+            [x['id'] for x in data]
+        )
+
     ### GuestMessageRetrieveAPIView
 
     def test_detail(self):
@@ -240,6 +273,23 @@ class GuestAPIViewTests(APITestCase):
     def test_detail(self):
         response = self.client.get('/api/guests/{}/'.format(self.guest.pk))
         self.assertEqual(response.status_code, 405)
+
+    def test_list_no_deleted_guests(self):
+        response = self.client.get('/api/guests/')
+        data = json.loads(response.content)
+        self.assertIn(
+            self.guest.id,
+            [x['id'] for x in data]
+        )
+        # Delete
+        self.guest.delete()
+        self.assertTrue(self.guest.hidden)
+        response = self.client.get('/api/guests/')
+        data = json.loads(response.content)
+        self.assertNotIn(
+            self.guest.id,
+            [x['id'] for x in data]
+        )
 
     # def test_create(self):
     #     response = self.client.post('/api/guests/', self.data, format='json')

@@ -95,9 +95,9 @@ class BaseModel(models.Model):
     def delete(self, override=None, *args, **kwargs):
         "Only delete explicitly."
         if not override:
-            self.hide()
+            return self.hide()
         else:
-            super(BaseModel, self).delete(*args, **kwargs)
+            return super(BaseModel, self).delete(*args, **kwargs)
 
     def hide(self):
         self.hidden = True 
