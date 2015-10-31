@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 
+from concierge.forms import GuestForm
 from concierge.models import Guest, Message
 from concierge.tests.factory import make_guests, make_messages
 from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
@@ -18,6 +19,15 @@ class GuestViewTests(TestCase):
 
         self.guests = make_guests(self.hotel)
         self.guest = self.guests.first()
+
+        self.guest_create_data = {
+            'hotel':self.user.profile.hotel,
+            'name': 'Test Guest',
+            'room_number': create._generate_int(5),
+            'phone_number': create._generate_ph(),
+            'check_in': create._generate_date(),
+            'check_out': create._generate_date()
+        }
 
         # Login
         self.client.login(username=self.user.username, password=PASSWORD)
@@ -70,18 +80,51 @@ class GuestViewTests(TestCase):
 
         # Login n Create a Guest
         response = self.client.post(reverse('concierge:guest_create'),
-            {'hotel':self.user.profile.hotel,
-            'name': 'Test Guest',
-            'room_number': create._generate_int(5),
-            'phone_number': create._generate_ph(),
-            'check_in': create._generate_date(),
-            'check_out': create._generate_date()},
-            follow=True)
+            self.guest_create_data, follow=True)
 
         # Now 1 guest
         guest = Guest.objects.first()
         self.assertIsInstance(guest, Guest)
         self.assertRedirects(response, reverse('concierge:guest_detail', kwargs={'pk':guest.pk}))
+
+    def test_validate_phone_in_use(self):
+        [g.delete(override=True) for g in Guest.objects.all()]
+
+        # Login n Create a Guest
+        response = self.client.post(reverse('concierge:guest_create'),
+            self.guest_create_data, follow=True)
+
+        # Now 1 guest
+        guest = Guest.objects.first()
+        self.assertIsInstance(guest, Guest)
+        self.assertRedirects(response, reverse('concierge:guest_detail', kwargs={'pk':guest.pk}))
+
+        # Trying to creat a Guest w/ the same Phone Number will fail
+        response = self.client.post(reverse('concierge:guest_create'),
+            self.guest_create_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertFormError(response, 'form', 'phone_number', GuestForm.error_messages['number_in_use'])
+
+    def test_validate_phone_in_use_deleted_guest(self):
+        # Deleted Guests should not raise errors because they are not active, so their
+        # Phone Number is free to be used
+        [g.delete(override=True) for g in Guest.objects.all()]
+
+        response = self.client.post(reverse('concierge:guest_create'),
+            self.guest_create_data, follow=True)
+        guest = Guest.objects.first()
+        self.assertIsInstance(guest, Guest)
+        self.assertRedirects(response, reverse('concierge:guest_detail', kwargs={'pk':guest.pk}))
+
+        guest.delete()
+        self.assertTrue(guest.hidden)
+
+        # Should succeed b/c PH # not in use
+        init_count = Guest.objects.count()
+        response = self.client.post(reverse('concierge:guest_create'),
+            self.guest_create_data)
+        post_count = Guest.objects.count()
+        self.assertEqual(init_count+1, post_count)
 
     def test_update_get(self):
         response = self.client.get(reverse('concierge:guest_update', kwargs={'pk':self.guest.pk}))

@@ -14,6 +14,10 @@ class GuestForm(NgFormValidationMixin, Bootstrap3ModelForm):
 
     form_name = 'guest_form'
 
+    error_messages = {
+        'number_in_use': "Guest phone number exists."
+    }
+
     phone_number = forms.RegexField(r'^(\(\d{3}\)) (\d{3})-(\d{4})$',
         label='Phone number',
         error_messages={'invalid': 'Phone number have 10 digits'},
@@ -65,10 +69,10 @@ class GuestForm(NgFormValidationMixin, Bootstrap3ModelForm):
         """Silently pass if the Guest is updating something, but leaving
         the PH # as is."""
 
-        qs = Guest.objects.filter(phone_number=phone)
+        qs = Guest.objects.current().filter(phone_number=phone)
 
         if self.guest:
             qs = qs.exclude(id=self.guest.id)
 
         if qs.exists():
-            raise forms.ValidationError("Guest phone number exists.")
+            raise forms.ValidationError(self.error_messages['number_in_use'])
