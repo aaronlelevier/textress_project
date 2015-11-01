@@ -8,7 +8,7 @@ describe('mainApp controllers', function() {
     it('UserListCtrl:', inject(function($controller) {
       var scope = {},
           ctrl = $controller('UserListCtrl', {$scope:scope});
-      expect(scope.twoTimesTwo).toBe(3); // 4
+      expect(scope.twoTimesTwo).toBe(4);
       expect(scope.predicate).toBe('username');
       expect(scope.reverse).toBe(true);
       // .order()
