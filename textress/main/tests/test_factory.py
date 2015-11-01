@@ -19,6 +19,8 @@ class FactoryTests(TestCase):
         hotel = factory.create_hotel()
         self.assertIsInstance(hotel, Hotel)
 
+    # create_hotel_user
+
     def test_create_hotel_user_user(self):
         hotel = factory.create_hotel()
         user = factory.create_hotel_user(hotel)
@@ -39,6 +41,27 @@ class FactoryTests(TestCase):
         self.assertIsNotNone(user.groups.filter(name=group))
         self.assertEqual(hotel.admin_id, user.id)
         self.assertEqual(hotel, user.profile.hotel)
+
+    # create_user
+
+    def test_create_user(self):
+        # With a Group
+        group_name = 'hotel_admin'
+        user, group = factory.create_user(group=group_name)
+        self.assertIsInstance(user, User)
+        self.assertIn(group, user.groups.all())
+        # can login
+        self.client.login(username=user.username, password=factory.PASSWORD)
+        self.assertIn('_auth_user_id', self.client.session)
+
+    def test_create_user_no_group(self):
+        user, group = factory.create_user()
+        self.assertIsInstance(user, User)
+        self.assertFalse(user.groups.all())
+        self.assertIsNone(group)
+        # can login
+        self.client.login(username=user.username, password=factory.PASSWORD)
+        self.assertIn('_auth_user_id', self.client.session)
 
     def test_create_hotel_random_name(self):
         hotel = factory.create_hotel()

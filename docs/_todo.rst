@@ -1,14 +1,14 @@
 Final Beta todo's
 -----------------
-:Unknown Guests:
-
-    Test "guest.is_unknown" messages
-
 :Signup form wizard:
 
     review tests
 
     reCaptcha - signup online
+
+:Helper messages:
+
+    for things that need configuring
 
 :Angular Tests:
 
@@ -88,6 +88,14 @@ Enhancements
 :MMS:
 
     None for Beta version
+
+:Unknown Guests:
+
+    Could add a Selenium test for - "guest.is_unknown" messages
+
+:User password requirements:
+
+    Stronger requirements, allowed to be configureable by the Hotel
 
 
 Bugs

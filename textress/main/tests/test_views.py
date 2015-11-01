@@ -6,11 +6,11 @@ from django.contrib.auth.models import User, Group
 
 import stripe
 
+from main.forms import UserCreateForm, UserUpdateForm
 from main.models import Hotel, UserProfile, Subaccount
-from main.tests.factory import (CREATE_USER_DICT, CREATE_HOTEL_DICT,
-    create_hotel, create_hotel_user)
-from utils import create
-from utils.messages import dj_messages
+from main.tests.factory import (CREATE_USER_DICT, CREATE_HOTEL_DICT, PASSWORD,
+    create_hotel, create_user, create_hotel_user)
+from utils import create, dj_messages, login_messages
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -36,7 +36,14 @@ class RegistrationTests(TransactionTestCase):
         self.username = 'test'
         self.password = '1234'
 
-    ### SUCCESSFUL REGISTRATION TESTs ###
+    # Step 1
+
+    def test_register_step1_get(self):
+        # initially logged-out
+        self.assertNotIn('_auth_user_id', self.client.session)
+        response = self.client.get(reverse('main:register_step1'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.context['form'], UserCreateForm)
 
     def test_register_step1(self):
         # Dave creates a User
@@ -46,20 +53,48 @@ class RegistrationTests(TransactionTestCase):
         self.assertRedirects(response, reverse('main:register_step2'))
 
         user = User.objects.get(username=self.username)
-        assert isinstance(user, User)
-        assert isinstance(user.profile, UserProfile)
-        assert user == User.objects.get(groups__name='hotel_admin')
+        self.assertIsInstance(user, User)
+        self.assertIsInstance(user.profile, UserProfile)
+        group = Group.objects.get(name='hotel_admin')
+        self.assertIn(group, user.groups.all())
 
+        # Now logged-in
+        self.assertIn('_auth_user_id', self.client.session)
+        # Logged in Message
+        m = list(response.context['messages'])
+        self.assertEqual(len(m), 1)
+        self.assertEqual(str(m[0]), login_messages['now_logged_in'])
+
+    def test_register_step1_update_info(self):
         # after Dave tries to go back and it takes him to the update URL instead
+        user, group = create_user(username=self.username, group="hotel_admin")
+        self.client.login(username=user.username, password=PASSWORD)
+
         response = self.client.get(reverse('main:register_step1'), follow=True)
         self.assertRedirects(response, reverse('main:register_step1_update', kwargs={'pk': user.pk}))
+        self.assertIsInstance(response.context['form'], UserUpdateForm)
+
+    def test_register_step1_clean_username(self):
+        create_user(username=CREATE_USER_DICT['username'])
+        response = self.client.post(reverse('main:register_step1'), CREATE_USER_DICT)
+        self.assertEqual(response.status_code, 200)
+        self.assertFormError(response, 'form', 'username',
+            UserCreateForm.error_messages['duplicate_username'])
+
+    def test_register_step1_clean_password2(self):
+        CREATE_USER_DICT['password2'] = create._generate_name()
+        response = self.client.post(reverse('main:register_step1'), CREATE_USER_DICT)
+        self.assertEqual(response.status_code, 200)
+        self.assertFormError(response, 'form', 'password2',
+            UserCreateForm.error_messages['password_mismatch'])
+
+    # Step 2
 
     def test_register_step2(self):
         # Step 1
         # assert logged in and can access "register step2 form"
         response = self.client.post(reverse('main:register_step1'),
             CREATE_USER_DICT)
-        self.client.login(username=self.username, password=self.password)
         response = self.client.get(reverse('main:register_step2'))
         self.assertEqual(response.status_code, 200)
 

@@ -48,30 +48,33 @@ def create_hotel(name=None, address_phone=None):
     return Hotel.objects.create(**address_data)
 
 
-def create_hotel_user(hotel, username=None, group=None):
-    '''
-    Handle making Admin, Manager, and Users with 1 Func.
-    '''
-    if not username:
-        username = create._generate_name()
+def create_hotel_user(hotel, username=create._generate_name(), group=None):
+    '''Handle making Admin, Manager, and Users with 1 Func.'''
+
+    user, group = create_user(username, group)
+
+    # if this is not done, ``main.mixins.AdminOnlyMixin`` will raise a 404
+    if group and group.name == 'hotel_admin':
+        hotel.set_admin_id(user)
+
+    user.profile.update_hotel(hotel)
+
+    return user
+
+
+def create_user(username=create._generate_name(), group=None):
+    """Create a User w/o a Hotel"""
 
     user = mommy.make(User, username=username, password=PASSWORD,
         first_name=username, last_name=username, email="{}@mail.com".format(username))
-
-    if group:
-        g = Group.objects.get(name=group)
-        user.groups.add(g)
-
-        # if this is not done, ``main.mixins.AdminOnlyMixin``
-        # will raise a 404
-        if group == 'hotel_admin':
-            hotel.set_admin_id(user)
-    
     user.set_password(PASSWORD)
     user.save()
-    user.profile.update_hotel(hotel)
 
-    return User.objects.get(username=username)
+    if group:
+        group = Group.objects.get(name=group)
+        user.groups.add(group)
+
+    return user, group
 
     
 def create_superuser():

@@ -95,7 +95,8 @@ class RegisterAdminCreateView(RegisterAdminBaseView, CreateView):
 
         # Add User to "Admin" Group
         user = User.objects.get(username=cd['username'])
-        user.groups.add(Group.objects.get(name='hotel_admin'))
+        group = Group.objects.get(name='hotel_admin')
+        user.groups.add(group)
         user.save()
 
         # Login
