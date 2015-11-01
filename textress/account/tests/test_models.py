@@ -13,7 +13,7 @@ from django.utils import timezone
 from model_mommy import mommy
 
 from account.models import (Dates, Pricing, TransType, AcctCost, AcctStmt, AcctTrans,
-    CHARGE_AMOUNTS, BALANCE_AMOUNTS)
+    INIT_CHARGE_AMOUNT, CHARGE_AMOUNTS, BALANCE_AMOUNTS)
 from account.tests.factory import create_acct_stmts, create_acct_trans
 from concierge.models import Guest, Message
 from concierge.tests.factory import make_guests, make_messages
@@ -161,7 +161,11 @@ class AcctCostTests(TestCase):
         self.assertEqual(acct_cost.balance_min, BALANCE_AMOUNTS[0][0])
         self.assertEqual(acct_cost.recharge_amt, CHARGE_AMOUNTS[0][0])
 
+    def test_create_already_created_update_amounts(self):
         # create new actually modifies original b/c p/ Hotel, singleton obj
+        acct_cost, created = AcctCost.objects.get_or_create(hotel=self.hotel)
+        self.assertTrue(created)
+
         new_acct_cost, created = AcctCost.objects.get_or_create(
             hotel=self.hotel,
             balance_min=BALANCE_AMOUNTS[2][0],
@@ -173,14 +177,25 @@ class AcctCostTests(TestCase):
         self.assertEqual(new_acct_cost.balance_min, BALANCE_AMOUNTS[2][0])
         self.assertEqual(new_acct_cost.recharge_amt, CHARGE_AMOUNTS[2][0])
 
+    def test_create_already_created(self):
         # If a ``get_or_create`` is called w/ no kwargs, it returns the current
         # ``acct_cost`` as is
         acct_cost, created = AcctCost.objects.get_or_create(hotel=self.hotel)
+        self.assertTrue(created)
+
+        new_acct_cost, created = AcctCost.objects.get_or_create(hotel=self.hotel)
         self.assertFalse(created)
         self.assertEqual(acct_cost, new_acct_cost)
         self.assertEqual(AcctCost.objects.filter(hotel=self.hotel).count(), 1)
-        self.assertEqual(acct_cost.balance_min, BALANCE_AMOUNTS[2][0])
-        self.assertEqual(acct_cost.recharge_amt, CHARGE_AMOUNTS[2][0])
+        self.assertEqual(acct_cost.balance_min, BALANCE_AMOUNTS[0][0])
+        self.assertEqual(acct_cost.recharge_amt, CHARGE_AMOUNTS[0][0])
+
+    def test_init_charge_amount(self):
+        acct_cost, created = AcctCost.objects.get_or_create(hotel=self.hotel)
+        self.assertTrue(created)
+        self.assertIsInstance(acct_cost, AcctCost)
+        self.assertEqual(acct_cost.init_amt, INIT_CHARGE_AMOUNT)
+        self.assertEqual(acct_cost.recharge_amt, INIT_CHARGE_AMOUNT)
 
 
 class AcctStmtTests(TestCase):

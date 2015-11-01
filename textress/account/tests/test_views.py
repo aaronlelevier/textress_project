@@ -5,6 +5,8 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Group
 
+from model_mommy import mommy
+
 from account.forms import AcctCostForm
 from account.models import (AcctStmt, TransType, AcctTrans, AcctCost,
     Pricing, CHARGE_AMOUNTS, BALANCE_AMOUNTS)
@@ -122,41 +124,56 @@ class RegistrationTests(TestCase):
 
     def setUp(self):
         create._get_groups_and_perms()
-        self.username = CREATE_USER_DICT['username']
-        self.password = '1234'
+        self.hotel = create_hotel()
+        self.user = create_hotel_user(self.hotel, group="hotel_admin")
+        # Login
+        self.client.login(username=self.user.username, password=PASSWORD)
 
-        # Necessary setup for Step # 3 tets
-        # Step 1
-        response = self.client.post(reverse('main:register_step1'),
-            CREATE_USER_DICT)
-        self.client.login(username=self.username, password=self.password)
-        # Step 2
-        response = self.client.post(reverse('main:register_step2'),
-            CREATE_HOTEL_DICT)
+    # register_step3
 
-    def test_register_step3(self):
+    def test_get(self):
+        response = self.client.get(reverse('register_step3'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.context['form'], AcctCostForm)
+
+    def test_create(self):
         # Step 3
-        response = self.client.post(reverse('register_step3'), # no namespace b/c in "account" app
+        response = self.client.post(reverse('register_step3'),
             CREATE_ACCTCOST_DICT, follow=True)
         self.assertRedirects(response, reverse('payment:register_step4'))
         # created n linked to Hotel
-        hotel = Hotel.objects.get(name=CREATE_HOTEL_DICT['name'])
-        acct_cost = AcctCost.objects.get(hotel=hotel)
-        assert isinstance(acct_cost, AcctCost)
+        acct_cost = AcctCost.objects.get(hotel=self.hotel)
+        self.assertIsInstance(acct_cost, AcctCost)
 
         # Dave tries to view the page again and is redirected to the UpdateView
         response = self.client.get(reverse('register_step3'), follow=True)
         self.assertRedirects(response, reverse('register_step3_update', kwargs={'pk': acct_cost.pk}))
 
+    def test_update(self):
         # Step 3 UpdateView
         # Dave wants to update his choice
+        acct_cost = mommy.make(AcctCost, hotel=self.hotel)
         response = self.client.get(reverse('register_step3_update', kwargs={'pk': acct_cost.pk}))
         self.assertEqual(response.status_code, 200)
-        assert isinstance(response.context['form'], AcctCostForm)
+        self.assertIsInstance(response.context['form'], AcctCostForm)
 
-        # TODO: remove when going Beta
-        # Warning is in the Context
-        self.assertContains(response, 'Textress is currently Pre-Alpha with limited functionality')
+    def test_update_no_account_cost(self):
+        # Dave doesn't have an AcctCost yet, and tries to go to another Hotel's AcctCost page
+        other_hotel = create_hotel()
+        other_acct_cost = mommy.make(AcctCost, hotel=other_hotel)
+        response = self.client.get(reverse('register_step3_update',
+            kwargs={'pk': other_acct_cost.pk}), follow=True)
+        self.assertRedirects(response, reverse('register_step3'))
+
+    def test_update_other_hotel_account_cost(self):
+        # Dave has an AcctCost, and tries to go to another Hotel's AcctCost page
+        acct_cost = mommy.make(AcctCost, hotel=self.hotel)
+        other_hotel = create_hotel()
+        other_acct_cost = mommy.make(AcctCost, hotel=other_hotel)
+        response = self.client.get(reverse('register_step3_update',
+            kwargs={'pk': other_acct_cost.pk}), follow=True)
+        self.assertRedirects(response, reverse('register_step3_update',
+            kwargs={'pk': acct_cost.pk}))
 
 
 class AccountTests(TestCase):

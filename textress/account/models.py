@@ -138,15 +138,14 @@ class TransType(TimeStampBaseModel):
 # ACCT COST #
 #############
 
-# use a lower charge amount in DEBUG:
-if settings.DEBUG:
-    INIT_CHARGE_AMT = 100
-else:
-    INIT_CHARGE_AMT = 500
-
 # AcctCost Amount Choices
-CHARGE_AMOUNTS = [(INIT_CHARGE_AMT, '${:.2f}'.format(1))] + [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
-BALANCE_AMOUNTS = [(100, '${:.2f}'.format(1))] + [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
+INIT_CHARGE_AMOUNT = 500
+CHARGE_AMOUNTS = [(INIT_CHARGE_AMOUNT, '${:.2f}'.format(INIT_CHARGE_AMOUNT/100))] + \
+    [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
+
+INIT_BALANCE_AMOUNT = 100
+BALANCE_AMOUNTS = [(INIT_BALANCE_AMOUNT, '${:.2f}'.format(INIT_BALANCE_AMOUNT/100))] + \
+    [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
 
 
 class AcctCostManager(models.Manager):
@@ -190,7 +189,8 @@ class AcctCost(TimeStampBaseModel):
     balance_min = models.PositiveIntegerField(_("Balance Minimum"),
         choices=BALANCE_AMOUNTS, default=BALANCE_AMOUNTS[0][0])
     recharge_amt = models.PositiveIntegerField(_("Recharge Amount"),
-        choices=CHARGE_AMOUNTS, default=CHARGE_AMOUNTS[0][0])
+        choices=CHARGE_AMOUNTS, default=CHARGE_AMOUNTS[0][0],
+        help_text="A higher Recharge Amount is recommended to decrease payment transactions.")
     auto_recharge = models.BooleanField("Auto Recharge On", blank=True, default=True)
 
     objects = AcctCostManager()

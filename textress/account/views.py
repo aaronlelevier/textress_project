@@ -136,7 +136,7 @@ class RegisterAcctCostUpdateView(RegisterAcctCostBaseView, UpdateView):
             acct_cost = None
 
         if not acct_cost:
-            raise Http404
+            return HttpResponseRedirect(reverse('register_step3'))
 
         return super(RegisterAcctCostUpdateView, self).dispatch(request, *args, **kwargs)
 
