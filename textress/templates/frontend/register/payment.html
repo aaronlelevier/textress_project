@@ -149,7 +149,7 @@
                                 <h4 class="text-center">1. Payment amount</h4>
                             </div>
                             <p><strong>{{ acct_cost.init_amt|stripe_money }}</strong> will be charged today.</p>
-                            <p>This is an initial deposit of funds.  You will be charged per SMS sent, and when purchasing a phone number for the account.  Phone numbers are <strong>{{ PHONE_NUMBER_CHARGE|stripe_money }}</strong>.</p>
+                            <p>This is an initial deposit of funds.  You will be charged per SMS sent, and when purchasing a phone number for the account.  Phone numbers are <strong>{{ PHONE_NUMBER_CHARGE|stripe_money }}</strong> each monthly.</p>
                             <hr>
                             <div class="well" style="padding:0;">
                                 <h4 class="text-center">2. Payment info</h4>
@@ -243,3 +243,14 @@
 
 
 {% block footer %}{% endblock %}
+
+
+{% block page_js %}
+{{ block.super }}
+    <script src="{% static 'clipone/admin/clip-one/assets/plugins/jquery.payment.min.js' %}"></script>
+    <script>
+    jQuery(function($) {
+        $('#card').payment('formatCardNumber');
+    });
+    </script>
+{% endblock page_js %}

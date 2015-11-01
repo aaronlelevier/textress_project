@@ -12,7 +12,7 @@ from account.tests.factory import (CREATE_ACCTCOST_DICT, create_acct_stmt,
 from main.models import Hotel
 from main.tests.factory import (CREATE_USER_DICT, CREATE_HOTEL_DICT, PASSWORD,
     create_hotel, create_hotel_user)
-# from payment.forms import StripeOneTimePaymentForm
+from payment.forms import StripeForm
 from payment.tests import factory
 from payment.models import Customer, Card, Charge
 from sms.models import PhoneNumber
@@ -24,19 +24,12 @@ class RegistrationTests(TestCase):
 
     def setUp(self):
         create._get_groups_and_perms()
-        self.username = CREATE_USER_DICT['username']
-        self.password = '1234'
 
-        # Step 1
-        response = self.client.post(reverse('main:register_step1'),
-            CREATE_USER_DICT)
-        self.client.login(username=self.username, password=self.password)
-        # Step 2
-        response = self.client.post(reverse('main:register_step2'),
-            CREATE_HOTEL_DICT)
-        # Step 3
-        response = self.client.post(reverse('register_step3'), # no namespace b/c in "account" app
-            CREATE_ACCTCOST_DICT)
+        self.hotel = create_hotel()
+        self.user = create_hotel_user(self.hotel, group='hotel_admin')
+        self.acct_cost = mommy.make(AcctCost, hotel=self.hotel)
+        # Login
+        self.client.login(username=self.user.username, password=PASSWORD)
 
     def test_register_step4_get(self):
         # Step 4
@@ -46,11 +39,12 @@ class RegistrationTests(TestCase):
     def test_register_step4_context(self):
         # Step 4
         response = self.client.get(reverse('payment:register_step4'))
-        assert isinstance(response.context['acct_cost'], AcctCost)
-        assert response.context['months']
-        assert response.context['years']
-        assert response.context['PHONE_NUMBER_CHARGE']
-
+        self.assertIsInstance(response.context['form'], StripeForm)
+        self.assertIsInstance(response.context['hotel'], Hotel)
+        self.assertIsInstance(response.context['acct_cost'], AcctCost)
+        self.assertTrue(response.context['months'])
+        self.assertTrue(response.context['years'])
+        self.assertTrue(response.context['PHONE_NUMBER_CHARGE'])
         self.assertContains(response, response.context['step'])
         self.assertContains(response, response.context['step_number'])
 
@@ -61,15 +55,18 @@ class RegistrationTests(TestCase):
         hotel = hotel.update_customer(customer)
         response = self.client.get(reverse('payment:register_success'))
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, response.context['step'])
+        self.assertContains(response, response.context['step_number'])
 
     def test_register_success_fail(self):
+        self.client.logout()
         # random Admin User who hasn't paid gets redirected
         # Users
         hotel_b = create_hotel(name='hotel_b')
         admin_b = create_hotel_user(hotel=hotel_b, username='admin_b', group='hotel_admin')
         hotel_b = hotel_b.set_admin_id(user=admin_b)
 
-        self.client.login(username=admin_b.username, password=self.password)
+        self.client.login(username=admin_b.username, password=PASSWORD)
         response = self.client.get(reverse('payment:register_success'))
         self.assertRedirects(response, reverse('payment:register_step4'))
 
