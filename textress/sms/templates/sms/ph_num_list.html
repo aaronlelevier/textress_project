@@ -37,18 +37,6 @@
                             </tr>
                         {% endfor %}
                     </table>
-                {% else %}
-                    <br>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h4>No phone numbers on account.</h4>
-                        </div>
-                        <div class="col-md-6">
-                            <a href="{% url 'sms:ph_num_add' %}">
-                                <button class="btn btn-success next-step">Add a Phone Number</button>
-                            </a>
-                        </div>
-                    </div>
                 {% endif %}
             </div>
         </div>

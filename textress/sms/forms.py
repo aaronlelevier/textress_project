@@ -2,9 +2,10 @@ from django import forms
 
 from account.models import AcctTrans
 from utils.exceptions import AutoRechargeOffExcp
+from utils.forms import Bootstrap3Form
 
 
-class PhoneNumberAddForm(forms.Form):
+class PhoneNumberAddForm(Bootstrap3Form):
 
     def __init__(self, hotel, *args, **kwargs):
         super(PhoneNumberAddForm, self).__init__(*args, **kwargs)

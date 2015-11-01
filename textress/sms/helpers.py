@@ -7,6 +7,7 @@ import xmltodict
 
 from django import forms
 from django.conf import settings
+from django.core.urlresolvers import reverse
 
 import twilio
 from twilio.rest import TwilioRestClient
@@ -116,3 +117,12 @@ def clean_to(obj, cleaned_data):
         to = "+1" + new_to
         cleaned_data['to'] = to
     return obj, cleaned_data
+
+
+def no_twilio_phone_number_alert():
+    return {
+        'type': 'warning',
+        'link': reverse('sms:ph_num_add'),
+        'strong_message': 'Alert!',
+        'message': 'Click here to purchase a phone number in order to send SMS.'
+    }

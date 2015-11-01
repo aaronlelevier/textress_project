@@ -4,15 +4,7 @@
 
 {% block head_js %}
     {{ block.super }}
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular.min.js"></script>
-    <script src="{% static 'vendor/angular-resource/angular-resource.min.js' %}"></script>
-    <script src="{% static 'vendor/angular-ui-router/release/angular-ui-router.min.js' %}"></script>
-    <script src="{% static 'angular/concierge/app.js' %}"></script>
-    <script src="{% static 'angular/concierge/services.js' %}"></script>
-    <script src="{% static 'angular/main/services.js' %}"></script>
-    <script src="{% static 'angular/concierge/controllers.js' %}"></script>
-    <script src="{% static 'angular/concierge/filters.js' %}"></script>
-    <script src="{% static 'angular/config.js' %}"></script>
+    {% include "include/angular/concierge.html" %}
 {% endblock head_js %}
 
 

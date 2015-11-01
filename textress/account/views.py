@@ -24,6 +24,7 @@ from account.models import Dates, AcctCost, AcctStmt, AcctTrans, Pricing
 from account.serializers import PricingSerializer
 from main.mixins import RegistrationContextMixin, AdminOnlyMixin, HotelUserMixin
 from payment.mixins import BillingSummaryContextMixin
+from sms.helpers import no_twilio_phone_number_alert
 from utils import email, login_messages
 from utils.mixins import FormUpdateMessageMixin
 
@@ -69,12 +70,7 @@ class AccountView(LoginRequiredMixin, HotelUserMixin, SetHeadlineMixin,
         Account will be fully functional."""
         context = super(AccountView, self).get_context_data(**kwargs)
         if not self.hotel.twilio_ph_sid:
-            alert = {
-                'type': 'warning',
-                'link': reverse('sms:ph_num_add'),
-                'strong_message': 'Alert!',
-                'message': 'You need to purchase a phone number before you are able to send SMS.'
-            }
+            alert = no_twilio_phone_number_alert()
             context['alerts'] = alert_messages(messages=[alert])
         return context
 

@@ -2,13 +2,15 @@ from django import forms
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 
-from account.models import AcctCost, AcctTrans, TransType, TRANS_TYPES
+from account.models import AcctCost, AcctTrans, TransType, TRANS_TYPES, INIT_CHARGE_AMOUNT
 from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
 from sms.forms import PhoneNumberAddForm
 from utils import create
 
 
 class PhoneNumberAddTests(TestCase):
+
+    fixtures = ['trans_type.json']
 
     def setUp(self):
         # Hotel
@@ -33,8 +35,17 @@ class PhoneNumberAddTests(TestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_form_fail(self):
+        # So the Hotel won't have enought to purchase a PH Num
+        hotel_account_balance = AcctTrans.objects.balance(self.hotel)
+
+        sms_used, _ = TransType.objects.get_or_create(name='sms_used')
+        acct_tran = AcctTrans.objects.create(
+            hotel=self.hotel,
+            trans_type=sms_used,
+            amount= -(hotel_account_balance)
+        )
+
         # setup
-        self.assertTrue(AcctTrans.objects.balance(self.hotel) < 300)
         self.acct_cost.auto_recharge = False
         self.acct_cost.save()
         # test

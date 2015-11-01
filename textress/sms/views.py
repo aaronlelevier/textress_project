@@ -11,8 +11,10 @@ from django.contrib.auth.decorators import login_required
 from braces.views import (SetHeadlineMixin, FormValidMessageMixin,
     FormInvalidMessageMixin)
 
+from account.mixins import alert_messages
 from main.mixins import AdminOnlyMixin
 from sms.forms import PhoneNumberAddForm
+from sms.helpers import no_twilio_phone_number_alert
 from sms.models import PhoneNumber
 from utils.exceptions import PhoneNumberNotDeletedExcp
 from utils.forms import EmptyForm
@@ -40,6 +42,9 @@ class PhoneNumberListView(PhoneNumberBaseView):
         context['phone_numbers'] = self.hotel.phonenumbers.order_by('-default')
         context['addit_info'] = render_to_string('cpanel/forms/form_ph_list.html',
             {'ph_num_monthly_cost': settings.PHONE_NUMBER_MONTHLY_COST})
+        if not self.hotel.twilio_ph_sid:
+            alert = no_twilio_phone_number_alert()
+            context['alerts'] = alert_messages(messages=[alert])
         return context
 
 
@@ -61,7 +66,7 @@ class PhoneNumberAddView(FormInvalidMessageMixin, PhoneNumberBaseView):
         context = super(PhoneNumberAddView, self).get_context_data(**kwargs)
         context['addit_info'] = render_to_string("cpanel/forms/form_ph_add.html",
             {'amount': settings.PHONE_NUMBER_CHARGE, 'hotel': self.hotel})
-        context['btn_text'] = "Confirm"
+        context['btn_text'] = "Purchase"
         return context
 
     def get_form_kwargs(self):
@@ -71,6 +76,7 @@ class PhoneNumberAddView(FormInvalidMessageMixin, PhoneNumberBaseView):
 
     def form_valid(self, form):
         "Purchase Twilio Ph # Obj here, and add to related models."
+        # Remove for Demos
         if not settings.DEBUG and 'test' not in sys.argv:
             phone_number = PhoneNumber.objects.purchase_number(hotel=self.hotel)
         return super(PhoneNumberAddView, self).form_valid(form)

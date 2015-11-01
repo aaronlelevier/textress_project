@@ -39,6 +39,17 @@ class PhoneNumberTests(TestCase):
         self.assertTrue(response.context['addit_info'])
         self.assertTrue(response.context['phone_numbers'])
 
+    def test_twilio_phone_alert(self):
+        response = self.client.get(reverse('sms:ph_num_list'))
+        self.assertTrue(response.context['alerts'])
+
+        self.hotel.twilio_ph_sid = self.ph_num.sid
+        self.hotel.save()
+
+        response = self.client.get(reverse('sms:ph_num_list'))
+        with self.assertRaises(KeyError):
+            response.context['alerts']
+
     ### ADD
 
     def test_add_response(self):

@@ -97,6 +97,10 @@ Enhancements
 
     Stronger requirements, allowed to be configureable by the Hotel
 
+:bootstrap django messages:
+
+    Use `my repo <https://github.com/aronysidoro/django-boostrap-messages>`_
+
 
 Bugs
 ----
