@@ -97,6 +97,7 @@ class HotelCreateForm(Bootstrap3ModelForm):
 
     error_messages = {
         'invalid_ph': _('Please enter a 10-digit phone number'),
+        'duplicate_address_phone': _('"Hotel phone number exists."')
     }
 
     address_phone = forms.RegexField(r'^(\(\d{3}\)) (\d{3})-(\d{4})$',
@@ -147,4 +148,4 @@ class HotelCreateForm(Bootstrap3ModelForm):
             qs = qs.exclude(id=self.hotel.id)
 
         if qs.exists():
-            raise forms.ValidationError("Hotel phone number exists.")
+            raise forms.ValidationError(self.error_messages['duplicate_address_phone'])

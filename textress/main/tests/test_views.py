@@ -6,11 +6,11 @@ from django.contrib.auth.models import User, Group
 
 import stripe
 
-from main.forms import UserCreateForm, UserUpdateForm
+from main.forms import UserCreateForm, UserUpdateForm, HotelCreateForm
 from main.models import Hotel, UserProfile, Subaccount
 from main.tests.factory import (CREATE_USER_DICT, CREATE_HOTEL_DICT, PASSWORD,
     create_hotel, create_user, create_hotel_user)
-from utils import create, dj_messages, login_messages
+from utils import create, dj_messages, login_messages, ph_formatter
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -90,19 +90,22 @@ class RegistrationTests(TransactionTestCase):
 
     # Step 2
 
-    def test_register_step2(self):
-        # Step 1
-        # assert logged in and can access "register step2 form"
-        response = self.client.post(reverse('main:register_step1'),
-            CREATE_USER_DICT)
+    def test_register_step2_get(self):
+        user, group = create_user(username=self.username, group="hotel_admin")
+        self.client.login(username=user.username, password=PASSWORD)
         response = self.client.get(reverse('main:register_step2'))
         self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.context['form'], HotelCreateForm)
+
+    def test_register_step2(self):
+        # Step 1
+        user, group = create_user(username=self.username, group="hotel_admin")
+        self.client.login(username=user.username, password=PASSWORD)
 
         # Step 2
         # Dave creates a Hotel
         response = self.client.post(reverse('main:register_step2'),
             CREATE_HOTEL_DICT, follow=True)
-        print response
         self.assertRedirects(response, reverse('register_step3'))
 
         # User set as Admin and Hotel properly linked
@@ -111,9 +114,28 @@ class RegistrationTests(TransactionTestCase):
         self.assertEqual(hotel.admin_id, updated_user.id)
         self.assertEqual(updated_user.profile.hotel, hotel)
 
+    def test_register_step2_update_info(self):
         # Dave tries to go back and Edit the Hotel and it takes him to the UpdateView
+        hotel = create_hotel()
+        user = create_hotel_user(hotel, group="hotel_admin")
+        self.client.login(username=user.username, password=PASSWORD)
+
         response = self.client.get(reverse('main:register_step2'), follow=True)
         self.assertRedirects(response, reverse('main:register_step2_update', kwargs={'pk': hotel.pk}))
+        self.assertIsInstance(response.context['form'], HotelCreateForm)
+
+    def test_register_step2_validate_phone_in_use(self):
+        other_hotel = create_hotel()
+        hotel = create_hotel()
+        user = create_hotel_user(hotel, group="hotel_admin")
+        self.client.login(username=user.username, password=PASSWORD)
+        # try to update to "other_hotel's" ``address_phone``
+        CREATE_HOTEL_DICT['address_phone'] = ph_formatter(other_hotel.address_phone)
+        response = self.client.post(reverse('main:register_step2_update', kwargs={'pk': hotel.pk}),
+            CREATE_HOTEL_DICT)
+        self.assertEqual(response.status_code, 200)
+        self.assertFormError(response, 'form', 'address_phone',
+            HotelCreateForm.error_messages['duplicate_address_phone'])
 
 
 class HotelViewTests(TestCase):

@@ -44,5 +44,5 @@ def ph_formatter(phone):
     `post`: 10 10-digit ph num spaced for ex: 702-510-1234
     '''
     phone = validate_phone(phone)
-    return phone[2:5]+'-'+phone[5:8]+'-'+phone[8:]
+    return "({}) {}-{}".format(phone[2:5], phone[5:8], phone[8:])
     

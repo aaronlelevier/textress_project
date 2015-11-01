@@ -1,3 +1,7 @@
+"""
+NOTE: (ayl 11-01-15) Leave this for now, but the main tests are in: ``main.tests.test_views``
+"""
+
 from django.conf import settings
 from django.test import TestCase
 from django.core.urlresolvers import reverse

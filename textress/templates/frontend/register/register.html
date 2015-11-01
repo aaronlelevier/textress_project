@@ -50,4 +50,14 @@
 <script type="text/javascript">
     var my_app = angular.module('django-forms', ['ng.django.forms']);
 </script>
+
+<script src="{% static 'clipone/admin/clip-one/assets/plugins/jquery.maskedinput/src/jquery.maskedinput.js' %}"></script>
+<script>
+    jQuery(document).ready(function() {
+        Main.init();
+    });
+    jQuery(function($){
+       $("#id_address_phone").mask("(999) 999-9999");
+    });
+</script>
 {% endblock page_js %}
