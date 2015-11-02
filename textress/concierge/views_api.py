@@ -147,4 +147,3 @@ class CurrentUserAPIView(APIView):
             raise PermissionDenied
 
         return Response(data)
-

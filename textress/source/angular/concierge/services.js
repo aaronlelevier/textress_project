@@ -41,4 +41,14 @@ angular.module('conciergeApp.services', ['ngResource'])
                 }
             });
         }
+    ])
+    .factory('CurrentUser', ['$resource',
+        function($resource) {
+            return $resource('/api/current-user/', null, {
+                'query': {
+                    method: 'GET'
+                }
+            });
+        }
     ]);
+    

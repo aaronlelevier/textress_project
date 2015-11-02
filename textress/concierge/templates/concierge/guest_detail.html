@@ -6,19 +6,13 @@
     {{ block.super }}
     {% include "include/angular/concierge.html" %}
     <script type="text/javascript">
-      // This allows you to access the current user id in your angular controllers.
-      angular
-          .module('conciergeApp.services')
-          .factory('GuestUser', function() {
-            return {
-              id: "{{ object.id|default:'' }}",
-            }
-          })
-          .factory('CurrentUser', function() {
-            return {
-                id: "{{ user.id|default:'' }}",
-            }
-          });
+        // This allows you to access the current user id in your angular controllers.
+        angular.module('conciergeApp.services')
+            .factory('GuestUser', function() {
+                return {
+                    id: "{{ object.id|default:'' }}",
+                }
+            })
     </script>
 {% endblock head_js %}
 

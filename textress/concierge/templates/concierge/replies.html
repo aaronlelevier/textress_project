@@ -9,7 +9,7 @@
       // This allows you to access the current user id in your angular controllers.
       angular
           .module('conciergeApp.services')
-          .factory('CurrentUser', function() {
+          .factory('CurrentUserTemplate', function() {
             return {
                 id: "{{ user.id|default:'' }}",
                 hotel_id: "{{ hotel.id|default:'' }}",
