@@ -1,6 +1,7 @@
 import json
 
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 
@@ -10,7 +11,8 @@ from rest_framework.test import APITestCase
 from concierge import serializers
 from concierge.models import Reply, REPLY_LETTERS, TriggerType, Trigger, Guest, Message
 from concierge.tests.factory import make_guests, make_messages
-from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
+from main.models import Hotel
+from main.tests.factory import create_hotel, create_user, create_hotel_user, PASSWORD
 from utils import create
 
 
@@ -497,3 +499,30 @@ class TriggerAPIViewTests(APITestCase):
             self.trigger.reply.letter,
             data['reply']['letter']
         )
+
+class CurrentUserAPIView(APITestCase):
+
+    def setUp(self):
+        self.hotel = create_hotel()
+        create._get_groups_and_perms()
+        self.admin = create_hotel_user(hotel=self.hotel, username='admin', group='hotel_admin')
+
+    def test_logged_in(self):
+        self.client.login(username=self.admin.username, password=PASSWORD)
+        response = self.client.get('/api/current-user/')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertEqual(data['id'], self.admin.id)
+        self.assertEqual(data['hotel_id'], self.admin.profile.hotel.id)
+
+    def test_logged_out(self):
+        response = self.client.get('/api/current-user/')
+        self.assertEqual(response.status_code, 403)
+
+    def test_no_hotel(self):
+        # Delete Hotel
+        user, group = create_user()
+        # Test 403 w/o a Hotel
+        self.client.login(username=user.username, password=PASSWORD)
+        response = self.client.get('/api/current-user/')
+        self.assertEqual(response.status_code, 403)

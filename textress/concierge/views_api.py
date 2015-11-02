@@ -4,8 +4,9 @@ from django.db.models import Q
 
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import list_route
-from rest_framework.exceptions import MethodNotAllowed
+from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from concierge.models import Message, Guest, Reply, TriggerType, Trigger
 from concierge.permissions import IsHotelObject, IsManagerOrAdmin
@@ -130,3 +131,20 @@ class TriggerAPIView(BaseModelViewSet):
         queryset = super(TriggerAPIView, self).get_queryset()
         queryset = queryset.filter(hotel=self.request.user.profile.hotel)
         return queryset
+
+
+class CurrentUserAPIView(APIView):
+    
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request, format='json'):
+        try:
+            data = {
+                'id': request.user.id,
+                'hotel_id': request.user.profile.hotel.id
+            }
+        except AttributeError:
+            raise PermissionDenied
+
+        return Response(data)
+

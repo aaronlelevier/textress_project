@@ -5,6 +5,7 @@ from django.contrib import admin
 from rest_framework import routers
 
 from concierge import views_api as concierge_views
+from concierge.views_api import CurrentUserAPIView
 from textress import views
 
 
@@ -33,6 +34,8 @@ urlpatterns = patterns('',
     # DRF
     url(r'^api/', include(router.urls)),
     url(r'api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    # My DRF (Non-ViewSet Endpoints)
+    url(r'^api/current-user/$', CurrentUserAPIView.as_view()),
 
     # Textress Views
     url(r'^$', views.IndexView.as_view(), name='index'),

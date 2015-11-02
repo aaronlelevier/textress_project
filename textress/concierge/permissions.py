@@ -1,7 +1,5 @@
-from django.core.exceptions import PermissionDenied
-
 from rest_framework import permissions
-
+from rest_framework.exceptions import PermissionDenied
 
 '''
 Instructions
