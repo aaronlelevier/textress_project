@@ -31,41 +31,22 @@ describe('GuestListCtrl', function() {
 });
 
 describe('GuestMessageCtrl', function() {
-   var mockUser = {
-            id: 1,
-            hotel_id: 1
-        },
-        mockGuest = {
+   var mockGuest = {
             id: 1,
         },
-        mockUserSvc, mockGuestSvc, scope, ctrl  ;
-
-    beforeEach(module('conciergeApp', function($provide) {
-        $provide.value('CurrentUser', mockUser);
-    }));
+        mockGuestSvc, scope, ctrl  ;
 
     beforeEach(module('conciergeApp', function($provide) {
         $provide.value('GuestUser', mockGuest);
     }));
 
-    beforeEach(inject(function(CurrentUser, GuestUser, $rootScope, $controller) {
-        mockUserSvc = CurrentUser;
+    beforeEach(inject(function(GuestUser, $rootScope, $controller) {
         mockGuestSvc = GuestUser;
         scope = $rootScope.$new();
         ctrl = $controller('GuestMessageCtrl', {
             $scope: scope
         });
     }));
-
-    // CurrentUser Tests
-
-    it('CurrentUser.id', function() {
-        expect(mockUserSvc.id).toEqual(mockUser.id);
-    });
-
-    it('CurrentUser.hotel_id', function() {
-        expect(mockUserSvc.hotel_id).toEqual(mockUser.hotel_id);
-    });
 
     // GuestUser Tests
 
@@ -76,22 +57,14 @@ describe('GuestMessageCtrl', function() {
     it('init values', function() {
         expect(scope.messages).toEqual({});
         expect(scope.modal_msg).toEqual(0);
-        expect(scope.user_id).toEqual(1);
     })
 });
 
 describe('ReplyCtrl', function() {
-   var mockData = {
-            id: 1,
-            hotel_id: 1
-        }, mockUtilSvc, scope, ctrl  ;
 
-    beforeEach(module('conciergeApp', function($provide) {
-        $provide.value('CurrentUser', mockData);
-    }));
+    beforeEach(module('conciergeApp'));
 
-    beforeEach(inject(function(CurrentUser, $rootScope, $controller) {
-        mockUtilSvc = CurrentUser;
+    beforeEach(inject(function($rootScope, $controller) {
         scope = $rootScope.$new();
         ctrl = $controller('ReplyCtrl', {
             $scope: scope
@@ -99,24 +72,16 @@ describe('ReplyCtrl', function() {
     }));
 
     it('init values', function() {
-        expect(scope.hotel_id).toEqual(1);
         expect(scope.reply).toEqual(null);
         expect(scope.letter).toEqual(null);
     })
 });
 
 describe('TriggerCtrl', function() {
-   var mockData = {
-            id: 1,
-            hotel_id: 1
-        }, mockUtilSvc, scope, ctrl  ;
 
-    beforeEach(module('conciergeApp', function($provide) {
-        $provide.value('CurrentUser', mockData);
-    }));
+    beforeEach(module('conciergeApp'));
 
-    beforeEach(inject(function(CurrentUser, $rootScope, $controller) {
-        mockUtilSvc = CurrentUser;
+    beforeEach(inject(function($rootScope, $controller) {
         scope = $rootScope.$new();
         ctrl = $controller('TriggerCtrl', {
             $scope: scope
@@ -124,7 +89,6 @@ describe('TriggerCtrl', function() {
     }));
 
     it('init values', function() {
-        expect(scope.hotel_id).toEqual(1);
         expect(scope.reply).toEqual(null);
         expect(scope.trigger).toEqual(null);
         expect(scope.trigger_type).toEqual(null);
