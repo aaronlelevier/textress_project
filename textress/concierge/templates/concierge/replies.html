@@ -5,17 +5,6 @@
 {% block head_js %}
     {{ block.super }}
     {% include "include/angular/concierge.html" %}
-    <script type="text/javascript">
-      // This allows you to access the current user id in your angular controllers.
-      angular
-          .module('conciergeApp.services')
-          .factory('CurrentUserTemplate', function() {
-            return {
-                id: "{{ user.id|default:'' }}",
-                hotel_id: "{{ hotel.id|default:'' }}",
-            }
-          });
-    </script>
 {% endblock head_js %}
 
 
@@ -183,7 +172,7 @@
                                     Reply Letter <span class="symbol required"></span>
                                 </label>
                                 <div class="col-sm-6">
-                                    <select id="form-field-select-1" class="form-control" ng-model="reply" ng-options="reply as reply.letter for reply in hotel_replies track by reply.id" required>
+                                    <select id="form-field-select-1" class="form-control" ng-model="reply" ng-options="reply as reply.letter for reply in hotel_replies | orderBy : 'letter' track by reply.id" required>
                                     </select>
                                 </div>
                             </div>

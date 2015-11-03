@@ -191,7 +191,11 @@ conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '
 conciergeControllers.controller('ReplyCtrl', ['$scope', 'Reply', 'ReplyHotelLetters', 'CurrentUser',
     function($scope, Reply, ReplyHotelLetters, CurrentUser) {
 
-        $scope.hotel_id = CurrentUser.hotel_id;
+        $scope.user = CurrentUser.query();
+        $scope.user.$promise.then(function (result) {
+            $scope.hotel_id = result.hotel_id;
+        });
+
         $scope.reply = null;
         $scope.letter = null;
 
@@ -218,7 +222,7 @@ conciergeControllers.controller('ReplyCtrl', ['$scope', 'Reply', 'ReplyHotelLett
                 if (response[0]) {
                     $scope.reply = response[0];
                 } else {
-                    $scope.reply.desc = $scope.reply.message = null;
+                    $scope.reply.desc = $scope.reply.message = "";
                 }
             });
         }
@@ -268,16 +272,13 @@ conciergeControllers.controller('ReplyCtrl', ['$scope', 'Reply', 'ReplyHotelLett
 ]);
 
 conciergeControllers.controller('TriggerCtrl',
-    ['$scope', 'Reply', 'Trigger', 'TriggerType', 'CurrentUser', 'CurrentUserTemplate',
-    function($scope, Reply, Trigger, TriggerType, CurrentUser, CurrentUserTemplate) {
+    ['$scope', 'Reply', 'Trigger', 'TriggerType', 'CurrentUser',
+    function($scope, Reply, Trigger, TriggerType, CurrentUser) {
 
-        // $scope.user = CurrentUser.query();
-        // $scope.user.$promise.then(function (result) {
-        //     $scope.user = result;
-        //     console.log($scope.user);
-        // });
-        $scope.hotel_id = CurrentUserTemplate.hotel_id;
-        // console.log($scope.hotel_id);
+        $scope.user = CurrentUser.query();
+        $scope.user.$promise.then(function (result) {
+            $scope.hotel_id = result.hotel_id;
+        });
 
         $scope.trigger_type = $scope.trigger = $scope.reply = null;
 
