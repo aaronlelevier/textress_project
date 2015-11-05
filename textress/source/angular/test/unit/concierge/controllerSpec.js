@@ -2,6 +2,7 @@
 describe('GuestListCtrl', function() {
 
     beforeEach(module('conciergeApp'));
+
     beforeEach(inject(function($rootScope, $controller) {
         scope = $rootScope.$new();
         ctrl = $controller('GuestListCtrl', {
@@ -31,33 +32,90 @@ describe('GuestListCtrl', function() {
 });
 
 describe('GuestMessageCtrl', function() {
-   var mockGuest = {
-            id: 1,
-        },
-        mockGuestSvc, scope, ctrl  ;
 
-    beforeEach(module('conciergeApp', function($provide) {
-        $provide.value('GuestUser', mockGuest);
-    }));
+    beforeEach(module('conciergeApp'));
 
-    beforeEach(inject(function(GuestUser, $rootScope, $controller) {
-        mockGuestSvc = GuestUser;
+    var scope,
+        ctrl,
+        q,
+        deferred,
+        mockGuestUser,
+        mockGuest,
+        mockCurrentUser,
+        mockGuestMessages;
+
+    beforeEach(function() {
+
+        mockGuest = {
+            id: 1
+        };
+        module(function($provide) {
+            $provide.value('GuestUser', mockGuest);
+        });
+
+      mockGuestMessages = {
+          get: function (id) {
+              return {'id': id};
+          }
+      };
+
+      module(function ($provide) {
+          $provide.value('GuestMessages', mockGuestMessages);
+      });
+
+    });
+
+    beforeEach(inject(function($rootScope, $controller, $q, GuestUser, CurrentUser, GuestMessages) {
+        q = $q;
         scope = $rootScope.$new();
         ctrl = $controller('GuestMessageCtrl', {
             $scope: scope
         });
+        mockGuestUser = GuestUser;
+        mockCurrentUser = CurrentUser;
+        mockGuestMessages = GuestMessages;
     }));
-
-    // GuestUser Tests
-
-    it('GuestUser.id', function() {
-        expect(mockGuestSvc.id).toEqual(mockGuest.id);
-    })
 
     it('init values', function() {
         expect(scope.messages).toEqual({});
         expect(scope.modal_msg).toEqual(0);
-    })
+    });
+
+    it('GuestUser.id', function() {
+        expect(mockGuestUser.id).toEqual(1);
+    });
+
+    it('CurrentUser - API', inject(function($httpBackend) {
+        spyOn(mockGuestMessages, 'get').andCallThrough(1);
+
+        // $httpBackend.expectGET("/api/guest-messages/1/");
+        // $httpBackend.whenGET("/api/guest-messages/1/").respond({id: 1});
+
+        $httpBackend.expectGET("/api/current-user/");
+        $httpBackend.whenGET("/api/current-user/").respond({ id: 2});
+        
+        var user = mockCurrentUser.query();
+
+        $httpBackend.flush();
+
+        expect(user.id).toEqual(2);
+    }));
+
+    it('GuestMessages - API', inject(function($httpBackend) {
+        $httpBackend.expectGET("/api/current-user/");
+        $httpBackend.whenGET("/api/current-user/").respond({ id: 2});
+
+        spyOn(mockCurrentUser, 'query').andCallThrough();
+
+        var guestMessages = spyOn(mockGuestMessages, 'get').andCallThrough(1);
+        
+        var guestMessages = mockGuestMessages.get(1);
+
+        $httpBackend.flush();
+
+        expect(guestMessages.id).toEqual(1);
+    }));
+
 });
 
 describe('ReplyCtrl', function() {

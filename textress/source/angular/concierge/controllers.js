@@ -99,12 +99,17 @@ conciergeControllers.controller('GuestMsgPreviewCtrl', ['$scope', '$filter', '$s
 
 // Use for single GuestDetail page w/ SMS messages. Send/Receive SMS
 // GuestUser = Guest
-conciergeControllers.controller('GuestMessageCtrl', ['$scope', '$stateParams', '$timeout', 'Message', 'GuestMessages', 'GuestUser', 'CurrentUser',
+conciergeControllers.controller('GuestMessageCtrl',
+    ['$scope', '$stateParams', '$timeout', 'Message', 'GuestMessages', 'GuestUser', 'CurrentUser',
     function($scope, $stateParams, $timeout, Message, GuestMessages, GuestUser, CurrentUser) {
+
+        $scope.user = CurrentUser.query();
+        $scope.user.$promise.then(function (result) {
+            $scope.user_id = result.id;
+        });
+
         $scope.messages = {};
         $scope.modal_msg = 0;
-        $scope.user = CurrentUser.query();
-        $scope.user_id = $scope.user.id;
 
         // Guest (single)
         $scope.getGuest = function(GuestMessages, $stateParams, $scope) {
