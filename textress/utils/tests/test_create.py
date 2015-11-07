@@ -11,7 +11,7 @@ from main.models import Hotel, UserProfile
 from main.tests.factory import create_hotel
 from concierge.models import Guest, Message
 from utils import create
-from utils.tests.runners import _set_eager
+from utils.tests.runners import celery_set_eager
 
 
 class CreateTests(TestCase):
@@ -38,7 +38,7 @@ class CreateTests(TestCase):
 class MgmtCmdTests(TestCase):
 
     def setUp(self):
-        _set_eager()
+        celery_set_eager()
         self.yesterday = timezone.now().date() - datetime.timedelta(days=1)
         self.hotel = create_hotel()
         self.guest_to_archive = mommy.make(

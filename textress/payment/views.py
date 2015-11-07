@@ -17,6 +17,7 @@ from payment.forms import StripeForm, CardListForm # StripeOneTimePaymentForm
 from payment.helpers import signup_register_step4
 from payment.mixins import (StripeMixin, StripeFormValidMixin, HotelCardOnlyMixin,
     BillingSummaryContextMixin, MonthYearContextMixin)
+from payment.tasks import create_initial_acct_trans_and_stmt
 from sms.models import PhoneNumber
 from utils.email import Email
 
@@ -73,7 +74,7 @@ class RegisterPmtView(AdminOnlyMixin, RegistrationContextMixin, MonthYearContext
             email.msg.send()
 
             # Creat initial: AcctStmt / AcctTrans
-            
+            create_initial_acct_trans_and_stmt.delay(self.hotel.id)
 
             return HttpResponseRedirect(self.success_url)
 

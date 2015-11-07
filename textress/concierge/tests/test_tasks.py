@@ -12,7 +12,7 @@ from concierge.models import Guest
 from concierge.tasks import archive_guests
 from main.tests.factory import create_hotel
 from utils import create
-from utils.tests.runners import _set_eager
+from utils.tests.runners import celery_set_eager
 
 
 class TaskTests(TestCase):
@@ -30,8 +30,7 @@ class TaskTests(TestCase):
         )
 
     def test_archive_guest(self):
-        _set_eager()
-        # with mock.patch('celeryconfig.CELERY_ALWAYS_EAGER', True, create=True):
+        celery_set_eager()
         self.assertEqual(Guest.objects.need_to_archive().count(), 1)
         ret = archive_guests.delay()
         self.assertEqual(Guest.objects.need_to_archive().count(), 0)
