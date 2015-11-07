@@ -28,12 +28,12 @@ def signup_register_step4(hotel, token, email, amount):
     except stripe.error.StripeError:
         raise
 
-    else:
-        # Account.model records for individual transactions
-        # recorded for ``accounting`` purposes
-        trans_type = TransType.objects.get(name='init_amt')
+    # else:
+    #     # Account.model records for individual transactions
+    #     # recorded for ``accounting`` purposes
+    #     trans_type = TransType.objects.get(name='init_amt')
         
-        acct_trans = AcctTrans.objects.create(hotel=hotel,
-            trans_type=trans_type, amount=amount)
+    #     acct_trans = AcctTrans.objects.create(hotel=hotel,
+    #         trans_type=trans_type, amount=amount)
 
-        return customer, card, charge
+    return customer, card, charge

@@ -26,7 +26,7 @@ from celery import shared_task
 
 from django.utils import timezone
 
-from account.models import AcctTrans, TransType, AcctStmt
+from account.models import AcctTrans, TransType
 from main.models import Hotel
 
 
@@ -50,13 +50,3 @@ def monthly_ph_charge():
             if today - last_charge.date > timedelta(days=30):
                 AcctTrans.objects.phone_number_charge(hotel,
                     phone_number=phone.phone_number)
-
-@shared_task
-def create_initial_acct_trans_and_stmt(hotel_id):
-    hotel = Hotel.objects.get(id=hotel_id)
-    init_amt_type = TransType.objects.get(name='init_amt')
-
-    acct_tran, _ = AcctTrans.objects.get_or_create(hotel=hotel,
-        trans_type=init_amt_type)
-
-    acct_stmt, _ = AcctStmt.objects.get_or_create(hotel=hotel)

@@ -1,9 +1,9 @@
 from django.test import TestCase
 
 from account.models import AcctTrans, AcctStmt, TransType, AcctCost
+from account.tasks import create_initial_acct_trans_and_stmt
 from main.models import Hotel
 from main.tests.factory import create_hotel
-from payment.tasks import create_initial_acct_trans_and_stmt
 from utils.tests.runners import celery_set_eager
 
 

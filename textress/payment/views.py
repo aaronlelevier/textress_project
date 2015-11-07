@@ -10,6 +10,7 @@ from braces.views import SetHeadlineMixin, FormValidMessageMixin
 
 from account.mixins import AcctCostContextMixin
 from account.models import AcctCost, AcctStmt, AcctTrans
+from account.tasks import create_initial_acct_trans_and_stmt
 from main.mixins import (RegistrationContextMixin, HotelContextMixin, HotelUserMixin,
     AdminOnlyMixin)
 from payment.models import Card
@@ -17,7 +18,6 @@ from payment.forms import StripeForm, CardListForm # StripeOneTimePaymentForm
 from payment.helpers import signup_register_step4
 from payment.mixins import (StripeMixin, StripeFormValidMixin, HotelCardOnlyMixin,
     BillingSummaryContextMixin, MonthYearContextMixin)
-from payment.tasks import create_initial_acct_trans_and_stmt
 from sms.models import PhoneNumber
 from utils.email import Email
 
@@ -149,9 +149,9 @@ class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
         context['phone_numbers'] = PhoneNumber.objects.filter(hotel=self.hotel)
         context['phone_numbers_cost'] = context['phone_numbers'].count() * settings.PHONE_NUMBER_MONTHLY_COST
         # AcctTrans
-        self.acct_trans = AcctTrans.objects.filter(hotel=self.hotel)
-        context['balance'] = self.acct_trans.balance()
-        context['acct_trans'] = self.acct_trans.filter(hotel=self.hotel,
+        # self.acct_trans = AcctTrans.objects.filter(hotel=self.hotel)
+        context['balance'] = AcctTrans.objects.balance(hotel=self.hotel)
+        context['acct_trans'] = AcctTrans.objects.filter(hotel=self.hotel,
             trans_type__name__in=['init_amt', 'recharge_amt']).order_by('-insert_date')[:4]
         return context
 
