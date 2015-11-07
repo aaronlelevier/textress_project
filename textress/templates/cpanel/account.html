@@ -77,29 +77,27 @@
                     <th>Date Time</th>
                     <th>Unread</th>
                 </tr>
-                <!-- <a class="activity" href="/guests/detail/[[ guest.id ]]/"> -->
-                    <tr class="activities" ng-repeat="guest in guests | orderBy:'messages[0].read':false">
-                        <td>
-                            <img ng-src="[[ guest.icon.icon ]]" class="profile_thumbnail">
-                        </td>
-                        <td>
-                            <a ng-href="/guests/detail/[[ guest.id ]]/">
-                                <strong>[[ guest.name ]]</strong>
-                            </a>
-                        </td>
-                        <td>
-                            <q ng-if="guest.messages[0]">[[ guest.messages | orderBy:'-created' | lastMsg:'body' ]]</q>
-                        </td>
-                        <td>
-                            <span class="message-time" ng-if="guest.messages[0]">
-                                [[ guest.messages | orderBy:'-created' | lastMsg:'created' | date :'medium' ]]
-                            </span>
-                        </td>
-                        <td class="text-center">
-                            <span class="badge [[ (guest.messages | numRead) ? 'badge-new-msg' : 'badge-old-msg' ]]">[[ guest.messages | numRead ]]</span>
-                        </td>
-                    </tr>
-                <!-- </a> -->
+                <tr class="activities" ng-repeat="guest in guests | orderBy:'messages[0].read':false">
+                    <td>
+                        <img ng-src="[[ guest.icon.icon ]]" class="profile_thumbnail">
+                    </td>
+                    <td>
+                        <a ng-href="/guests/detail/[[ guest.id ]]/">
+                            <strong>[[ guest.name ]]</strong>
+                        </a>
+                    </td>
+                    <td>
+                        <q ng-if="guest.messages[0]">[[ guest.messages | orderBy:'-created' | lastMsg:'body' ]]</q>
+                    </td>
+                    <td>
+                        <span class="message-time" ng-if="guest.messages[0]">
+                            [[ guest.messages | orderBy:'-created' | lastMsg:'created' | date :'medium' ]]
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge [[ (guest.messages | numRead) ? 'badge-new-msg' : 'badge-old-msg' ]]">[[ guest.messages | numRead ]]</span>
+                    </td>
+                </tr>
             </table>
 
             </div>

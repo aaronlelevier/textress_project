@@ -2,12 +2,14 @@ var conciergeControllers = angular.module('conciergeApp.controllers', ['concierg
 
 conciergeControllers.controller('GuestListCtrl', ['$scope', '$timeout', 'Guest', 'Message',
     function($scope, $timeout, Guest, Message) {
-        // live
-        $scope.guests = Guest.query();
 
         // Sorting for List
-        $scope.predicate = 'name';
-        $scope.reverse = true;
+        $scope.predicate = 'messages[0].read';
+        $scope.reverse = false;
+
+        Guest.query().$promise.then(function (response) {
+            $scope.guests = response;
+        });
 
         $scope.order = function(predicate) {
             $scope.reverse = ($scope.predicate === predicate) ? !$scope.reverse : false;
@@ -55,13 +57,16 @@ conciergeControllers.controller('GuestListCtrl', ['$scope', '$timeout', 'Guest',
 conciergeControllers.controller('GuestMsgPreviewCtrl', ['$scope', '$filter', '$stateParams', '$timeout', 'Message', 'GuestMessages',
     function($scope, $filter, $stateParams, $timeout, Message, GuestMessages) {
 
-        $scope.guests = GuestMessages.query();
+        // $scope.guests = GuestMessages.query();
+        GuestMessages.query().$promise.then(function (response) {
+            $scope.guests = response;
+        });
 
         // Append Last Message object to each Guest in Array
         // LastMsg has: text, time, read/unread status
 
         // GuestListView: Push incoming messsage onto Guest Messages array for all Guests
-        var initializing = true;
+        initializing = true;
 
         $scope.getMessage = function(message) {
 
@@ -287,18 +292,25 @@ conciergeControllers.controller('TriggerCtrl',
     ['$scope', 'Reply', 'Trigger', 'TriggerType', 'CurrentUser',
     function($scope, Reply, Trigger, TriggerType, CurrentUser) {
 
-        $scope.user = CurrentUser.query();
-        $scope.user.$promise.then(function (result) {
-            $scope.hotel_id = result.hotel_id;
-        });
-
         $scope.trigger_type = $scope.trigger = $scope.reply = null;
 
-        $scope.hotel_replies = Reply.query({
-            hotel: $scope.hotel_id
+        CurrentUser.query().$promise.then(function (response) {
+            $scope.hotel_id = response.hotel_id;
         });
-        $scope.trigger_types = TriggerType.query();
-        $scope.triggers = Trigger.query(); // nested w/ 'type' n 'reply'
+
+        Reply.query({
+            hotel: $scope.hotel_id
+        }).$promise.then(function (response) {
+            $scope.hotel_replies = response;
+        });
+
+        Trigger.query().$promise.then(function (response) {
+            $scope.triggers = response;
+        });
+
+        TriggerType.query().$promise.then(function (response) {
+            $scope.trigger_type = response;
+        });
 
         $scope.$watch(function() {
                 return $scope.trigger;
