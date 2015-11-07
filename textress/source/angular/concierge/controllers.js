@@ -112,9 +112,9 @@ conciergeControllers.controller('GuestMessageCtrl',
         $scope.modal_msg = 0;
 
         // Guest (single)
-        $scope.getGuest = function(GuestMessages, $stateParams, $scope) {
+        this.getGuest = function() {
             GuestMessages.get({
-                id: GuestUser.id //$stateParams.guestId
+                id: GuestUser.id
             }, function(response) {
                 $scope.guest = response;
                 $scope.to = response.phone_number;
@@ -123,7 +123,7 @@ conciergeControllers.controller('GuestMessageCtrl',
         }
 
         // populate initial context without a delay
-        $scope.getGuest(GuestMessages, $stateParams, $scope);
+        this.getGuest();
 
         $scope.submitMessage = function(ws4redis, body) {
             $scope.body = null;
