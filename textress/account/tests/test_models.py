@@ -268,6 +268,31 @@ class AcctStmtTests(TestCase):
         self.assertFalse(created)
 
 
+class AcctStmtSignupTests(TestCase):
+
+    fixtures = ['pricing.json', 'trans_type.json']
+
+    def setUp(self):
+        self.hotel = create_hotel()
+        self.init_amt = TransType.objects.get(name='init_amt')
+        self.acct_cost, _ = AcctCost.objects.get_or_create(hotel=self.hotel)
+
+    def test_initial_acct_stmt(self):
+        acct_tran, _ = AcctTrans.objects.get_or_create(hotel=self.hotel,
+            trans_type=self.init_amt)
+
+        acct_stmt, _ = AcctStmt.objects.get_or_create(hotel=self.hotel)
+
+        self.assertEqual(acct_stmt.hotel, self.hotel)
+        self.assertEqual(acct_stmt.monthly_costs, settings.DEFAULT_MONTHLY_FEE)
+        self.assertEqual(acct_stmt.total_sms, 0)
+        self.assertEqual(acct_stmt.balance, self.acct_cost.init_amt) # Most important test!!
+        self.assertEqual(
+            acct_stmt.balance,
+            AcctTrans.objects.balance(hotel=self.hotel)
+        )
+
+
 class AcctStmtNewHotelTests(TestCase):
     # Test Hotels that have only signed up, and don't have 
     # any SMS sent yet
