@@ -497,16 +497,30 @@ class AcctTransManager(Dates, models.Manager):
         date = date or self._today
 
         if trans_type.name == 'sms_used':
+            # pre-check 'sms count', because if no 'sms_used' don't need to
+            # create an AcctTran
             sms_used = hotel.messages.filter(insert_date=date).count()
-            acct_tran = self.sms_used(hotel, date)
-            # check if balance < 0, if so charge C.Card, and if fail, suspend Twilio Acct.
-            # don't worry about raising an error here.  Twilio Acct will be suspended
-            # and an email will be sent to myself and the Hotel of the C.Card Charge fail.
-            recharge = self.check_balance(hotel)
+            if sms_used:
+                acct_tran = self.sms_used(hotel, date)
+                # check if balance < 0, if so charge C.Card, and if fail, suspend Twilio Acct.
+                # don't worry about raising an error here.  Twilio Acct will be suspended
+                # and an email will be sent to myself and the Hotel of the C.Card Charge fail.
+                recharge = self.check_balance(hotel)
+                return acct_tran, True
+
+        elif trans_type.name == 'init_amt':
+            amount = hotel.acct_cost.init_amt
+            acct_tran = self.create(
+                hotel=hotel,
+                trans_type=trans_type,
+                insert_date=date,
+                amount=amount,
+                balance=amount
+            )
             return acct_tran, True
 
-        elif trans_type.name in ('init_amt', 'recharge_amt'):
-            amount = getattr(hotel.acct_cost, trans_type.name)
+        elif trans_type.name == 'recharge_amt':
+            amount = hotel.acct_cost.recharge_amt
             acct_tran = self.create(
                 hotel=hotel,
                 trans_type=trans_type,
@@ -539,7 +553,7 @@ class AcctTrans(TimeStampBaseModel):
     sms_used = models.PositiveIntegerField(blank=True, null=True,
         help_text="NULL unless trans_type=sms_used")
     insert_date = models.DateField(_("Insert Date"), blank=True, null=True) # remove in Prod (use ``created``)
-    balance = models.PositiveIntegerField(_("Balance"), blank=True, null=True,
+    balance = models.PositiveIntegerField(_("Balance"), blank=True, default=0,
         help_text="Current blance, just like in a Bank Account.")
 
     objects = AcctTransManager()

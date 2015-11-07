@@ -28,7 +28,8 @@ class AcctStmtAdmin(admin.ModelAdmin):
 
 @admin.register(AcctTrans)
 class AcctTransAdmin(admin.ModelAdmin):
-    list_display = ('hotel', 'created', 'insert_date', 'trans_type',)
+    list_display = ('hotel', 'created', 'insert_date', 'trans_type', 'amount',
+        'sms_used', 'balance',)
     readonly_fields = ('created', 'modified',)
 
 

@@ -61,8 +61,9 @@ def create_acct_tran(hotel, trans_type, insert_date, amount=None):
 
     'sms_used' are b/t -100 ... -10  (for testing purposes)
     '''
-    global AcctTrans
-    AcctTrans.save = models.Model.save
+    # NOTE: took out this to trigger the normal ``AcctTrans.save`` method that calculates "balance"
+    # global AcctTrans
+    # AcctTrans.save = models.Model.save
 
     # transaction
     if trans_type.name in ('init_amt', 'recharge_amt'):

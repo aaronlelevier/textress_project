@@ -3,7 +3,7 @@ import datetime
 import pytz
 
 from django.db.models import Max, Sum
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
@@ -289,7 +289,7 @@ class AcctStmtNewHotelTests(TestCase):
         self.assertEqual(AcctTrans.objects.sms_used_mtd(self.hotel, self.today), 0)
 
 
-class AcctTransTests(TestCase):
+class AcctTransTests(TransactionTestCase):
 
     fixtures = ['pricing.json', 'trans_type.json']
 
@@ -363,7 +363,7 @@ class AcctTransTests(TestCase):
 
     def test_balance(self):
         self.assertEqual(
-            AcctTrans.objects.filter(hotel=self.hotel).balance(),
+            AcctTrans.objects.balance(self.hotel),
             AcctTrans.objects.filter(hotel=self.hotel).aggregate(Sum('amount'))['amount__sum']
         )
 
@@ -371,12 +371,6 @@ class AcctTransTests(TestCase):
         self.assertEqual(
             AcctTrans.objects.balance(self.hotel),
             AcctTrans.objects.filter(hotel=self.hotel).aggregate(Sum('amount'))['amount__sum']
-        )
-
-    def test_balance_unfiltered(self):
-        self.assertEqual(
-            AcctTrans.objects.balance(),
-            AcctTrans.objects.balance(self.hotel) + AcctTrans.objects.balance(self.hotel_2)
         )
 
     ### MANAGER TESTS
@@ -392,6 +386,8 @@ class AcctTransTests(TestCase):
         )
         self.assertEqual(acct_tran.trans_type, self.init_amt)
         self.assertEqual(acct_tran.amount, self.acct_cost.init_amt)
+        self.assertEqual(acct_tran.balance, self.acct_cost.init_amt)
+        self.assertIsNone(acct_tran.sms_used)
 
     # 2. recharge_amt
 
@@ -402,6 +398,25 @@ class AcctTransTests(TestCase):
         )
         self.assertEqual(acct_tran.trans_type, self.recharge_amt)
         self.assertEqual(acct_tran.amount, self.acct_cost.recharge_amt)
+
+    def test_rechare_amt_after_sms_used_that_balance_gets_calculated(self):
+        # signup
+        init_acct_tran, created = AcctTrans.objects.get_or_create(hotel=self.hotel,
+            trans_type=self.init_amt)
+        # use sms
+        amount = -200
+        balance = AcctTrans.objects.balance(self.hotel)
+        usage_acct_tran = AcctTrans.objects.create(hotel=self.hotel, trans_type=self.sms_used,
+            amount=amount, sms_used=amount, balance=(balance+amount))
+
+        recharge_acct_tran, created = AcctTrans.objects.get_or_create(hotel=self.hotel,
+            trans_type=self.recharge_amt)
+        self.assertEqual(recharge_acct_tran.trans_type, self.recharge_amt)
+        self.assertEqual(recharge_acct_tran.amount, self.acct_cost.recharge_amt)
+        self.assertEqual(
+            recharge_acct_tran.balance,
+            (usage_acct_tran.balance + recharge_acct_tran.amount)
+        )
 
     # 3. sms_used
 

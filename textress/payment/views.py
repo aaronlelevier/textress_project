@@ -71,6 +71,10 @@ class RegisterPmtView(AdminOnlyMixin, RegistrationContextMixin, MonthYearContext
                 html_content='email/payment_email.html'
             )
             email.msg.send()
+
+            # Creat initial: AcctStmt / AcctTrans
+            
+
             return HttpResponseRedirect(self.success_url)
 
 
