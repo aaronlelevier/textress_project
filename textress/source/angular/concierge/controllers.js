@@ -196,21 +196,28 @@ conciergeControllers.controller('GuestMessageCtrl',
 conciergeControllers.controller('ReplyCtrl', ['$scope', 'Reply', 'ReplyHotelLetters', 'CurrentUser',
     function($scope, Reply, ReplyHotelLetters, CurrentUser) {
 
-        $scope.user = CurrentUser.query();
-        $scope.user.$promise.then(function (result) {
-            $scope.hotel_id = result.hotel_id;
-        });
-
         $scope.reply = null;
         $scope.letter = null;
 
-        $scope.system_replies = Reply.query({
+        CurrentUser.query().$promise.then(function (result) {
+            $scope.hotel_id = result.hotel_id;
+        });
+
+        Reply.query({
             hotel__isnull: true
-        });
-        $scope.hotel_replies = Reply.query({
+        }).$promise.then(function (response) {
+            $scope.system_replies = response;
+        })
+
+        Reply.query({
             hotel: $scope.hotel_id
-        });
-        $scope.hotel_letters = ReplyHotelLetters.query();
+        }).$promise.then(function (response) {
+            $scope.hotel_replies = response;
+        })
+
+        ReplyHotelLetters.query().$promise.then(function (response) {
+            $scope.hotel_letters = response;
+        })
 
         $scope.$watch(function() {
                 return $scope.letter;

@@ -31,116 +31,6 @@ describe('GuestListCtrl', function() {
 
 });
 
-describe('GuestMessageCtrl', function() {
-    var scope,
-        ctrl,
-        q,
-        deferred,
-        mockGuestUser,
-        mockGuest,
-        mockCurrentUser,
-        mockCurrentUserResponse,
-        mockGuestMessages;
-
-    beforeEach(module('conciergeApp'));
-
-    beforeEach(function() {
-
-        mockGuest = {
-            id: 1
-        };
-        module(function($provide) {
-            $provide.value('GuestUser', mockGuest);
-        });
-
-        mockCurrentUser = {
-            query: function() {
-                deferred = q.defer();
-                return {$promise: deferred.promise};
-            }
-        };
-        
-        spyOn(mockCurrentUser, 'query').andCallThrough();
-
-        module(function($provide) {
-            $provide.value('CurrentUser', mockCurrentUser);
-        });
-
-        mockGuestMessages = {
-            get: function(id) {
-                return {
-                    'id': id
-                };
-            }
-        };
-        module(function($provide) {
-            $provide.value('GuestMessages', mockGuestMessages);
-        });
-
-    });
-
-    beforeEach(inject(function($rootScope, $controller, $q, GuestUser, CurrentUser, GuestMessages) {
-        q = $q;
-        scope = $rootScope.$new();
-        ctrl = $controller('GuestMessageCtrl', {
-            $scope: scope
-        });
-        mockGuestUser = GuestUser;
-        mockCurrentUser = CurrentUser;
-        mockGuestMessages = GuestMessages;
-    }));
-
-    it('init values', function() {
-        expect(scope.messages).toEqual({});
-        expect(scope.modal_msg).toEqual(0);
-    });
-
-    it('GuestUser.id', function() {
-        expect(mockGuestUser.id).toEqual(1);
-    });
-
-    it('CurrentUser - API', inject(function($httpBackend) {
-        // $httpBackend.expectGET("/api/current-user/");
-        // $httpBackend.whenGET("/api/current-user/").respond({
-        //     id: 2
-        // });
-        expect(mockCurrentUser.query).toHaveBeenCalled();
-
-        // var user = mockCurrentUser.query();
-
-        // deferred.resolve({id: 1});
-        // scope.$apply();
-
-        // console.log(user);
-        // console.log(user.$promise);
-        // // $httpBackend.flush();
-
-        // scope.$apply();
-
-        // expect(user.$promise.id).toEqual(2);
-    }));
-
-    it('$scope.user results', function() {
-        mockCurrentUserResponse = {id: 1};
-        deferred.resolve(mockCurrentUserResponse);
-        scope.$apply();
-
-        expect(scope.user.$promise.$$state.value.id).toEqual(mockCurrentUserResponse.id);
-    });
-
-    it('GuestMessages - API', inject(function($httpBackend) {
-        // $httpBackend.expectGET("/api/current-user/");
-        // $httpBackend.whenGET("/api/current-user/").respond(null);
-
-        var guestMessages = mockGuestMessages.get(1);
-        // $httpBackend.flush();
-
-        expect(guestMessages.id).toEqual(1);
-    }));
-
-});
-
-
 describe('GuestMessageCtrl:', function() {
     var $q,
         $rootScope,
@@ -186,10 +76,6 @@ describe('GuestMessageCtrl:', function() {
         };
 
     beforeEach(module('conciergeApp'));
-
-    // module(function($provide) {
-    //     $provide.value('GuestUser', mockGuestUser);
-    // });
 
     beforeEach(inject(function(_$q_, _$rootScope_) {
         $q = _$q_;
@@ -293,20 +179,141 @@ describe('GuestMessageCtrl:', function() {
 
 
 describe('ReplyCtrl', function() {
+    var $q,
+        $rootScope,
+        $scope,
+        ctrl,
+        mockCurrentUser,
+        mockCurrentUserResponse = {'id': 1, 'hotel': 1},
+        mockReply,
+        mockReplyResponse = [{
+            "id": 2,
+            "hotel": null,
+            "letter": "Y",
+            "desc": "Messaging Reactivated",
+            "message": "None"
+        }, {
+            "id": 30,
+            "hotel": 1,
+            "letter": "T",
+            "desc": "Thanks",
+            "message": "Thank you for staying."
+        }],
+        mockReplyHotelLetters,
+        mockReplyHotelLettersResponse = [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Z"
+        ];
 
     beforeEach(module('conciergeApp'));
 
-    beforeEach(inject(function($rootScope, $controller) {
-        scope = $rootScope.$new();
-        ctrl = $controller('ReplyCtrl', {
-            $scope: scope
-        });
+    beforeEach(inject(function(_$q_, _$rootScope_) {
+        $q = _$q_;
+        $rootScope = _$rootScope_;
     }));
 
-    it('init values', function() {
+    beforeEach(inject(function($controller) {
+        $scope = $rootScope.$new();
+
+        mockCurrentUser = {
+            query: function() {
+                currentUserDeferred = $q.defer();
+                return {
+                    $promise: currentUserDeferred.promise
+                };
+            }
+        }
+        spyOn(mockCurrentUser, 'query').andCallThrough();
+
+        mockReply = {
+            query: function() {
+                replyDeferred = $q.defer();
+                return {
+                    $promise: replyDeferred.promise
+                };
+            }
+        }
+        spyOn(mockReply, 'query').andCallThrough();
+
+        mockReplyHotelLetters = {
+            query: function() {
+                replyHotelLettersDeferred = $q.defer();
+                return {
+                    $promise: replyHotelLettersDeferred.promise
+                };
+            }
+        }
+        spyOn(mockReplyHotelLetters, 'query').andCallThrough();
+
+        ctrl = $controller('ReplyCtrl', {
+            '$scope': $scope,
+            'CurrentUser': mockCurrentUser,
+            'Reply': mockReply,
+            'ReplyHotelLetters': mockReplyHotelLetters
+        });
+
+    }));
+
+    it('init static values', function() {
         expect(scope.reply).toEqual(null);
         expect(scope.letter).toEqual(null);
-    })
+    });
+
+    describe('CurrentUser:', function() {
+
+        beforeEach(function() {
+            currentUserDeferred.resolve(mockCurrentUserResponse);
+            $rootScope.$apply();
+        });
+
+        it('should query the CurrentUser', function() {
+            expect(mockCurrentUser.query).toHaveBeenCalled();
+        });
+
+        it('set $scope.user_id based on CurrentUser.query', function() {
+            expect($scope.hotel_id).toEqual(mockCurrentUserResponse.hotel_id);
+        });
+    });
+
+    describe('HotelReplyLetters', function() {
+
+        beforeEach(function() {
+            replyHotelLettersDeferred.resolve(mockReplyHotelLettersResponse);
+            $rootScope.$apply();
+        });
+
+        it('query should be called', function() {
+            expect(mockReplyHotelLetters.query).toHaveBeenCalled();
+        });
+
+        it('system_replies', function() {
+            expect($scope.hotel_letters).toEqual(mockReplyHotelLettersResponse);
+        });
+
+    });
+
 });
 
 describe('TriggerCtrl', function() {
