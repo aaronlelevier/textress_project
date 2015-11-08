@@ -1,6 +1,6 @@
 dj_messages = {
     # Admin
-    'alter_admin_fail': "Cannot alter Hotel Admin record.",
+    'alter_admin_fail': "Cannot delete Hotel Admin record.",
     # Contact
     'coming_soon': "Thank you for your interest. We'll be in touch when we get closer to launch!",
     'contact_thanks': "Thank you for contacting us.  We look forward to speaking with you.",

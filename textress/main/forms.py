@@ -4,7 +4,8 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 
 from djangular.forms import NgFormValidationMixin
 
-from main.models import Hotel
+from main.helpers import user_in_group
+from main.models import Hotel, UserProfile
 from utils import ph_formatter, validate_phone
 from utils.forms import Bootstrap3ModelForm
 
@@ -88,6 +89,30 @@ class UserUpdateForm(Bootstrap3ModelForm):
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email']
+
+
+class DeleteUserForm(forms.ModelForm):
+    """
+    Users are hidden, not deleted.
+
+    The purpose of this form is to not allow Admin Users to essentially delete (hide)
+    themselves, and instead raise a form error.
+    """
+    class Meta:
+        model = UserProfile
+        fields = []
+
+    def __init__(self, user, *args, **kwargs):
+        super(DeleteUserForm, self).__init__(*args, **kwargs)
+        self.user = user
+
+    def clean(self):
+        cleaned_data = super(DeleteUserForm, self).clean()
+
+        if user_in_group(self.user, 'hotel_admin'):
+            raise forms.ValidationError("Can't delete an Admin User.")
+
+        return cleaned_data
 
 
 class HotelCreateForm(Bootstrap3ModelForm):

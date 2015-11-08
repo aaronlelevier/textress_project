@@ -431,6 +431,7 @@ class ManageUsersTests(TestCase):
         self.client.login(username=self.mgr.username, password=self.password)
         response = self.client.get(reverse('main:manage_user_delete', kwargs={'pk': self.user.pk}))
         self.assertEqual(response.status_code, 200)
+        self.assertIn(self.user.username, response.context['addit_info'])
         # delete => only hides
         self.assertFalse(self.user.profile.hidden)
         response = self.client.post(reverse('main:manage_user_delete', kwargs={'pk': self.user.pk}), follow=True)

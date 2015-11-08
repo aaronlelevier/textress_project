@@ -10,12 +10,12 @@ from django.http import HttpResponseRedirect
 from rest_framework.response import Response
 from rest_framework import permissions, generics
 from braces.views import (LoginRequiredMixin, GroupRequiredMixin,
-     SetHeadlineMixin, FormValidMessageMixin)
+     SetHeadlineMixin, FormValidMessageMixin, FormInvalidMessageMixin)
 
 from concierge.permissions import (IsHotelObject, IsManagerOrAdmin, IsHotelUser,
     IsHotelOfUser)
 from main.models import Hotel, UserProfile, Subaccount, viewable_user_fields_dict
-from main.forms import UserCreateForm, HotelCreateForm, UserUpdateForm
+from main.forms import UserCreateForm, HotelCreateForm, UserUpdateForm, DeleteUserForm
 from main.mixins import (UserOnlyMixin, HotelUsersOnlyMixin,
     MyHotelOnlyMixin, RegistrationContextMixin, HotelUserMixin, HotelContextMixin,
     UserListContextMixin)
@@ -299,20 +299,33 @@ class MgrUserUpdateView(SetHeadlineMixin, HotelUsersOnlyMixin, UserListContextMi
 
 
 class MgrUserDeleteView(SetHeadlineMixin, DeleteButtonMixin, HotelUsersOnlyMixin,
-    GroupRequiredMixin, UserListContextMixin, UpdateView):
+    GroupRequiredMixin, UserListContextMixin, FormInvalidMessageMixin, UpdateView):
     '''
     A Mgr+ can delete any User for their Hotel except the AdminUser.
     '''
     headline = "User Delete View"
     groups = ['hotel_admin', 'hotel_manager']
     model = UserProfile
-    fields = [] # EmptyForm - no user input required. 
+    form_class = DeleteUserForm
     template_name = 'cpanel/form.html'
     success_url = reverse_lazy('main:manage_user_list')
+    form_invalid_message = dj_messages['alter_admin_fail']
+
+    def get_form_kwargs(self):
+        kwargs = super(MgrUserDeleteView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
     def form_valid(self, form):
         self.object.hide()
         return super(MgrUserDeleteView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super(MgrUserDeleteView, self).get_context_data(**kwargs)
+        context['addit_info'] = '''
+            <h4>Are you sure that you want to delete <strong>{}</strong>?</h4>
+            '''.format(self.object.user.username)
+        return context
 
 
 ##################
