@@ -309,11 +309,12 @@ class MgrUserDeleteView(SetHeadlineMixin, DeleteButtonMixin, HotelUsersOnlyMixin
     form_class = DeleteUserForm
     template_name = 'cpanel/form.html'
     success_url = reverse_lazy('main:manage_user_list')
-    form_invalid_message = dj_messages['alter_admin_fail']
+    form_invalid_message = dj_messages['delete_admin_fail']
 
     def get_form_kwargs(self):
         kwargs = super(MgrUserDeleteView, self).get_form_kwargs()
-        kwargs['user'] = self.request.user
+        kwargs['user'] = self.object.user
+        print kwargs['user']
         return kwargs
 
     def form_valid(self, form):

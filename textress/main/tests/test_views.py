@@ -440,11 +440,16 @@ class ManageUsersTests(TestCase):
         self.assertTrue(self.user.profile.hidden)
 
     def test_delete_admin(self):
-        # UserProfile.hide() for an "Admin" will raise a ValidationError b/c can't hide Admin.
         self.client.login(username=self.mgr.username, password=self.password)
-        with self.assertRaises(ValidationError):
-            response = self.client.post(reverse('main:manage_user_delete',
-                kwargs={'pk': self.admin.pk}), follow=True)
+
+        response = self.client.post(reverse('main:manage_user_delete',
+                kwargs={'pk': self.admin.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        # error message
+        m = list(response.context['messages'])
+        self.assertEqual(len(m), 1)
+        self.assertEqual(str(m[0]), dj_messages['delete_admin_fail'])
 
     def test_delete_breadcrumbs(self):
         self.client.login(username=self.mgr.username, password=self.password)

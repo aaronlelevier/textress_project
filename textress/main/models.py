@@ -299,7 +299,7 @@ class UserProfile(BaseModel):
         A Mgr+ can delete any User for their Hotel except the Admin.
         '''
         if self.is_admin:
-            raise ValidationError(dj_messages['alter_admin_fail'])
+            raise ValidationError(dj_messages['delete_admin_fail'])
         return super(UserProfile, self).hide()
 
 

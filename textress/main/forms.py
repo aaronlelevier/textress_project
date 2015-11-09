@@ -6,7 +6,7 @@ from djangular.forms import NgFormValidationMixin
 
 from main.helpers import user_in_group
 from main.models import Hotel, UserProfile
-from utils import ph_formatter, validate_phone
+from utils import ph_formatter, validate_phone, dj_messages
 from utils.forms import Bootstrap3ModelForm
 
 
@@ -110,7 +110,7 @@ class DeleteUserForm(forms.ModelForm):
         cleaned_data = super(DeleteUserForm, self).clean()
 
         if user_in_group(self.user, 'hotel_admin'):
-            raise forms.ValidationError("Can't delete an Admin User.")
+            raise forms.ValidationError(dj_messages['delete_admin_fail'])
 
         return cleaned_data
 
