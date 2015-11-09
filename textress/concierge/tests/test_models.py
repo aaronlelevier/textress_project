@@ -439,19 +439,28 @@ class ReplyTests(TestCase):
 
     def test_check_for_data_update_stop(self):
         self.assertFalse(self.guest.stop)
+
         Reply.objects.check_for_data_update(self.guest, self.system_reply_S)
+
         self.assertTrue(self.guest.stop)
+        self.assertTrue(self.guest.hidden)
 
     def test_check_for_data_update_no_stop(self):
         self.assertFalse(self.guest.stop)
+
         Reply.objects.check_for_data_update(self.guest, self.hotel_reply_H)
+
         self.assertFalse(self.guest.stop)
+        self.assertFalse(self.guest.hidden)
 
     def test_check_for_data_update_reactivate(self):
         self.guest.stop = True
         self.guest.save()
+
         Reply.objects.check_for_data_update(self.guest, self.system_reply_Y)
+
         self.assertFalse(self.guest.stop)
+        self.assertFalse(self.guest.hidden)
 
     def test_process_reply_return_reply(self):
         reply = Reply.objects.process_reply(self.guest, self.hotel_w_reply, self.letter_help)

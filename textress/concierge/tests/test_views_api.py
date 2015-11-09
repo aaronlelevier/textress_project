@@ -293,41 +293,6 @@ class GuestAPIViewTests(APITestCase):
             [x['id'] for x in data]
         )
 
-    # def test_create(self):
-    #     response = self.client.post('/api/guests/', self.data, format='json')
-    #     self.assertEqual(response.status_code, 201)
-
-    # ### GuestRetrieveUpdateAPIView
-
-    # def test_get(self):
-    #     response = self.client.get('/api/guests/{}/'.format(self.guest.pk))
-    #     self.assertEqual(response.status_code, 200)
-    #     data = json.loads(response.content)
-    #     self.assertEqual(data['id'], self.guest.id)
-
-    # def test_get_other_hotel_guest(self):
-    #     guest = Guest.objects.exclude(hotel=self.hotel).first()
-    #     self.assertIsInstance(guest, Guest)
-    #     response = self.client.get('/api/guests/{}/'.format(guest.pk))
-    #     self.assertEqual(response.status_code, 403)
-
-    # def test_update(self):
-    #     self.data = serializers.GuestListSerializer(self.guest).data
-    #     self.data.update({'name': 'changed'})
-    #     response = self.client.get('/api/guests/{}/'.format(self.guest.pk),
-    #         self.data, format='json')
-    #     self.assertEqual(response.status_code, 200)
-
-    # # tests: ``from utils.mixins import DestroyModelMixin``
-
-    # def test_delete(self):
-    #     self.assertFalse(self.guest.hidden)
-    #     init_count = Guest.objects.count()
-    #     response = self.client.delete('/api/guests/{}/'.format(self.guest.pk))
-    #     self.assertEqual(response.status_code, 204)
-    #     post_count = Guest.objects.count()
-    #     self.assertEqual(init_count, post_count+1)
-
 
 class ReplyAPIViewTests(APITestCase):
 

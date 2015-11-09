@@ -392,10 +392,10 @@ class ReplyManager(models.Manager):
     def check_for_data_update(self, guest, reply):
         "Currently only support 'stop messages'."
         if reply.letter == "S":
-            guest.stop = True
+            guest.stop = guest.hidden = True
             guest.save()
         elif reply.letter == "Y":
-            guest.stop = False
+            guest.stop = guest.hidden = False
             guest.save()
 
     def get_reply(self, hotel, body):
