@@ -7,4 +7,4 @@ class Command(BaseCommand):
     help = "Archive all Guests that are past their check-out date."
 
     def handle(self, *args, **options):
-        archive_guests.delay() # TODO: need to test this
+        archive_guests.delay()
