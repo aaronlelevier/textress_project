@@ -94,7 +94,11 @@
                                 <li>
                                     <a href="{% url 'main:user_detail' user.pk %}">
                                         <span class="title"> My Profile </span>
-                                        <span class="badge badge-new">Me</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'password_change' %}">
+                                        <span class="title"> Change Password </span>
                                     </a>
                                 </li>
                                 {% if user|has_group:"hotel_admin" %}
