@@ -127,6 +127,14 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
+CACHES = {
+    'default': {
+        'BACKEND': 'redis_cache.RedisCache',
+        'LOCATION': 'localhost:6379',
+    },
+}
+
+
 SITE =  "textress.com"
 SITE_NAME = 'Textress'
 SITE_URL = "https://textress.com"

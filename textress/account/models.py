@@ -17,7 +17,11 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 
+from django.core.cache import get_cache
+cache = get_cache('default')
+
 from celery import shared_task
+
 import stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
 

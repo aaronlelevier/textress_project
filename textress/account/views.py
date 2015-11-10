@@ -215,7 +215,8 @@ class AcctPmtHistoryView(AdminOnlyMixin, SetHeadlineMixin, BillingSummaryContext
 # CLOSE ACCT #
 ##############
 
-# TODO: Implement the "Close Account" views or don't ??
+# NotImplemented: Manually handle closing of Accounts to start, until it becomes an issue,
+# then automate this.
 
 class CloseAcctView(AdminOnlyMixin, SetHeadlineMixin, FormView):
     '''
@@ -274,8 +275,8 @@ class CloseAcctConfirmView(AdminOnlyMixin, SetHeadlineMixin, FormView):
 
 class CloseAcctSuccessView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
     '''
-    TODO
-    ----
+    NotImplemented
+    --------------
     `context`: 
         submitted, takes: 
             Takes 24 hours to process request
