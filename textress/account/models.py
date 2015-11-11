@@ -532,6 +532,10 @@ class AcctTransManager(Dates, models.Manager):
                 amount=amount
             )
             return acct_tran, True
+
+    def get_or_create_sms_used(self, hotel, date=None):
+        trans_type, _ = TransType.objects.get_or_create(name='sms_used')
+        return self.get_or_create(hotel, trans_type, date)
         
 
 class AcctTrans(TimeStampBaseModel):

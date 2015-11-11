@@ -4,6 +4,9 @@ from django.conf import settings
 from django.test import TestCase
 from django.contrib.auth.models import User, Group
 
+from django.core.cache import get_cache
+cache = get_cache('default')
+
 from model_mommy import mommy
 from twilio.rest import TwilioRestClient
 from twilio.rest.resources.messages import Message as TwilioMessage
@@ -36,3 +39,11 @@ class SendMessageTests(TestCase):
         message = send_message(hotel=self.hotel, to=settings.DEFAULT_TO_PH,
             body='sms.test.test_helpers msg')
         self.assertTrue(message)
+
+    def test_send_message_increments_redis_sms_count(self):
+        cache.delete(self.hotel.redis_key)
+
+        message = send_message(hotel=self.hotel, to=settings.DEFAULT_TO_PH,
+            body='sms.test.test_helpers msg')
+
+        self.assertEqual(cache.get(self.hotel.redis_key), 1)

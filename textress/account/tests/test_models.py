@@ -501,6 +501,20 @@ class AcctTransTests(TransactionTestCase):
         self.assertEqual(acct_tran.trans_type, self.phone_number_charge)
         self.assertEqual(acct_tran.amount, -settings.PHONE_NUMBER_MONTHLY_COST)
 
+    # get_or_create - specific 'trans_type'
+
+    def test_get_or_create_sms_used(self):
+        [x.delete() for x in AcctTrans.objects.filter(hotel=self.hotel, trans_type=self.sms_used)]
+        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel, trans_type=self.sms_used).count(), 0)
+        # 10 messages from yesterday need to be logged
+        insert_date = timezone.now().date() - datetime.timedelta(days=1)
+        self.assertEqual(self.hotel.messages.filter(insert_date=insert_date).count(), 10)
+
+        acct_tran, created = AcctTrans.objects.get_or_create_sms_used(hotel=self.hotel,
+            date=insert_date)
+
+        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel, trans_type=self.sms_used).count(), 1)
+
     ### OTHER MANAGER TESTS
 
     def test_recharge_success(self):

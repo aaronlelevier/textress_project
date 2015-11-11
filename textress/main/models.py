@@ -14,10 +14,14 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save, pre_delete
 from django.forms.models import model_to_dict
 
+from django.core.cache import get_cache
+cache = get_cache('default')
+
 from twilio import TwilioRestException
 from twilio.rest import TwilioRestClient
 from rest_framework.authtoken.models import Token
 
+from account import helpers as acct_helpers
 from payment.models import Customer
 from utils import validate_phone, dj_messages, exceptions as excp
 from utils.data import STATES, HOTEL_TYPES
@@ -158,6 +162,28 @@ class Hotel(TwilioClient, BaseModel):
             return User.objects.get(id=self.admin_id)
         except User.DoesNotExist:
             return
+
+    @property
+    def redis_key(self):
+        return "{}_{}".format(self._meta.verbose_name, self.id)
+
+    @property
+    def redis_sms_count(self):
+        return cache.get(self.redis_key, 0)
+
+    def redis_incr_sms_count(self):
+        try:
+            cache.incr(self.redis_key)
+        except ValueError:
+            cache.set(self.redis_key, 1)
+        finally:
+            self.check_sms_count()
+
+    def check_sms_count(self):
+        print 'in this block', self.redis_sms_count, settings.CHECK_SMS_LIMIT
+
+        if self.redis_sms_count >= settings.CHECK_SMS_LIMIT:
+            acct_helpers.get_or_create_sms_used(hotel=self)
 
     def get_absolute_url(self):
         return reverse('main:hotel_update', kwargs={'pk':self.pk})

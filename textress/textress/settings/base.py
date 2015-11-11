@@ -165,8 +165,10 @@ TEXTRESS_PHONE_NUMBER = os.environ['T17_PHONE_NUMBER']
 
 COMPANY_NAME = "Textress"
 
-# Textress Concierge Settings
-SMS_LIMIT = 50
+# At this "Limit", post an AcctTran 'sms_used' to check if account
+# needs to be recharged.
+CHECK_SMS_LIMIT = 100
+
 # Default Costs for Accounts (Stripe Amounts ~ in cents)
 DEFAULT_MONTHLY_FEE = 0
 DEFAULT_SMS_COST = 5.5

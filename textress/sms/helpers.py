@@ -59,9 +59,16 @@ def send_text(text):
 def send_message(hotel, to, body):
     """
     Main Send Message Twilio function call.
+
+    TODO
+    ----
+    Monkey patch this method in test, so the ``if 'test' in sys.argv`` is removed
+    from this production code.
     """
     # so not sending live SMS with ``./manage.py test``
     if 'test' in sys.argv:
+        # sms count
+        hotel.redis_incr_sms_count()
         return True
 
     client = TwilioRestClient(hotel.twilio_sid, hotel.twilio_auth_token)
@@ -74,6 +81,8 @@ def send_message(hotel, to, body):
     except twilio.TwilioRestException as e:
         raise e
     else:
+        # sms count
+        hotel.redis_incr_sms_count()
         return message
 
 
