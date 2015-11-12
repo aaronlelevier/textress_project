@@ -21,6 +21,10 @@ class Dates(object):
         return self._now.date()
 
     @property
+    def _yesterday(self):
+        return self._today - datetime.timedelta(days=1)
+
+    @property
     def _year(self):
         return self._now.year
 

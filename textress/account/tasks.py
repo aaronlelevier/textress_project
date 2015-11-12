@@ -6,7 +6,6 @@ from account.models import AcctTrans, TransType, AcctStmt
 from main.models import Hotel
 
 
-
 @shared_task
 def create_initial_acct_trans_and_stmt(hotel_id):
     hotel = Hotel.objects.get(id=hotel_id)

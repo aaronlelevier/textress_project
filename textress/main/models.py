@@ -21,7 +21,6 @@ from twilio import TwilioRestException
 from twilio.rest import TwilioRestClient
 from rest_framework.authtoken.models import Token
 
-from account import helpers as acct_helpers
 from payment.models import Customer
 from utils import validate_phone, dj_messages, exceptions as excp
 from utils.data import STATES, HOTEL_TYPES
@@ -176,14 +175,12 @@ class Hotel(TwilioClient, BaseModel):
             cache.incr(self.redis_key)
         except ValueError:
             cache.set(self.redis_key, 1)
-        finally:
-            self.check_sms_count()
+    #     finally:
+    #         self.check_sms_count()
 
-    def check_sms_count(self):
-        print 'in this block', self.redis_sms_count, settings.CHECK_SMS_LIMIT
-
-        if self.redis_sms_count >= settings.CHECK_SMS_LIMIT:
-            acct_helpers.get_or_create_sms_used(hotel=self)
+    # def check_sms_count(self):
+    #     if self.redis_sms_count >= settings.CHECK_SMS_LIMIT:
+    #         self.acct_trans.get_or_create_sms_used(self)
 
     def get_absolute_url(self):
         return reverse('main:hotel_update', kwargs={'pk':self.pk})

@@ -455,7 +455,7 @@ class AcctTransManager(Dates, models.Manager):
         self.check_balance(hotel)
 
         # pre-validation
-        self.sms_used_validate_insert_date(insert_date)
+        self.sms_used_validate_insert_date(insert_date) # TODO: causes infinite loop if for today()
         self.sms_used_validate_single_date_record(hotel, insert_date)
 
         # static `trans_type`
@@ -535,8 +535,8 @@ class AcctTransManager(Dates, models.Manager):
 
     def get_or_create_sms_used(self, hotel, date=None):
         trans_type, _ = TransType.objects.get_or_create(name='sms_used')
-        return self.get_or_create(hotel, trans_type, date)
-        
+        return AcctTrans.objects.get_or_create(hotel, trans_type, date)
+
 
 class AcctTrans(TimeStampBaseModel):
     """

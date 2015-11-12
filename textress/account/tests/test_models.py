@@ -38,6 +38,7 @@ class DatesTests(TestCase):
 
         self.assertTrue(dates._now)
         self.assertEqual(dates._today, now.date())
+        self.assertEqual(dates._yesterday, now.date() - datetime.timedelta(days=1))
         self.assertEqual(dates._year, now.year)
         self.assertEqual(dates._month, now.month)
 
@@ -301,12 +302,18 @@ class AcctStmtNewHotelTests(TestCase):
 
     def setUp(self):
         self.password = PASSWORD
-        self.today = timezone.now().date()
+        # Dates
+        date = Dates()
+        self.today = date._today
+        self.yesterday = date._yesterday
+        # Users
         create._get_groups_and_perms()
         self.hotel = create_hotel()
         self.admin = create_hotel_user(self.hotel, 'admin')
+        self.guest = make_guests(hotel=self.hotel, number=1)[0] #b/c returns a list
         # Supporting Models
-        self.acct_cost = AcctCost.objects.get_or_create(hotel=self.hotel)
+        self.sms_used, _ = TransType.objects.get_or_create(name='sms_used')
+        self.acct_cost, _ = AcctCost.objects.get_or_create(hotel=self.hotel)
 
     def test_sms_used_mtd(self):
         acct_stmt, created = AcctStmt.objects.get_or_create(hotel=self.hotel)
