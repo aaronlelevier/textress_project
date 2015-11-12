@@ -23,58 +23,6 @@ from utils import create
 from utils.exceptions import AutoRechargeOffExcp
 
 
-class DatesTests(TestCase):
-
-    def setUp(self):
-        self.tzinfo = pytz.timezone(settings.TIME_ZONE)
-
-    def test_tzinfo(self):
-        dates = Dates()
-        self.assertTrue(hasattr(dates, 'tzinfo'))
-
-    def test_all_dates(self):
-        dates = Dates()
-        now = timezone.now()
-
-        self.assertTrue(dates._now)
-        self.assertEqual(dates._today, now.date())
-        self.assertEqual(dates._yesterday, now.date() - datetime.timedelta(days=1))
-        self.assertEqual(dates._year, now.year)
-        self.assertEqual(dates._month, now.month)
-
-    def test_first_of_month(self):
-        dates = Dates()
-        first_of_month = dates.first_of_month(month=1, year=1)
-        self.assertEqual(
-            first_of_month,
-            datetime.datetime(day=1, month=1,year=1, tzinfo=self.tzinfo).date()
-        )
-
-    def test_first_of_month_default(self):
-        dates = Dates()
-        first_of_month = dates.first_of_month()
-        self.assertEqual(
-            first_of_month,
-            datetime.datetime(day=1, month=dates._today.month,
-                year=dates._today.year, tzinfo=self.tzinfo).date()
-        )
-
-    def test_last_month_end(self):
-        dates = Dates()
-        self.assertEqual(
-            dates.last_month_end(),
-            dates.first_of_month() - datetime.timedelta(days=1)
-        )
-
-class BaseModelTests(TestCase):
-
-    def test_properties(self):
-        # auto fields work
-        price = mommy.make(Pricing)
-        self.assertIsInstance(price.created, datetime.datetime)
-        self.assertIsInstance(price.modified, datetime.datetime)
-
-
 class PricingTests(TestCase):
     # NOTE: Am skipping testing save() b/c these are static Pricing Tiers
     #   that are created once and hardly ever changed.
@@ -146,9 +94,7 @@ class AcctCostTests(TestCase):
     '''
 
     def setUp(self):
-        self.password = PASSWORD
         self.hotel = create_hotel()
-
         # "other_hotel" has no affect on this one
         self.hotel_2 = create_hotel()
         AcctCost.objects.get_or_create(hotel=self.hotel_2)
@@ -162,7 +108,20 @@ class AcctCostTests(TestCase):
         self.assertEqual(acct_cost.balance_min, BALANCE_AMOUNTS[0][0])
         self.assertEqual(acct_cost.recharge_amt, CHARGE_AMOUNTS[0][0])
 
-    def test_create_already_created_update_amounts(self):
+    def test_create_already_created(self):
+        # If a ``get_or_create`` is called w/ no kwargs, it returns the current
+        # ``acct_cost`` as is
+        acct_cost, created = AcctCost.objects.get_or_create(hotel=self.hotel)
+        self.assertTrue(created)
+
+        new_acct_cost, created = AcctCost.objects.get_or_create(hotel=self.hotel)
+        self.assertFalse(created)
+        self.assertEqual(acct_cost, new_acct_cost)
+        self.assertEqual(AcctCost.objects.filter(hotel=self.hotel).count(), 1)
+        self.assertEqual(acct_cost.balance_min, BALANCE_AMOUNTS[0][0])
+        self.assertEqual(acct_cost.recharge_amt, CHARGE_AMOUNTS[0][0])
+
+    def test_update_already_created(self):
         # create new actually modifies original b/c p/ Hotel, singleton obj
         acct_cost, created = AcctCost.objects.get_or_create(hotel=self.hotel)
         self.assertTrue(created)
@@ -177,19 +136,6 @@ class AcctCostTests(TestCase):
         self.assertEqual(AcctCost.objects.filter(hotel=self.hotel).count(), 1)
         self.assertEqual(new_acct_cost.balance_min, BALANCE_AMOUNTS[2][0])
         self.assertEqual(new_acct_cost.recharge_amt, CHARGE_AMOUNTS[2][0])
-
-    def test_create_already_created(self):
-        # If a ``get_or_create`` is called w/ no kwargs, it returns the current
-        # ``acct_cost`` as is
-        acct_cost, created = AcctCost.objects.get_or_create(hotel=self.hotel)
-        self.assertTrue(created)
-
-        new_acct_cost, created = AcctCost.objects.get_or_create(hotel=self.hotel)
-        self.assertFalse(created)
-        self.assertEqual(acct_cost, new_acct_cost)
-        self.assertEqual(AcctCost.objects.filter(hotel=self.hotel).count(), 1)
-        self.assertEqual(acct_cost.balance_min, BALANCE_AMOUNTS[0][0])
-        self.assertEqual(acct_cost.recharge_amt, CHARGE_AMOUNTS[0][0])
 
     def test_init_charge_amount(self):
         acct_cost, created = AcctCost.objects.get_or_create(hotel=self.hotel)
