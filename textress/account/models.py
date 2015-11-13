@@ -351,6 +351,7 @@ class AcctTransManager(Dates, models.Manager):
         date = date or self._today
         return self.get_queryset().monthly_trans(hotel, date)
 
+    # NOTE: comment out until supporting methods are flushed out (created)
     # def check_balance(self, hotel):
     #     """
     #     Daily, or more often if high SMS volumes, check the Funds ``balance``
@@ -359,7 +360,45 @@ class AcctTransManager(Dates, models.Manager):
     #     Before this method: run ``update_or_create_sms_used`` so that all charges
     #     are posted.
     #     """
+    #     self.update_or_create_sms_used(hotel)
 
+    def update_or_create_sms_used(self, hotel, date=None):
+        """
+        Complete regardless of there being "zero" SMS for the date.
+        """
+        date = date or self._today
+        sms_used = hotel.messages.filter(insert_date=date).count()
+
+        try:
+            acct_trans = self.get(hotel=hotel, trans_type=self.trans_types.sms_used)
+        except AcctTrans.DoesNotExist:
+            pass
+
+    def sms_used(self, hotel, insert_date=None):
+        # SMS counts needed to get the daily incremental "sms_used" cost
+        sms_used = hotel.messages.filter(insert_date=insert_date).count()
+        sms_used_mtd = self.sms_used_mtd_as_of_yesterday(hotel)
+        amount = -Pricing.objects.get_cost(units=sms_used, units_mtd=sms_used_mtd)
+        
+        return self.create(
+            hotel=hotel,
+            trans_type=self.trans_types.sms_used,
+            amount=amount,
+            sms_used=sms_used,
+            insert_date=insert_date
+        )
+
+    def sms_used_mtd_as_of_yesterday(self, hotel):
+        """
+        Calculate MTD as of yesterday EOD.
+        """
+        try:
+            acct_trans = self.get(hotel=hotel, trans_type=self.trans_types.sms_used,
+                insert_date=self._yesterday)
+        except AcctTrans.DoesNotExist:
+            return 0
+        else:
+            return acct_trans.sms_used
 
     def balance(self, hotel=None):
         '''
@@ -378,6 +417,8 @@ class AcctTransManager(Dates, models.Manager):
     @staticmethod
     def calculate_recharge_amount(hotel, balance):
         return hotel.acct_cost.recharge_amt - balance
+
+    ### LEGACY METHODS THAT ARE STILL "NEED TO BE REFACTORED WIP" ###
 
     def recharge(self, hotel):
         """
@@ -466,18 +507,18 @@ class AcctTransManager(Dates, models.Manager):
 
     ### SMS_USED
 
-    def sms_used_validate_insert_date(self, insert_date):
-        if insert_date >= self._today:
-            raise ValidationError(
-                "Can only calculate `sms_used` for prior dates. "
-                "You submitted: {}".format(insert_date))
+    # def sms_used_validate_insert_date(self, insert_date):
+    #     if insert_date >= self._today:
+    #         raise ValidationError(
+    #             "Can only calculate `sms_used` for prior dates. "
+    #             "You submitted: {}".format(insert_date))
 
-    def sms_used_validate_single_date_record(self, hotel, insert_date):
-        if self.filter(hotel=hotel,
-                       insert_date=insert_date,
-                       trans_type=self.trans_types.sms_used).exists():
+    # def sms_used_validate_single_date_record(self, hotel, insert_date):
+    #     if self.filter(hotel=hotel,
+    #                    insert_date=insert_date,
+    #                    trans_type=self.trans_types.sms_used).exists():
 
-            raise ValidationError("Only 1 `sms_used` record per Hotel per Day.")
+    #         raise ValidationError("Only 1 `sms_used` record per Hotel per Day.")
 
     def sms_used(self, hotel, insert_date=None):
         '''
@@ -512,6 +553,8 @@ class AcctTransManager(Dates, models.Manager):
 
         If the Hotel hasn't sent any SMS, this will return "None", so 
         always return "0" instead.
+
+        TODO: Will need to calculate MTD as of yesterday EOD.
         """
         trans_type = self.trans_types.sms_used
 
@@ -569,28 +612,6 @@ class AcctTransManager(Dates, models.Manager):
         trans_type = self.trans_types.sms_used
         return AcctTrans.objects.get_or_create(hotel, trans_type, date)
 
-    # def update_or_create_sms_used(self, hotel, trans_type, date=None):
-    #     """
-    #     Use get_or_create, so as not to duplicate charges, or daily records
-
-    #     `sms_used` - get's the SMS used for the day, and calculates the cost.
-    #     `init_amt` - initial funding amount
-    #     `recharge_amt` - recharge funding amount
-    #     """
-    #     date = date or self._today
-
-    #     if trans_type.name == 'sms_used':
-    #         # pre-check 'sms count', because if no 'sms_used' don't need to
-    #         # create an AcctTran
-    #         sms_used = hotel.messages.filter(insert_date=date).count()
-    #         if sms_used:
-    #             acct_tran = self.sms_used(hotel, date)
-    #             # check if balance < 0, if so charge C.Card, and if fail, suspend Twilio Acct.
-    #             # don't worry about raising an error here.  Twilio Acct will be suspended
-    #             # and an email will be sent to myself and the Hotel of the C.Card Charge fail.
-    #             recharge = self.check_balance(hotel)
-    #             return acct_tran, True
-
 
 class AcctTrans(TimeStampBaseModel):
     """
@@ -612,7 +633,7 @@ class AcctTrans(TimeStampBaseModel):
         help_text="Negative for Usage, Positive for 'Funds Added' records.")
     desc = models.CharField(max_length=100, blank=True, null=True,
         help_text="Use to store additional filter logic")
-    sms_used = models.PositiveIntegerField(blank=True, null=True,
+    sms_used = models.PositiveIntegerField(blank=True, default=0,
         help_text="NULL unless trans_type=sms_used")
     insert_date = models.DateField(_("Insert Date"), blank=True, null=True)
     balance = models.PositiveIntegerField(_("Balance"), blank=True, default=0,
