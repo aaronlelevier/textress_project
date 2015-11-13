@@ -14,8 +14,8 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save, pre_delete
 from django.forms.models import model_to_dict
 
-from django.core.cache import get_cache
-cache = get_cache('default')
+from django.core.cache import caches
+cache = caches['default']
 
 from twilio import TwilioRestException
 from twilio.rest import TwilioRestClient

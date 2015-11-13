@@ -3,12 +3,10 @@ import random
 
 from django.conf import settings
 from django.test import TestCase
+from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User, Group
 from django.utils import timezone
-
-from django.core.cache import get_cache
-cache = get_cache('default')
 
 from model_mommy import mommy
 from twilio.rest import TwilioRestClient

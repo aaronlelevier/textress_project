@@ -46,12 +46,15 @@ class FactoryTests(TransactionTestCase):
 
     def test_create_account_tran(self):
         trans_types = factory.create_trans_types()
-        at = factory.create_acct_tran(
+
+        acct_trans = factory.create_acct_tran(
             hotel=self.hotel,
             trans_type=trans_types[0],
             insert_date=timezone.now()
             )
-        self.assertIsInstance(at, AcctTrans)
+
+        self.assertIsInstance(acct_trans, AcctTrans)
+        self.assertEqual(AcctTrans.objects.count(), 1)
 
     def test_create_acct_trans(self):
         self.assertEqual(AcctTrans.objects.count(), 0)

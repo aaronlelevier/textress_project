@@ -17,9 +17,6 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 
-from django.core.cache import get_cache
-cache = get_cache('default')
-
 import stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -309,8 +306,10 @@ class AcctStmt(TimeStampBaseModel):
 class AcctTransQuerySet(models.query.QuerySet):
 
     def monthly_trans(self, hotel, date):
-        """Return all transactions for the Hotel that happened during 
-        the month of the supplied date."""
+        """
+        Return all transactions for the ``hotel`` that happened during 
+        the month of the given ``date``.
+        """
         return (self.filter(hotel=hotel,
                             insert_date__month=date.month,
                             insert_date__year=date.year))
@@ -328,16 +327,16 @@ class AcctTransManager(Dates, models.Manager):
         return AcctTransQuerySet(self.model, self._db)
 
     def monthly_trans(self, hotel, date=None):
-        """Default to return the Hotel's current month's transactions 
+        """Default to return the Hotel's current month's transactions
         if not date is supplied."""
         date = date or self._today
         return self.get_queryset().monthly_trans(hotel, date)
 
-    ### PRE-CREATE ACCT TRANS CHARGE METHODS
-
     def balance(self, hotel=None):
         '''Sum `amount` for any queryset object.'''
         return self.get_queryset().balance(hotel)
+
+    ### PRE-CREATE ACCT TRANS CHARGE METHODS
 
     def recharge(self, hotel):
         """

@@ -14,7 +14,8 @@ from model_mommy import mommy
 
 from account.models import (Dates, Pricing, TransType, AcctCost, AcctStmt, AcctTrans,
     INIT_CHARGE_AMOUNT, CHARGE_AMOUNTS, BALANCE_AMOUNTS)
-from account.tests.factory import create_acct_stmts, create_acct_trans
+from account.tests.factory import (create_acct_stmts, create_acct_tran, create_acct_trans,
+    create_trans_types)
 from concierge.models import Guest, Message
 from concierge.tests.factory import make_guests, make_messages
 from main.models import Subaccount
@@ -100,15 +101,6 @@ class AcctCostTests(TestCase):
         AcctCost.objects.get_or_create(hotel=self.hotel_2)
 
     def test_create(self):
-        # Dave starts with the "Default Amounts" when creating his ``AcctCost``
-        acct_cost, created = AcctCost.objects.get_or_create(hotel=self.hotel)
-        self.assertTrue(created)
-        self.assertIsInstance(acct_cost, AcctCost)
-        self.assertEqual(acct_cost.init_amt, CHARGE_AMOUNTS[0][0])
-        self.assertEqual(acct_cost.balance_min, BALANCE_AMOUNTS[0][0])
-        self.assertEqual(acct_cost.recharge_amt, CHARGE_AMOUNTS[0][0])
-
-    def test_create_already_created(self):
         # If a ``get_or_create`` is called w/ no kwargs, it returns the current
         # ``acct_cost`` as is
         acct_cost, created = AcctCost.objects.get_or_create(hotel=self.hotel)
@@ -267,6 +259,72 @@ class AcctStmtNewHotelTests(TestCase):
         self.assertEqual(AcctTrans.objects.sms_used_mtd(self.hotel, self.today), 0)
 
 
+class AcctTransQuerySetTests(TestCase):
+
+    def setUp(self):
+        self.hotel = create_hotel()
+        self.trans_types = create_trans_types()
+        self.today = timezone.now().date()
+        # AcctTrans
+        self.acct_trans = create_acct_tran(
+            hotel=self.hotel,
+            trans_type=self.trans_types[0],
+            insert_date=self.today
+        )
+        self.hotel2 = create_hotel()
+        self.sms_used = TransType.objects.get(name='sms_used')
+        self.acct_trans = create_acct_tran(
+            hotel=self.hotel2,
+            trans_type=self.sms_used,
+            insert_date=self.today,
+            amount=1000
+        )
+
+    def test_monthly_trans(self):
+        self.assertTrue(AcctTrans.objects.monthly_trans(self.hotel, self.today))
+
+    def test_monthly_trans_default_date(self):
+        monthly_trans = AcctTrans.objects.filter(
+            hotel=self.hotel,
+            insert_date__month=self.today.month,
+            insert_date__year=self.today.year
+        )
+
+        monthly_trans_mgr = AcctTrans.objects.monthly_trans(hotel=self.hotel)
+
+        self.assertEqual(monthly_trans.count(), monthly_trans_mgr.count())
+
+    def test_balance(self):
+        init_amt = TransType.objects.get(name='init_amt')
+        self.acct_trans = create_acct_tran(
+            hotel=self.hotel,
+            trans_type=init_amt,
+            insert_date=self.today
+        )
+
+        balance = AcctTrans.objects.balance()
+
+        self.assertEqual(
+            balance,
+            AcctTrans.objects.aggregate(Sum('amount'))['amount__sum']
+        )
+
+    def test_balance_hotel(self):
+        init_amt = TransType.objects.get(name='init_amt')
+        self.acct_trans = create_acct_tran(
+            hotel=self.hotel,
+            trans_type=init_amt,
+            insert_date=self.today
+        )
+
+        balance = AcctTrans.objects.balance(self.hotel)
+
+        self.assertEqual(
+            balance,
+            AcctTrans.objects.filter(hotel=self.hotel).aggregate(Sum('amount'))['amount__sum']
+        )
+
+
 class AcctTransTests(TransactionTestCase):
 
     fixtures = ['pricing.json', 'trans_type.json']
@@ -320,35 +378,6 @@ class AcctTransTests(TransactionTestCase):
         self.assertEqual(
             Message.objects.filter(hotel=self.hotel, insert_date=self.yesterday).count(),
             Message.objects.count()
-        )
-
-    ### QUERYSET TESTS
-
-    def test_monthly_trans(self):
-        # could be more precise if I wasn't factory creating AcctTrans
-        self.assertTrue(AcctTrans.objects.monthly_trans(self.hotel, self.yesterday))
-
-    def test_monthly_trans_default(self):
-        monthly_trans = AcctTrans.objects.filter(
-            hotel=self.hotel, 
-            insert_date__month=self.today.month,
-            insert_date__year=self.today.year
-        )
-        monthly_trans_mgr = AcctTrans.objects.monthly_trans(
-            hotel=self.hotel
-        )
-        self.assertEqual(monthly_trans.count(), monthly_trans_mgr.count())
-
-    def test_balance(self):
-        self.assertEqual(
-            AcctTrans.objects.balance(self.hotel),
-            AcctTrans.objects.filter(hotel=self.hotel).aggregate(Sum('amount'))['amount__sum']
-        )
-
-    def test_balance_hotel(self):
-        self.assertEqual(
-            AcctTrans.objects.balance(self.hotel),
-            AcctTrans.objects.filter(hotel=self.hotel).aggregate(Sum('amount'))['amount__sum']
         )
 
     ### MANAGER TESTS
