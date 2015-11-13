@@ -370,9 +370,10 @@ describe('ReplyCtrl', function() {
 
     beforeEach(module('conciergeApp'));
 
-    beforeEach(inject(function(_$q_, _$rootScope_) {
+    beforeEach(inject(function (_$q_, _$rootScope_, _$httpBackend_) {
         $q = _$q_;
         $rootScope = _$rootScope_;
+        $httpBackend = _$httpBackend_;
     }));
 
     beforeEach(inject(function($controller) {
@@ -452,7 +453,49 @@ describe('ReplyCtrl', function() {
         });
     });
 
+    describe('query', function () {
+        var Reply;
+        var $httpBackend;
+        // beforeEach(module('conciergeApp.services'));
+        beforeEach(inject(function (_Reply_, _$httpBackend_) {
+            Reply = _Reply_;
+            $httpBackend = _$httpBackend_;
+        }));
+
+        afterEach(function () {
+            $httpBackend.verifyNoOutstandingExpectation();
+            $httpBackend.verifyNoOutstandingRequest();
+        });
+
+        it('should be a function', function () {
+            expect(Reply.query).toBeDefined();
+            expect(typeof Reply.query).toBe('function');
+        });
+
+        it('GET Hotel Replies: using hotel id', function () {
+            var id = 1234;
+            var mockResponse = [];
+            $httpBackend.expect('GET', '/api/reply/?hotel=' + id).respond(mockResponse);
+
+            Reply.query({
+                hotel: id
+            });
+            $httpBackend.flush();
+        });
+
+        it('GET System Replies: where hotel id is NULL', function () {
+            var mockResponse = [];
+            $httpBackend.expect('GET', '/api/reply/?hotel__isnull=true').respond(mockResponse);
+
+            Reply.query({
+                hotel__isnull: true
+            });
+            $httpBackend.flush();
+        });
+
+    });
 });
+
 
 describe('TriggerCtrl', function() {
     var $q,
