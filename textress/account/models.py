@@ -351,11 +351,33 @@ class AcctTransManager(Dates, models.Manager):
         date = date or self._today
         return self.get_queryset().monthly_trans(hotel, date)
 
+    # def check_balance(self, hotel):
+    #     """
+    #     Daily, or more often if high SMS volumes, check the Funds ``balance``
+    #     of the Hotel to see if a ``recharge`` is required.
+
+    #     Before this method: run ``update_or_create_sms_used`` so that all charges
+    #     are posted.
+    #     """
+
+
     def balance(self, hotel=None):
-        '''Sum `amount` for any queryset object.'''
+        '''
+        Calculates current balance (Expensive).
+        '''
         return self.get_queryset().balance(hotel)
 
-    ### PRE-CREATE ACCT TRANS CHARGE METHODS
+    def get_balance(self, hotel):
+        last_acct_trans = self.filter(hotel=hotel).order_by('-modified').first()
+        return last_acct_trans.balance
+
+    @staticmethod
+    def check_recharge_required(hotel, balance):
+        return balance < hotel.acct_cost.balance_min
+
+    @staticmethod
+    def calculate_recharge_amount(hotel, balance):
+        return hotel.acct_cost.recharge_amt - balance
 
     def recharge(self, hotel):
         """
@@ -547,6 +569,28 @@ class AcctTransManager(Dates, models.Manager):
         trans_type = self.trans_types.sms_used
         return AcctTrans.objects.get_or_create(hotel, trans_type, date)
 
+    # def update_or_create_sms_used(self, hotel, trans_type, date=None):
+    #     """
+    #     Use get_or_create, so as not to duplicate charges, or daily records
+
+    #     `sms_used` - get's the SMS used for the day, and calculates the cost.
+    #     `init_amt` - initial funding amount
+    #     `recharge_amt` - recharge funding amount
+    #     """
+    #     date = date or self._today
+
+    #     if trans_type.name == 'sms_used':
+    #         # pre-check 'sms count', because if no 'sms_used' don't need to
+    #         # create an AcctTran
+    #         sms_used = hotel.messages.filter(insert_date=date).count()
+    #         if sms_used:
+    #             acct_tran = self.sms_used(hotel, date)
+    #             # check if balance < 0, if so charge C.Card, and if fail, suspend Twilio Acct.
+    #             # don't worry about raising an error here.  Twilio Acct will be suspended
+    #             # and an email will be sent to myself and the Hotel of the C.Card Charge fail.
+    #             recharge = self.check_balance(hotel)
+    #             return acct_tran, True
+
 
 class AcctTrans(TimeStampBaseModel):
     """
@@ -570,7 +614,7 @@ class AcctTrans(TimeStampBaseModel):
         help_text="Use to store additional filter logic")
     sms_used = models.PositiveIntegerField(blank=True, null=True,
         help_text="NULL unless trans_type=sms_used")
-    insert_date = models.DateField(_("Insert Date"), blank=True, null=True) # remove in Prod (use ``created``)
+    insert_date = models.DateField(_("Insert Date"), blank=True, null=True)
     balance = models.PositiveIntegerField(_("Balance"), blank=True, default=0,
         help_text="Current blance, just like in a Bank Account.")
 

@@ -292,14 +292,22 @@ class AcctTransQuerySetTests(TestCase):
         self.hotel = create_hotel()
         self.trans_types = create_trans_types()
         self.today = timezone.now().date()
+        # TransType
+        self.init_amt = TransType.objects.get(name='init_amt')
+        self.sms_used = TransType.objects.get(name='sms_used')
         # AcctTrans
         self.acct_trans = create_acct_tran(
             hotel=self.hotel,
             trans_type=self.trans_types[0],
             insert_date=self.today
         )
+        self.acct_trans2 = create_acct_tran(
+            hotel=self.hotel,
+            trans_type=self.init_amt,
+            insert_date=self.today
+        )
+        # Hotel 2
         self.hotel2 = create_hotel()
-        self.sms_used = TransType.objects.get(name='sms_used')
         self.acct_trans = create_acct_tran(
             hotel=self.hotel2,
             trans_type=self.sms_used,
@@ -322,13 +330,6 @@ class AcctTransQuerySetTests(TestCase):
         self.assertEqual(monthly_trans.count(), monthly_trans_mgr.count())
 
     def test_balance(self):
-        init_amt = TransType.objects.get(name='init_amt')
-        self.acct_trans = create_acct_tran(
-            hotel=self.hotel,
-            trans_type=init_amt,
-            insert_date=self.today
-        )
-
         balance = AcctTrans.objects.balance()
 
         self.assertEqual(
@@ -337,18 +338,64 @@ class AcctTransQuerySetTests(TestCase):
         )
 
     def test_balance_hotel(self):
-        init_amt = TransType.objects.get(name='init_amt')
-        self.acct_trans = create_acct_tran(
-            hotel=self.hotel,
-            trans_type=init_amt,
-            insert_date=self.today
-        )
-
         balance = AcctTrans.objects.balance(self.hotel)
 
         self.assertEqual(
             balance,
             AcctTrans.objects.filter(hotel=self.hotel).aggregate(Sum('amount'))['amount__sum']
+        )
+
+
+class AcctTransManagerTests(TestCase):
+
+    def setUp(self):
+        self.hotel = create_hotel()
+        self.trans_types = create_trans_types()
+        self.today = timezone.now().date()
+        # AcctCost
+        self.acct_cost = mommy.make(AcctCost, hotel=self.hotel)
+        # TransType
+        self.init_amt = TransType.objects.get(name='init_amt')
+        self.sms_used = TransType.objects.get(name='sms_used')
+        # AcctTrans
+        self.acct_trans = create_acct_tran(
+            hotel=self.hotel,
+            trans_type=self.trans_types[0],
+            insert_date=self.today
+        )
+        self.acct_trans2 = create_acct_tran(
+            hotel=self.hotel,
+            trans_type=self.init_amt,
+            insert_date=self.today
+        )
+        # Hotel 2
+        self.hotel2 = create_hotel()
+        self.acct_trans = create_acct_tran(
+            hotel=self.hotel2,
+            trans_type=self.sms_used,
+            insert_date=self.today,
+            amount=1000
+        )
+
+    def test_get_balance(self):
+        self.assertEqual(
+            AcctTrans.objects.get_balance(self.hotel),
+            AcctTrans.objects.filter(hotel=self.hotel).order_by('-modified').first().balance
+        )
+
+    def test_check_recharge_required_true(self):
+        balance = self.acct_cost.balance_min - 1
+        self.assertTrue(AcctTrans.objects.check_recharge_required(self.hotel, balance))
+
+    def test_check_recharge_required_false(self):
+        balance = self.acct_cost.balance_min + 1
+        self.assertFalse(AcctTrans.objects.check_recharge_required(self.hotel, balance))
+
+    def test_calculate_recharge_amount(self):
+        balance = 100
+        self.assertEqual(
+            AcctTrans.objects.calculate_recharge_amount(self.hotel, balance),
+            self.hotel.acct_cost.recharge_amt - balance
         )
 
 
