@@ -5,6 +5,7 @@ import pytz
 from django.db.models import Max, Sum
 from django.test import TestCase, TransactionTestCase
 from django.conf import settings
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Group
@@ -12,8 +13,8 @@ from django.utils import timezone
 
 from model_mommy import mommy
 
-from account.models import (Dates, Pricing, TransType, AcctCost, AcctStmt, AcctTrans,
-    INIT_CHARGE_AMOUNT, CHARGE_AMOUNTS, BALANCE_AMOUNTS)
+from account.models import (Dates, Pricing, TransType, TransTypeCache, AcctCost, AcctStmt,
+    AcctTrans, TRANS_TYPES, INIT_CHARGE_AMOUNT, CHARGE_AMOUNTS, BALANCE_AMOUNTS)
 from account.tests.factory import (create_acct_stmts, create_acct_tran, create_acct_trans,
     create_trans_types)
 from concierge.models import Guest, Message
@@ -87,6 +88,32 @@ class TransTypeTests(TestCase):
         self.assertIsInstance(init_amt, TransType)
         self.assertEqual(str(init_amt), init_amt.name)
         self.assertEqual(TransType.objects.count(), 4)
+
+
+class TransTypeCacheTests(TestCase):
+
+    fixtures = ['trans_type.json']
+
+    def setUp(self):
+        self.cache = TransTypeCache()
+
+    def test_get_or_set_value(self):
+        cache.clear()
+
+        sms_used = self.cache.get_or_set_value('sms_used')
+
+        self.assertIsInstance(sms_used, TransType)
+        self.assertEqual(sms_used.name, 'sms_used')
+
+    def test_cached_trans_types(self):
+        trans_types = [x[0] for x in TRANS_TYPES]
+        for t in trans_types:
+            cache.clear()
+
+            obj = getattr(self.cache, t)
+
+            self.assertIsInstance(obj, TransType)
+            self.assertEqual(obj.name, t)
 
 
 class AcctCostTests(TestCase):
@@ -382,6 +409,9 @@ class AcctTransTests(TransactionTestCase):
 
     ### MANAGER TESTS
 
+    def test_trans_types(self):
+        self.assertIsInstance(AcctTrans.objects.trans_types, TransTypeCache)
+
     ### Charges
 
     # 1. init_amt
@@ -520,7 +550,7 @@ class AcctTransTests(TransactionTestCase):
         amount_to_recharge = AcctTrans.objects.amount_to_recharge(self.hotel, balance)
         self.assertEqual(
             amount_to_recharge,
-            (self.hotel.acct_cost.balance_min - balance) + self.hotel.acct_cost.recharge_amt
+            self.hotel.acct_cost.recharge_amt - balance
         )
 
     def test_check_balance_ok(self):

@@ -132,6 +132,21 @@ class TransType(TimeStampBaseModel):
         return self.name
 
 
+class TransTypeCache(object):
+
+    def __init__(self):
+        self.trans_types = [x[0] for x in TRANS_TYPES]
+
+        for t in self.trans_types:
+            setattr(self, t, self.get_or_set_value(t))
+
+    def get_or_set_value(self, name):
+        value = cache.get(name)
+        if not value:
+            cache.set(name, TransType.objects.get(name=name))
+        return cache.get(name)
+
+
 #############
 # ACCT COST #
 #############
@@ -326,6 +341,10 @@ class AcctTransManager(Dates, models.Manager):
     def get_queryset(self):
         return AcctTransQuerySet(self.model, self._db)
 
+    @property
+    def trans_types(self):
+        return TransTypeCache()
+
     def monthly_trans(self, hotel, date=None):
         """Default to return the Hotel's current month's transactions
         if not date is supplied."""
@@ -354,30 +373,29 @@ class AcctTransManager(Dates, models.Manager):
         # ISSUE: in 'test', Charge card is being called, which is slowing down 
         #   tests, and failing b/c doesn't have the correct Customer/Card combination
         if 'test' not in sys.argv:
-            try:
-                charge = Charge.objects.stripe_create(hotel, amount)
-            except stripe.error.CardError as e:
-                  email.send_charge_failed_email(hotel, amount)
-                  hotel.deactivate()
-                  raise e("Recharge account failed.")
-            else:
-                email.send_account_charged_email(hotel, charge)
+            self.charge_hotel(hotel, amount)
 
-        trans_type = cache.get('recharge_amt',
-                               TransType.objects.get_or_create(name='recharge_amt')[0])
         return self.create(
             hotel=hotel,
-            trans_type=trans_type,
+            trans_type=self.trans_types.recharge_amt,
             amount=amount
         )
 
     ### CHARGE ACCOUNT SUPPORT METHODS
 
     def amount_to_recharge(self, hotel, balance):
-        """
-        Amount below the ``Hotel.balance_min + Hotel.recharge_amt``
-        """
-        return (hotel.acct_cost.balance_min - balance) + hotel.acct_cost.recharge_amt
+        return hotel.acct_cost.recharge_amt - balance
+
+    def charge_hotel(self, hotel, amount):
+        # TODO: Fake 'Stripe' Card testing needed
+        try:
+            charge = Charge.objects.stripe_create(hotel, amount)
+        except stripe.error.CardError as e:
+              email.send_charge_failed_email(hotel, amount)
+              hotel.deactivate()
+              raise e("Recharge account failed.")
+        else:
+            email.send_account_charged_email(hotel, charge)
 
     def check_balance(self, hotel):
         """
@@ -415,13 +433,11 @@ class AcctTransManager(Dates, models.Manager):
         :phone_number: twilio ``phone_number`` as a string
         """
         self.check_balance(hotel)
-        trans_type = cache.get('phone_number',
-                               TransType.objects.get_or_create(name='phone_number')[0])
         cost = settings.PHONE_NUMBER_MONTHLY_COST
 
         return self.create(
             hotel=hotel,
-            trans_type=trans_type,
+            trans_type=self.trans_types.phone_number,
             amount = -cost,
             desc="PH charge {} for PH#: {}".format(cost, phone_number)
         )
@@ -435,11 +451,10 @@ class AcctTransManager(Dates, models.Manager):
                 "You submitted: {}".format(insert_date))
 
     def sms_used_validate_single_date_record(self, hotel, insert_date):
-        trans_type = cache.get('sms_used',
-                               TransType.objects.get_or_create(name='sms_used')[0])
         if self.filter(hotel=hotel,
                        insert_date=insert_date,
-                       trans_type=trans_type).exists():
+                       trans_type=self.trans_types.sms_used).exists():
+
             raise ValidationError("Only 1 `sms_used` record per Hotel per Day.")
 
     def sms_used(self, hotel, insert_date=None):
@@ -455,8 +470,7 @@ class AcctTransManager(Dates, models.Manager):
         self.sms_used_validate_single_date_record(hotel, insert_date)
 
         # static `trans_type`
-        trans_type = cache.get('sms_used',
-                               TransType.objects.get_or_create(name='sms_used')[0])
+        trans_type = self.trans_types.sms_used
         
         # SMS counts needed to get the daily incremental "sms_used" cost
         sms_used = hotel.messages.filter(insert_date=insert_date).count()
@@ -477,8 +491,8 @@ class AcctTransManager(Dates, models.Manager):
         If the Hotel hasn't sent any SMS, this will return "None", so 
         always return "0" instead.
         """
-        trans_type = cache.get('sms_used',
-                               TransType.objects.get_or_create(name='sms_used')[0])
+        trans_type = self.trans_types.sms_used
+
         sms_used_mtd = (self.filter(trans_type=trans_type)
                             .monthly_trans(hotel=hotel, date=insert_date)
                             .aggregate(Max('sms_used'))['sms_used__max'])
@@ -530,7 +544,7 @@ class AcctTransManager(Dates, models.Manager):
             return acct_tran, True
 
     def get_or_create_sms_used(self, hotel, date=None):
-        trans_type, _ = TransType.objects.get_or_create(name='sms_used')
+        trans_type = self.trans_types.sms_used
         return AcctTrans.objects.get_or_create(hotel, trans_type, date)
 
 
