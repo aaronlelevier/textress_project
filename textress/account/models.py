@@ -59,7 +59,7 @@ class PricingManager(models.Manager):
                     cost += units_to_subtract * t.price
                     units_to_expense -= units_to_subtract
         # will be a 'debit' (account deduction), so always negative
-        return -cost
+        return float(-cost)
 
 
 class Pricing(TimeStampBaseModel):
@@ -384,16 +384,15 @@ class AcctTransManager(Dates, models.Manager):
         sms_used_prior_mtd = self.sms_used_mtd_prior_to_this_date(hotel, date)
         amount = -Pricing.objects.get_cost(units=sms_used, units_mtd=sms_used_prior_mtd)
         # get_balance
-        get_balance_excludes = {'trans_type': self.trans_types.sms_used, 'insert_date': date}
-        balance = self.get_balance(hotel, excludes=get_balance_excludes) + amount
+        # get_balance_excludes = {'trans_type': self.trans_types.sms_used, 'insert_date': date}
+        # balance = self.get_balance(hotel, excludes=get_balance_excludes) + amount
         
         return self.create(
             hotel=hotel,
             trans_type=self.trans_types.sms_used,
             amount=amount,
             sms_used=sms_used,
-            insert_date=date,
-            balance=balance
+            insert_date=date
         )
 
     def sms_used_mtd_prior_to_this_date(self, hotel, date=None):
@@ -646,7 +645,7 @@ class AcctTrans(TimeStampBaseModel):
     sms_used = models.PositiveIntegerField(blank=True, default=0,
         help_text="NULL unless trans_type=sms_used")
     insert_date = models.DateField(_("Insert Date"), blank=True, null=True)
-    balance = models.PositiveIntegerField(_("Balance"), blank=True, default=0,
+    balance = models.PositiveIntegerField(_("Balance"), blank=True, default=None,
         help_text="Current blance, just like in a Bank Account.")
 
     objects = AcctTransManager()
@@ -657,7 +656,7 @@ class AcctTrans(TimeStampBaseModel):
 
     def __str__(self):
         return "Date: {self.insert_date} Hotel: {self.hotel} TransType: {self.trans_type} \
-Amount: ${amount:.2f}".format(self=self, amount=self.amount/100.0)
+Amount: ${amount:.2f}".format(self=self, amount=float(self.amount)/100.0)
 
     def save(self, *args, **kwargs):
         # For testing only
@@ -672,11 +671,11 @@ Amount: ${amount:.2f}".format(self=self, amount=self.amount/100.0)
         return super(AcctTrans, self).save(*args, **kwargs)
 
 
-# @receiver(post_save, sender=AcctTrans)
-# def create_userprofile(sender, instance=None, created=False, **kwargs):
-#     if instance.balance:
-#         trans_types = TransTypeCache()
-#         excludes = {'trans_type': trans_types.sms_used, ''}
-
-#         instance.balance = AcctTrans.objects.get_balance
-#         instance.save()
+@receiver(post_save, sender=AcctTrans)
+def create_userprofile(sender, instance=None, created=False, **kwargs):
+    if not instance.balance:
+        instance.balance = AcctTrans.objects.get_balance(
+            hotel=instance.hotel,
+            excludes=AcctTrans.objects.get_balance_default_excludes
+        )
+        instance.save()

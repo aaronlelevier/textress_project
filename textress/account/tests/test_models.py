@@ -383,6 +383,9 @@ class AcctTransManagerTests(TransactionTestCase):
             amount=1000
         )
 
+        # clear cache - in order to propery compare object "TransTypes"
+        cache.clear()
+
     # get_balance
 
     def test_get_balance(self):
@@ -547,22 +550,18 @@ class AcctTransManagerTests(TransactionTestCase):
 
     # create_sms_used
 
-    # def test_create_sms_used(self):
-    #     self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel,trans_type=self.sms_used).count(), 0)
-    #     # messages
-    #     guest = make_guests(hotel=self.hotel, number=1)[0]
-    #     messages = make_messages(
-    #         hotel=self.hotel,
-    #         user=self.admin,
-    #         guest=guest,
-    #         insert_date=self.today
-    #     )
-    #     self.assertEqual(messages.count(), 10)
+    def test_create_sms_used(self):
+        acct_trans = AcctTrans.objects.create_sms_used(self.hotel, self.today)
 
-    #     acct_trans = AcctTrans.objects.create_sms_used(self.hotel, self.today)
-
-    #     self.assertIsInstance(acct_trans, AcctTrans)
-    #     self.assertEqual(acct_trans.sms_used, 10)
+        self.assertIsInstance(acct_trans, AcctTrans)
+        self.assertEqual(acct_trans.hotel, self.hotel)
+        self.assertEqual(acct_trans.trans_type, self.sms_used)
+        self.assertEqual(acct_trans.insert_date, self.today)
+        self.assertEqual(
+            acct_trans.sms_used,
+            self.hotel.messages.filter(insert_date=self.today).count()
+        )
+        self.assertIsNotNone(acct_trans.balance)
 
     # update_or_create_sms_used
 
