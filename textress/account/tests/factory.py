@@ -76,7 +76,6 @@ def create_acct_tran(hotel, trans_type, insert_date, amount=None):
     else:
         sms_used_count = 0
 
-
     return AcctTrans.objects.create(
         hotel=hotel,
         trans_type=trans_type,

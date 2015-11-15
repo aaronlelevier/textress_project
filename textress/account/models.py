@@ -367,37 +367,49 @@ class AcctTransManager(Dates, models.Manager):
         Complete regardless of there being "zero" SMS for the date.
         """
         date = date or self._today
-        sms_used = hotel.messages.filter(insert_date=date).count()
+        sms_used = self.sms_used_count(hotel, date)
 
         try:
             acct_trans = self.get(hotel=hotel, trans_type=self.trans_types.sms_used)
         except AcctTrans.DoesNotExist:
             pass
 
-    def sms_used(self, hotel, insert_date=None):
+    def sms_used_count(self, hotel, date=None):
+        date = date or self._today
+        return hotel.messages.filter(insert_date=date).count()
+
+    def create_sms_used(self, hotel, date):
         # SMS counts needed to get the daily incremental "sms_used" cost
-        sms_used = hotel.messages.filter(insert_date=insert_date).count()
-        sms_used_mtd = self.sms_used_mtd_as_of_yesterday(hotel)
-        amount = -Pricing.objects.get_cost(units=sms_used, units_mtd=sms_used_mtd)
+        sms_used = self.sms_used_count(hotel, date)
+        sms_used_prior_mtd = self.sms_used_mtd_prior_to_this_date(hotel, date)
+        amount = -Pricing.objects.get_cost(units=sms_used, units_mtd=sms_used_prior_mtd)
+        # get_balance
+        get_balance_excludes = {'trans_type': self.trans_types.sms_used, 'insert_date': date}
+        balance = self.get_balance(hotel, excludes=get_balance_excludes) + amount
         
         return self.create(
             hotel=hotel,
             trans_type=self.trans_types.sms_used,
             amount=amount,
             sms_used=sms_used,
-            insert_date=insert_date
+            insert_date=date,
+            balance=balance
         )
 
-    def sms_used_mtd_as_of_yesterday(self, hotel):
+    def sms_used_mtd_prior_to_this_date(self, hotel, date=None):
         """
-        Calculate MTD as of yesterday EOD.
+        Calculate MTD sms_used prior to ``date``. Main purpose is to calculate
+        the "sms used as of yesterday" but can be used for any date.
         """
-        if self._yesterday.month != self._today.month:
+        date = date or self._today
+        date_prior = date - datetime.timedelta(days=1)
+
+        if date_prior.month != date.month:
             return 0
 
         return (AcctTrans.objects.filter(hotel=hotel,
-                                         insert_date__month=self._today.month,
-                                         insert_date__lte=self._today)
+                                         insert_date__month=date.month,
+                                         insert_date__lte=date)
                                   .aggregate(Sum('sms_used'))['sms_used__sum']) or 0
 
     def balance(self, hotel=None):
@@ -406,9 +418,18 @@ class AcctTransManager(Dates, models.Manager):
         '''
         return self.get_queryset().balance(hotel)
 
-    def get_balance(self, hotel):
-        last_acct_trans = self.filter(hotel=hotel).order_by('-modified').first()
-        return last_acct_trans.balance
+    def get_balance(self, hotel, excludes=None):
+        qs = self.filter(hotel=hotel)
+
+        if excludes:
+            qs = qs.exclude(**excludes)
+
+        last_acct_trans = qs.order_by('-modified').first()
+
+        try:
+            return last_acct_trans.balance
+        except AttributeError:
+            return 0
 
     @staticmethod
     def check_recharge_required(hotel, balance):
@@ -507,32 +528,30 @@ class AcctTransManager(Dates, models.Manager):
 
     ### SMS_USED
 
-    def sms_used(self, hotel, insert_date=None):
-        '''
-        SMS used by a Hotel for a single day. Only call after the 
-        day has ended, so it will be the final SMS count, and only 
-        calculated once.
-        '''
-        self.check_balance(hotel)
+    # def sms_used(self, hotel, insert_date=None):
+    #     '''
+    #     SMS used by a Hotel for a single day. Only call after the 
+    #     day has ended, so it will be the final SMS count, and only 
+    #     calculated once.
+    #     '''
+    #     self.check_balance(hotel)
 
-        # pre-validation
-        # self.sms_used_validate_insert_date(insert_date) # TODO: causes infinite loop if for today()
-        # self.sms_used_validate_single_date_record(hotel, insert_date)
+    #     # pre-validation
 
-        # static `trans_type`
-        trans_type = self.trans_types.sms_used
+    #     # static `trans_type`
+    #     trans_type = self.trans_types.sms_used
         
-        # SMS counts needed to get the daily incremental "sms_used" cost
-        sms_used = hotel.messages.filter(insert_date=insert_date).count()
-        sms_used_mtd = self.sms_used_mtd(hotel, insert_date)
+    #     # SMS counts needed to get the daily incremental "sms_used" cost
+    #     sms_used = hotel.messages.filter(insert_date=insert_date).count()
+    #     sms_used_mtd = self.sms_used_mtd(hotel, insert_date)
         
-        return self.create(
-            hotel=hotel,
-            trans_type=trans_type,
-            amount= -Pricing.objects.get_cost(units=sms_used, units_mtd=sms_used_mtd),
-            sms_used=sms_used,
-            insert_date=insert_date
-        )
+    #     return self.create(
+    #         hotel=hotel,
+    #         trans_type=trans_type,
+    #         amount= -Pricing.objects.get_cost(units=sms_used, units_mtd=sms_used_mtd),
+    #         sms_used=sms_used,
+    #         insert_date=insert_date
+    #     )
 
     def sms_used_mtd(self, hotel, insert_date):
         """
@@ -567,7 +586,7 @@ class AcctTransManager(Dates, models.Manager):
             # create an AcctTran
             sms_used = hotel.messages.filter(insert_date=date).count()
             if sms_used:
-                acct_tran = self.sms_used(hotel, date)
+                acct_tran = self.create_sms_used(hotel, date)
                 # check if balance < 0, if so charge C.Card, and if fail, suspend Twilio Acct.
                 # don't worry about raising an error here.  Twilio Acct will be suspended
                 # and an email will be sent to myself and the Hotel of the C.Card Charge fail.
