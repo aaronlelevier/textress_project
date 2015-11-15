@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from account.models import AcctTrans, AcctStmt, TransType, AcctCost
+from account.models import AcctTrans, AcctStmt, TransType, AcctCost, Pricing
 from account.tasks import create_initial_acct_trans_and_stmt
 from main.models import Hotel
 from main.tests.factory import create_hotel
@@ -33,3 +33,10 @@ class CreateInitialAcctTransAndAcctStmtTests(TestCase):
         create_initial_acct_trans_and_stmt.delay(self.hotel.id)
 
         self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 1)
+
+    def test_pricing(self):
+        self.assertEqual(Pricing.objects.filter(hotel=self.hotel).count(), 0)
+
+        create_initial_acct_trans_and_stmt.delay(self.hotel.id)
+
+        self.assertEqual(Pricing.objects.filter(hotel=self.hotel).count(), 1)

@@ -26,51 +26,21 @@ from utils.exceptions import AutoRechargeOffExcp
 
 
 class PricingTests(TestCase):
-    # NOTE: Am skipping testing save() b/c these are static Pricing Tiers
-    #   that are created once and hardly ever changed.
 
-    fixtures = ['pricing.json']
+    def setUp(self):
+        self.hotel = create_hotel()
+        self.pricing = mommy.make(Pricing, hotel=self.hotel)
 
-    def test_fixtures(self):
-        free_price = Pricing.objects.get(tier_name="Free")
-        self.assertIsInstance(free_price, Pricing)
+    def test_create_hotel_pricing(self):
+        self.assertIsInstance(self.hotel.pricing, Pricing)
+        self.assertEqual(self.hotel.pricing.cost, settings.DEFAULT_SMS_COST)
 
-    ### No MTD SMS tests
+    def test_get_cost(self):
+        sms_used_count = 150
 
-    def test_cost(self):
-        self.assertEqual(Pricing.objects.get_cost(units=200, units_mtd=0), 0)
+        cost = self.hotel.pricing.get_cost(sms_used_count)
 
-    def test_cost_two_tiers(self):
-        tier1 = 200 * 0
-        tier2 = 100 * 5.5
-        result = tier1 + tier2 # 550
-        self.assertEqual(Pricing.objects.get_cost(units=300, units_mtd=0), -result)
-
-    def test_cost_three_tiers(self):
-        tier1 = 200 * 0
-        tier2 = 2000 * 5.5
-        tier3 = 300 * 5.25
-        result = tier1 + tier2 + tier3 # 12575
-        self.assertEqual(Pricing.objects.get_cost(units=2500, units_mtd=0), -result)
-
-    ### MTD SMS tests
-
-    def test_cost_mtd(self):
-        result = 100 * 5.5
-        self.assertEqual(Pricing.objects.get_cost(units=100, units_mtd=200), -result)
-
-    def test_cost_mtd_two_tiers(self):
-        tier1 = 200 * 5.5
-        tier2 = 300 * 5.25
-        result = tier1 + tier2
-        self.assertEqual(Pricing.objects.get_cost(units=500, units_mtd=2000), -result)
-
-    def test_cost_mtd_three_tiers(self):
-        tier1 = 100 * 0
-        tier2 = 2000 * 5.5
-        tier3 = 400 * 5.25
-        result = tier1 + tier2 + tier3
-        self.assertEqual(Pricing.objects.get_cost(units=2500, units_mtd=100), -result)
+        self.assertEqual(cost, sms_used_count * self.pricing.cost)
 
 
 class TransTypeTests(TestCase):
@@ -166,7 +136,7 @@ class AcctCostTests(TestCase):
 
 class AcctStmtTests(TestCase):
 
-    fixtures = ['pricing.json', 'trans_type.json']
+    fixtures = ['trans_type.json']
 
     def setUp(self):
         self.password = PASSWORD
@@ -191,6 +161,7 @@ class AcctStmtTests(TestCase):
         # Supporting Models
         self.acct_cost = AcctCost.objects.get_or_create(hotel=self.hotel)
         self.acct_trans = create_acct_trans(hotel=self.hotel)
+        self.pricing = mommy.make(Pricing, hotel=self.hotel)
 
     ### MODEL TESTS
 
@@ -236,12 +207,13 @@ class AcctStmtTests(TestCase):
 
 class AcctStmtSignupTests(TestCase):
 
-    fixtures = ['pricing.json', 'trans_type.json']
+    fixtures = ['trans_type.json']
 
     def setUp(self):
         self.hotel = create_hotel()
         self.init_amt = TransType.objects.get(name='init_amt')
         self.acct_cost, _ = AcctCost.objects.get_or_create(hotel=self.hotel)
+        self.pricing = mommy.make(Pricing, hotel=self.hotel)
 
     def test_initial_acct_stmt(self):
         acct_tran, _ = AcctTrans.objects.get_or_create(hotel=self.hotel,
@@ -279,6 +251,7 @@ class AcctStmtNewHotelTests(TestCase):
         # Supporting Models
         self.sms_used, _ = TransType.objects.get_or_create(name='sms_used')
         self.acct_cost, _ = AcctCost.objects.get_or_create(hotel=self.hotel)
+        self.pricing = mommy.make(Pricing, hotel=self.hotel)
 
     def test_sms_used_mtd(self):
         acct_stmt, created = AcctStmt.objects.get_or_create(hotel=self.hotel)
@@ -359,6 +332,7 @@ class AcctTransManagerTests(TransactionTestCase):
         self.yesterday = self.today - datetime.timedelta(days=1)
         # AcctCost
         self.acct_cost = mommy.make(AcctCost, hotel=self.hotel)
+        self.pricing = mommy.make(Pricing, hotel=self.hotel)
         # TransType
         self.trans_types = create_trans_types()
         self.init_amt = TransType.objects.get(name='init_amt')
@@ -629,7 +603,7 @@ class AcctTransManagerTests(TransactionTestCase):
 
 class AcctTransTests(TransactionTestCase):
 
-    fixtures = ['pricing.json', 'trans_type.json']
+    fixtures = ['trans_type.json']
 
     def setUp(self):
         self.password = PASSWORD
@@ -663,6 +637,7 @@ class AcctTransTests(TransactionTestCase):
         # AcctTrans
         self.acct_trans = create_acct_trans(hotel=self.hotel)
         self.acct_tran = self.acct_trans[0]
+        self.pricing = mommy.make(Pricing, hotel=self.hotel)
 
         # Hotel 2 - use to make sure "AcctTrans.balance" and other 
         # methods don't conflict

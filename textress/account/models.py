@@ -31,72 +31,23 @@ from utils.models import Dates, TimeStampBaseModel
 # PRICING #
 ###########
 
-class PricingManager(models.Manager):
-
-    def get_cost(self, units, units_mtd=0):
-        """
-        Global Monthly Cost Calculator
-        ------------------------------
-        Get the cost of units used based upon the current ``Pricing`` 
-        Tier.
-
-        :units: sms used for the current day that we are expensing
-        :units_mtd: mtd sms used excluding the current day
-        """
-        units_total = units + units_mtd
-        units_to_expense = units
-        cost = 0
-
-        tiers = self.exclude(end__lte=units_mtd).order_by('start')
-        while units_to_expense > 0:
-            for t in tiers:
-                if units_total >= t.start: # 2500 > 200
-                    if units_total >= t.end: # 2500 > 2200
-                        # -1 b/c tier2 300-201=99 not 100 for ex
-                        units_to_subtract = t.end - (units_mtd if units_mtd >= t.start-1 else t.start-1) # 2200 - 2000
-                    else:
-                        units_to_subtract = units_to_expense
-                    cost += units_to_subtract * t.price
-                    units_to_expense -= units_to_subtract
-        # will be a 'debit' (account deduction), so always negative
-        return float(-cost)
-
-
 class Pricing(TimeStampBaseModel):
-    """Pricing Tiers that gradually decrease in Price as Volumes increase. 
-    Based on monthly volumes."""
-
-    tier = models.PositiveIntegerField(_("Tier"))
-    tier_name = models.CharField(_("Tier Name"), max_length=55, blank=True,
-        help_text="If blank, will be the Tier's Price per SMS")
-    desc = models.CharField(_("Description"), max_length=255, blank=True,
-        help_text="Used for Pricing Biz Page Description.")
-    price = models.DecimalField(_("Price per SMS"), max_digits=3, decimal_places=2,
-        help_text="Price in $'s. Ex: 0.0525")
-    start = models.PositiveIntegerField(_("SMS Start"), help_text="Min SMS per Tier")
-    end = models.PositiveIntegerField(_("SMS End"), help_text="Max SMS per Tier")
-
-    objects = PricingManager()
+    """
+    Pricing per SMS will be fixed, and will be $0.05 per SMS unless there is a business
+    need to do otherwise.
+    """
+    hotel = models.OneToOneField(Hotel, related_name='pricing', blank=True, null=True)
+    cost = models.FloatField(blank=True, default=settings.DEFAULT_SMS_COST,
+        help_text="Price in Stripe units, so -> 5.00 == $0.05")
 
     class Meta:
         verbose_name_plural = "Pricing"
-        ordering = ('tier',)
 
     def __str__(self):
-        return "Price per SMS: ${:.4f}; SMS range: {}-{}".format(
-            self.price, self.start, self.end)
+        return "Hotel: {}; Price per SMS: ${:.4f}".format(self.hotel, self.cost)
 
-    def save(self, *args, **kwargs):
-        """Default ``tier_name`` with the exception of the 'Free Tier'. Middle 
-        Tiers use the same ``desc``."""
-
-        if not self.tier_name:
-            self.tier_name = "{0:.4f}".format(self.price)
-
-        if not self.desc:
-            self.desc = "Next {0:3g}k SMS per month".format((self.end-self.start+1)/1000)
-
-        return super(Pricing, self).save(*args, **kwargs)
+    def get_cost(self, sms_used_count):
+        return self.cost * sms_used_count
 
 
 ##############
@@ -252,7 +203,7 @@ class AcctStmtManager(Dates, models.Manager):
         date = self.first_of_month(month, year)
 
         total_sms = hotel.messages.monthly_all(date=date).count()
-        monthly_costs = (Pricing.objects.get_cost(units=total_sms) +
+        monthly_costs = ((hotel.pricing.get_cost(total_sms)) +
             hotel.phonenumbers.count() * settings.PHONE_NUMBER_MONTHLY_COST)
         balance = self.acct_trans_balance(hotel, date)
 
@@ -385,7 +336,7 @@ class AcctTransManager(Dates, models.Manager):
                 # amount = -Pricing.objects.get_cost(units=sms_used_count, units_mtd=sms_used_prior_mtd)
                 # update
                 acct_trans.sms_used = sms_used_count
-                acct_trans.amount = 1 * sms_used_count
+                acct_trans.amount = 1 * sms_used_count # TODO: convert to a ``Pricing.<method>``
                 acct_trans.balance = None
                 acct_trans.save()
                 return acct_trans
@@ -398,8 +349,8 @@ class AcctTransManager(Dates, models.Manager):
         # SMS counts needed to get the daily incremental "sms_used" cost
         sms_used = self.sms_used_count(hotel, date)
         sms_used_prior_mtd = self.sms_used_mtd_prior_to_this_date(hotel, date)
-        amount = -Pricing.objects.get_cost(units=sms_used, units_mtd=sms_used_prior_mtd)
-        
+        amount = hotel.pricing.get_cost(sms_used)
+
         return self.create(
             hotel=hotel,
             trans_type=self.trans_types.sms_used,

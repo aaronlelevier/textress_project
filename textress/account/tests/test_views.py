@@ -20,8 +20,6 @@ from utils import create
 
 class AcctStmtViewTests(TestCase):
 
-    fixtures = ['pricing.json']
-
     def setUp(self):
         self.hotel = create_hotel()
         create._get_groups_and_perms()
@@ -108,7 +106,9 @@ class AcctStmtViewTests(TestCase):
 
 class APITests(TestCase):
 
-    fixtures = ['pricing.json']
+    def setUp(self):
+        self.hotel = create_hotel()
+        self.pricing = mommy.make(Pricing, hotel=self.hotel)
 
     def test_pricing(self):
         response = self.client.get(reverse('api_pricing'))

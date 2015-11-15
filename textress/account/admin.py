@@ -35,5 +35,5 @@ class AcctTransAdmin(admin.ModelAdmin):
 
 @admin.register(Pricing)
 class PricingAdmin(admin.ModelAdmin):
-    list_display = ('tier', 'tier_name', 'desc', 'price', 'start', 'end',)
+    list_display = ('hotel', 'cost',)
     readonly_fields = ('created', 'modified',)
