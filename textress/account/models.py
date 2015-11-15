@@ -431,6 +431,10 @@ class AcctTransManager(Dates, models.Manager):
         except AttributeError:
             return 0
 
+    @property
+    def get_balance_default_excludes(self):
+        return {'trans_type': self.trans_types.sms_used, 'insert_date': self._today}
+
     @staticmethod
     def check_recharge_required(hotel, balance):
         return balance < hotel.acct_cost.balance_min
@@ -666,3 +670,13 @@ Amount: ${amount:.2f}".format(self=self, amount=self.amount/100.0)
             self.balance = current_balance + amount
 
         return super(AcctTrans, self).save(*args, **kwargs)
+
+
+# @receiver(post_save, sender=AcctTrans)
+# def create_userprofile(sender, instance=None, created=False, **kwargs):
+#     if instance.balance:
+#         trans_types = TransTypeCache()
+#         excludes = {'trans_type': trans_types.sms_used, ''}
+
+#         instance.balance = AcctTrans.objects.get_balance
+#         instance.save()

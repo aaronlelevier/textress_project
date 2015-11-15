@@ -427,6 +427,17 @@ class AcctTransManagerTests(TransactionTestCase):
 
         self.assertEqual(get_balance, sms_used_yesterday.balance)
 
+    # get_balance_default_excludes
+
+    def test_get_balance_default_excludes(self):
+        cache.clear()
+
+        default_excludes = AcctTrans.objects.get_balance_default_excludes
+
+        self.assertIsInstance(default_excludes, dict)
+        self.assertEqual(default_excludes['trans_type'], self.sms_used)
+        self.assertEqual(default_excludes['insert_date'], self.today)
+
     # check_recharge_required
 
     def test_check_recharge_required_true(self):
@@ -560,7 +571,6 @@ class AcctTransManagerTests(TransactionTestCase):
     #         trans_type=self.sms_used, insert_date=self.today).count(), 0)
 
 
-
 class AcctTransTests(TransactionTestCase):
 
     fixtures = ['pricing.json', 'trans_type.json']
@@ -602,6 +612,9 @@ class AcctTransTests(TransactionTestCase):
         # methods don't conflict
         self.hotel_2 = create_hotel()
         self.acct_trans_2 = create_acct_trans(hotel=self.hotel_2)
+
+        # clear cache - so as to make proper assertions for "TransTypes"
+        cache.clear()
 
     ### CREATE TESTS
 
