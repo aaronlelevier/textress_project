@@ -392,13 +392,13 @@ class AcctTransManager(Dates, models.Manager):
         """
         Calculate MTD as of yesterday EOD.
         """
-        try:
-            acct_trans = self.get(hotel=hotel, trans_type=self.trans_types.sms_used,
-                insert_date=self._yesterday)
-        except AcctTrans.DoesNotExist:
+        if self._yesterday.month != self._today.month:
             return 0
-        else:
-            return acct_trans.sms_used
+
+        return (AcctTrans.objects.filter(hotel=hotel,
+                                         insert_date__month=self._today.month,
+                                         insert_date__lte=self._today)
+                                  .aggregate(Sum('sms_used'))['sms_used__sum']) or 0
 
     def balance(self, hotel=None):
         '''
@@ -507,19 +507,6 @@ class AcctTransManager(Dates, models.Manager):
 
     ### SMS_USED
 
-    # def sms_used_validate_insert_date(self, insert_date):
-    #     if insert_date >= self._today:
-    #         raise ValidationError(
-    #             "Can only calculate `sms_used` for prior dates. "
-    #             "You submitted: {}".format(insert_date))
-
-    # def sms_used_validate_single_date_record(self, hotel, insert_date):
-    #     if self.filter(hotel=hotel,
-    #                    insert_date=insert_date,
-    #                    trans_type=self.trans_types.sms_used).exists():
-
-    #         raise ValidationError("Only 1 `sms_used` record per Hotel per Day.")
-
     def sms_used(self, hotel, insert_date=None):
         '''
         SMS used by a Hotel for a single day. Only call after the 
@@ -529,8 +516,8 @@ class AcctTransManager(Dates, models.Manager):
         self.check_balance(hotel)
 
         # pre-validation
-        self.sms_used_validate_insert_date(insert_date) # TODO: causes infinite loop if for today()
-        self.sms_used_validate_single_date_record(hotel, insert_date)
+        # self.sms_used_validate_insert_date(insert_date) # TODO: causes infinite loop if for today()
+        # self.sms_used_validate_single_date_record(hotel, insert_date)
 
         # static `trans_type`
         trans_type = self.trans_types.sms_used

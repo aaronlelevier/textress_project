@@ -71,11 +71,17 @@ def create_acct_tran(hotel, trans_type, insert_date, amount=None):
     else:
         amount = _randint(-100, -10)
 
+    if trans_type.name == 'sms_used':
+        sms_used_count = _randint()
+    else:
+        sms_used_count = 0
+
+
     return AcctTrans.objects.create(
         hotel=hotel,
         trans_type=trans_type,
         amount=amount,
-        sms_used=_randint(),
+        sms_used=sms_used_count,
         insert_date=insert_date
         )
 
