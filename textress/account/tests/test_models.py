@@ -565,9 +565,66 @@ class AcctTransManagerTests(TransactionTestCase):
 
     # update_or_create_sms_used
 
-    # def test_update_or_create_sms_used_create(self):
-    #     self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel,
-    #         trans_type=self.sms_used, insert_date=self.today).count(), 0)
+    def test_update_or_create_sms_used_create(self):
+        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel,
+            trans_type=self.sms_used, insert_date=self.today).count(), 0)
+
+        acct_trans = AcctTrans.objects.update_or_create_sms_used(
+            hotel=self.hotel, date=self.today)
+
+        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel,
+            trans_type=self.sms_used, insert_date=self.today).count(), 1)
+
+    def test_update_or_create_sms_used_get(self):
+        create_acct_tran(self.hotel, self.sms_used, self.today)
+        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel,
+            trans_type=self.sms_used, insert_date=self.today).count(), 1)
+
+        acct_trans = AcctTrans.objects.update_or_create_sms_used(
+            hotel=self.hotel, date=self.today)
+
+        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel,
+            trans_type=self.sms_used, insert_date=self.today).count(), 1)
+
+    def test_update_or_create_sms_used_get(self):
+        # setup
+        init_acct_trans = create_acct_tran(self.hotel, self.sms_used, self.today)
+        init_acct_trans.sms_used = 0
+        init_acct_trans.save()
+        # init test
+        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel,
+            trans_type=self.sms_used, insert_date=self.today).count(), 1)
+
+        acct_trans = AcctTrans.objects.update_or_create_sms_used(
+            hotel=self.hotel, date=self.today)
+
+        self.assertEqual(init_acct_trans.sms_used, acct_trans.sms_used)
+
+    def test_update_or_create_sms_used_update(self):
+        # Hotel Messages
+        guest = make_guests(hotel=self.hotel, number=1)[0]
+        messages = make_messages(
+            hotel=self.hotel,
+            user=self.admin,
+            guest=guest,
+            insert_date=self.today,
+            number=1
+        )
+        self.assertEqual(messages.count(), 1)
+        # setup
+        init_acct_trans = create_acct_tran(self.hotel, self.sms_used, self.today)
+        init_acct_trans.sms_used = 0
+        init_acct_trans.save()
+        # init test
+        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel,
+            trans_type=self.sms_used, insert_date=self.today).count(), 1)
+
+        acct_trans = AcctTrans.objects.update_or_create_sms_used(
+            hotel=self.hotel, date=self.today)
+
+        self.assertEqual(acct_trans.sms_used, 1)
+        self.assertIsNotNone(acct_trans.balance)
+        self.assertEqual(acct_trans.amount, acct_trans.sms_used * 1)
 
 
 class AcctTransTests(TransactionTestCase):

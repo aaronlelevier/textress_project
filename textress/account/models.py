@@ -367,12 +367,28 @@ class AcctTransManager(Dates, models.Manager):
         Complete regardless of there being "zero" SMS for the date.
         """
         date = date or self._today
-        sms_used = self.sms_used_count(hotel, date)
 
         try:
-            acct_trans = self.get(hotel=hotel, trans_type=self.trans_types.sms_used)
+            acct_trans = self.get(hotel=hotel, trans_type=self.trans_types.sms_used,
+                insert_date=date)
         except AcctTrans.DoesNotExist:
-            pass
+            # create
+            return self.create_sms_used(hotel, date)
+        else:
+            sms_used_count = self.sms_used_count(hotel, date)
+            if acct_trans.sms_used == sms_used_count:
+                # get
+                return acct_trans
+            else:
+                sms_used_prior_mtd = self.sms_used_mtd_prior_to_this_date(hotel, date)
+                # print sms_used_count, sms_used_prior_mtd
+                # amount = -Pricing.objects.get_cost(units=sms_used_count, units_mtd=sms_used_prior_mtd)
+                # update
+                acct_trans.sms_used = sms_used_count
+                acct_trans.amount = 1 * sms_used_count
+                acct_trans.balance = None
+                acct_trans.save()
+                return acct_trans
 
     def sms_used_count(self, hotel, date=None):
         date = date or self._today
@@ -383,9 +399,6 @@ class AcctTransManager(Dates, models.Manager):
         sms_used = self.sms_used_count(hotel, date)
         sms_used_prior_mtd = self.sms_used_mtd_prior_to_this_date(hotel, date)
         amount = -Pricing.objects.get_cost(units=sms_used, units_mtd=sms_used_prior_mtd)
-        # get_balance
-        # get_balance_excludes = {'trans_type': self.trans_types.sms_used, 'insert_date': date}
-        # balance = self.get_balance(hotel, excludes=get_balance_excludes) + amount
         
         return self.create(
             hotel=hotel,
