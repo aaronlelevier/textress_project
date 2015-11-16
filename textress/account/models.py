@@ -627,21 +627,14 @@ Amount: ${amount:.2f}".format(self=self, amount=float(self.amount)/100.0)
         if not self.balance:
             self.update_balance()
 
-        #     current_balance = AcctTrans.objects.balance(hotel=self.hotel)
-        #     amount = self.amount or 0
-        #     self.balance = current_balance + amount
-
         return super(AcctTrans, self).save(*args, **kwargs)
 
     def update_balance(self):
-        if not self.balance:
-            self.balance = self.amount
+        if self.trans_type.name == 'sms_used':
+            self.balance = AcctTrans.objects.get_balance(
+                hotel=self.hotel, excludes=True) + self.amount
         else:
-            if self.trans_type.name == 'sms_used':
-                self.balance = AcctTrans.objects.get_balance(
-                    hotel=self.hotel, excludes=True) + self.amount
-            else:
-                self.balance = AcctTrans.objects.get_balance(hotel=self.hotel) + self.amount
+            self.balance = AcctTrans.objects.get_balance(hotel=self.hotel) + self.amount
 
 
 # @receiver(post_save, sender=AcctTrans)
