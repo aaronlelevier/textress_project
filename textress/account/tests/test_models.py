@@ -387,13 +387,12 @@ class AcctTransManagerTests(TransactionTestCase):
         self.assertTrue(AcctTrans.objects.filter(hotel=self.hotel).count() > 1)
         # values to compare
         target_balance = (AcctTrans.objects.exclude(trans_type=self.sms_used, insert_date=self.today)
-                                           .order_by('-modified')
-                                           .first()
+                                           .order_by('modified')
+                                           .last()
                                            .balance)
 
         # get_balance
-        excludes = {'trans_type': self.sms_used, 'insert_date': self.today}
-        get_balance = AcctTrans.objects.get_balance(self.hotel, excludes=excludes)
+        get_balance = AcctTrans.objects.get_balance(self.hotel, excludes=True)
 
         self.assertEqual(get_balance, target_balance)
 
@@ -408,21 +407,9 @@ class AcctTransManagerTests(TransactionTestCase):
         self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel).count(), 2)
 
         # get_balance
-        excludes = {'trans_type': self.sms_used, 'insert_date': self.today}
-        get_balance = AcctTrans.objects.get_balance(self.hotel, excludes=excludes)
+        get_balance = AcctTrans.objects.get_balance(self.hotel, excludes=True)
 
         self.assertEqual(get_balance, sms_used_yesterday.balance)
-
-    # get_balance_default_excludes
-
-    def test_get_balance_default_excludes(self):
-        cache.clear()
-
-        default_excludes = AcctTrans.objects.get_balance_default_excludes
-
-        self.assertIsInstance(default_excludes, dict)
-        self.assertEqual(default_excludes['trans_type'], self.sms_used)
-        self.assertEqual(default_excludes['insert_date'], self.today)
 
     # check_recharge_required
 
@@ -653,8 +640,7 @@ class AcctTransManagerTests(TransactionTestCase):
 
         self.assertEqual(
             acct_trans.balance,
-            (AcctTrans.objects.get_balance(hotel=self.hotel,
-                excludes=AcctTrans.objects.get_balance_default_excludes) + acct_trans.amount)
+            AcctTrans.objects.get_balance(hotel=self.hotel, excludes=True) + acct_trans.amount
         )
 
 
@@ -733,8 +719,11 @@ class AcctTransTests(TransactionTestCase):
         )
         self.assertEqual(acct_tran.trans_type, self.init_amt)
         self.assertEqual(acct_tran.amount, self.acct_cost.init_amt)
-        self.assertEqual(acct_tran.balance, self.acct_cost.init_amt)
         self.assertEqual(acct_tran.sms_used, 0)
+        self.assertEqual(
+            acct_tran.balance,
+            AcctTrans.objects.balance(hotel=self.hotel)
+        )
 
     # 2. recharge_amt
 

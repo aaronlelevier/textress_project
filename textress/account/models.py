@@ -406,10 +406,10 @@ class AcctTransManager(Dates, models.Manager):
                 Q(insert_date=self._today)    
             )
 
-        last_acct_trans = qs.order_by('-modified').first()
+        last_acct_trans = qs.order_by('modified').last()
 
         try:
-            if last_acct_trans.balance is None:
+            if not last_acct_trans.balance:
                 balance = 0
             else:
                 balance = last_acct_trans.balance
@@ -417,10 +417,6 @@ class AcctTransManager(Dates, models.Manager):
             balance = 0
 
         return balance
-
-    @property
-    def get_balance_default_excludes(self):
-        return {'trans_type': self.trans_types.sms_used, 'insert_date': self._today}
 
     @staticmethod
     def check_recharge_required(hotel, balance):
@@ -606,7 +602,7 @@ class AcctTrans(TimeStampBaseModel):
     sms_used = models.PositiveIntegerField(blank=True, default=0,
         help_text="NULL unless trans_type=sms_used")
     insert_date = models.DateField(_("Insert Date"), blank=True, null=True)
-    balance = models.PositiveIntegerField(_("Balance"), blank=True, null=True,
+    balance = models.PositiveIntegerField(_("Balance"), blank=True,
         help_text="Current blance, just like in a Bank Account.")
 
     objects = AcctTransManager()
@@ -624,8 +620,7 @@ Amount: ${amount:.2f}".format(self=self, amount=float(self.amount)/100.0)
         if not self.insert_date:
             self.insert_date = timezone.now().date()
 
-        if not self.balance:
-            self.update_balance()
+        self.update_balance()
 
         return super(AcctTrans, self).save(*args, **kwargs)
 
@@ -635,14 +630,3 @@ Amount: ${amount:.2f}".format(self=self, amount=float(self.amount)/100.0)
                 hotel=self.hotel, excludes=True) + self.amount
         else:
             self.balance = AcctTrans.objects.get_balance(hotel=self.hotel) + self.amount
-
-
-# @receiver(post_save, sender=AcctTrans)
-# def update_acct_trans_balance(sender, instance=None, created=False, **kwargs):
-#     print "instance.balance:", instance.balance
-#     if instance.balance is None:
-#         instance.balance = AcctTrans.objects.get_balance(
-#             hotel=instance.hotel,
-#             excludes=AcctTrans.objects.get_balance_default_excludes
-#         )
-#         instance.save()
