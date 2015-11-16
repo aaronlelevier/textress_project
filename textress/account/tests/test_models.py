@@ -593,7 +593,8 @@ class AcctTransManagerTests(TransactionTestCase):
             insert_date=self.today,
             number=1
         )
-        self.assertEqual(messages.count(), 1)
+        self.assertEqual(messages.count(), 1) # message-count
+        message_count = 1
         # setup
         init_acct_trans = create_acct_tran(self.hotel, self.sms_used, self.today)
         init_acct_trans.sms_used = 0
@@ -605,9 +606,9 @@ class AcctTransManagerTests(TransactionTestCase):
         acct_trans = AcctTrans.objects.update_or_create_sms_used(
             hotel=self.hotel, date=self.today)
 
-        self.assertEqual(acct_trans.sms_used, 1)
+        self.assertEqual(acct_trans.sms_used, message_count)
         self.assertIsNotNone(acct_trans.balance)
-        self.assertEqual(acct_trans.amount, acct_trans.sms_used * 1)
+        self.assertEqual(acct_trans.amount, self.hotel.pricing.get_cost(message_count))
 
 
 class AcctTransTests(TransactionTestCase):
@@ -731,9 +732,13 @@ class AcctTransTests(TransactionTestCase):
         self.assertEqual(AcctTrans.objects.sms_used_mtd(hotel=self.hotel,
             insert_date=self.yesterday), 0)
 
-        AcctTrans.objects.create_sms_used(hotel=self.hotel, date=self.yesterday)
+        acct_trans = AcctTrans.objects.create_sms_used(hotel=self.hotel, date=self.yesterday)
         self.assertEqual(AcctTrans.objects.sms_used_mtd(hotel=self.hotel,
             insert_date=self.yesterday), 10)
+        self.assertEqual(
+            acct_trans.amount,
+            self.hotel.pricing.get_cost(acct_trans.sms_used)
+        )
 
     # 4. phone_number
 

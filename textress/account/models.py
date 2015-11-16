@@ -345,12 +345,9 @@ class AcctTransManager(Dates, models.Manager):
                 # get
                 return acct_trans
             else:
-                sms_used_prior_mtd = self.sms_used_mtd_prior_to_this_date(hotel, date)
-                # print sms_used_count, sms_used_prior_mtd
-                # amount = -Pricing.objects.get_cost(units=sms_used_count, units_mtd=sms_used_prior_mtd)
                 # update
                 acct_trans.sms_used = sms_used_count
-                acct_trans.amount = 1 * sms_used_count # TODO: convert to a ``Pricing.<method>``
+                acct_trans.amount = hotel.pricing.get_cost(sms_used_count)
                 acct_trans.balance = None
                 acct_trans.save()
                 return acct_trans
@@ -506,33 +503,6 @@ class AcctTransManager(Dates, models.Manager):
             amount = -cost,
             desc="PH charge {} for PH#: {}".format(cost, phone_number)
         )
-
-    ### SMS_USED
-
-    # def sms_used(self, hotel, insert_date=None):
-    #     '''
-    #     SMS used by a Hotel for a single day. Only call after the 
-    #     day has ended, so it will be the final SMS count, and only 
-    #     calculated once.
-    #     '''
-    #     self.check_balance(hotel)
-
-    #     # pre-validation
-
-    #     # static `trans_type`
-    #     trans_type = self.trans_types.sms_used
-        
-    #     # SMS counts needed to get the daily incremental "sms_used" cost
-    #     sms_used = hotel.messages.filter(insert_date=insert_date).count()
-    #     sms_used_mtd = self.sms_used_mtd(hotel, insert_date)
-        
-    #     return self.create(
-    #         hotel=hotel,
-    #         trans_type=trans_type,
-    #         amount= -Pricing.objects.get_cost(units=sms_used, units_mtd=sms_used_mtd),
-    #         sms_used=sms_used,
-    #         insert_date=insert_date
-    #     )
 
     def sms_used_mtd(self, hotel, insert_date):
         """
