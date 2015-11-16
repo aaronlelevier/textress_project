@@ -621,23 +621,23 @@ class AcctTransManagerTests(TransactionTestCase):
 
     # update_hotel_sms_used
 
-    # def test_update_hotel_sms_used(self):
-    #     init_acct_trans = create_acct_tran(self.hotel, self.sms_used, self.today)
-    #     addit_sms = 10
-    #     new_sms_used_count = init_acct_trans.sms_used + addit_sms
+    def test_update_hotel_sms_used(self):
+        init_acct_trans = create_acct_tran(self.hotel, self.sms_used, self.today)
+        addit_sms = 10
+        new_sms_used_count = init_acct_trans.sms_used + addit_sms
 
-    #     acct_trans = AcctTrans.objects.update_hotel_sms_used(
-    #         acct_trans=init_acct_trans,
-    #         hotel=self.hotel,
-    #         sms_used_count=new_sms_used_count
-    #     )
+        acct_trans = AcctTrans.objects.update_hotel_sms_used(
+            acct_trans=init_acct_trans,
+            hotel=self.hotel,
+            sms_used_count=new_sms_used_count
+        )
 
-    #     self.assertEqual(acct_trans.sms_used, new_sms_used_count)
-    #     self.assertEqual(acct_trans.amount, self.hotel.pricing.get_cost(new_sms_used_count))
-    #     self.assertEqual(
-    #         acct_trans.balance,
-    #         init_acct_trans.balance + self.hotel.pricing.get_cost(addit_sms) # -50.00 for 10 SMS
-    #     )
+        self.assertEqual(acct_trans.sms_used, new_sms_used_count)
+        self.assertEqual(acct_trans.amount, self.hotel.pricing.get_cost(new_sms_used_count))
+        self.assertEqual(
+            acct_trans.balance,
+            AcctTrans.objects.balance(hotel=self.hotel)
+        )
 
     ### Model Methods
 
