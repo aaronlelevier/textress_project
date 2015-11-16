@@ -205,7 +205,8 @@ class AcctStmtManager(Dates, models.Manager):
         balance = AcctTrans.objects.balance(hotel=hotel)
 
         if balance < hotel.acct_cost.balance_min:
-            recharge_amt = AcctTrans.objects.recharge(hotel)
+            recharge_amt = AcctTrans.objects.calculate_recharge_amount(hotel, balance)
+            AcctTrans.objects.recharge(hotel, recharge_amt)
             balance = AcctTrans.objects.balance(hotel=hotel)
 
         return balance
@@ -321,15 +322,49 @@ class AcctTransManager(Dates, models.Manager):
         return self.get_queryset().monthly_trans(hotel, date)
 
     # NOTE: comment out until supporting methods are flushed out (created)
+    def check_balance(self, hotel):
+        """
+        Daily, or more often if high SMS volumes, check the Funds ``balance``
+        of the Hotel to see if a ``recharge`` is required.
+
+        Before this method: run ``update_or_create_sms_used`` so that all charges
+        are posted.
+        """
+        self.update_or_create_sms_used(hotel)
+        balance = self.get_balance(hotel)
+        recharge_required = self.check_recharge_required(hotel, balance)
+
+        if recharge_required:
+            recharge_amt = self.calculate_recharge_amount(hotel, balance)
+            self.recharge(hotel, recharge_amt)
+
+    # TODO: If "auto-recharge" is set to OFF, it is the recharge() method that 
+    # should raise this error. Test this tomorrow that ``recharge`` is working as planned
+
     # def check_balance(self, hotel):
     #     """
-    #     Daily, or more often if high SMS volumes, check the Funds ``balance``
-    #     of the Hotel to see if a ``recharge`` is required.
+    #     Master Pre-Create AcctTrans method to call that checks 
+    #     `balance`, `auto_recharge`, and `c.card charging` ability 
+    #     before creating the actual AcctTrans.
 
-    #     Before this method: run ``update_or_create_sms_used`` so that all charges
-    #     are posted.
+    #     :return: None if ok, or raise error.
     #     """
-    #     self.update_or_create_sms_used(hotel)
+    #     balance = self.balance(hotel=hotel)
+
+    #     if balance > hotel.acct_cost.balance_min:
+    #         return
+    #     else:
+    #         if hotel.acct_cost.auto_recharge:
+    #             self.recharge(hotel)
+    #         else:
+    #             # ``auto_charge`` is OFF and the Account Balance is not 
+    #             # enough to process the transaction.
+    #             email.send_auto_recharge_failed_email(hotel)
+    #             hotel.deactivate()
+    #             raise AutoRechargeOffExcp(
+    #                 "Auto-recharge is off, and the account doesn't have "
+    #                 "enough funds to process this transaction."
+    #             )
 
     def update_or_create_sms_used(self, hotel, date=None):
         """
@@ -433,20 +468,9 @@ class AcctTransManager(Dates, models.Manager):
     def calculate_recharge_amount(hotel, balance):
         return hotel.acct_cost.recharge_amt - balance
 
-    ### LEGACY METHODS THAT ARE STILL "NEED TO BE REFACTORED WIP" ###
-
-    def recharge(self, hotel):
-        """
-        If this method is called, either A or B: 
-
-        A. recharge account:
-            - charge the c.card
-            - create AcctTrans w/ a recharge_amt TransType
-
-        B. raise error that ``recharge`` failed
-        """
-        balance = self.balance(hotel)
-        amount = self.amount_to_recharge(hotel, balance)
+    def recharge(self, hotel, recharge_amt):
+        # balance = self.balance(hotel)
+        # amount = self.amount_to_recharge(hotel, balance)
 
         # ISSUE: in 'test', Charge card is being called, which is slowing down 
         #   tests, and failing b/c doesn't have the correct Customer/Card combination
@@ -456,13 +480,15 @@ class AcctTransManager(Dates, models.Manager):
         return self.create(
             hotel=hotel,
             trans_type=self.trans_types.recharge_amt,
-            amount=amount
+            amount=recharge_amt
         )
+
+    ### LEGACY METHODS THAT ARE STILL "NEED TO BE REFACTORED WIP" ###
 
     ### CHARGE ACCOUNT SUPPORT METHODS
 
-    def amount_to_recharge(self, hotel, balance):
-        return hotel.acct_cost.recharge_amt - balance
+    # def amount_to_recharge(self, hotel, balance):
+    #     return hotel.acct_cost.recharge_amt - balance
 
     def charge_hotel(self, hotel, amount):
         # TODO: Fake 'Stripe' Card testing needed
@@ -475,30 +501,30 @@ class AcctTransManager(Dates, models.Manager):
         else:
             email.send_account_charged_email(hotel, charge)
 
-    def check_balance(self, hotel):
-        """
-        Master Pre-Create AcctTrans method to call that checks 
-        `balance`, `auto_recharge`, and `c.card charging` ability 
-        before creating the actual AcctTrans.
+    # def check_balance(self, hotel):
+    #     """
+    #     Master Pre-Create AcctTrans method to call that checks 
+    #     `balance`, `auto_recharge`, and `c.card charging` ability 
+    #     before creating the actual AcctTrans.
 
-        :return: None if ok, or raise error.
-        """
-        balance = self.balance(hotel=hotel)
+    #     :return: None if ok, or raise error.
+    #     """
+    #     balance = self.balance(hotel=hotel)
 
-        if balance > hotel.acct_cost.balance_min:
-            return
-        else:
-            if hotel.acct_cost.auto_recharge:
-                self.recharge(hotel)
-            else:
-                # ``auto_charge`` is OFF and the Account Balance is not 
-                # enough to process the transaction.
-                email.send_auto_recharge_failed_email(hotel)
-                hotel.deactivate()
-                raise AutoRechargeOffExcp(
-                    "Auto-recharge is off, and the account doesn't have "
-                    "enough funds to process this transaction."
-                )
+    #     if balance > hotel.acct_cost.balance_min:
+    #         return
+    #     else:
+    #         if hotel.acct_cost.auto_recharge:
+    #             self.recharge(hotel)
+    #         else:
+    #             # ``auto_charge`` is OFF and the Account Balance is not 
+    #             # enough to process the transaction.
+    #             email.send_auto_recharge_failed_email(hotel)
+    #             hotel.deactivate()
+    #             raise AutoRechargeOffExcp(
+    #                 "Auto-recharge is off, and the account doesn't have "
+    #                 "enough funds to process this transaction."
+    #             )
 
     ### PHONE_NUMBER
 
