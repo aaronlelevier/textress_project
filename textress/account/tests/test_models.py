@@ -42,6 +42,15 @@ class PricingTests(TestCase):
 
         self.assertEqual(cost, sms_used_count * self.pricing.cost)
 
+    def test_check_for_default_pricing(self):
+        # only allow one Pricing Obj to have a blank Hotel FK
+        # to be used w/ "index.html"
+        mommy.make(Pricing)
+        self.assertEqual(Pricing.objects.filter(hotel__isnull=True).count(), 1)
+
+        with self.assertRaises(Exception):
+            mommy.make(Pricing)
+
 
 class TransTypeTests(TestCase):
     # Test contains all TransTypes

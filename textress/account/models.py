@@ -44,7 +44,21 @@ class Pricing(TimeStampBaseModel):
         verbose_name_plural = "Pricing"
 
     def __str__(self):
-        return "Hotel: {}; Price per SMS: ${:.4f}".format(self.hotel, self.cost)
+        return "Hotel: {}; Price per SMS: ${:.2f}".format(self.hotel, self.cost)
+
+    def save(self, *args, **kwargs):
+        if not self.hotel:
+            self.check_for_default_pricing()
+        return super(Pricing, self).save(*args, **kwargs)
+
+    def check_for_default_pricing(self):
+        """
+        Only allow one Pricing Obj to have a blank Hotel FK
+        to be used w/ 'index.html'
+        """
+        default = Pricing.objects.filter(hotel__isnull=True)
+        if default:
+            raise Exception("Default Pricing object with No Hotel already exists.")
 
     def get_cost(self, sms_used_count):
         return self.cost * sms_used_count
