@@ -6,7 +6,7 @@ import datetime
 import pytz
 
 from django.db import models
-from django.db.models import Max, Sum
+from django.db.models import Max, Sum, Q
 from django.conf import settings
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
@@ -61,7 +61,11 @@ class Pricing(TimeStampBaseModel):
             raise Exception("Default Pricing object with No Hotel already exists.")
 
     def get_cost(self, sms_used_count):
-        return self.cost * sms_used_count
+        """
+        ** Always Negative **
+        Expenses are negative, added Funds are Positive.
+        """
+        return -(self.cost * sms_used_count)
 
 
 ##############
@@ -337,20 +341,20 @@ class AcctTransManager(Dates, models.Manager):
             acct_trans = self.get(hotel=hotel, trans_type=self.trans_types.sms_used,
                 insert_date=date)
         except AcctTrans.DoesNotExist:
-            # create
             return self.create_sms_used(hotel, date)
         else:
             sms_used_count = self.sms_used_count(hotel, date)
             if acct_trans.sms_used == sms_used_count:
-                # get
                 return acct_trans
             else:
-                # update
-                acct_trans.sms_used = sms_used_count
-                acct_trans.amount = hotel.pricing.get_cost(sms_used_count)
-                acct_trans.balance = None
-                acct_trans.save()
-                return acct_trans
+                return self.update_hotel_sms_used(acct_trans, hotel, sms_used_count)
+
+    @staticmethod
+    def update_hotel_sms_used(acct_trans, hotel, sms_used_count):
+        acct_trans.sms_used = sms_used_count
+        acct_trans.amount = hotel.pricing.get_cost(sms_used_count)
+        acct_trans.save()
+        return acct_trans
 
     def sms_used_count(self, hotel, date=None):
         date = date or self._today
@@ -396,14 +400,23 @@ class AcctTransManager(Dates, models.Manager):
         qs = self.filter(hotel=hotel)
 
         if excludes:
-            qs = qs.exclude(**excludes)
+            # qs = qs.exclude(**excludes)
+            qs = qs.exclude(
+                Q(trans_type=self.trans_types.sms_used) & \
+                Q(insert_date=self._today)    
+            )
 
         last_acct_trans = qs.order_by('-modified').first()
 
         try:
-            return last_acct_trans.balance
+            if last_acct_trans.balance is None:
+                balance = 0
+            else:
+                balance = last_acct_trans.balance
         except AttributeError:
-            return 0
+            balance = 0
+
+        return balance
 
     @property
     def get_balance_default_excludes(self):
@@ -593,7 +606,7 @@ class AcctTrans(TimeStampBaseModel):
     sms_used = models.PositiveIntegerField(blank=True, default=0,
         help_text="NULL unless trans_type=sms_used")
     insert_date = models.DateField(_("Insert Date"), blank=True, null=True)
-    balance = models.PositiveIntegerField(_("Balance"), blank=True, default=None,
+    balance = models.PositiveIntegerField(_("Balance"), blank=True, null=True,
         help_text="Current blance, just like in a Bank Account.")
 
     objects = AcctTransManager()
@@ -612,18 +625,31 @@ Amount: ${amount:.2f}".format(self=self, amount=float(self.amount)/100.0)
             self.insert_date = timezone.now().date()
 
         if not self.balance:
-            current_balance = AcctTrans.objects.balance(hotel=self.hotel)
-            amount = self.amount or 0
-            self.balance = current_balance + amount
+            self.update_balance()
+
+        #     current_balance = AcctTrans.objects.balance(hotel=self.hotel)
+        #     amount = self.amount or 0
+        #     self.balance = current_balance + amount
 
         return super(AcctTrans, self).save(*args, **kwargs)
 
+    def update_balance(self):
+        if not self.balance:
+            self.balance = self.amount
+        else:
+            if self.trans_type.name == 'sms_used':
+                self.balance = AcctTrans.objects.get_balance(
+                    hotel=self.hotel, excludes=True) + self.amount
+            else:
+                self.balance = AcctTrans.objects.get_balance(hotel=self.hotel) + self.amount
 
-@receiver(post_save, sender=AcctTrans)
-def create_userprofile(sender, instance=None, created=False, **kwargs):
-    if not instance.balance:
-        instance.balance = AcctTrans.objects.get_balance(
-            hotel=instance.hotel,
-            excludes=AcctTrans.objects.get_balance_default_excludes
-        )
-        instance.save()
+
+# @receiver(post_save, sender=AcctTrans)
+# def update_acct_trans_balance(sender, instance=None, created=False, **kwargs):
+#     print "instance.balance:", instance.balance
+#     if instance.balance is None:
+#         instance.balance = AcctTrans.objects.get_balance(
+#             hotel=instance.hotel,
+#             excludes=AcctTrans.objects.get_balance_default_excludes
+#         )
+#         instance.save()

@@ -40,7 +40,7 @@ class PricingTests(TestCase):
 
         cost = self.hotel.pricing.get_cost(sms_used_count)
 
-        self.assertEqual(cost, sms_used_count * self.pricing.cost)
+        self.assertEqual(cost, -(sms_used_count * self.pricing.cost))
 
     def test_check_for_default_pricing(self):
         # only allow one Pricing Obj to have a blank Hotel FK
@@ -610,6 +610,62 @@ class AcctTransManagerTests(TransactionTestCase):
         self.assertIsNotNone(acct_trans.balance)
         self.assertEqual(acct_trans.amount, self.hotel.pricing.get_cost(message_count))
 
+    # update_hotel_sms_used
+
+    def test_update_hotel_sms_used(self):
+        init_acct_trans = create_acct_tran(self.hotel, self.sms_used, self.today)
+        addit_sms = 10
+        new_sms_used_count = init_acct_trans.sms_used + addit_sms
+
+        acct_trans = AcctTrans.objects.update_hotel_sms_used(
+            acct_trans=init_acct_trans,
+            hotel=self.hotel,
+            sms_used_count=new_sms_used_count
+        )
+
+        self.assertEqual(acct_trans.sms_used, new_sms_used_count)
+        self.assertEqual(acct_trans.amount, self.hotel.pricing.get_cost(new_sms_used_count))
+        print acct_trans.balance, init_acct_trans.balance
+        self.assertEqual(
+            acct_trans.balance,
+            init_acct_trans.balance + self.hotel.pricing.get_cost(addit_sms) # -50.00 for 10 SMS
+        )
+
+    ### Model Methods
+
+    # update_balance
+    
+    def test_update_balance_when_it_is_none(self):
+        acct_trans = create_acct_tran(self.hotel, self.init_amt, self.today)
+        acct_trans.balance = None
+
+        acct_trans.update_balance()
+
+        self.assertEqual(acct_trans.balance, acct_trans.amount)
+
+    def test_update_balance_adding_funds(self):
+        acct_trans = create_acct_tran(self.hotel, self.init_amt, self.today)
+        acct_trans.balance = -100 # balance won't be negative here (just need a false #...)
+
+        acct_trans.update_balance()
+
+        self.assertEqual(
+            acct_trans.balance,
+            AcctTrans.objects.get_balance(hotel=self.hotel) + acct_trans.amount
+        )
+
+    def test_update_balance_sms_used(self):
+        acct_trans = create_acct_tran(self.hotel, self.sms_used, self.today)
+        acct_trans.balance = -100 # balance won't be negative here (just need a false #...)
+
+        acct_trans.update_balance()
+
+        self.assertEqual(
+            acct_trans.balance,
+            (AcctTrans.objects.get_balance(hotel=self.hotel,
+                excludes=AcctTrans.objects.get_balance_default_excludes) + acct_trans.amount)
+        )
+
 
 class AcctTransTests(TransactionTestCase):
 
@@ -701,22 +757,20 @@ class AcctTransTests(TransactionTestCase):
         self.assertEqual(acct_tran.sms_used, 0)
 
     def test_rechare_amt_after_sms_used_that_balance_gets_calculated(self):
-        # signup
         init_acct_tran, created = AcctTrans.objects.get_or_create(hotel=self.hotel,
             trans_type=self.init_amt)
-        # use sms
-        amount = -200
-        balance = AcctTrans.objects.balance(self.hotel)
-        usage_acct_tran = AcctTrans.objects.create(hotel=self.hotel, trans_type=self.sms_used,
-            amount=amount, sms_used=amount, balance=(balance+amount))
 
         recharge_acct_tran, created = AcctTrans.objects.get_or_create(hotel=self.hotel,
             trans_type=self.recharge_amt)
+
         self.assertEqual(recharge_acct_tran.trans_type, self.recharge_amt)
         self.assertEqual(recharge_acct_tran.amount, self.acct_cost.recharge_amt)
+        
+        print recharge_acct_tran.__dict__, init_acct_tran.__dict__
+        
         self.assertEqual(
             recharge_acct_tran.balance,
-            (usage_acct_tran.balance + recharge_acct_tran.amount)
+            (init_acct_tran.balance + recharge_acct_tran.amount)
         )
 
     # 3. sms_used
