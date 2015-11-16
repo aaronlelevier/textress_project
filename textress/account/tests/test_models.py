@@ -411,6 +411,28 @@ class AcctTransManagerTests(TransactionTestCase):
 
         self.assertEqual(get_balance, sms_used_yesterday.balance)
 
+    # resolve_last_trans_balance
+
+    def test_resolve_last_trans_balance__when_none(self):
+        ret = AcctTrans.objects.resolve_last_trans_balance(None)
+
+        self.assertEqual(ret, 0)
+
+    def test_resolve_last_trans_balance__when_no_balance(self):
+        acct_trans = create_acct_tran(self.hotel, self.sms_used, self.yesterday)
+        acct_trans.balance = None
+
+        ret = AcctTrans.objects.resolve_last_trans_balance(acct_trans)
+
+        self.assertEqual(ret, 0)
+
+    def test_resolve_last_trans_balance__populated_balance_returns_as_is(self):
+        acct_trans = create_acct_tran(self.hotel, self.sms_used, self.yesterday)
+
+        ret = AcctTrans.objects.resolve_last_trans_balance(acct_trans)
+
+        self.assertEqual(ret, acct_trans.balance)
+
     # check_recharge_required
 
     def test_check_recharge_required_true(self):

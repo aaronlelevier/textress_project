@@ -397,10 +397,13 @@ class AcctTransManager(Dates, models.Manager):
         return self.get_queryset().balance(hotel)
 
     def get_balance(self, hotel, excludes=None):
+        """
+        Cheaply get the Hotel's Funds 'balance' without Summing all
+        acct_trans record amounts.
+        """
         qs = self.filter(hotel=hotel)
 
         if excludes:
-            # qs = qs.exclude(**excludes)
             qs = qs.exclude(
                 Q(trans_type=self.trans_types.sms_used) & \
                 Q(insert_date=self._today)    
@@ -408,6 +411,10 @@ class AcctTransManager(Dates, models.Manager):
 
         last_acct_trans = qs.order_by('modified').last()
 
+        return self.resolve_last_trans_balance(last_acct_trans)
+
+    @staticmethod
+    def resolve_last_trans_balance(last_acct_trans):
         try:
             if not last_acct_trans.balance:
                 balance = 0
