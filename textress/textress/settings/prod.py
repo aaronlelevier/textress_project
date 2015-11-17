@@ -20,6 +20,9 @@ DATABASES = {
     }
 }
 
+STRIPE_SECRET_KEY = os.environ['STRIPE_LIVE_SECRET_KEY']
+STRIPE_PUBLIC_KEY = os.environ['STRIPE_LIVE_PUBLIC_KEY']
+
 # HTTPS
 # os.environ['HTTPS'] = "on"
 # os.environ['wsgi.url_scheme'] = 'https'

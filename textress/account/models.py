@@ -367,8 +367,8 @@ class AcctTransManager(Dates, models.Manager):
             "enough funds to process this transaction."
         )
 
-    def charge_hotel(self, hotel, amount):
-        # TODO: Fake 'Stripe' Card testing needed
+    @staticmethod
+    def charge_hotel(hotel, amount):
         try:
             charge = Charge.objects.stripe_create(hotel, amount)
         except stripe.error.CardError as e:

@@ -200,15 +200,8 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.TokenAuthentication',
-        # 'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     ),
 }
-
-# JWT_AUTH = {
-#     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=14),
-#     'JWT_ALLOW_REFRESH': True,
-#     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=14)
-# }
 
 
 ### TWILIO
@@ -222,27 +215,23 @@ PHONE_NUMBER_TEST = os.environ['TWILIO_PHONE_NUMBER_TEST']
 TWILIO_ACCOUNT_SID_TEST = os.environ['TWILIO_ACCOUNT_SID_TEST']
 TWILIO_AUTH_TOKEN_TEST = os.environ['TWILIO_AUTH_TOKEN_TEST']
 
-
-### STRIPE
-
-if DEBUG:
-    STRIPE_SECRET_KEY = os.environ['STRIPE_TEST_SECRET_KEY']
-    STRIPE_PUBLIC_KEY = os.environ['STRIPE_TEST_PUBLIC_KEY']
-else:
-    STRIPE_SECRET_KEY = os.environ['STRIPE_LIVE_SECRET_KEY']
-    STRIPE_PUBLIC_KEY = os.environ['STRIPE_LIVE_PUBLIC_KEY']
-
 TWILIO_RESOURCE_URI = "www.twilio.com/2010-01-01/Accounts/"+TWILIO_ACCOUNT_SID
 
 
-### REDIS ###
+### STRIPE
+
+STRIPE_SECRET_KEY = os.environ['STRIPE_TEST_SECRET_KEY']
+STRIPE_PUBLIC_KEY = os.environ['STRIPE_TEST_PUBLIC_KEY']
+
+
+### REDIS
 
 SESSION_ENGINE = 'redis_sessions.session'
 
 SESSION_REDIS_PREFIX = 'session'
 
 
-### DJANGO-WEBSOCKET-REDIS ###
+### DJANGO-WEBSOCKET-REDIS
 
 WEBSOCKET_URL = '/ws/'
 

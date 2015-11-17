@@ -21,6 +21,7 @@ from concierge.models import Guest, Message
 from concierge.tests.factory import make_guests, make_messages
 from main.models import Subaccount
 from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
+from payment.models import Charge, Customer
 from utils import create
 from utils.exceptions import AutoRechargeOffExcp
 
@@ -330,6 +331,8 @@ class AcctTransQuerySetTests(TestCase):
 
 class AcctTransManagerTests(TransactionTestCase):
 
+    fixtures = ['payment.json']
+
     def setUp(self):
         # Hotel
         self.hotel = create_hotel()
@@ -600,6 +603,20 @@ class AcctTransManagerTests(TransactionTestCase):
         with self.assertRaises(AutoRechargeOffExcp):
             AcctTrans.objects.handle_auto_recharge_failed(self.hotel)
         self.assertFalse(self.hotel.active)
+
+    # charge_hotel
+
+    def test_charge_hotel(self):
+        customer = Customer.objects.first()
+        self.assertIsInstance(customer, Customer)
+        self.hotel.customer = customer
+        self.hotel.save()
+        init_charges = Charge.objects.count()
+        amount = 1000
+
+        AcctTrans.objects.charge_hotel(self.hotel, amount)
+
+        self.assertEqual(Charge.objects.count(), init_charges+1)
 
     # update_or_create_sms_used
 

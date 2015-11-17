@@ -1,13 +1,63 @@
 [
 {
   "fields": {
-    "email": "",
-    "modified": "2015-07-25T15:03:34.633Z",
-    "short_pk": "7xxfuithl0",
-    "created": "2015-07-25T15:03:34.633Z"
+    "email": "pyaaron@gmail.com",
+    "modified": "2015-10-02T13:54:25.897Z",
+    "short_pk": "6J8kmS3CMz",
+    "created": "2015-10-02T13:54:25.897Z"
   },
   "model": "payment.customer",
-  "pk": "cus_6Kys7xxfuithl0"
+  "pk": "cus_75fJ6J8kmS3CMz"
+},
+{
+  "fields": {
+    "email": "pyaaron@gmail.com",
+    "modified": "2015-10-02T13:56:13.386Z",
+    "short_pk": "RVYepQZ6E3",
+    "created": "2015-10-02T13:56:13.386Z"
+  },
+  "model": "payment.customer",
+  "pk": "cus_75fLRVYepQZ6E3"
+},
+{
+  "fields": {
+    "email": "pyaaron@gmail.com",
+    "modified": "2015-10-02T14:03:06.957Z",
+    "short_pk": "zMGewUsW7i",
+    "created": "2015-10-02T14:03:06.957Z"
+  },
+  "model": "payment.customer",
+  "pk": "cus_75fSzMGewUsW7i"
+},
+{
+  "fields": {
+    "email": "pyaaron@gmail.com",
+    "modified": "2015-10-02T14:07:19.266Z",
+    "short_pk": "UbM8dV8R8G",
+    "created": "2015-10-02T14:07:19.266Z"
+  },
+  "model": "payment.customer",
+  "pk": "cus_75fWUbM8dV8R8G"
+},
+{
+  "fields": {
+    "email": "pyaaron@gmail.com",
+    "modified": "2015-11-01T20:13:04.169Z",
+    "short_pk": "Zz8muUKVIc",
+    "created": "2015-11-01T20:13:04.169Z"
+  },
+  "model": "payment.customer",
+  "pk": "cus_7H0CZz8muUKVIc"
+},
+{
+  "fields": {
+    "email": "aaron.y.lelevier@gmail.com",
+    "modified": "2015-11-07T22:33:06.242Z",
+    "short_pk": "syYNWZNyqG",
+    "created": "2015-11-07T22:33:06.242Z"
+  },
+  "model": "payment.customer",
+  "pk": "cus_7JHosyYNWZNyqG"
 },
 {
   "fields": {
@@ -59,19 +109,157 @@
 },
 {
   "fields": {
-    "customer": "cus_6Kys7xxfuithl0",
-    "exp_month": 5,
-    "short_pk": "kK2KWn8E5Q",
-    "created": "2015-08-02T15:22:48.153Z",
+    "customer": "cus_75fLRVYepQZ6E3",
+    "exp_month": 1,
+    "short_pk": "kKJN2czUIT",
+    "created": "2015-10-02T13:56:13.815Z",
     "default": true,
-    "image": null,
-    "expires": "05/2015",
-    "modified": "2015-08-02T15:22:48.153Z",
+    "image": 1,
+    "expires": "01/2017",
+    "modified": "2015-10-02T13:56:13.815Z",
     "last4": 4242,
-    "exp_year": 2015,
+    "exp_year": 2017,
     "brand": "Visa"
   },
   "model": "payment.card",
-  "pk": "card_168Iv02DyompLxkK2KWn8E5Q"
+  "pk": "card_16rU122DyompLxkKJN2czUIT"
+},
+{
+  "fields": {
+    "customer": "cus_75fSzMGewUsW7i",
+    "exp_month": 1,
+    "short_pk": "kKNr68vM7o",
+    "created": "2015-10-02T14:03:07.408Z",
+    "default": true,
+    "image": 1,
+    "expires": "01/2017",
+    "modified": "2015-10-02T14:03:07.408Z",
+    "last4": 4242,
+    "exp_year": 2017,
+    "brand": "Visa"
+  },
+  "model": "payment.card",
+  "pk": "card_16rU7i2DyompLxkKNr68vM7o"
+},
+{
+  "fields": {
+    "customer": "cus_75fWUbM8dV8R8G",
+    "exp_month": 1,
+    "short_pk": "kKJhcszcMO",
+    "created": "2015-10-22T12:39:48.643Z",
+    "default": false,
+    "image": 2,
+    "expires": "01/2016",
+    "modified": "2015-10-22T13:04:52.093Z",
+    "last4": 8210,
+    "exp_year": 2016,
+    "brand": "MasterCard"
+  },
+  "model": "payment.card",
+  "pk": "card_16yiMA2DyompLxkKJhcszcMO"
+},
+{
+  "fields": {
+    "customer": "cus_75fWUbM8dV8R8G",
+    "exp_month": 1,
+    "short_pk": "kK1i3IwUFm",
+    "created": "2015-10-22T13:04:52.104Z",
+    "default": false,
+    "image": 4,
+    "expires": "01/2016",
+    "modified": "2015-10-22T13:12:35.037Z",
+    "last4": 1117,
+    "exp_year": 2016,
+    "brand": "Discover"
+  },
+  "model": "payment.card",
+  "pk": "card_16yikR2DyompLxkK1i3IwUFm"
+},
+{
+  "fields": {
+    "customer": "cus_75fWUbM8dV8R8G",
+    "exp_month": 1,
+    "short_pk": "kKtlOoJDqI",
+    "created": "2015-10-22T13:12:35.047Z",
+    "default": true,
+    "image": 4,
+    "expires": "01/2018",
+    "modified": "2015-10-22T13:12:35.047Z",
+    "last4": 9424,
+    "exp_year": 2018,
+    "brand": "Discover"
+  },
+  "model": "payment.card",
+  "pk": "card_16yirs2DyompLxkKtlOoJDqI"
+},
+{
+  "fields": {
+    "customer": "cus_7H0CZz8muUKVIc",
+    "exp_month": 1,
+    "short_pk": "kKkp2Tflva",
+    "created": "2015-11-01T20:13:04.690Z",
+    "default": true,
+    "image": 1,
+    "expires": "01/2018",
+    "modified": "2015-11-01T20:13:04.690Z",
+    "last4": 4242,
+    "exp_year": 2018,
+    "brand": "Visa"
+  },
+  "model": "payment.card",
+  "pk": "card_172SCH2DyompLxkKkp2Tflva"
+},
+{
+  "fields": {
+    "customer": "cus_7JHosyYNWZNyqG",
+    "exp_month": 1,
+    "short_pk": "kKw7DWe1gM",
+    "created": "2015-11-07T22:33:06.901Z",
+    "default": true,
+    "image": 1,
+    "expires": "01/2017",
+    "modified": "2015-11-07T22:33:06.901Z",
+    "last4": 4242,
+    "exp_year": 2017,
+    "brand": "Visa"
+  },
+  "model": "payment.card",
+  "pk": "card_174fF62DyompLxkKw7DWe1gM"
+},
+{
+  "fields": {
+    "customer": "cus_75fSzMGewUsW7i",
+    "short_pk": "kKgbislkUM",
+    "created": "2015-10-02T14:03:12.601Z",
+    "modified": "2015-10-02T14:03:12.601Z",
+    "amount": 1000,
+    "card": "card_16rU7i2DyompLxkKNr68vM7o"
+  },
+  "model": "payment.charge",
+  "pk": "ch_16rU7j2DyompLxkKgbislkUM"
+},
+{
+  "fields": {
+    "customer": "cus_7H0CZz8muUKVIc",
+    "short_pk": "kKPfZ7m1ep",
+    "created": "2015-11-01T20:13:09.110Z",
+    "modified": "2015-11-01T20:13:09.110Z",
+    "amount": 500,
+    "card": "card_172SCH2DyompLxkKkp2Tflva"
+  },
+  "model": "payment.charge",
+  "pk": "ch_172SCJ2DyompLxkKPfZ7m1ep"
+},
+{
+  "fields": {
+    "customer": "cus_7JHosyYNWZNyqG",
+    "short_pk": "kKM3ZNlk0w",
+    "created": "2015-11-07T22:33:11.236Z",
+    "modified": "2015-11-07T22:33:11.236Z",
+    "amount": 500,
+    "card": "card_174fF62DyompLxkKw7DWe1gM"
+  },
+  "model": "payment.charge",
+  "pk": "ch_174fF92DyompLxkKM3ZNlk0w"
 }
 ]
