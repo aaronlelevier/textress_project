@@ -12,6 +12,7 @@ from django.contrib.auth.models import User, Group
 from django.utils import timezone
 
 from model_mommy import mommy
+import stripe
 
 from account.models import (Dates, Pricing, TransType, TransTypeCache, AcctCost, AcctStmt,
     AcctTrans, TRANS_TYPES, INIT_CHARGE_AMOUNT, CHARGE_AMOUNTS, BALANCE_AMOUNTS)
@@ -607,16 +608,44 @@ class AcctTransManagerTests(TransactionTestCase):
     # charge_hotel
 
     def test_charge_hotel(self):
+        # customer
         customer = Customer.objects.first()
         self.assertIsInstance(customer, Customer)
         self.hotel.customer = customer
         self.hotel.save()
+        # charge
         init_charges = Charge.objects.count()
         amount = 1000
 
         AcctTrans.objects.charge_hotel(self.hotel, amount)
 
         self.assertEqual(Charge.objects.count(), init_charges+1)
+
+    # TODO: Stripe Payment tests need to be verified first. ``CardError`` is not being raised here.
+    def test_charge_hotel__card_error(self):
+        # No Stripe ``Customer``, so will raise an error (just make sure Error bubbles
+        # up basically, and this section of the logic is triggered)
+
+        # customer
+        customer = Customer.objects.first()
+        self.assertIsInstance(customer, Customer)
+        self.hotel.customer = customer
+        self.hotel.save()
+        # card
+        card = customer.cards.filter(default=True)[0]
+        card.stripe_object.exp_month = 10
+        card.stripe_object.exp_year = 2014
+        card.stripe_object.save()
+        # setup tests
+        self.assertTrue(self.hotel.active)
+        init_charges = Charge.objects.count()
+        amount = 1000
+
+        with self.assertRaises(stripe.error.CardError):
+            AcctTrans.objects.charge_hotel(self.hotel, amount)
+
+        self.assertEqual(Charge.objects.count(), init_charges)
+        self.assertFalse(self.hotel.active)
 
     # update_or_create_sms_used
 

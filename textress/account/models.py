@@ -339,18 +339,13 @@ class AcctTransManager(Dates, models.Manager):
             self.recharge(hotel, recharge_amt)
 
     def recharge(self, hotel, recharge_amt):
-        # balance = self.balance(hotel)
-        # amount = self.amount_to_recharge(hotel, balance)
-
-        # ISSUE: in 'test', Charge card is being called, which is slowing down 
-        #   tests, and failing b/c doesn't have the correct Customer/Card combination
         if not hotel.acct_cost.auto_recharge:
-            # ``auto_charge`` is OFF and the Account Balance is not 
-            # enough to process the transaction.
             self.handle_auto_recharge_failed(hotel)
 
+        # if ``charge_hotel`` is called here, all ``recharge`` tests will need a Stripe
+        # Customer in order to pass, and will run slow b/c have to hit the Stripe API ea time.
         if 'test' not in sys.argv:
-            self.charge_hotel(hotel, amount)
+            self.charge_hotel(hotel, recharge_amt)
 
         return self.create(
             hotel=hotel,
