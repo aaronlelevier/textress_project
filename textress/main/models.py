@@ -236,6 +236,8 @@ class Hotel(TwilioClient, BaseModel):
         """
         return Subaccount.objects.get_or_create(self)
 
+    # TODO: Test ``activate / deactivate`` for Twilio API
+
     def activate(self):
         # account = self.client.accounts.update(self.twilio_sid, status="active")
         self.active = True

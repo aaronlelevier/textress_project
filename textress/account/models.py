@@ -338,6 +338,46 @@ class AcctTransManager(Dates, models.Manager):
             recharge_amt = self.calculate_recharge_amount(hotel, balance)
             self.recharge(hotel, recharge_amt)
 
+    def recharge(self, hotel, recharge_amt):
+        # balance = self.balance(hotel)
+        # amount = self.amount_to_recharge(hotel, balance)
+
+        # ISSUE: in 'test', Charge card is being called, which is slowing down 
+        #   tests, and failing b/c doesn't have the correct Customer/Card combination
+        if not hotel.acct_cost.auto_recharge:
+            # ``auto_charge`` is OFF and the Account Balance is not 
+            # enough to process the transaction.
+            self.handle_auto_recharge_failed(hotel)
+
+        if 'test' not in sys.argv:
+            self.charge_hotel(hotel, amount)
+
+        return self.create(
+            hotel=hotel,
+            trans_type=self.trans_types.recharge_amt,
+            amount=recharge_amt
+        )
+
+    @staticmethod
+    def handle_auto_recharge_failed(hotel):
+        email.send_auto_recharge_failed_email(hotel)
+        hotel.deactivate()
+        raise AutoRechargeOffExcp(
+            "Auto-recharge is off, and the account doesn't have "
+            "enough funds to process this transaction."
+        )
+
+    def charge_hotel(self, hotel, amount):
+        # TODO: Fake 'Stripe' Card testing needed
+        try:
+            charge = Charge.objects.stripe_create(hotel, amount)
+        except stripe.error.CardError as e:
+              email.send_charge_failed_email(hotel, amount)
+              hotel.deactivate()
+              raise e("Recharge account failed.")
+        else:
+            email.send_account_charged_email(hotel, charge)
+
     # TODO: If "auto-recharge" is set to OFF, it is the recharge() method that 
     # should raise this error. Test this tomorrow that ``recharge`` is working as planned
 
@@ -468,38 +508,12 @@ class AcctTransManager(Dates, models.Manager):
     def calculate_recharge_amount(hotel, balance):
         return hotel.acct_cost.recharge_amt - balance
 
-    def recharge(self, hotel, recharge_amt):
-        # balance = self.balance(hotel)
-        # amount = self.amount_to_recharge(hotel, balance)
-
-        # ISSUE: in 'test', Charge card is being called, which is slowing down 
-        #   tests, and failing b/c doesn't have the correct Customer/Card combination
-        if 'test' not in sys.argv:
-            self.charge_hotel(hotel, amount)
-
-        return self.create(
-            hotel=hotel,
-            trans_type=self.trans_types.recharge_amt,
-            amount=recharge_amt
-        )
-
     ### LEGACY METHODS THAT ARE STILL "NEED TO BE REFACTORED WIP" ###
 
     ### CHARGE ACCOUNT SUPPORT METHODS
 
     # def amount_to_recharge(self, hotel, balance):
     #     return hotel.acct_cost.recharge_amt - balance
-
-    def charge_hotel(self, hotel, amount):
-        # TODO: Fake 'Stripe' Card testing needed
-        try:
-            charge = Charge.objects.stripe_create(hotel, amount)
-        except stripe.error.CardError as e:
-              email.send_charge_failed_email(hotel, amount)
-              hotel.deactivate()
-              raise e("Recharge account failed.")
-        else:
-            email.send_account_charged_email(hotel, charge)
 
     # def check_balance(self, hotel):
     #     """

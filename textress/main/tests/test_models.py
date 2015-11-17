@@ -175,12 +175,16 @@ class HotelTests(TestCase):
         self.hotel.active = False
         self.hotel.save()
         self.assertFalse(self.hotel.active)
+
         self.hotel.activate()
+
         self.assertTrue(self.hotel.active)
 
     def test_deactivate(self):
         self.assertTrue(self.hotel.active)
+
         self.hotel.deactivate()
+
         self.assertFalse(self.hotel.active)
         
 

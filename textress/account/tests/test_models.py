@@ -584,6 +584,23 @@ class AcctTransManagerTests(TransactionTestCase):
             trans_type=self.recharge_amt).count()
         self.assertEqual(post_recharges, init_recharges)
 
+    # recharge
+
+    def test_recharge__auto_recharge_off(self):
+        self.hotel.acct_cost.auto_recharge = False
+        self.hotel.acct_cost.save()
+
+        with self.assertRaises(AutoRechargeOffExcp):
+            AcctTrans.objects.recharge(self.hotel, self.hotel.acct_cost.recharge_amt)
+        self.assertFalse(self.hotel.active)
+
+    # handle_auto_recharge_failed
+
+    def test_handle_auto_recharge_failed(self):
+        with self.assertRaises(AutoRechargeOffExcp):
+            AcctTrans.objects.handle_auto_recharge_failed(self.hotel)
+        self.assertFalse(self.hotel.active)
+
     # update_or_create_sms_used
 
     def test_update_or_create_sms_used__create(self):
@@ -861,19 +878,3 @@ class AcctTransTests(TransactionTestCase):
         AcctTrans.objects.check_balance(self.hotel)
         post_trans = AcctTrans.objects.filter(hotel=self.hotel, trans_type=self.recharge_amt).count()
         self.assertEqual(pre_trans+1, post_trans)
-
-    def test_check_balance_auto_recharge_off(self):
-        # Twilio Subaccount
-        # subaccount, _ = Subaccount.objects.get_or_create(self.hotel)
-        # set 'balance = 0'
-        balance = AcctTrans.objects.balance(self.hotel)
-        AcctTrans.objects.create(
-            hotel=self.hotel,
-            amount= -balance,
-            trans_type=self.sms_used
-        )
-        self.acct_cost.auto_recharge = False
-        self.acct_cost.save()
-        # triggering a 'recharge()' will now raise an error b/c 'auto_recharge' is OFF
-        with self.assertRaises(AutoRechargeOffExcp):
-            AcctTrans.objects.check_balance(self.hotel)
