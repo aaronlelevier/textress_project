@@ -103,6 +103,8 @@ class PaymentEmailTests(TestCase):
 
 class BillingSummaryTests(TransactionTestCase):
 
+    fixtures = ['trans_type.json']
+
     def setUp(self):
         # Users
         create._get_groups_and_perms()

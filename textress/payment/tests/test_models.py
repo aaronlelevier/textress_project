@@ -19,6 +19,7 @@ class StripeClientTests(TestCase):
     def test_init(self):
         sc = StripeClient()
         self.assertIsInstance(sc, StripeClient)
+        self.assertTrue(hasattr(sc, 'stripe'))
         self.assertIsNotNone(sc.stripe.api_key)
 
 
@@ -26,7 +27,7 @@ class PmtBaseModelTests(TestCase):
 
     def test_short_pk(self):
         self.customer = factory.customer()
-        self.assertEqual(len(self.customer.short_pk), 10)
+        self.assertEqual(self.customer.short_pk, self.customer.id[-10:])
 
 
 class CustomerTests(TestCase):
