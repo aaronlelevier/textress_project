@@ -5,10 +5,10 @@ from django.test import TestCase
 from django.core.exceptions import ValidationError
 
 from main.models import Subaccount
-from main.tests.factory import create_hotel, make_subaccount
+from main.tests.factory import create_hotel, create_hotel_user, make_subaccount
 from payment.models import StripeClient, Customer, Card, Charge, Refund
 from payment.tests import factory
-
+from utils import create
 
 # Set Stripe Key for All tests
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -33,7 +33,15 @@ class PmtBaseModelTests(TestCase):
 class CustomerTests(TestCase):
 
     def setUp(self):
+        create._get_groups_and_perms()
+        self.hotel = create_hotel()
+        self.user = create_hotel_user(self.hotel, group='hotel_admin')
         self.customer = factory.customer()
+
+    def test_stripe_create__raise_error(self):
+        with self.assertRaises(stripe.error.StripeError):
+            Customer.objects.stripe_create(hotel=self.hotel, token='foo',
+                email=self.user.email)
 
     def test_stripe_attr(self):
         self.assertTrue(hasattr(self.customer, 'stripe'))

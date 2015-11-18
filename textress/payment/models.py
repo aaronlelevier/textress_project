@@ -50,6 +50,7 @@ class PmtBaseModel(StripeClient, models.Model):
 ############
 # CUSTOMER #
 ############
+
 class CustomerManager(StripeClient, models.Manager):
 
     def stripe_create(self, hotel, token, email):
@@ -60,7 +61,7 @@ class CustomerManager(StripeClient, models.Manager):
                 description=email,
                 email=email
             )
-        except self.stripe.error.InvalidRequestError:
+        except self.stripe.error.StripeError:
             raise
         else:
             customer = self.create(
