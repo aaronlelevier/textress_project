@@ -71,6 +71,12 @@ class CustomerManager(StripeClient, models.Manager):
             hotel.update_customer(customer)
             return customer
 
+    def get_stripe_customer(self, id):
+        try:
+            return self.stripe.Customer.retrieve(id)
+        except self.stripe.error.StripeError:
+            raise
+
 
 class Customer(PmtBaseModel):
     """
@@ -164,18 +170,27 @@ class CardManager(StripeClient, models.Manager):
 
         `token` arg: used to create new Card.
         '''
-        try:
-            stripe_customer = self.stripe.Customer.retrieve(customer.id)
-            if token:
-                stripe_card = stripe_customer.cards.create(card=token)
-            else:
-                stripe_card = stripe_customer.cards.retrieve(stripe_customer.default_card)
-        except self.stripe.error.StripeError:
-            raise
+        stripe_customer = Customer.objects.get_stripe_customer(customer.id)
+
+        if token:
+            stripe_card = stripe_customer.cards.create(card=token)
         else:
-            return self.create(id=stripe_card.id, customer=customer,
-                brand=stripe_card.brand, last4=stripe_card.last4,
-                exp_month=stripe_card.exp_month, exp_year=stripe_card.exp_year)
+            stripe_card = stripe_customer.cards.retrieve(stripe_customer.default_card)
+
+        return self.get_or_create_card(customer, stripe_card)
+
+    def get_or_create_card(self, customer, stripe_card):
+        try:
+            return self.get(id=stripe_card.id)
+        except Card.DoesNotExist:
+            return self.create(
+                id=stripe_card.id,
+                customer=customer,
+                brand=stripe_card.brand,
+                last4=stripe_card.last4,
+                exp_month=stripe_card.exp_month,
+                exp_year=stripe_card.exp_year
+            )
 
     def delete_card(self, customer, id_):
         "Validate the Card before deleting it."

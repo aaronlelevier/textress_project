@@ -43,6 +43,15 @@ class CustomerTests(TestCase):
             Customer.objects.stripe_create(hotel=self.hotel, token='foo',
                 email=self.user.email)
 
+    def test_get_stripe_customer(self):
+        stripe_customer = Customer.objects.get_stripe_customer(self.customer.id)
+
+        self.assertIsInstance(stripe_customer, stripe.resource.Customer)
+
+    def test_get_stripe_customer__raise_error(self):
+        with self.assertRaises(stripe.error.StripeError):
+            stripe_customer = Customer.objects.get_stripe_customer('not-a-valid-customer-id')
+
     def test_stripe_attr(self):
         self.assertTrue(hasattr(self.customer, 'stripe'))
 
@@ -116,73 +125,103 @@ class CardManagerTests(TestCase):
         self.assertEqual(Card.objects.filter(customer=self.customer, default=True).count(), 1)
         self.assertEqual(card.id, self.card2.id)
 
+    def test_stripe_create__card_already_in_db(self):
+        init_count = Card.objects.count()
+        card = Card.objects.stripe_create(self.customer)
+
+        self.assertIsInstance(card, Card)
+        # counts
+        post_count = Card.objects.count()
+        self.assertEqual(init_count, post_count)
+
+    def test_get_or_create_card__get(self):
+        init_count = Card.objects.count()
+        stripe_card = self.card.stripe_object
+        card = Card.objects.get_or_create_card(self.customer, stripe_card)
+
+        self.assertIsInstance(card, Card)
+        # counts
+        post_count = Card.objects.count()
+        self.assertEqual(init_count, post_count)
+
+    def test_get_or_create_card__create(self):
+        stripe_card = self.card.stripe_object
+        self.card.delete()
+        init_count = Card.objects.count()
+        card = Card.objects.get_or_create_card(self.customer, stripe_card)
+
+        self.assertIsInstance(card, Card)
+        # counts
+        post_count = Card.objects.count()
+        self.assertEqual(post_count, init_count+1)
+
     def test_delete_card(self):
         Card.objects.delete_card(self.customer, self.card.id)
         with self.assertRaises(Card.DoesNotExist):
             Card.objects.get(id=self.card.id)
 
 
-# class CardTests(TestCase):
+class CardTests(TestCase):
 
-#     def setUp(self):
-#         self.customer = factory.customer()
-#         self.card = factory.card(customer_id=self.customer.id)
+    def setUp(self):
+        self.customer = factory.customer()
+        self.card = factory.card(customer_id=self.customer.id)
 
-#     ### Save Logic
+    ### Save Logic
 
-#     def test_default(self):
-#         self.assertTrue(self.card.default)
+    def test_default(self):
+        self.assertTrue(self.card.default)
 
-#     def test_stripe_object_attr(self):
-#         self.assertIsInstance(
-#             self.customer.stripe_object,
-#             stripe.resource.Customer
-#         )
+    def test_stripe_object_attr(self):
+        self.assertIsInstance(
+            self.customer.stripe_object,
+            stripe.resource.Customer
+        )
 
-#     def test_expires(self):
-#         self.assertIsInstance(self.card.expires, str)
+    def test_expires(self):
+        self.assertIsInstance(self.card.expires, str)
 
-#     def test_image(self):
-#         self.assertTrue(self.card.image)
-
-
-# class ChargeManagerTests(TestCase):
-
-#     def setUp(self):
-#         self.hotel = create_hotel()
-#         self.subaccount = make_subaccount(self.hotel)
-#         self.customer = factory.customer()
-#         self.card = factory.card(self.customer.id)
-#         self.hotel.update_customer(self.customer)
-
-#     def test_stripe_create(self):
-#         amount = 1000
-#         init_charges = stripe.Charge.all(customer=self.customer, limit=100)
-#         charge = Charge.objects.stripe_create(self.hotel, amount)
-#         post_charges = stripe.Charge.all(customer=self.customer, limit=100)
-
-#         # Stripe charge posted
-#         self.assertIsInstance(
-#             stripe.Charge.retrieve(charge.id),
-#             stripe.resource.Charge
-#         )
-
-#         # Subaccount now exists
-#         self.assertIsInstance(self.hotel.subaccount, Subaccount)
-
-#         # DB record created
-#         self.assertIsInstance(charge, Charge)
-#         self.assertEqual(charge.card, self.card)
-#         self.assertEqual(charge.customer, self.customer)
+    def test_image(self):
+        self.assertTrue(self.card.image)
 
 
-# class ChargeTests(TestCase):
+class ChargeManagerTests(TestCase):
 
-#     def setUp(self):
-#         self.charge = factory.charge()
+    def setUp(self):
+        self.hotel = create_hotel()
+        self.subaccount = make_subaccount(self.hotel)
+        self.customer = factory.customer()
+        self.card = factory.card(self.customer.id)
+        self.hotel.update_customer(self.customer)
 
-#     def test_stripe_object_attr(self):
-#         self.assertIsInstance(
-#             self.charge.stripe_object,
-#             stripe.resource.Charge
-#         )
+    def test_stripe_create(self):
+        amount = 1000
+        init_charges = stripe.Charge.all(customer=self.customer, limit=100)
+        charge = Charge.objects.stripe_create(self.hotel, amount)
+        post_charges = stripe.Charge.all(customer=self.customer, limit=100)
+
+        # Stripe charge posted
+        self.assertIsInstance(
+            stripe.Charge.retrieve(charge.id),
+            stripe.resource.Charge
+        )
+
+        # Subaccount now exists
+        self.assertIsInstance(self.hotel.subaccount, Subaccount)
+
+        # DB record created
+        self.assertIsInstance(charge, Charge)
+        self.assertEqual(charge.card, self.card)
+        self.assertEqual(charge.customer, self.customer)
+
+
+class ChargeTests(TestCase):
+
+    def setUp(self):
+        self.charge = factory.charge()
+
+    def test_stripe_object_attr(self):
+        self.assertIsInstance(
+            self.charge.stripe_object,
+            stripe.resource.Charge
+        )
