@@ -126,8 +126,8 @@ class CardManager(StripeClient, models.Manager):
         try:
             card = self.get(customer=customer, id=id_)
         except Card.DoesNotExist:
-            raise ValidationError("The Card does not exist for \
-customer: {}".format(customer))
+            raise ValidationError(
+                "The Card does not exist for customer: {}".format(customer))
         return card
 
     def _set_default(self, customer, id_):
@@ -140,9 +140,7 @@ customer: {}".format(customer))
 
     def _update_non_defaults(self, customer, id_):
         "All other 'non-default' cards are set as default=False."
-        for card in self.filter(customer=customer, default=True).exclude(id=id_):
-            card.default = False
-            card.save()
+        self.filter(customer=customer, default=True).exclude(id=id_).update(default=False)
 
     def _update_stripe_default(self, customer, id_):
         "Update `default card` on Stripe Customer Obj."
@@ -156,9 +154,7 @@ customer: {}".format(customer))
         `id_` is the "default card id"
         '''
         self._validate_card(customer, id_)
-        # The defalt ``Card``
         card = self._set_default(customer, id_)
-        self._update_non_defaults(customer, id_)
         self._update_stripe_default(customer, id_)
         return card
         
