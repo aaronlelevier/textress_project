@@ -38,6 +38,8 @@ class HotelTests(TestCase):
         self.admin = create_hotel_user(self.hotel, group="hotel_admin")
         self.user = create_hotel_user(self.hotel)
 
+        self.sub = make_subaccount(self.hotel, live=True)
+
         # AcctTrans, TransType, etc...
         self.sms_used, _ = TransType.objects.get_or_create(name='sms_used')
         # Guest
@@ -142,26 +144,9 @@ class HotelTests(TestCase):
 
         self.assertEqual(cache.get(self.hotel.redis_key), 3)
 
-    # NOTE: Passes, but w/o the below test, is not needed
-    # def test_check_sms_count(self):
-    #     self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel, trans_type=self.sms_used).count(), 0)
-
-    #     self.hotel.check_sms_count()
-
-    #     self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel, trans_type=self.sms_used).count(), 0)
-
-    # FAILING TEST: can't currently calculate "sms_used" for same day, only a past date
-    # def test_check_sms_count_create_sms_used_acct_trans(self):
-    #     AcctCost.objects.get_or_create(hotel=self.hotel)
-    #     self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel, trans_type=self.sms_used).count(), 0)
-    #     self.hotel.redis_incr_sms_count()
-
-    #     with self.settings(CHECK_SMS_LIMIT=1):
-    #         self.hotel.check_sms_count()
-
-    #         self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel, trans_type=self.sms_used).count(), 1)
-
     def test_get_or_create_subaccount(self):
+        self.hotel.subaccount.delete(override=True)
+
         with self.assertRaises(Subaccount.DoesNotExist):
             Subaccount.objects.get(hotel=self.hotel)
 
@@ -186,6 +171,9 @@ class HotelTests(TestCase):
         self.hotel.deactivate()
 
         self.assertFalse(self.hotel.active)
+        # reactivate Hotel b/c Live Twilio Subaccount is linked 
+        # (even tho account only for test purposes)
+        self.hotel.activate()
         
 
 class UserProfileTests(TestCase):
@@ -260,3 +248,13 @@ class SubaccountTests(TestCase):
         self.assertEqual(self.hotel.twilio_sid, self.sub.sid)
         self.assertEqual(self.hotel.twilio_auth_token, self.sub.auth_token)
         self.assertIsInstance(self.hotel._client, TwilioRestClient)
+
+    ### Model Tests
+
+    def test_activate(self):
+        self.assertEqual(self.sub.activate(), 'active')
+
+    def test_deactivate(self):
+        self.assertEqual(self.sub.deactivate(), 'suspended')
+        # set back to "active" b/c this is a live Twilio Subaccount
+        self.assertEqual(self.sub.activate(), 'active')

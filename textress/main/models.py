@@ -236,16 +236,14 @@ class Hotel(TwilioClient, BaseModel):
         """
         return Subaccount.objects.get_or_create(self)
 
-    # TODO: Test ``activate / deactivate`` for Twilio API
-
     def activate(self):
-        # account = self.client.accounts.update(self.twilio_sid, status="active")
+        self.subaccount.activate()
         self.active = True
         self.save()
         return self
 
     def deactivate(self):
-        # account = self.client.accounts.update(self.twilio_sid, status="suspended")
+        self.subaccount.deactivate()
         self.active = False
         self.save()
         return self
@@ -405,6 +403,14 @@ class Subaccount(BaseModel):
     @property
     def twilio_object(self):
         return self.client.accounts.get(self.sid)
+
+    def activate(self):
+        account = self.client.accounts.update(self.sid, status="active")
+        return account.status
+
+    def deactivate(self):
+        account = self.client.accounts.update(self.sid, status="suspended")
+        return account.status
 
 
 """ DRF Token Auth (NOT IN USE !!) """

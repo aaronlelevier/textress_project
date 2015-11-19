@@ -275,9 +275,7 @@ class ChargeManager(StripeClient, models.Manager):
         hotel.get_or_create_subaccount()
         hotel.activate()
 
-        # TODO: Will this always succeed, and does it grab the primary Card?
-        # DB Card
-        card = Card.objects.get(id=stripe_charge.card.id)
+        card = Card.objects.get_or_create_card(hotel.customer, stripe_charge.card)
 
         # DB Charge
         return self._db_create(card, hotel, stripe_charge)
@@ -292,8 +290,8 @@ class ChargeManager(StripeClient, models.Manager):
                 currency=currency,
                 customer=hotel.customer.id
             )
-        except self.stripe.error.CardError as e:
-            raise e
+        except self.stripe.error.StripeError:
+            raise
 
         return stripe_charge
 
