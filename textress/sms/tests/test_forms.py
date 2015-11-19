@@ -2,7 +2,10 @@ from django import forms
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 
-from account.models import AcctCost, AcctTrans, TransType, TRANS_TYPES, INIT_CHARGE_AMOUNT
+from model_mommy import mommy
+
+from account.models import (AcctCost, AcctTrans, TransType, Pricing,
+    TRANS_TYPES, INIT_CHARGE_AMOUNT)
 from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
 from sms.forms import PhoneNumberAddForm
 from utils import create
@@ -16,6 +19,7 @@ class PhoneNumberAddTests(TestCase):
         # Hotel
         self.hotel = create_hotel()
         # Account
+        self.pricing = mommy.make(Pricing, hotel=self.hotel)
         self.init_amt, _ = TransType.objects.get_or_create(name='init_amt')
         self.acct_cost, _ = AcctCost.objects.get_or_create(self.hotel, auto_recharge=True)
         self.acct_trans, _ = AcctTrans.objects.get_or_create(self.hotel, self.init_amt)

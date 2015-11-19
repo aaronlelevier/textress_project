@@ -237,13 +237,15 @@ class Hotel(TwilioClient, BaseModel):
         return Subaccount.objects.get_or_create(self)
 
     def activate(self):
-        self.subaccount.activate()
+        if 'test' not in sys.argv:
+            self.subaccount.activate()
         self.active = True
         self.save()
         return self
 
     def deactivate(self):
-        self.subaccount.deactivate()
+        if 'test' not in sys.argv:
+            self.subaccount.deactivate()
         self.active = False
         self.save()
         return self

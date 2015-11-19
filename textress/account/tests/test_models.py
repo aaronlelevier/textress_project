@@ -621,31 +621,27 @@ class AcctTransManagerTests(TransactionTestCase):
 
         self.assertEqual(Charge.objects.count(), init_charges+1)
 
-    # TODO: Stripe Payment tests need to be verified first. ``CardError`` is not being raised here.
     def test_charge_hotel__card_error(self):
         # No Stripe ``Customer``, so will raise an error (just make sure Error bubbles
         # up basically, and this section of the logic is triggered)
 
         # customer
         customer = Customer.objects.first()
+        customer.id = 'not-a-stripe-id'
+        customer.save()
         self.assertIsInstance(customer, Customer)
         self.hotel.customer = customer
         self.hotel.save()
-        # card
-        card = customer.cards.filter(default=True)[0]
-        card.stripe_object.exp_month = 10
-        card.stripe_object.exp_year = 2014
-        card.stripe_object.save()
         # setup tests
         self.assertTrue(self.hotel.active)
         init_charges = Charge.objects.count()
         amount = 1000
 
-        with self.assertRaises(stripe.error.CardError):
+        with self.assertRaises(stripe.error.StripeError):
             AcctTrans.objects.charge_hotel(self.hotel, amount)
 
-        self.assertEqual(Charge.objects.count(), init_charges)
         self.assertFalse(self.hotel.active)
+        self.assertEqual(Charge.objects.count(), init_charges)
 
     # update_or_create_sms_used
 

@@ -366,40 +366,16 @@ class AcctTransManager(Dates, models.Manager):
     def charge_hotel(hotel, amount):
         try:
             charge = Charge.objects.stripe_create(hotel, amount)
-        except stripe.error.CardError as e:
+        except stripe.error.StripeError:
               email.send_charge_failed_email(hotel, amount)
               hotel.deactivate()
-              raise e("Recharge account failed.")
+              raise
         else:
+            hotel.activate()
             email.send_account_charged_email(hotel, charge)
 
     # TODO: If "auto-recharge" is set to OFF, it is the recharge() method that 
     # should raise this error. Test this tomorrow that ``recharge`` is working as planned
-
-    # def check_balance(self, hotel):
-    #     """
-    #     Master Pre-Create AcctTrans method to call that checks 
-    #     `balance`, `auto_recharge`, and `c.card charging` ability 
-    #     before creating the actual AcctTrans.
-
-    #     :return: None if ok, or raise error.
-    #     """
-    #     balance = self.balance(hotel=hotel)
-
-    #     if balance > hotel.acct_cost.balance_min:
-    #         return
-    #     else:
-    #         if hotel.acct_cost.auto_recharge:
-    #             self.recharge(hotel)
-    #         else:
-    #             # ``auto_charge`` is OFF and the Account Balance is not 
-    #             # enough to process the transaction.
-    #             email.send_auto_recharge_failed_email(hotel)
-    #             hotel.deactivate()
-    #             raise AutoRechargeOffExcp(
-    #                 "Auto-recharge is off, and the account doesn't have "
-    #                 "enough funds to process this transaction."
-    #             )
 
     def update_or_create_sms_used(self, hotel, date=None):
         """
