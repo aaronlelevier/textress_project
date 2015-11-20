@@ -383,9 +383,6 @@ class AcctTransManager(Dates, models.Manager):
             hotel.activate()
             email.send_account_charged_email(hotel, charge)
 
-    # TODO: If "auto-recharge" is set to OFF, it is the recharge() method that 
-    # should raise this error. Test this tomorrow that ``recharge`` is working as planned
-
     def update_or_create_sms_used(self, hotel, date=None):
         """
         Complete regardless of there being "zero" SMS for the date.
@@ -518,8 +515,6 @@ class AcctTransManager(Dates, models.Manager):
 
     ### LEGACY METHODS THAT ARE STILL "NEED TO BE REFACTORED WIP" ###
 
-    ### PHONE_NUMBER
-
     ### GET_OR_CREATE
 
     def get_or_create(self, hotel, trans_type, date=None):
@@ -533,41 +528,39 @@ class AcctTransManager(Dates, models.Manager):
         date = date or self._today
 
         if trans_type.name == 'sms_used':
-            # pre-check 'sms count', because if no 'sms_used' don't need to
-            # create an AcctTran
-            sms_used = hotel.messages.filter(insert_date=date).count()
-            if sms_used:
-                acct_tran = self.create_sms_used(hotel, date)
-                # check if balance < 0, if so charge C.Card, and if fail, suspend Twilio Acct.
-                # don't worry about raising an error here.  Twilio Acct will be suspended
-                # and an email will be sent to myself and the Hotel of the C.Card Charge fail.
-                recharge = self.check_balance(hotel)
-                return acct_tran, True
+            acct_tran = self.update_or_create_sms_used(hotel, date)
+            return acct_tran, True
 
         elif trans_type.name == 'init_amt':
-            amount = hotel.acct_cost.init_amt
-            acct_tran = self.create(
-                hotel=hotel,
-                trans_type=trans_type,
-                insert_date=date,
-                amount=amount,
-                balance=amount
-            )
-            return acct_tran, True
+            return self.get_or_create_init_amt(hotel, date)
 
         elif trans_type.name == 'recharge_amt':
-            amount = hotel.acct_cost.recharge_amt
-            acct_tran = self.create(
-                hotel=hotel,
-                trans_type=trans_type,
-                insert_date=date,
-                amount=amount
-            )
-            return acct_tran, True
+            return self.get_or_create_recharge_amt(hotel, date)
 
-    def get_or_create_sms_used(self, hotel, date=None):
-        trans_type = self.trans_types.sms_used
-        return AcctTrans.objects.get_or_create(hotel, trans_type, date)
+    def get_or_create_init_amt(self, hotel, date):
+        amount = hotel.acct_cost.init_amt
+        trans_type = self.trans_types.init_amt
+
+        acct_tran = self.create(
+            hotel=hotel,
+            trans_type=trans_type,
+            insert_date=date,
+            amount=amount,
+            balance=amount
+        )
+        return acct_tran, True
+
+    def get_or_create_recharge_amt(self, hotel, date):
+        amount = hotel.acct_cost.recharge_amt
+        trans_type = self.trans_types.recharge_amt
+
+        acct_tran = self.create(
+            hotel=hotel,
+            trans_type=trans_type,
+            insert_date=date,
+            amount=amount
+        )
+        return acct_tran, True
 
 
 class AcctTrans(TimeStampBaseModel):
