@@ -175,7 +175,7 @@ class AcctStmtTests(TestCase):
             hotel=self.hotel,
             user=self.admin,
             guest=self.guest
-            )
+        )
 
         # AcctStmt
         self.acct_stmts = create_acct_stmts(hotel=self.hotel)

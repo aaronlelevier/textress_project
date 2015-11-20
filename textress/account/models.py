@@ -252,9 +252,8 @@ class AcctStmt(TimeStampBaseModel):
     Monthly usage stats for each hotel.
 
     :When are AcctStmt's generated?:
-        1. Daily
-        2. At first login for the day
-        3. After a month has ended
+        1. Daily (3 am) <- planned time
+        3. After a month has ended (Final month-end Stmt)
 
     :Level: One record per Hotel per Month.
 
