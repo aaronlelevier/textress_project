@@ -326,6 +326,7 @@ class AcctTransQuerySetTests(TestCase):
         self.assertEqual(monthly_trans.count(), monthly_trans_mgr.count())
 
     def test_balance(self):
+        "Tests total Funds Balance for all Hotels."
         balance = AcctTrans.objects.balance()
 
         self.assertEqual(
@@ -334,6 +335,7 @@ class AcctTransQuerySetTests(TestCase):
         )
 
     def test_balance_hotel(self):
+        "Test Funds balance for a single Hotel."
         balance = AcctTrans.objects.balance(self.hotel)
 
         self.assertEqual(
@@ -363,6 +365,7 @@ class AcctTransManagerTests(TransactionTestCase):
         self.init_amt = TransType.objects.get(name='init_amt')
         self.recharge_amt = TransType.objects.get(name='recharge_amt')
         self.sms_used = TransType.objects.get(name='sms_used')
+        self.phone_number = TransType.objects.get(name='phone_number')
         # AcctTrans
         self.acct_trans = create_acct_tran(
             hotel=self.hotel,
@@ -381,191 +384,10 @@ class AcctTransManagerTests(TransactionTestCase):
         # clear cache - in order to propery compare object "TransTypes"
         cache.clear()
 
-    # get_balance
+    # trans_types
 
-    def test_get_balance(self):
-        self.assertEqual(
-            AcctTrans.objects.get_balance(self.hotel),
-            AcctTrans.objects.filter(hotel=self.hotel).order_by('-modified').first().balance
-        )
-    
-    def test_get_balance_excludes(self):
-        # exluce sms_used records for the same day, in order to calculate ``create_sms_used``
-        # without it causing an inifinite loop
-
-        # setup tests
-        create_acct_tran(self.hotel, self.sms_used, self.today)
-        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel, trans_type=self.sms_used).count(), 1)
-        self.assertTrue(AcctTrans.objects.filter(hotel=self.hotel).count() > 1)
-        # values to compare
-        target_balance = (AcctTrans.objects.exclude(trans_type=self.sms_used, insert_date=self.today)
-                                           .order_by('modified')
-                                           .last()
-                                           .balance)
-
-        # get_balance
-        get_balance = AcctTrans.objects.get_balance(self.hotel, excludes=True)
-
-        self.assertEqual(get_balance, target_balance)
-
-    def test_get_balance_excludes_last_record_is_sms_used_from_yesterday(self):
-        [x.delete() for x in AcctTrans.objects.all()]
-        self.assertEqual(AcctTrans.objects.count(), 0)
-        # sms_used to compare
-        sms_used_yesterday = create_acct_tran(self.hotel, self.sms_used, self.yesterday)
-        sms_used_today = create_acct_tran(self.hotel, self.sms_used, self.today)
-        # pre-tests
-        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel, trans_type=self.sms_used).count(), 2)
-        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel).count(), 2)
-
-        # get_balance
-        get_balance = AcctTrans.objects.get_balance(self.hotel, excludes=True)
-
-        self.assertEqual(get_balance, sms_used_yesterday.balance)
-
-    # resolve_last_trans_balance
-
-    def test_resolve_last_trans_balance__when_none(self):
-        ret = AcctTrans.objects.resolve_last_trans_balance(None)
-
-        self.assertEqual(ret, 0)
-
-    def test_resolve_last_trans_balance__when_no_balance(self):
-        acct_trans = create_acct_tran(self.hotel, self.sms_used, self.yesterday)
-        acct_trans.balance = None
-
-        ret = AcctTrans.objects.resolve_last_trans_balance(acct_trans)
-
-        self.assertEqual(ret, 0)
-
-    def test_resolve_last_trans_balance__populated_balance_returns_as_is(self):
-        acct_trans = create_acct_tran(self.hotel, self.sms_used, self.yesterday)
-
-        ret = AcctTrans.objects.resolve_last_trans_balance(acct_trans)
-
-        self.assertEqual(ret, acct_trans.balance)
-
-    # check_recharge_required
-
-    def test_check_recharge_required_true(self):
-        balance = self.acct_cost.balance_min - 1
-        self.assertTrue(AcctTrans.objects.check_recharge_required(self.hotel, balance))
-
-    def test_check_recharge_required_false(self):
-        balance = self.acct_cost.balance_min + 1
-        self.assertFalse(AcctTrans.objects.check_recharge_required(self.hotel, balance))
-
-    #  calculate_recharge_amount
-
-    def test_calculate_recharge_amount(self):
-        balance = 100
-        self.assertEqual(
-            AcctTrans.objects.calculate_recharge_amount(self.hotel, balance),
-            self.hotel.acct_cost.recharge_amt - balance
-        )
-
-    # sms_used_count
-
-    def test_sms_used_count(self):
-        guest = make_guests(hotel=self.hotel, number=1)[0]
-        messages = make_messages(
-            hotel=self.hotel,
-            user=self.admin,
-            guest=guest,
-            insert_date=self.yesterday
-        )
-        self.assertEqual(messages.count(), 10)
-
-        sms_used_count = AcctTrans.objects.sms_used_count(self.hotel, self.yesterday)
-
-        self.assertEqual(sms_used_count, messages.count())
-
-    def test_sms_used_count_default_date_is_today(self):
-        guest = make_guests(hotel=self.hotel, number=1)[0]
-        messages = make_messages(
-            hotel=self.hotel,
-            user=self.admin,
-            guest=guest,
-            insert_date=self.today
-        )
-        self.assertEqual(messages.count(), 10)
-
-        sms_used_count = AcctTrans.objects.sms_used_count(self.hotel)
-
-        self.assertEqual(sms_used_count, messages.count())
-
-    # sms_used_mtd_prior_to_this_date
-
-    def test_sms_used_mtd_prior_to_this_date(self):
-        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel,trans_type=self.sms_used).count(), 0)
-        acct_trans = create_acct_tran(hotel=self.hotel, trans_type=self.sms_used,
-                insert_date=self.yesterday)
-
-        sms_used_count = AcctTrans.objects.sms_used_mtd_prior_to_this_date(self.hotel)
-
-        # tests
-        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel,trans_type=self.sms_used).count(), 1)
-
-        if self.yesterday.month != self.today.month:
-            self.assertEqual(sms_used_count, 0)
-        else:
-            self.assertEqual(acct_trans.sms_used, sms_used_count)
-
-    def test_sms_used_mtd_prior_to_this_date_does_not_exist_returs_zero(self):
-        # this test will be triggered on the 1st day of signup b/c not prior date records
-        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel,trans_type=self.sms_used).count(), 0)
-
-        sms_used_count = AcctTrans.objects.sms_used_mtd_prior_to_this_date(self.hotel)
-
-        self.assertEqual(sms_used_count, 0)
-
-    def test_sms_used_mtd_prior_to_this_date_aggregate(self):
-        # for an aggreate of "sms_used_count" for the month we need at least 2 days
-        if self.today.day >= 3:
-            create_acct_tran(hotel=self.hotel, trans_type=self.sms_used,
-                insert_date=self.yesterday)
-            two_days_ago = self.yesterday - datetime.timedelta(days=1)
-            create_acct_tran(hotel=self.hotel, trans_type=self.sms_used,
-                insert_date=two_days_ago)
-
-        sms_used_count = AcctTrans.objects.sms_used_mtd_prior_to_this_date(self.hotel)
-        sms_used_manual_count = (AcctTrans.objects.filter(hotel=self.hotel,
-                                                          insert_date__month=self.today.month,
-                                                          insert_date__lte=self.today)
-                                                   .aggregate(Sum('sms_used'))['sms_used__sum'])
-
-        self.assertEqual(sms_used_count, sms_used_manual_count)
-
-    def test_sms_used_mtd_prior_to_this_date_for_an_arbitrary_date(self):
-        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel,trans_type=self.sms_used).count(), 0)
-        acct_trans = create_acct_tran(hotel=self.hotel, trans_type=self.sms_used,
-                insert_date=self.yesterday)
-
-        sms_used_count = AcctTrans.objects.sms_used_mtd_prior_to_this_date(
-            self.hotel, self.today)
-
-        # tests
-        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel,trans_type=self.sms_used).count(), 1)
-
-        if self.yesterday.month != self.today.month:
-            self.assertEqual(sms_used_count, 0)
-        else:
-            self.assertEqual(acct_trans.sms_used, sms_used_count)
-
-    # create_sms_used
-
-    def test_create_sms_used(self):
-        acct_trans = AcctTrans.objects.create_sms_used(self.hotel, self.today)
-
-        self.assertIsInstance(acct_trans, AcctTrans)
-        self.assertEqual(acct_trans.hotel, self.hotel)
-        self.assertEqual(acct_trans.trans_type, self.sms_used)
-        self.assertEqual(acct_trans.insert_date, self.today)
-        self.assertEqual(
-            acct_trans.sms_used,
-            self.hotel.messages.filter(insert_date=self.today).count()
-        )
-        self.assertIsNotNone(acct_trans.balance)
+    def test_trans_types(self):
+        self.assertIsInstance(AcctTrans.objects.trans_types, TransTypeCache)
 
     # check_balance
 
@@ -725,6 +547,224 @@ class AcctTransManagerTests(TransactionTestCase):
             AcctTrans.objects.balance(hotel=self.hotel)
         )
 
+    # sms_used_count
+
+    def test_sms_used_count(self):
+        guest = make_guests(hotel=self.hotel, number=1)[0]
+        messages = make_messages(
+            hotel=self.hotel,
+            user=self.admin,
+            guest=guest,
+            insert_date=self.yesterday
+        )
+        self.assertEqual(messages.count(), 10)
+
+        sms_used_count = AcctTrans.objects.sms_used_count(self.hotel, self.yesterday)
+
+        self.assertEqual(sms_used_count, messages.count())
+
+    def test_sms_used_count_default_date_is_today(self):
+        guest = make_guests(hotel=self.hotel, number=1)[0]
+        messages = make_messages(
+            hotel=self.hotel,
+            user=self.admin,
+            guest=guest,
+            insert_date=self.today
+        )
+        self.assertEqual(messages.count(), 10)
+
+        sms_used_count = AcctTrans.objects.sms_used_count(self.hotel)
+
+        self.assertEqual(sms_used_count, messages.count())
+
+    # create_sms_used
+
+    def test_create_sms_used(self):
+        acct_trans = AcctTrans.objects.create_sms_used(self.hotel, self.today)
+
+        self.assertIsInstance(acct_trans, AcctTrans)
+        self.assertEqual(acct_trans.hotel, self.hotel)
+        self.assertEqual(acct_trans.trans_type, self.sms_used)
+        self.assertEqual(acct_trans.insert_date, self.today)
+        self.assertEqual(
+            acct_trans.sms_used,
+            self.hotel.messages.filter(insert_date=self.today).count()
+        )
+        self.assertIsNotNone(acct_trans.balance)
+
+    # sms_used_mtd_prior_to_this_date
+
+    def test_sms_used_mtd_prior_to_this_date(self):
+        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel,trans_type=self.sms_used).count(), 0)
+        acct_trans = create_acct_tran(hotel=self.hotel, trans_type=self.sms_used,
+                insert_date=self.yesterday)
+
+        sms_used_count = AcctTrans.objects.sms_used_mtd_prior_to_this_date(self.hotel)
+
+        # tests
+        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel,trans_type=self.sms_used).count(), 1)
+
+        if self.yesterday.month != self.today.month:
+            self.assertEqual(sms_used_count, 0)
+        else:
+            self.assertEqual(acct_trans.sms_used, sms_used_count)
+
+    def test_sms_used_mtd_prior_to_this_date_does_not_exist_returs_zero(self):
+        # this test will be triggered on the 1st day of signup b/c not prior date records
+        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel,trans_type=self.sms_used).count(), 0)
+
+        sms_used_count = AcctTrans.objects.sms_used_mtd_prior_to_this_date(self.hotel)
+
+        self.assertEqual(sms_used_count, 0)
+
+    def test_sms_used_mtd_prior_to_this_date_aggregate(self):
+        # for an aggreate of "sms_used_count" for the month we need at least 2 days
+        if self.today.day >= 3:
+            create_acct_tran(hotel=self.hotel, trans_type=self.sms_used,
+                insert_date=self.yesterday)
+            two_days_ago = self.yesterday - datetime.timedelta(days=1)
+            create_acct_tran(hotel=self.hotel, trans_type=self.sms_used,
+                insert_date=two_days_ago)
+
+        sms_used_count = AcctTrans.objects.sms_used_mtd_prior_to_this_date(self.hotel)
+        sms_used_manual_count = (AcctTrans.objects.filter(hotel=self.hotel,
+                                                          insert_date__month=self.today.month,
+                                                          insert_date__lte=self.today)
+                                                   .aggregate(Sum('sms_used'))['sms_used__sum'])
+
+        self.assertEqual(sms_used_count, sms_used_manual_count)
+
+    def test_sms_used_mtd_prior_to_this_date_for_an_arbitrary_date(self):
+        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel,trans_type=self.sms_used).count(), 0)
+        acct_trans = create_acct_tran(hotel=self.hotel, trans_type=self.sms_used,
+                insert_date=self.yesterday)
+
+        sms_used_count = AcctTrans.objects.sms_used_mtd_prior_to_this_date(
+            self.hotel, self.today)
+
+        # tests
+        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel,trans_type=self.sms_used).count(), 1)
+
+        if self.yesterday.month != self.today.month:
+            self.assertEqual(sms_used_count, 0)
+        else:
+            self.assertEqual(acct_trans.sms_used, sms_used_count)
+
+    # get_balance
+
+    def test_get_balance(self):
+        self.assertEqual(
+            AcctTrans.objects.get_balance(self.hotel),
+            AcctTrans.objects.filter(hotel=self.hotel).order_by('-modified').first().balance
+        )
+    
+    def test_get_balance_excludes(self):
+        # exluce sms_used records for the same day, in order to calculate ``create_sms_used``
+        # without it causing an inifinite loop
+
+        # setup tests
+        create_acct_tran(self.hotel, self.sms_used, self.today)
+        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel, trans_type=self.sms_used).count(), 1)
+        self.assertTrue(AcctTrans.objects.filter(hotel=self.hotel).count() > 1)
+        # values to compare
+        target_balance = (AcctTrans.objects.exclude(trans_type=self.sms_used, insert_date=self.today)
+                                           .order_by('modified')
+                                           .last()
+                                           .balance)
+
+        # get_balance
+        get_balance = AcctTrans.objects.get_balance(self.hotel, excludes=True)
+
+        self.assertEqual(get_balance, target_balance)
+
+    def test_get_balance_excludes_last_record_is_sms_used_from_yesterday(self):
+        [x.delete() for x in AcctTrans.objects.all()]
+        self.assertEqual(AcctTrans.objects.count(), 0)
+        # sms_used to compare
+        sms_used_yesterday = create_acct_tran(self.hotel, self.sms_used, self.yesterday)
+        sms_used_today = create_acct_tran(self.hotel, self.sms_used, self.today)
+        # pre-tests
+        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel, trans_type=self.sms_used).count(), 2)
+        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel).count(), 2)
+
+        # get_balance
+        get_balance = AcctTrans.objects.get_balance(self.hotel, excludes=True)
+
+        self.assertEqual(get_balance, sms_used_yesterday.balance)
+
+    # resolve_last_trans_balance
+
+    def test_resolve_last_trans_balance__when_none(self):
+        ret = AcctTrans.objects.resolve_last_trans_balance(None)
+
+        self.assertEqual(ret, 0)
+
+    def test_resolve_last_trans_balance__when_no_balance(self):
+        acct_trans = create_acct_tran(self.hotel, self.sms_used, self.yesterday)
+        acct_trans.balance = None
+
+        ret = AcctTrans.objects.resolve_last_trans_balance(acct_trans)
+
+        self.assertEqual(ret, 0)
+
+    def test_resolve_last_trans_balance__populated_balance_returns_as_is(self):
+        acct_trans = create_acct_tran(self.hotel, self.sms_used, self.yesterday)
+
+        ret = AcctTrans.objects.resolve_last_trans_balance(acct_trans)
+
+        self.assertEqual(ret, acct_trans.balance)
+
+    # check_recharge_required
+
+    def test_check_recharge_required_true(self):
+        balance = self.acct_cost.balance_min - 1
+        self.assertTrue(AcctTrans.objects.check_recharge_required(self.hotel, balance))
+
+    def test_check_recharge_required_false(self):
+        balance = self.acct_cost.balance_min + 1
+        self.assertFalse(AcctTrans.objects.check_recharge_required(self.hotel, balance))
+
+    #  calculate_recharge_amount
+
+    def test_calculate_recharge_amount(self):
+        balance = 100
+        self.assertEqual(
+            AcctTrans.objects.calculate_recharge_amount(self.hotel, balance),
+            self.hotel.acct_cost.recharge_amt - balance
+        )
+
+    # phone_number_charge
+
+    def test_phone_number_charge(self):
+        acct_tran = AcctTrans.objects.phone_number_charge(self.hotel, 'twilio-ph-num')
+
+        self.assertIsInstance(acct_tran, AcctTrans)
+        self.assertEqual(acct_tran.trans_type, self.phone_number)
+        self.assertEqual(acct_tran.amount, -settings.PHONE_NUMBER_MONTHLY_COST)
+        self.assertEqual(acct_tran.hotel, self.hotel)
+
+    # sms_used_mtd
+
+    def test_sms_used_mtd(self):
+        guest = make_guests(hotel=self.hotel, number=1)[0]
+        messages = make_messages(
+            hotel=self.hotel,
+            user=self.admin,
+            guest=guest,
+            insert_date=self.yesterday,
+            number=2
+        )
+        for ea in AcctTrans.objects.filter(hotel=self.hotel, trans_type=self.sms_used):
+            ea.delete()
+
+        self.assertEqual(AcctTrans.objects.sms_used_mtd(hotel=self.hotel,
+            insert_date=self.yesterday), 0)
+
+        acct_trans = AcctTrans.objects.create_sms_used(hotel=self.hotel, date=self.yesterday)
+        self.assertEqual(AcctTrans.objects.sms_used_mtd(hotel=self.hotel,
+            insert_date=self.yesterday), 2)
+
+
     ### Model Methods
 
     # update_balance
@@ -812,9 +852,6 @@ class AcctTransTests(TransactionTestCase):
         )
 
     ### MANAGER TESTS
-
-    def test_trans_types(self):
-        self.assertIsInstance(AcctTrans.objects.trans_types, TransTypeCache)
 
     ### Charges
 

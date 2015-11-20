@@ -315,17 +315,22 @@ class AcctTransManager(Dates, models.Manager):
     def get_queryset(self):
         return AcctTransQuerySet(self.model, self._db)
 
-    @property
-    def trans_types(self):
-        return TransTypeCache()
-
     def monthly_trans(self, hotel, date=None):
         """Default to return the Hotel's current month's transactions
         if not date is supplied."""
         date = date or self._today
         return self.get_queryset().monthly_trans(hotel, date)
 
-    # NOTE: comment out until supporting methods are flushed out (created)
+    def balance(self, hotel=None):
+        '''
+        Calculates current balance (Expensive).
+        '''
+        return self.get_queryset().balance(hotel)
+
+    @property
+    def trans_types(self):
+        return TransTypeCache()
+
     def check_balance(self, hotel):
         """
         Daily, or more often if high SMS volumes, check the Funds ``balance``
@@ -440,12 +445,6 @@ class AcctTransManager(Dates, models.Manager):
                                          insert_date__lte=date)
                                   .aggregate(Sum('sms_used'))['sms_used__sum']) or 0
 
-    def balance(self, hotel=None):
-        '''
-        Calculates current balance (Expensive).
-        '''
-        return self.get_queryset().balance(hotel)
-
     def get_balance(self, hotel, excludes=None):
         """
         Cheaply get the Hotel's Funds 'balance' without Summing all
@@ -483,40 +482,6 @@ class AcctTransManager(Dates, models.Manager):
     def calculate_recharge_amount(hotel, balance):
         return hotel.acct_cost.recharge_amt - balance
 
-    ### LEGACY METHODS THAT ARE STILL "NEED TO BE REFACTORED WIP" ###
-
-    ### CHARGE ACCOUNT SUPPORT METHODS
-
-    # def amount_to_recharge(self, hotel, balance):
-    #     return hotel.acct_cost.recharge_amt - balance
-
-    # def check_balance(self, hotel):
-    #     """
-    #     Master Pre-Create AcctTrans method to call that checks 
-    #     `balance`, `auto_recharge`, and `c.card charging` ability 
-    #     before creating the actual AcctTrans.
-
-    #     :return: None if ok, or raise error.
-    #     """
-    #     balance = self.balance(hotel=hotel)
-
-    #     if balance > hotel.acct_cost.balance_min:
-    #         return
-    #     else:
-    #         if hotel.acct_cost.auto_recharge:
-    #             self.recharge(hotel)
-    #         else:
-    #             # ``auto_charge`` is OFF and the Account Balance is not 
-    #             # enough to process the transaction.
-    #             email.send_auto_recharge_failed_email(hotel)
-    #             hotel.deactivate()
-    #             raise AutoRechargeOffExcp(
-    #                 "Auto-recharge is off, and the account doesn't have "
-    #                 "enough funds to process this transaction."
-    #             )
-
-    ### PHONE_NUMBER
-
     def phone_number_charge(self, hotel, phone_number):
         """
         Creates an AcctTrans charge for a PH.  This could be an initial 
@@ -526,23 +491,23 @@ class AcctTransManager(Dates, models.Manager):
         :phone_number: twilio ``phone_number`` as a string
         """
         self.check_balance(hotel)
-        cost = settings.PHONE_NUMBER_MONTHLY_COST
+        amount = settings.PHONE_NUMBER_MONTHLY_COST
+
+        if 'test' not in sys.argv:
+            self.charge_hotel(hotel, amount)
 
         return self.create(
             hotel=hotel,
             trans_type=self.trans_types.phone_number,
-            amount = -cost,
-            desc="PH charge {} for PH#: {}".format(cost, phone_number)
+            amount = -amount,
+            desc="PH charge ${:.2f} for PH#: {}".format(amount/100, phone_number)
         )
 
     def sms_used_mtd(self, hotel, insert_date):
         """
         MTD SMS used by the Hotel.
 
-        If the Hotel hasn't sent any SMS, this will return "None", so 
-        always return "0" instead.
-
-        TODO: Will need to calculate MTD as of yesterday EOD.
+        NOTE: Used by ``AcctStmt``
         """
         trans_type = self.trans_types.sms_used
 
@@ -550,6 +515,10 @@ class AcctTransManager(Dates, models.Manager):
                             .monthly_trans(hotel=hotel, date=insert_date)
                             .aggregate(Max('sms_used'))['sms_used__max'])
         return sms_used_mtd or 0
+
+    ### LEGACY METHODS THAT ARE STILL "NEED TO BE REFACTORED WIP" ###
+
+    ### PHONE_NUMBER
 
     ### GET_OR_CREATE
 
