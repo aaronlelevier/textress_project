@@ -57,6 +57,10 @@ class Pricing(TimeStampBaseModel):
         to be used w/ 'index.html'
         """
         default = Pricing.objects.filter(hotel__isnull=True)
+
+        if self.id:
+            default = default.exclude(id=self.id)
+
         if default:
             raise Exception("Default Pricing object with No Hotel already exists.")
 

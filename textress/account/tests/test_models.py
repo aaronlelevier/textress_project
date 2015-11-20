@@ -37,13 +37,6 @@ class PricingTests(TestCase):
         self.assertIsInstance(self.hotel.pricing, Pricing)
         self.assertEqual(self.hotel.pricing.cost, settings.DEFAULT_SMS_COST)
 
-    def test_get_cost(self):
-        sms_used_count = 150
-
-        cost = self.hotel.pricing.get_cost(sms_used_count)
-
-        self.assertEqual(cost, -(sms_used_count * self.pricing.cost))
-
     def test_check_for_default_pricing(self):
         # only allow one Pricing Obj to have a blank Hotel FK
         # to be used w/ "index.html"
@@ -52,6 +45,25 @@ class PricingTests(TestCase):
 
         with self.assertRaises(Exception):
             mommy.make(Pricing)
+
+    def test_check_for_default_pricing(self):
+        "Can't create 2 defaults, but can update the default."
+        pricing = mommy.make(Pricing)
+        init_cost = pricing.cost
+        self.assertEqual(Pricing.objects.filter(hotel__isnull=True).count(), 1)
+
+        pricing.cost += 1
+        pricing.save()
+
+        self.assertEqual(Pricing.objects.filter(hotel__isnull=True).count(), 1)
+        self.assertEqual(pricing.cost, init_cost+1)
+
+    def test_get_cost(self):
+        sms_used_count = 150
+
+        cost = self.hotel.pricing.get_cost(sms_used_count)
+
+        self.assertEqual(cost, -(sms_used_count * self.pricing.cost))
 
 
 class TransTypeTests(TestCase):
