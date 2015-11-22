@@ -18,3 +18,9 @@ def create_initial_acct_trans_and_stmt(hotel_id):
         trans_type=init_amt_type)
 
     AcctStmt.objects.get_or_create(hotel=hotel)
+
+
+@shared_task
+def get_or_create_acct_stmt(hotel_id, month, year):
+    hotel = Hotel.objects.get(id=hotel_id)
+    return AcctStmt.objects.get_or_create(hotel, month, year)
