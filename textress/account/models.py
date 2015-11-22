@@ -214,10 +214,14 @@ class AcctStmtManager(Dates, models.Manager):
         """
         date = self.first_of_month(month, year)
 
-        funds_added = AcctTrans.objects.funds_added(hotel, date)
-        phone_numbers = hotel.phone_numbers.count()
+        # sms fields: re-calculate 'sms_used' for today in order to get most
+        # up to date usage balance
+        AcctTrans.objects.update_or_create_sms_used(hotel, self._today) 
         total_sms = hotel.messages.monthly_all(date=date).count()
         total_sms_costs = self.get_total_sms_costs(hotel, total_sms)
+        # other fields
+        funds_added = AcctTrans.objects.funds_added(hotel, date)
+        phone_numbers = hotel.phone_numbers.count()
         monthly_costs = phone_numbers * settings.PHONE_NUMBER_MONTHLY_COST
         balance = AcctTrans.objects.monthly_trans(hotel, date).balance()
 
@@ -245,7 +249,7 @@ class AcctStmtManager(Dates, models.Manager):
         try:
             return hotel.pricing.get_cost(total_sms)
         except Exception: # RelatedObjectDoesNotExist
-            return total_sms * settings.DEFAULT_SMS_COST
+            return -(total_sms * settings.DEFAULT_SMS_COST)
 
 
 class AcctStmt(TimeStampBaseModel):
@@ -405,11 +409,19 @@ class AcctTransManager(Dates, models.Manager):
             else:
                 return self.update_hotel_sms_used(acct_trans, hotel, sms_used_count)
 
-    @staticmethod
-    def update_hotel_sms_used(acct_trans, hotel, sms_used_count):
+    # @staticmethod
+    def update_hotel_sms_used(self, acct_trans, hotel, sms_used_count):
+        """
+        ``pricing.get_cost`` will always return a negative (debits are negative)
+        so as we add "sms cost", "amount" goes down.
+        """
+        sms_used_cost = hotel.pricing.get_cost(sms_used_count)
+
         acct_trans.sms_used = sms_used_count
-        acct_trans.amount = hotel.pricing.get_cost(sms_used_count)
+        acct_trans.amount = sms_used_cost
+        acct_trans.balance = self.get_balance(hotel, excludes=True) + sms_used_cost
         acct_trans.save()
+
         return acct_trans
 
     def sms_used_count(self, hotel, date=None):

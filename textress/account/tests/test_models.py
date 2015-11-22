@@ -167,7 +167,6 @@ class AcctStmtTests(TestCase):
         create._get_groups_and_perms()
         self.hotel = create_hotel()
         self.admin = create_hotel_user(self.hotel, 'admin')
-        
         # Guests (makes 10)
         self.guest = make_guests(hotel=self.hotel, number=1)[0] #b/c returns a list
         # Messages (makes 10)
@@ -184,8 +183,12 @@ class AcctStmtTests(TestCase):
         self.acct_stmt = self.acct_stmts[0]
         # Supporting Models
         self.acct_cost = AcctCost.objects.get_or_create(hotel=self.hotel)
+        self.recharge_amt, _ = TransType.objects.get_or_create(name='recharge_amt')
         self.acct_trans = create_acct_trans(hotel=self.hotel)
         self.pricing = mommy.make(Pricing, hotel=self.hotel)
+
+        # clear cache
+        cache.clear()
 
     ### MODEL TESTS
 
@@ -239,6 +242,8 @@ class AcctStmtTests(TestCase):
             self.acct_stmts[-2].balance
         )
 
+    # get_or_create
+
     def test_get_or_create_current_month(self):
         # Should already exist
         acct_stmt, created = AcctStmt.objects.get_or_create(
@@ -256,6 +261,75 @@ class AcctStmtTests(TestCase):
             )
         self.assertIsInstance(acct_stmt, AcctStmt)
         self.assertFalse(created)
+
+    def test_get_or_create__funds_added(self):
+        """
+        Additional ``funds_added`` increase the 'funds_added' and 'balance'.
+        """
+        acct_stmt, _ = AcctStmt.objects.get_or_create(
+            hotel=self.hotel,
+            month=self.today.month,
+            year=self.today.year
+        )
+        init_funds_added = AcctTrans.objects.funds_added(self.hotel, self.today)
+        init_balance = AcctTrans.objects.monthly_trans(self.hotel, self.today).balance()
+
+        self.assertEqual(acct_stmt.funds_added, init_funds_added)
+        self.assertEqual(acct_stmt.balance, init_balance)
+
+        # Add funds again, and the AcctStmt 'funds_added' and 'balance' should be updated
+        recharge_acct_tran = create_acct_tran(self.hotel, self.recharge_amt, self.today)
+
+        updated_acct_stmt, _ = AcctStmt.objects.get_or_create(
+            hotel=self.hotel,
+            month=self.today.month,
+            year=self.today.year
+        )
+        self.assertEqual(updated_acct_stmt.funds_added, init_funds_added+recharge_acct_tran.amount)
+        self.assertEqual(updated_acct_stmt.balance, init_balance+recharge_acct_tran.amount)
+
+    def test_get_or_create__sms_updated(self):
+        """
+        'sms_used' should increase the 'total_sms' and 'total_sms_costs' fields, and 
+        decrease the 'balance' field
+        """
+        acct_stmt, _ = AcctStmt.objects.get_or_create(
+            hotel=self.hotel,
+            month=self.today.month,
+            year=self.today.year
+        )
+        init_total_sms = self.hotel.messages.monthly_all(date=self.today).count()
+        init_total_sms_costs = AcctStmt.objects.get_total_sms_costs(self.hotel, init_total_sms)
+        init_balance = AcctTrans.objects.monthly_trans(self.hotel, self.today).balance()
+
+        self.assertEqual(acct_stmt.total_sms, init_total_sms)
+        self.assertEqual(acct_stmt.total_sms_costs, init_total_sms_costs)
+        self.assertEqual(acct_stmt.balance, init_balance)
+
+        # send some SMS
+        addit_sms = 2
+        self.messages = make_messages(
+            hotel=self.hotel,
+            user=self.admin,
+            guest=self.guest,
+            insert_date=self.today,
+            number=addit_sms
+        )
+        updated_acct_stmt, _ = AcctStmt.objects.get_or_create(
+            hotel=self.hotel,
+            month=self.today.month,
+            year=self.today.year
+        )
+        # total_sms, total_sms_costs go up, 'balance' goes down
+        self.assertEqual(updated_acct_stmt.total_sms, init_total_sms+addit_sms)
+        self.assertEqual(
+            updated_acct_stmt.total_sms_costs,
+            AcctStmt.objects.get_total_sms_costs(self.hotel, (init_total_sms+addit_sms))
+        )
+        self.assertEqual(
+            updated_acct_stmt.balance,
+            init_balance + AcctStmt.objects.get_total_sms_costs(self.hotel, addit_sms)
+        )
 
     # get_total_sms_costs
 
@@ -280,7 +354,7 @@ class AcctStmtTests(TestCase):
 
         ret = AcctStmt.objects.get_total_sms_costs(hotel, total_sms)
 
-        self.assertEqual(ret, total_sms * settings.DEFAULT_SMS_COST)
+        self.assertEqual(ret, -(total_sms * settings.DEFAULT_SMS_COST))
 
 
 class AcctStmtSignupTests(TestCase):
@@ -564,7 +638,11 @@ class AcctTransTests(TransactionTestCase):
         self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel,
             trans_type=self.sms_used, insert_date=self.today).count(), 1)
 
-    def test_update_or_create_sms_used_update(self):
+    def test_update_or_create_sms_used__update(self):
+        """
+        Integration test that 'update_or_create_sms_used' will update 'sms_used' for 
+        same day records.
+        """
         # Hotel Messages
         guest = make_guests(hotel=self.hotel, number=1)[0]
         messages = make_messages(
@@ -575,21 +653,37 @@ class AcctTransTests(TransactionTestCase):
             number=1
         )
         self.assertEqual(messages.count(), 1) # message-count
-        message_count = 1
-        # setup
-        init_acct_trans = create_acct_tran(self.hotel, self.sms_used, self.today)
-        init_acct_trans.sms_used = 0
-        init_acct_trans.save()
+        message_count = messages.count()
+
+        acct_trans = AcctTrans.objects.update_or_create_sms_used(
+            hotel=self.hotel, date=self.today)
         # init test
         self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel,
             trans_type=self.sms_used, insert_date=self.today).count(), 1)
 
-        acct_trans = AcctTrans.objects.update_or_create_sms_used(
-            hotel=self.hotel, date=self.today)
-
         self.assertEqual(acct_trans.sms_used, message_count)
         self.assertIsNotNone(acct_trans.balance)
         self.assertEqual(acct_trans.amount, self.hotel.pricing.get_cost(message_count))
+
+        # send more SMS and 'sms_used' will be updated
+        messages = make_messages(
+            hotel=self.hotel,
+            user=self.admin,
+            guest=guest,
+            insert_date=self.today,
+            number=1
+        )
+        self.assertEqual(messages.count(), 2)
+        new_message_count = 2
+
+        acct_trans = AcctTrans.objects.update_or_create_sms_used(
+            hotel=self.hotel, date=self.today)
+
+        self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel,
+            trans_type=self.sms_used, insert_date=self.today).count(), 1)
+        self.assertEqual(acct_trans.sms_used, new_message_count)
+        self.assertIsNotNone(acct_trans.balance)
+        self.assertEqual(acct_trans.amount, self.hotel.pricing.get_cost(new_message_count))
 
     # update_hotel_sms_used
 
