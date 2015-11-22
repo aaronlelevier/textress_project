@@ -77,8 +77,8 @@ class PhoneNumberAddView(FormInvalidMessageMixin, PhoneNumberBaseView):
     def form_valid(self, form):
         "Purchase Twilio Ph # Obj here, and add to related models."
         # Remove for Demos
-        if not settings.DEBUG and 'test' not in sys.argv:
-            phone_number = PhoneNumber.objects.purchase_number(hotel=self.hotel)
+        # if not settings.DEBUG and 'test' not in sys.argv:
+        phone_number = PhoneNumber.objects.purchase_number(hotel=self.hotel)
         return super(PhoneNumberAddView, self).form_valid(form)
 
 

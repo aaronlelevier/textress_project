@@ -123,13 +123,15 @@ hotel: {}".format(hotel))
         '''
         Calls all logic for the Purchase of a New PhoneNumber.
         '''
+        # LIVE: Twilio PH Num purchase
         twilio_ph = self._twilio_purchase_number(hotel)
         
-        # charge account on success
+        # LIVE: Stripe Charge
         acct_tran = AcctTrans.objects.phone_number_charge(hotel,
             phone_number=twilio_ph.phone_number)
 
-        # DB create
+        # DB create (but LIVE updates my current Twilio PH Num REST API 
+        # endpoint for the PH Num)
         number = self.create_from_twilio(hotel, twilio_ph)
 
         # Update default
