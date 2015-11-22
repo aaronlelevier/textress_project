@@ -203,29 +203,6 @@ class AcctStmtManager(Dates, models.Manager):
             return self.get(hotel=hotel, month=prev_month, year=prev_year).balance
         except AcctStmt.DoesNotExist:
             return 0
-
-    ### LEGACY ###
-
-    def acct_trans_balance(self, hotel, date):
-        """
-        Calculate the current balance based on sms_used for today.
-
-        Calculate `balance`
-
-        If `balance` < 0, recharge account, and recalculate `balance`
-
-        Return: `balance`
-        """
-        sms_used = AcctTrans.objects.sms_used_mtd(hotel, insert_date=date)
-
-        balance = AcctTrans.objects.balance(hotel=hotel)
-
-        if balance < hotel.acct_cost.balance_min:
-            recharge_amt = AcctTrans.objects.calculate_recharge_amount(hotel, balance)
-            AcctTrans.objects.recharge(hotel, recharge_amt)
-            balance = AcctTrans.objects.balance(hotel=hotel)
-
-        return balance
     
     def get_or_create(self, hotel, month=None, year=None):
         """
@@ -238,15 +215,17 @@ class AcctStmtManager(Dates, models.Manager):
         date = self.first_of_month(month, year)
 
         funds_added = AcctTrans.objects.funds_added(hotel, date)
-        # phone_numbers
+        phone_numbers = hotel.phone_numbers.count()
         total_sms = hotel.messages.monthly_all(date=date).count()
-        monthly_costs = ((hotel.pricing.get_cost(total_sms)) +
-            hotel.phone_numbers.count() * settings.PHONE_NUMBER_MONTHLY_COST)
-        balance = self.acct_trans_balance(hotel, date)
+        total_sms_costs = self.get_total_sms_costs(hotel, total_sms)
+        monthly_costs = phone_numbers * settings.PHONE_NUMBER_MONTHLY_COST
+        balance = AcctTrans.objects.monthly_trans(hotel, date).balance()
 
         values = {
             'funds_added': funds_added,
+            'phone_numbers': phone_numbers,
             'total_sms': total_sms,
+            'total_sms_costs': total_sms_costs,
             'monthly_costs': monthly_costs,
             'balance': balance
         }
@@ -260,6 +239,13 @@ class AcctStmtManager(Dates, models.Manager):
             acct_stmt = self.create(hotel=hotel, month=date.month, year=date.year,
                 **values)
             return acct_stmt, True
+
+    @staticmethod
+    def get_total_sms_costs(hotel, total_sms):
+        try:
+            return hotel.pricing.get_cost(total_sms)
+        except Exception: # RelatedObjectDoesNotExist
+            return total_sms * settings.DEFAULT_SMS_COST
 
 
 class AcctStmt(TimeStampBaseModel):

@@ -133,9 +133,7 @@ class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
                 context.update({
                     'year': acct_stmt.year,
                     'month': acct_stmt.month,
-                    'acct_stmt': acct_stmt,
-                    'sms_cost': acct_stmt.monthly_costs - context['phone_numbers_cost'],
-                    'total_montly_cost': acct_stmt.monthly_costs
+                    'acct_stmt': acct_stmt
                 })
         else:
             context['acct_stmt'] = None
@@ -149,11 +147,6 @@ class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
         # legacy
         context['acct_stmts'] = AcctStmt.objects.filter(hotel=self.hotel)
         context['acct_cost'], created = AcctCost.objects.get_or_create(hotel=self.hotel)
-        context['phone_numbers'] = PhoneNumber.objects.filter(hotel=self.hotel)
-        context['phone_numbers_cost'] = context['phone_numbers'].count() * settings.PHONE_NUMBER_MONTHLY_COST
-        # AcctTrans
-        # self.acct_trans = AcctTrans.objects.filter(hotel=self.hotel)
-        context['balance'] = AcctTrans.objects.balance(hotel=self.hotel)
         context['acct_trans'] = AcctTrans.objects.filter(hotel=self.hotel,
             trans_type__name__in=['init_amt', 'recharge_amt']).order_by('-insert_date')[:4]
         return context

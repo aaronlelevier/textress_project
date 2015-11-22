@@ -7,7 +7,7 @@
         <div class="row">
             <div class="col-md-4">
                 <h3 class="lead">Current Funds Balance</h3>
-                <h3>{{ balance|stripe_money }}</h3>
+                <h3>{{ acct_stmt.balance|stripe_money }}</h3>
             </div>
             <div class="col-md-4">
                 <h3 class="lead">Auto Recharge: {% if acct_cost.auto_recharge %}ON{% else %}OFF{% endif %}</h3>
@@ -55,27 +55,27 @@
                                 <tr>
                                     <td>Starting Balance</td>
                                     <td></td>
-                                    <td>{{ acct_stmt_starting_balance }}</td>
+                                    <td>{{ acct_stmt_starting_balance|stripe_money }}</td>
                                 </tr>
                                 <tr>
                                     <td>Funds Added</td>
                                     <td></td>
-                                    <td>{{ acct_stmt.funds_added }}</td>
+                                    <td>{{ acct_stmt.funds_added|stripe_money }}</td>
                                 </tr>
                                 <tr>
                                     <td>SMS</td>
                                     <td>{{ acct_stmt.total_sms }}</td>
-                                    <td>{{ sms_cost|stripe_money }}</td>
+                                    <td>{{ acct_stmt.total_sms_costs|stripe_money }}</td>
                                 </tr>
                                 <tr>
                                     <td>Phone Numbers</td>
-                                    <td>{{ phone_numbers.count }}</td>
-                                    <td>{{ phone_numbers_cost|stripe_money }}</td>
+                                    <td>{{ acct_stmt.phone_numbers }}</td>
+                                    <td>{{ acct_stmt.monthly_costs|stripe_money }}</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Total</strong></td>
+                                    <td><strong>Current Funds Balance</strong></td>
                                     <td></td>
-                                    <td><strong>{{ total_montly_cost|stripe_money }}</strong></td>
+                                    <td><strong>{{ acct_stmt.balance|stripe_money }}</strong></td>
                                 </tr>
                             </table>
                             <a href="{% url 'acct_stmt_detail' year month %}">

@@ -6,7 +6,8 @@ from django.contrib.auth.models import User
 
 from model_mommy import mommy
 
-from account.models import AcctCost, AcctStmt, AcctTrans, CHARGE_AMOUNTS, BALANCE_AMOUNTS
+from account.models import (Pricing, AcctCost, AcctStmt, AcctTrans,
+    CHARGE_AMOUNTS, BALANCE_AMOUNTS)
 from account.tests.factory import (CREATE_ACCTCOST_DICT, create_acct_stmt,
     create_acct_stmts, create_acct_trans)
 from main.models import Hotel
@@ -115,7 +116,9 @@ class BillingSummaryTests(TransactionTestCase):
         # Billing Stmt Fixtures
         self.acct_cost, created = AcctCost.objects.get_or_create(self.hotel)
         self.acct_stmts = create_acct_stmts(self.hotel)
+        self.acct_stmt = self.acct_stmts[-1]
         self.acct_trans = create_acct_trans(self.hotel)
+        self.pricing = mommy.make(Pricing, hotel=self.hotel)
         self.phone_number = mommy.make(PhoneNumber, hotel=self.hotel)
         # Login
         self.client.login(username=self.admin.username, password=PASSWORD)
@@ -135,19 +138,19 @@ class BillingSummaryTests(TransactionTestCase):
         # Other context
         self.assertIsInstance(response.context['acct_trans'][0], AcctTrans)
         self.assertIsInstance(response.context['acct_cost'], AcctCost)
-        self.assertIsInstance(response.context['phone_numbers'][0], PhoneNumber)
 
-    # acct_stmt - current usage, starting balance, current balance
+    # acct_stmt table - current usage, starting balance, current balance
 
-    def test_starting_balance_new_signup(self):
+    def test_context_starting_balance_new_signup(self):
         """
         Starting balance (from previous month) should be 'zero' for new signups.
         """
         response = self.client.get(reverse('payment:summary'))
+
         self.assertIn("Starting Balance", response.content)
         self.assertEqual(response.context['acct_stmt_starting_balance'], 0)
 
-    def test_funds_added(self):
+    def test_context_funds_added(self):
         """
         Funds added for the month should be that month's 'init_amt' + 'recharge_amt' (s)
         """
@@ -155,8 +158,66 @@ class BillingSummaryTests(TransactionTestCase):
             trans_type__name__in=['recharge_amt', 'init_amt']).exists())
 
         response = self.client.get(reverse('payment:summary'))
+
         self.assertIn("Funds Added", response.content)
-        self.assertEqual(response.context['acct_stmt.funds_added'], 0)
+        self.assertEqual(response.context['acct_stmt'].funds_added, 0)
+
+    def test_context_total_sms(self):
+        response = self.client.get(reverse('payment:summary'))
+
+        self.assertIn("SMS", response.content)
+        self.assertEqual(
+            response.context['acct_stmt'].total_sms,
+            self.acct_stmt.total_sms
+        )
+
+    def test_context_total_sms_cost(self):
+        self.acct_stmt.total_sms_costs = AcctStmt.objects.get_total_sms_costs(
+            self.hotel, self.acct_stmt.total_sms)
+        self.acct_stmt.save()
+
+        response = self.client.get(reverse('payment:summary'))
+
+        self.assertEqual(
+            response.context['acct_stmt'].total_sms_costs,
+            AcctStmt.objects.get_total_sms_costs(self.hotel, response.context['acct_stmt'].total_sms)
+        )
+
+    def test_context_phone_numbers(self):
+        self.acct_stmt.phone_numbers = self.hotel.phone_numbers.count()
+        self.acct_stmt.save()
+
+        response = self.client.get(reverse('payment:summary'))
+
+        self.assertIn("Phone Numbers", response.content)
+        self.assertEqual(
+            response.context['acct_stmt'].phone_numbers,
+            self.acct_stmt.phone_numbers
+        )
+
+    def test_context_monthly_costs(self):
+        """
+        monthly_costs - just phone_number costs for the time being.
+        """
+        phone_numbers = self.hotel.phone_numbers.count()
+        self.acct_stmt.monthly_costs = phone_numbers * settings.PHONE_NUMBER_MONTHLY_COST
+        self.acct_stmt.save()
+
+        response = self.client.get(reverse('payment:summary'))
+
+        self.assertEqual(
+            response.context['acct_stmt'].monthly_costs,
+            self.acct_stmt.monthly_costs
+        )
+
+    def test_context_current_funds_balance(self):
+        response = self.client.get(reverse('payment:summary'))
+
+        self.assertIn("Current Funds Balance", response.content)
+        self.assertEqual(
+            response.context['acct_stmt'].balance,
+            self.acct_stmt.balance
+        )
 
     def test_acct_stmts_preview_none(self):
         [x.delete() for x in AcctStmt.objects.filter(hotel=self.hotel)]

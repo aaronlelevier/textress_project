@@ -257,6 +257,31 @@ class AcctStmtTests(TestCase):
         self.assertIsInstance(acct_stmt, AcctStmt)
         self.assertFalse(created)
 
+    # get_total_sms_costs
+
+    def test_get_total_sms_costs(self):
+        """
+        Be able to use the default SMS pricing if a record doesn't 
+        exist for the Hotel in order to be more flexible w/i tests, 
+        and this is the "defacto pricing" anyways unless a Hotel 
+        negotiates otherwise.
+        """
+        total_sms = 100
+
+        ret = AcctStmt.objects.get_total_sms_costs(self.hotel, total_sms)
+
+        self.assertEqual(ret, self.hotel.pricing.get_cost(total_sms))
+
+    def test_get_total_sms_costs_no_pricing(self):
+        total_sms = 100
+        hotel = create_hotel()
+        with self.assertRaises(Exception): # RelatedObjectDoesNotExist
+            self.assertIsNone(hotel.pricing)
+
+        ret = AcctStmt.objects.get_total_sms_costs(hotel, total_sms)
+
+        self.assertEqual(ret, total_sms * settings.DEFAULT_SMS_COST)
+
 
 class AcctStmtSignupTests(TestCase):
 

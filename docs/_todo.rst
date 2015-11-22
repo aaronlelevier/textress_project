@@ -115,10 +115,6 @@ competely deleted from the DB?
 - All Hotel's must have a valid ``AcctCost`` or else things like 
 ``./manage.py acct_stmt_update`` will fail
 
-- ``AcctStmt.objects.acct_trans_balance`` needs to be moved to AcctTrans Manager
-
-    - needs tests
-
     
 2015-08-21
 ----------
