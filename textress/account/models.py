@@ -237,12 +237,15 @@ class AcctStmtManager(Dates, models.Manager):
         """
         date = self.first_of_month(month, year)
 
+        funds_added = AcctTrans.objects.funds_added(hotel, date)
+        # phone_numbers
         total_sms = hotel.messages.monthly_all(date=date).count()
         monthly_costs = ((hotel.pricing.get_cost(total_sms)) +
-            hotel.phonenumbers.count() * settings.PHONE_NUMBER_MONTHLY_COST)
+            hotel.phone_numbers.count() * settings.PHONE_NUMBER_MONTHLY_COST)
         balance = self.acct_trans_balance(hotel, date)
 
         values = {
+            'funds_added': funds_added,
             'total_sms': total_sms,
             'monthly_costs': monthly_costs,
             'balance': balance
@@ -274,13 +277,17 @@ class AcctStmt(TimeStampBaseModel):
     # Keys
     hotel = models.ForeignKey(Hotel, related_name='acct_stmt')
     # Auto Fields
-    year = models.PositiveIntegerField(_("Year"), blank=True)
-    month = models.PositiveIntegerField(_("Month"), blank=True)
-    monthly_costs = models.PositiveIntegerField(_("Total Monthly Cost"), blank=True,
-        default=settings.DEFAULT_MONTHLY_FEE)
+    year = models.PositiveIntegerField()
+    month = models.PositiveIntegerField()
+    funds_added = models.PositiveIntegerField(blank=True, default=0,
+        help_text="from 'init_amt' or 'recharge_amt' AcctTrans.")
+    phone_numbers = models.PositiveIntegerField(blank=True, default=0)
+    monthly_costs = models.PositiveIntegerField(blank=True, default=0,
+        help_text="Only active Phone Numbers have a monthly cost at this time, \
+but other costs may be added. Additional feature costs, surcharge for REST API access, etc...")
     total_sms = models.PositiveIntegerField(blank=True, default=0)
-    balance = models.IntegerField(_("Current Funds Balance"), blank=True, default=0,
-        help_text="Monthly Cost + (SMS Used * Cost Per SMS)")
+    total_sms_costs = models.PositiveIntegerField(blank=True, default=0)
+    balance = models.IntegerField(_("Current Funds Balance"), blank=True, default=0)
 
     objects = AcctStmtManager()
 
@@ -572,6 +579,11 @@ class AcctTransManager(Dates, models.Manager):
             amount=amount
         )
         return acct_tran, True
+
+    def funds_added(self, hotel, date=None):
+        return (self.monthly_trans(hotel, date)
+                    .filter(trans_type__name__in=['init_amt', 'recharge_amt'])
+                    .aggregate(Sum('amount'))['amount__sum'] or 0)
 
 
 class AcctTrans(TimeStampBaseModel):

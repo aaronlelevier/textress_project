@@ -41,7 +41,7 @@ def monthly_ph_charge():
     today = timezone.now().date()
 
     for hotel in Hotel.objects.all():
-        for phone in hotel.phonenumbers.all():
+        for phone in hotel.phone_numbers.all():
             last_charge = AcctTrans.objects.filter(hotel=hotel,
                 desc=phone.phone_number).order_by('-created').last()
             # if not last_charge:

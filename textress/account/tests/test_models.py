@@ -208,6 +208,24 @@ class AcctStmtTests(TestCase):
             "{} {}".format(calendar.month_abbr[self.acct_stmt.month], self.acct_stmt.year)
         )
 
+    def test_funds_added(self):
+        """
+        Store 'funds_added' on the AcctStmt so doesn't have to be added each 
+        time from AcctTrans.
+        """
+        date = datetime.date(day=1, month=self.acct_stmt.month, year=self.acct_stmt.year)
+        acct_trans = (AcctTrans.objects.monthly_trans(self.hotel, date=date)
+                                       .filter(trans_type__name__in=['init_amt', 'recharge_amt'])
+                                       .aggregate(Sum('amount'))['amount__sum'] or 0)
+
+        self.acct_stmt.funds_added = AcctTrans.objects.funds_added(self.hotel, date)
+        self.acct_stmt.save()
+
+        self.assertEqual(
+            self.acct_stmt.funds_added,
+            acct_trans # acct_trans funds added calc
+        )
+
     ### MANAGER TESTS
 
     def test_starting_balance(self):
@@ -840,4 +858,18 @@ class AcctTransTests(TransactionTestCase):
         self.assertEqual(
             acct_trans.balance,
             AcctTrans.objects.get_balance(hotel=self.hotel, excludes=True) + acct_trans.amount
+        )
+
+    def test_funds_added(self):
+        """
+        Funds added for a single month. This will be calculted, so it can be 
+        stored on the AcctStmt for that month.
+        """
+        funds_added = (AcctTrans.objects.monthly_trans(self.hotel)
+                                        .filter(trans_type__name__in=['init_amt', 'recharge_amt'])
+                                        .aggregate(Sum('amount'))['amount__sum'] or 0)
+
+        self.assertEqual(
+            AcctTrans.objects.funds_added(self.hotel),
+            funds_added
         )

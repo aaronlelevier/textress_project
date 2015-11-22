@@ -39,7 +39,7 @@ class PhoneNumberListView(PhoneNumberBaseView):
 
     def get_context_data(self, **kwargs):
         context = super(PhoneNumberListView, self).get_context_data(**kwargs)
-        context['phone_numbers'] = self.hotel.phonenumbers.order_by('-default')
+        context['phone_numbers'] = self.hotel.phone_numbers.order_by('-default')
         context['addit_info'] = render_to_string('cpanel/forms/form_ph_list.html',
             {'ph_num_monthly_cost': settings.PHONE_NUMBER_MONTHLY_COST})
         if not self.hotel.twilio_ph_sid:

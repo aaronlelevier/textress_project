@@ -147,6 +147,17 @@ class BillingSummaryTests(TransactionTestCase):
         self.assertIn("Starting Balance", response.content)
         self.assertEqual(response.context['acct_stmt_starting_balance'], 0)
 
+    def test_funds_added(self):
+        """
+        Funds added for the month should be that month's 'init_amt' + 'recharge_amt' (s)
+        """
+        self.assertTrue(self.hotel.acct_trans.filter(
+            trans_type__name__in=['recharge_amt', 'init_amt']).exists())
+
+        response = self.client.get(reverse('payment:summary'))
+        self.assertIn("Funds Added", response.content)
+        self.assertEqual(response.context['acct_stmt.funds_added'], 0)
+
     def test_acct_stmts_preview_none(self):
         [x.delete() for x in AcctStmt.objects.filter(hotel=self.hotel)]
         response = self.client.get(reverse('payment:summary'))

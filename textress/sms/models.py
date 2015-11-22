@@ -179,7 +179,7 @@ class PhoneNumber(TwilioClient, TimeStampBaseModel):
     and should only be "friendly" formatted only when rendered in the template.
     '''
     # Keys
-    hotel = models.ForeignKey(Hotel, related_name="phonenumbers")
+    hotel = models.ForeignKey(Hotel, related_name="phone_numbers")
     # Fields
     sid = models.CharField(_("Twilio Phone # Sid"), primary_key=True, max_length=50)
     phone_number = models.CharField(_("Twilio Phone #"), max_length=12)
