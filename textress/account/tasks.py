@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+from django.conf import settings
+
 from celery import shared_task
 
 from account.models import AcctTrans, TransType, AcctStmt, Pricing
@@ -24,3 +26,23 @@ def create_initial_acct_trans_and_stmt(hotel_id):
 def get_or_create_acct_stmt(hotel_id, month, year):
     hotel = Hotel.objects.get(id=hotel_id)
     return AcctStmt.objects.get_or_create(hotel, month, year)
+
+
+@shared_task
+def charge_hotel_monthly_for_phone_numbers(hotel_id):
+    hotel = Hotel.objects.get(id=hotel_id)
+    
+    for ph in hotel.phone_numbers.all():
+        try:
+            AcctTrans.objects.get(
+                hotel=hotel,
+                trans_type__name='phone_number',
+                insert_date__day=settings.PHONE_NUMBER_MONTHLY_CHARGE_DAY,
+                desc=ph.monthly_charge_desc
+            )
+        except AcctTrans.DoesNotExist:
+            AcctTrans.objects.phone_number_charge(
+                hotel=hotel, 
+                phone_number=ph.phone_number,
+                desc=ph.monthly_charge_desc
+            )

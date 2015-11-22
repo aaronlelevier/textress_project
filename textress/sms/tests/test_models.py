@@ -93,33 +93,44 @@ class PhoneNumberManagerTests(TestCase):
 
 class PhoneNumberTests(TestCase):
 
+    def setUp(self):
+        self.hotel = create_hotel()
+
     def test_default(self):
         ph = create_phone_number()
         self.assertTrue(ph.default)
 
-    def test_last_created_default(TestCase):
-        hotel = create_hotel()
-        ph = mommy.make(PhoneNumber, hotel=hotel)
-        ph_2 = mommy.make(PhoneNumber, hotel=hotel)
-        assert ph_2.default
+    def test_last_created_default(self):
+        ph = mommy.make(PhoneNumber, hotel=self.hotel)
+        ph_2 = mommy.make(PhoneNumber, hotel=self.hotel)
+        self.assertTrue(ph_2.default)
 
-    def test_last_created_default_else(TestCase):
+    def test_last_created_default_else(self):
         # Unless expicitly told
-        hotel = create_hotel()
-        ph = mommy.make(PhoneNumber, hotel=hotel)
-        ph_2 = mommy.make(PhoneNumber, hotel=hotel, default=False)
-        assert not ph_2.default 
+        ph = mommy.make(PhoneNumber, hotel=self.hotel)
+        ph_2 = mommy.make(PhoneNumber, hotel=self.hotel, default=False)
+        self.assertFalse(ph_2.default)
 
     def test_default(self):
-        hotel = create_hotel()
-        phones = mommy.make(PhoneNumber, hotel=hotel, _quantity=3)
+        phones = mommy.make(PhoneNumber, hotel=self.hotel, _quantity=3)
 
         # Need to update the "default" ph num 1st or else ".default()"
         # will return multiple phone numbers
-        default = PhoneNumber.objects.default(hotel)
-        assert isinstance(default, PhoneNumber)
-        assert default.default
-        assert len(PhoneNumber.objects.filter(default=False)) == len(phones) - 1
+        ph = PhoneNumber.objects.default(self.hotel)
+        self.assertIsInstance(ph, PhoneNumber)
+        self.assertTrue(ph.default)
+        self.assertEqual(
+            len(PhoneNumber.objects.filter(default=False)),
+            len(phones) - 1
+        )
+
+    def test_monthly_charge_desc(self):
+        ph = create_phone_number()
+
+        self.assertEqual(
+            ph.monthly_charge_desc,
+            "monthly charge: {}".format(ph.phone_number)
+        )
 
 
 # class LivePhoneNumberTests(TestCase):

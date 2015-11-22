@@ -211,6 +211,10 @@ class PhoneNumber(TwilioClient, TimeStampBaseModel):
         # DB PhoneNumber delete
         return super(PhoneNumber, self).delete()
 
+    @property
+    def monthly_charge_desc(self):
+        return "monthly charge: {}".format(self.phone_number)
+
 
 '''
 Denormalize Hotel

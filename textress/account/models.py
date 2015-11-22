@@ -495,16 +495,19 @@ class AcctTransManager(Dates, models.Manager):
     def calculate_recharge_amount(hotel, balance):
         return hotel.acct_cost.recharge_amt - balance
 
-    def phone_number_charge(self, hotel, phone_number):
+    def phone_number_charge(self, hotel, phone_number, desc=None):
         """
         Creates an AcctTrans charge for a PH.  This could be an initial 
         charge or monthly.
 
         :hotel: Hotel object
         :phone_number: twilio ``phone_number`` as a string
+        :desc:
+            to be used to differentiate from "monthly phone_number charges 
+            vs. first time purchase charge.
         """
         self.check_balance(hotel)
-        amount = settings.PHONE_NUMBER_MONTHLY_COST
+        amount = -(settings.PHONE_NUMBER_MONTHLY_COST)
 
         if 'test' not in sys.argv:
             self.charge_hotel(hotel, amount)
@@ -512,8 +515,8 @@ class AcctTransManager(Dates, models.Manager):
         return self.create(
             hotel=hotel,
             trans_type=self.trans_types.phone_number,
-            amount = -amount,
-            desc="PH charge ${:.2f} for PH#: {}".format(amount/100, phone_number)
+            amount=amount,
+            desc=desc or "PH charge ${:.2f} for PH#: {}".format(amount/100, phone_number)
         )
 
     def sms_used_mtd(self, hotel, insert_date):
