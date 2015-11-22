@@ -144,6 +144,9 @@ class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(SummaryView, self).get_context_data(**kwargs)
+        # new
+        context['acct_stmt_starting_balance'] = AcctStmt.objects.starting_balance(hotel=self.hotel)
+        # legacy
         context['acct_stmts'] = AcctStmt.objects.filter(hotel=self.hotel)
         context['acct_cost'], created = AcctCost.objects.get_or_create(hotel=self.hotel)
         context['phone_numbers'] = PhoneNumber.objects.filter(hotel=self.hotel)

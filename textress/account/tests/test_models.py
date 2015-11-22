@@ -177,6 +177,7 @@ class AcctStmtTests(TestCase):
             guest=self.guest
         )
 
+        self.dates = Dates()
         # AcctStmt
         self.acct_stmts = create_acct_stmts(hotel=self.hotel)
         # Single AcctStmt
@@ -208,6 +209,17 @@ class AcctStmtTests(TestCase):
         )
 
     ### MANAGER TESTS
+
+    def test_starting_balance(self):
+        # self.acct_stmts are built in ascending order, so need to 'negative index'
+        # to get the last, and 2nd to last stmts
+        date = datetime.date(day=1, month=self.acct_stmts[-1].month,
+            year=self.acct_stmts[-1].year)
+
+        self.assertEqual(
+            AcctStmt.objects.starting_balance(hotel=self.hotel, date=date),
+            self.acct_stmts[-2].balance
+        )
 
     def test_get_or_create_current_month(self):
         # Should already exist
@@ -252,6 +264,13 @@ class AcctStmtSignupTests(TestCase):
             acct_stmt.balance,
             AcctTrans.objects.balance(hotel=self.hotel)
         )
+
+    def test_starting_balance(self):
+        self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 0)
+
+        ret = AcctStmt.objects.starting_balance(self.hotel)
+
+        self.assertEqual(ret, 0)
 
 
 class AcctStmtNewHotelTests(TestCase):

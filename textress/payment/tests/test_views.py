@@ -137,6 +137,16 @@ class BillingSummaryTests(TransactionTestCase):
         self.assertIsInstance(response.context['acct_cost'], AcctCost)
         self.assertIsInstance(response.context['phone_numbers'][0], PhoneNumber)
 
+    # acct_stmt - current usage, starting balance, current balance
+
+    def test_starting_balance_new_signup(self):
+        """
+        Starting balance (from previous month) should be 'zero' for new signups.
+        """
+        response = self.client.get(reverse('payment:summary'))
+        self.assertIn("Starting Balance", response.content)
+        self.assertEqual(response.context['acct_stmt_starting_balance'], 0)
+
     def test_acct_stmts_preview_none(self):
         [x.delete() for x in AcctStmt.objects.filter(hotel=self.hotel)]
         response = self.client.get(reverse('payment:summary'))
@@ -211,10 +221,7 @@ class CardUpdateTests(TestCase):
         self.assertEqual(len(m), 1)
 
 
-
-
-'''Remove for the time being. Can add in V2 of the software. Not critical at 
-this time.'''
+### COMMENT OUT:Remove for the time being. Can add in V2 of the software. Not critical at this time
 # class OneTimePaymentTests(TestCase):
 
 #     def setUp(self):

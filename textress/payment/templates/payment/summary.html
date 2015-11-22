@@ -53,6 +53,11 @@
                                     <th>Cost</th>
                                 </tr>
                                 <tr>
+                                    <td>Starting Balance</td>
+                                    <td></td>
+                                    <td>{{ acct_stmt_starting_balance }}</td>
+                                </tr>
+                                <tr>
                                     <td>SMS</td>
                                     <td>{{ acct_stmt.total_sms }}</td>
                                     <td>{{ sms_cost|stripe_money }}</td>

@@ -54,6 +54,20 @@ class DatesTests(TestCase):
             dates.first_of_month() - datetime.timedelta(days=1)
         )
 
+    def test_prev_month(self):
+        dates = Dates()
+        self.assertEqual(
+            dates.prev_month(),
+            dates.last_month_end().month
+        )
+
+    def test_prev_year(self):
+        dates = Dates()
+        self.assertEqual(
+            dates.prev_year(),
+            dates.last_month_end().year
+        )
+
 
 class TesterTests(TestCase):
 

@@ -194,6 +194,18 @@ class AcctCost(TimeStampBaseModel):
 
 class AcctStmtManager(Dates, models.Manager):
 
+    def starting_balance(self, hotel, date=None):
+        date = date or self._today
+        prev_month = self.prev_month(date)
+        prev_year = self.prev_year(date)
+
+        try:
+            return self.get(hotel=hotel, month=prev_month, year=prev_year).balance
+        except AcctStmt.DoesNotExist:
+            return 0
+
+    ### LEGACY ###
+
     def acct_trans_balance(self, hotel, date):
         """
         Calculate the current balance based on sms_used for today.
@@ -267,7 +279,7 @@ class AcctStmt(TimeStampBaseModel):
     monthly_costs = models.PositiveIntegerField(_("Total Monthly Cost"), blank=True,
         default=settings.DEFAULT_MONTHLY_FEE)
     total_sms = models.PositiveIntegerField(blank=True, default=0)
-    balance = models.PositiveIntegerField(_("Current Funds Balance"), blank=True, default=0,
+    balance = models.IntegerField(_("Current Funds Balance"), blank=True, default=0,
         help_text="Monthly Cost + (SMS Used * Cost Per SMS)")
 
     objects = AcctStmtManager()

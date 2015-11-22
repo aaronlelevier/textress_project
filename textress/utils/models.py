@@ -50,6 +50,12 @@ class Dates(object):
         return self.first_of_month(month=date.month,
             year=date.year) - datetime.timedelta(days=1)
 
+    def prev_month(self, date=None):
+        return self.last_month_end(date).month
+
+    def prev_year(self, date=None):
+        return self.last_month_end(date).year
+
 
 class TimeStampBaseModel(Dates, models.Model):
     created = models.DateTimeField(auto_now_add=True)
