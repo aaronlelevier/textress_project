@@ -184,6 +184,7 @@ class AcctStmtTests(TestCase):
         # Supporting Models
         self.acct_cost = AcctCost.objects.get_or_create(hotel=self.hotel)
         self.recharge_amt, _ = TransType.objects.get_or_create(name='recharge_amt')
+        self.phone_number, _ = TransType.objects.get_or_create(name='phone_number')
         self.acct_trans = create_acct_trans(hotel=self.hotel)
         self.pricing = mommy.make(Pricing, hotel=self.hotel)
 
@@ -244,7 +245,7 @@ class AcctStmtTests(TestCase):
 
     # get_or_create
 
-    def test_get_or_create_current_month(self):
+    def test_get_or_create__current_month(self):
         # Should already exist
         acct_stmt, created = AcctStmt.objects.get_or_create(
             hotel=self.hotel,
@@ -331,6 +332,27 @@ class AcctStmtTests(TestCase):
             init_balance + AcctStmt.objects.get_total_sms_costs(self.hotel, addit_sms)
         )
 
+    def test_get_or_create__monthly_costs(self):
+        """
+        ``phone_number`` charge should increase 'monthly_costs' and decrease 'balance'
+        """
+        acct_stmt, _ = AcctStmt.objects.get_or_create(
+            hotel=self.hotel,
+            month=self.today.month,
+            year=self.today.year
+        )
+        acct_tran = AcctTrans.objects.create(hotel=self.hotel, trans_type=self.phone_number,
+            amount= -(settings.PHONE_NUMBER_MONTHLY_COST))
+
+        updated_acct_stmt, _ = AcctStmt.objects.get_or_create(
+            hotel=self.hotel,
+            month=self.today.month,
+            year=self.today.year
+        )
+
+        self.assertEqual(updated_acct_stmt.monthly_costs, acct_stmt.monthly_costs+acct_tran.amount)
+        self.assertEqual(updated_acct_stmt.balance, acct_stmt.balance+acct_tran.amount)
+
     # get_total_sms_costs
 
     def test_get_total_sms_costs(self):
@@ -355,6 +377,16 @@ class AcctStmtTests(TestCase):
         ret = AcctStmt.objects.get_total_sms_costs(hotel, total_sms)
 
         self.assertEqual(ret, -(total_sms * settings.DEFAULT_SMS_COST))
+
+    def test_get_monthly_costs(self):
+        AcctTrans.objects.create(hotel=self.hotel, trans_type=self.phone_number,
+            amount= -(settings.PHONE_NUMBER_MONTHLY_COST))
+        AcctTrans.objects.create(hotel=self.hotel, trans_type=self.phone_number,
+            amount= -(settings.PHONE_NUMBER_MONTHLY_COST))
+
+        ret = AcctStmt.objects.get_monthly_costs(self.hotel, self.today)
+
+        self.assertEqual(ret, -(settings.PHONE_NUMBER_MONTHLY_COST)*2)
 
 
 class AcctStmtSignupTests(TestCase):

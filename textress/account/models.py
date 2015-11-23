@@ -222,7 +222,7 @@ class AcctStmtManager(Dates, models.Manager):
         # other fields
         funds_added = AcctTrans.objects.funds_added(hotel, date)
         phone_numbers = hotel.phone_numbers.count()
-        monthly_costs = phone_numbers * settings.PHONE_NUMBER_MONTHLY_COST
+        monthly_costs = self.get_monthly_costs(hotel, date)
         balance = AcctTrans.objects.monthly_trans(hotel, date).balance()
 
         values = {
@@ -251,6 +251,15 @@ class AcctStmtManager(Dates, models.Manager):
         except Exception: # RelatedObjectDoesNotExist
             return -(total_sms * settings.DEFAULT_SMS_COST)
 
+    @staticmethod
+    def get_monthly_costs(hotel, date):
+        """
+        'phone_number' is the only current ``trans_type`` w/ a monthly cost.
+        """
+        return (AcctTrans.objects.monthly_trans(hotel, date)
+                                 .filter(trans_type__name='phone_number')
+                                 .balance())
+
 
 class AcctStmt(TimeStampBaseModel):
     """
@@ -272,11 +281,12 @@ class AcctStmt(TimeStampBaseModel):
     funds_added = models.PositiveIntegerField(blank=True, default=0,
         help_text="from 'init_amt' or 'recharge_amt' AcctTrans.")
     phone_numbers = models.PositiveIntegerField(blank=True, default=0)
-    monthly_costs = models.PositiveIntegerField(blank=True, default=0,
+    monthly_costs = models.IntegerField(blank=True, default=0,
         help_text="Only active Phone Numbers have a monthly cost at this time, \
 but other costs may be added. Additional feature costs, surcharge for REST API access, etc...")
     total_sms = models.PositiveIntegerField(blank=True, default=0)
-    total_sms_costs = models.PositiveIntegerField(blank=True, default=0)
+    total_sms_costs = models.IntegerField(blank=True, default=0,
+        help_text="This will be negative (debits are negative).")
     balance = models.IntegerField(_("Current Funds Balance"), blank=True, default=0)
 
     objects = AcctStmtManager()
