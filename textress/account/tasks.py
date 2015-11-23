@@ -6,6 +6,7 @@ from celery import shared_task
 
 from account.models import AcctTrans, TransType, AcctStmt, Pricing
 from main.models import Hotel
+from utils.models import Dates
 
 
 @shared_task
@@ -46,3 +47,15 @@ def charge_hotel_monthly_for_phone_numbers(hotel_id):
                 phone_number=ph.phone_number,
                 desc=ph.monthly_charge_desc
             )
+
+@shared_task
+def eod_update_or_create_sms_used():
+    """
+    After a day has passed, run the final ``update_or_create_sms_used`` 
+    to get the final 'sms' counts/costs for that day for all active Hotels.
+    """
+    dates = Dates()
+    yesterday = dates._yesterday
+
+    for hotel in Hotel.objects.current():
+        AcctTrans.objects.update_or_create_sms_used(hotel, yesterday)

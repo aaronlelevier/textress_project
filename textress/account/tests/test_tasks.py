@@ -1,3 +1,5 @@
+from mock import patch
+
 from django.test import TestCase
 from django.conf import settings
 from django.db.models import Sum
@@ -6,8 +8,8 @@ from model_mommy import mommy
 
 from account.models import AcctTrans, AcctStmt, TransType, AcctCost, Pricing
 from account.tasks import (create_initial_acct_trans_and_stmt, get_or_create_acct_stmt,
-    charge_hotel_monthly_for_phone_numbers)
-from account.tests.factory import create_acct_stmt
+    charge_hotel_monthly_for_phone_numbers, eod_update_or_create_sms_used)
+from account.tests.factory import create_acct_stmt, create_acct_tran
 from main.models import Hotel
 from main.tests.factory import create_hotel
 from sms.tests.factory import create_phone_number
@@ -24,6 +26,10 @@ class CreateInitialAcctTransAndAcctStmtTests(TestCase):
         self.pricing = mommy.make(Pricing, hotel=self.hotel)
         self.acct_cost = AcctCost.objects.get_or_create(hotel=self.hotel)
         self.init_amt = TransType.objects.get(name='init_amt')
+        self.sms_used = TransType.objects.get(name='sms_used')
+        # dates
+        self.dates = Dates()
+        self.today = self.dates._today
 
         celery_set_eager()
 
@@ -113,3 +119,13 @@ class CreateInitialAcctTransAndAcctStmtTests(TestCase):
                 ph_num_acct_trans.aggregate(Sum('amount'))['amount__sum'],
                 2 * -(settings.PHONE_NUMBER_MONTHLY_COST)
             )
+    # @patch("account.models.AcctTransManager.update_or_create_sms_used")
+    def test_eod_update_or_create_sms_used(self):
+        init_acct_tran = create_acct_tran(self.hotel, self.sms_used, self.today)
+
+        eod_update_or_create_sms_used.delay()
+
+        post_acct_tran = AcctTrans.objects.filter(hotel=self.hotel,
+            trans_type=self.sms_used).order_by('-modified').first()
+
+        self.assertTrue(post_acct_tran.modified > init_acct_tran.modified)
