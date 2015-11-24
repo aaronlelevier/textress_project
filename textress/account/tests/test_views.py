@@ -91,6 +91,16 @@ class AcctStmtViewTests(TestCase):
     def test_acct_pmt_history_breadcrumbs(self):
         response = self.client.get(reverse('acct_pmt_history'))
         self.assertTrue(response.context['breadcrumbs'])
+
+    def test_acct_pmt_history_context(self):
+        acct_tran = AcctTrans.objects.filter(hotel=self.hotel, trans_type__name='init_amt').first()
+        self.assertTrue(acct_tran)
+
+        response = self.client.get(reverse('acct_pmt_history'))
+
+        self.assertIn(acct_tran.insert_date.strftime("%b. %d, %Y"), response.content)
+        self.assertIn("init amt", response.content)
+        self.assertIn('${:.2f}'.format(acct_tran.amount/100.0), response.content)
         
     ### ACCT COST
 
