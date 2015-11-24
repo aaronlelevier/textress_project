@@ -20,6 +20,8 @@ from utils import create
 
 class AcctStmtViewTests(TestCase):
 
+    fixtures = ['trans_type.json']
+
     def setUp(self):
         self.hotel = create_hotel()
         create._get_groups_and_perms()
@@ -55,15 +57,26 @@ class AcctStmtViewTests(TestCase):
             kwargs={'year': self.year, 'month': self.month}))
         self.assertTrue(response.context['acct_stmt'])
         self.assertTrue(response.context['acct_stmts'])
-        # Because `monthly_trans` have a one day lag, so if today is the 1st
-        # of the month, there won't be any `monthly_trans` yet for this month.
-        if not self.today.day == 1:
-            self.assertTrue(response.context['monthly_trans'])
 
     def test_acct_stmt_detail_breadcrumbs(self):
         response = self.client.get(reverse('acct_stmt_detail',
             kwargs={'year': self.year, 'month': self.month}))
         self.assertTrue(response.context['breadcrumbs'])
+
+    def test_context_acct_trans(self):
+        acct_tran = AcctTrans.objects.filter(hotel=self.hotel, trans_type__name='sms_used').first()
+        self.assertTrue(acct_tran)
+
+        response = self.client.get(reverse('acct_stmt_detail',
+            kwargs={'year': self.year, 'month': self.month}))
+
+        self.assertTrue(response.context['monthly_trans'])
+        # the "sms_used" AcctTrans is populating the table how we expect
+        self.assertIn(acct_tran.insert_date.strftime("%b. %d, %Y"), response.content)
+        self.assertIn("sms used", response.content)
+        self.assertIn(str(acct_tran.sms_used), response.content)
+        self.assertIn('${:.2f}'.format(acct_tran.amount/100.0), response.content)
+        self.assertIn('${:.2f}'.format(acct_tran.balance/100.0), response.content)
 
     ### ACCT PMT HISTORY
 

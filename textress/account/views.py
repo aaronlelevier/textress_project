@@ -184,15 +184,11 @@ class AcctStmtDetailView(AdminOnlyMixin, SetHeadlineMixin, BillingSummaryContext
         # Use All Time Hotel Transactions to get the Balance
         _date = Dates().first_of_month(int(kwargs['month']), int(kwargs['year']))
         all_trans = AcctTrans.objects.filter(hotel=self.hotel)
-        monthly_trans = AcctTrans.objects.monthly_trans(self.hotel, _date).order_by('-created')
         # Table Context
-        context['monthly_trans'] = monthly_trans
-        context['init_balance'] = monthly_trans.balance()
-        # Normal Context
+        context['monthly_trans'] = AcctTrans.objects.monthly_trans(self.hotel, _date).order_by('-created')
         context['acct_stmt'] = (AcctStmt.objects.filter(hotel=self.hotel)
                                                 .get(month=kwargs['month'], year=kwargs['year']))
         context['acct_stmts'] = AcctStmt.objects.filter(hotel=self.hotel)
-        context['balance'] = all_trans.balance()
         return context
 
 

@@ -185,6 +185,7 @@ class AcctStmtTests(TestCase):
         self.acct_cost = AcctCost.objects.get_or_create(hotel=self.hotel)
         self.recharge_amt, _ = TransType.objects.get_or_create(name='recharge_amt')
         self.phone_number, _ = TransType.objects.get_or_create(name='phone_number')
+        self.sms_used, _ = TransType.objects.get_or_create(name='sms_used')
         self.acct_trans = create_acct_trans(hotel=self.hotel)
         self.pricing = mommy.make(Pricing, hotel=self.hotel)
 
@@ -299,7 +300,7 @@ class AcctStmtTests(TestCase):
             month=self.today.month,
             year=self.today.year
         )
-        init_total_sms = self.hotel.messages.monthly_all(date=self.today).count()
+        init_total_sms = AcctStmt.objects.get_total_sms(self.hotel, self.today)
         init_total_sms_costs = AcctStmt.objects.get_total_sms_costs(self.hotel, init_total_sms)
         init_balance = AcctTrans.objects.monthly_trans(self.hotel, self.today).balance()
 
@@ -353,6 +354,52 @@ class AcctStmtTests(TestCase):
         self.assertEqual(updated_acct_stmt.monthly_costs, acct_stmt.monthly_costs+acct_tran.amount)
         self.assertEqual(updated_acct_stmt.balance, acct_stmt.balance+acct_tran.amount)
 
+    # get_phone_numbers
+
+    def test_get_phone_numbers(self):
+        AcctTrans.objects.create(hotel=self.hotel, trans_type=self.phone_number,
+            amount= -(settings.PHONE_NUMBER_MONTHLY_COST))
+        AcctTrans.objects.create(hotel=self.hotel, trans_type=self.phone_number,
+            amount= -(settings.PHONE_NUMBER_MONTHLY_COST))
+
+        ret = AcctStmt.objects.get_phone_numbers(self.hotel, self.today)
+
+        self.assertEqual(ret, 2)
+
+    # get_total_sms
+
+    def test_get_total_sms(self):
+        """
+        Correctly calculate the total sms used for a Hotel for a single month.
+        This should be the same w/ or w/o filtering for 'sms_used' trans_types.
+        """
+        create_acct_tran(self.hotel, self.sms_used, self.today)
+        create_acct_tran(self.hotel, self.sms_used, self.today)
+
+        ret = AcctStmt.objects.get_total_sms(self.hotel, self.today)
+
+        self.assertEqual(
+            ret,
+            (AcctTrans.objects.monthly_trans(self.hotel, self.today)
+                              .filter(trans_type=self.sms_used)
+                              .aggregate(Sum('sms_used'))['sms_used__sum'] or 0)
+        )
+
+    def test_get_total_sms__no_sms_used_trans_type_filter(self):
+        """
+        This should be the same w/ or w/o filtering for 'sms_used' trans_types.
+        """
+        create_acct_tran(self.hotel, self.sms_used, self.today)
+        create_acct_tran(self.hotel, self.sms_used, self.today)
+
+        ret = AcctStmt.objects.get_total_sms(self.hotel, self.today)
+
+        self.assertEqual(
+            ret,
+            (AcctTrans.objects.monthly_trans(self.hotel, self.today)
+                              .aggregate(Sum('sms_used'))['sms_used__sum'] or 0)
+        )
+
     # get_total_sms_costs
 
     def test_get_total_sms_costs(self):
@@ -368,7 +415,7 @@ class AcctStmtTests(TestCase):
 
         self.assertEqual(ret, self.hotel.pricing.get_cost(total_sms))
 
-    def test_get_total_sms_costs_no_pricing(self):
+    def test_get_total_sms_costs__no_pricing(self):
         total_sms = 100
         hotel = create_hotel()
         with self.assertRaises(Exception): # RelatedObjectDoesNotExist
@@ -377,6 +424,8 @@ class AcctStmtTests(TestCase):
         ret = AcctStmt.objects.get_total_sms_costs(hotel, total_sms)
 
         self.assertEqual(ret, -(total_sms * settings.DEFAULT_SMS_COST))
+
+    # get_monthly_costs
 
     def test_get_monthly_costs(self):
         AcctTrans.objects.create(hotel=self.hotel, trans_type=self.phone_number,

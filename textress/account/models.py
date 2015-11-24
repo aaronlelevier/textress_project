@@ -216,12 +216,12 @@ class AcctStmtManager(Dates, models.Manager):
 
         # sms fields: re-calculate 'sms_used' for today in order to get most
         # up to date usage balance
-        AcctTrans.objects.update_or_create_sms_used(hotel, self._today) 
-        total_sms = hotel.messages.monthly_all(date=date).count()
+        AcctTrans.objects.update_or_create_sms_used(hotel, self._today)
+        # fields
+        total_sms = self.get_total_sms(hotel, date)
         total_sms_costs = self.get_total_sms_costs(hotel, total_sms)
-        # other fields
         funds_added = AcctTrans.objects.funds_added(hotel, date)
-        phone_numbers = hotel.phone_numbers.count()
+        phone_numbers = self.get_phone_numbers(hotel, date)
         monthly_costs = self.get_monthly_costs(hotel, date)
         balance = AcctTrans.objects.monthly_trans(hotel, date).balance()
 
@@ -243,6 +243,21 @@ class AcctStmtManager(Dates, models.Manager):
             acct_stmt = self.create(hotel=hotel, month=date.month, year=date.year,
                 **values)
             return acct_stmt, True
+
+    @staticmethod
+    def get_phone_numbers(hotel, date):
+        """
+        A count of 'phone_numbers' purchased during the month.
+        """
+        return (AcctTrans.objects.monthly_trans(hotel, date)
+                                 .filter(trans_type__name='phone_number')
+                                 .count())
+
+    @staticmethod
+    def get_total_sms(hotel, date):
+        return (AcctTrans.objects.monthly_trans(hotel, date)
+                                 .filter(trans_type__name='sms_used')
+                                 .aggregate(Sum('sms_used'))['sms_used__sum'] or 0)
 
     @staticmethod
     def get_total_sms_costs(hotel, total_sms):
