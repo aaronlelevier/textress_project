@@ -13,7 +13,7 @@ from account.tests.factory import (CREATE_ACCTCOST_DICT, create_acct_stmt,
 from main.models import Hotel
 from main.tests.factory import (CREATE_USER_DICT, CREATE_HOTEL_DICT, PASSWORD,
     create_hotel, create_hotel_user)
-from payment.forms import StripeForm
+from payment.forms import StripeForm, OneTimePaymentForm
 from payment.tests import factory
 from payment.models import Customer, Card, Charge
 from sms.models import PhoneNumber
@@ -138,6 +138,31 @@ class BillingSummaryTests(TransactionTestCase):
         # Other context
         self.assertIsInstance(response.context['acct_trans'][0], AcctTrans)
         self.assertIsInstance(response.context['acct_cost'], AcctCost)
+
+    def test_context__manage_payments(self):
+        response = self.client.get(reverse('payment:summary'))
+
+        self.assertIn("Manage Payments", response.content)
+
+    def test_context__chage_or_add_payment_method(self):
+        response = self.client.get(reverse('payment:summary'))
+
+        self.assertIn("Change / Add Payment Method", response.content)
+        self.assertIn(reverse("payment:card_list"), response.content)
+
+    def test_context__add_funds(self):
+        response = self.client.get(reverse('payment:summary'))
+
+        self.assertIn("Add Funds", response.content)
+        self.assertIn(reverse("payment:one_time_payment"), response.content)
+
+    # one_time_payment
+
+    def test_one_time_payment__get(self):
+        response = self.client.get(reverse('payment:one_time_payment'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.context['form'], OneTimePaymentForm)
 
     # acct_stmt table - current usage, starting balance, current balance
 

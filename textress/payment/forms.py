@@ -1,6 +1,7 @@
 from django import forms
 
 from account.models import CHARGE_AMOUNTS
+from utils.forms import Bootstrap3Form
 
 
 class StripeForm(forms.Form):
@@ -15,34 +16,16 @@ class CardListForm(StripeForm):
         initial=False, required=False)
 
 
-### TODO: May use the below "1x Pmt Form in the future?"
+class OneTimePaymentForm(Bootstrap3Form):
+    '''
+    Amount: One-Time payment amount from Dropdown, or Choose an other amount
 
-# class StripeOneTimePaymentForm(CardListForm):
-#     '''
-#     Amount: One-Time payment amount from Dropdown, or Choose an other amount
+    Card: Choose Existing Card, or Add a new one 
+    '''
+    def __init__(self, hotel, *args, **kwargs):
+        super(OneTimePaymentForm, self).__init__(*args, **kwargs)
+        self.hotel = hotel
+        self.fields['auto_pay'].initial = self.hotel.acct_cost.auto_recharge
 
-#     Card: Choose Existing Card, or Add a new one 
-#     '''
-#     def __init__(self, hotel, *args, **kwargs):
-#         super(CardListForm, self).__init__(*args, **kwargs)
-#         self.hotel = hotel
-#         self.fields['cards'].choices = self._card_list
-
-#     @property
-#     def _card_list(self):
-#         try: 
-#             cards = self.hotel.customer.cards.all()
-#         except AttributeError:
-#             cards = None
-
-#         if cards:
-#             return [(c.id, c.last4) for c in cards]
-#         else:
-#             return [(None, None)]   
-#     # Card List
-#     cards = forms.ChoiceField(widget=forms.RadioSelect, required=False)
-#     # Amount
-#     amount = forms.ChoiceField(choices=CHARGE_AMOUNTS, required=False)
-#     other = forms.BooleanField(label='Other Amount',
-#         initial=False, required=False)
-#     other_amount = forms.FloatField(required=False)
+    amount = forms.ChoiceField(choices=CHARGE_AMOUNTS, required=False)
+    auto_pay = forms.BooleanField()

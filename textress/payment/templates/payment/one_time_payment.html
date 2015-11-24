@@ -2,66 +2,10 @@
 {% load staticfiles stripe_tags %}
 
 
-{% block page_css %}
-<style type="text/css">
-    #add_card {display: none;}
-    #other_amount {display: none;}
-</style>
-{% endblock page_css %}
-
-
-{% block head_js %}
-{{ block.super }}
-<!-- form plugins: start -->
-<script src="{% static 'clipone/admin/clip-one/assets/plugins/jquery.maskedinput/src/jquery.maskedinput.js' %}"></script>
-<script src="{% static 'clipone/admin/clip-one/assets/plugins/jquery-maskmoney/jquery.maskMoney.js' %}"></script>
-<!-- form plugins: end -->
-<!-- stipe: start -->
-<script type="text/javascript" src="https://js.stripe.com/v2/"></script>
-<script type="text/javascript">
-    Stripe.setPublishableKey('{{ publishable_key }}');
-
-    var stripeResponseHandler = function(status, response) {
-        var $form = $('#checkout-form');
-
-        if (response.error) {
-            // Show the errors on the form
-            $form.find('.payment-errors').text(response.error.message);
-            $form.find('.payment-errors').addClass('alert');
-            $form.find('.payment-errors').addClass('alert-error');
-            $form.find('button').prop('disabled', false);
-        } else {
-            // token contains id, last4, and card type
-            var token = response.id;
-            // Insert the token into the form so it gets submitted to the server
-            $form.append($('<input type="hidden" name="stripe_token" />').val(token));
-            // and re-submit
-            $form.get(0).submit();
-        }
-    };
-
-    jQuery(function($) {
-        $('#checkout-form').submit(function(e) {
-            var $form = $(this);
-
-            // Disable the submit button to prevent repeated clicks
-            $form.find('button').prop('disabled', true);
-
-            Stripe.createToken($form, stripeResponseHandler);
-
-            // Prevent the form from submitting with the default action
-            return false;
-        });
-    });
-</script>
-<!-- stripe: end -->
-{% endblock head_js %}
-
-
 {% block content %}
 
 <div class="row">
-    <div class="col-md-5 col-md-offset-3">
+    <div class="col-md-6 col-md-offset-3">
         <form method="post" action="" id="checkout-form">
             {% csrf_token %}
             {{ form.non_field_errors }}
@@ -70,104 +14,35 @@
                     <h4 class="text-center">One-Time payment amount</h4>
                 </div>
             </div>
-            <div class="row pull-right">
-                <div>
-                    {{ form.other }} &nbsp; Other Amount
-                </div>
-            </div>
-            <br>
-            <br>
             <div class="row" id="recharge_amount">
                 {{ form.amount.errors }}
-                Payment Amount <small class="text-success">0.00</small>
                 <select for="id_amount" name="amount" class="form-control" style="margin-top:5px;" />
                 {% for v,t in form.amount.field.choices %}
                     <option value="{{ v }}">{{ t }}</option>
                 {% endfor %}
                 </select>
             </div>
-            <div class="row" id="other_amount">
-                <label for="id_other_amount">
-                    Payment Amount <small class="text-success">0.00</small>
-                </label>
-                <div>
-                    <input type="text" id="id_other_amount" name="other_amount" class="form-control currency">
-                </div>
-            </div>
+
             <br>
 
             <div class="row">
                 <div class="well" style="padding:0;">
-                    <h4 class="text-center">Credit &amp; Debit Cards</h4>
+                    <h4 class="text-center">Payment Method</h4>
                 </div>
             </div>
 
-<!-- Stripe Error Alert -->
-            <div class="row" style="margin-bottom:2em">
-                <div class="col-md-12">
-                    <span class="payment-errors alert-danger"></span>
-                </div>
-            </div>
-            
             <div class="row">
-                <div class="pull-right">
-                    {{ form.add_card }} &nbsp; Add a Card
-                </div>
-            </div>
-
-            <div class="row" id="current_cards">
-                {% for c in hotel.customer.cards.all %}
-                    <div class="radio vcenter">
-                        <label for="id_cards{{ forloop.counter0 }}">
-                            <input id="id_cards{{ forloop.counter0 }}" name="cards" type="radio" value="{{ c.id }}" class="grey">
-                                <img src="{{ MEDIA_URL }}{{ c.image.image }}"> 
-                                <span style="margin-left:5px">{{ c.brand }} ending in {{ c.last4 }}</span>
-                                <span style="margin-left:5px"><small>Expires:</small> {{ c.expires }}</span>
-                    </label>
-                    </div>
-                {% endfor %}
-            <br>
-            </div>
-
-
-            <div class="row" id="add_card">
-                <div class="form-group">
-                    <label class="control-label" for="card">Card</label>
-                    <div class="controls">
-                        <input type="text" id="card" class="form-control" data-stripe="number" />
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-8">
-                        <div class="form-group">
-                            <label class="control-label" for="">Expiration (MM/YYYY)</label>
-                            <div class="row">
-                                <div class="col-md-5" style="padding-right:0;">
-                                    <select data-stripe="exp-month" class="form-control" />
-                                    {% for month in months %}
-                                        {{ month|safe }}
-                                    {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="col-xs-1">
-                                    <h2 style="margin-top:0;">/</h2>
-                                </div>
-                                <div class="col-md-5" style="padding-left:5px;">
-                                    <select data-stripe="exp-year" class="form-control" />
-                                    {% for year in years %}
-                                        {{ year|safe }}
-                                    {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
+                <div class="col-sm-12">
+                    <div class="row well" style="background-color:white;">
+                        <div class="col-sm-7" style="padding:0px;margin:0px;">
+                            <img src="{{ MEDIA_URL }}{{ card.image.image }}" style="max-width:40px;"> 
+                            <span style="margin-left:5px"><small>{{ card.brand|first_word }} ending in: </small>{{ card.last4 }}</span>
+                            <span style="margin-left:5px"><small>Expires: </small>{{ card.expires }}</span>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label class="control-label" for="cvc">CVC</label>
-                            <div class="controls">
-                                <input type="text" id="cvc" size="4" class="form-control" data-stripe="cvc" />
-                            </div>
+                        <div class="col-sm-3 col-sm-offset-2 text-center">
+                            <a href="{% url 'payment:card_list' %}">
+                                <p><strong>change</strong></p>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -208,34 +83,3 @@
 </div>
 <br>
 {% endblock content %}
-
-
-{% block page_js %}
-<script type="text/javascript">
-// Add a Card hide logic
-$(document).ready(function(){
-    $('#id_other').click(function(){
-        $("#other_amount").toggle();
-        if ($("#recharge_amount").is(":visible")){
-            $("#recharge_amount").hide();
-        }
-        else {
-            $("#recharge_amount").show();
-        }
-    });
-    $('#id_add_card').click(function(){
-        $("#add_card").toggle();
-        if ($("#current_cards").is(":visible")){
-            $("#current_cards").hide();
-        }
-        else {
-            $("#current_cards").show();
-        }
-    });
-});
-// Input Helpers
-$(function() {
-    $('#id_other_amount').maskMoney();
-});
-</script>
-{% endblock page_js %}

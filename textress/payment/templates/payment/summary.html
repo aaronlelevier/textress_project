@@ -18,9 +18,12 @@
                 </a>
             </div>
             <div class="col-md-4">
-                <h3 class="lead">Manage Payment Methods</h3>
+                <h3 class="lead">Manage Payments</h3>
                 <a href="{% url 'payment:card_list' %}">
                     <p><strong>Change / Add Payment Method</strong></p>
+                </a>
+                <a href="{% url 'payment:one_time_payment' %}">
+                    <p><strong>Add Funds</strong></p>
                 </a>
             </div>
         </div>

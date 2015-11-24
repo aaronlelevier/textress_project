@@ -14,7 +14,7 @@ from account.tasks import create_initial_acct_trans_and_stmt
 from main.mixins import (RegistrationContextMixin, HotelContextMixin, HotelUserMixin,
     AdminOnlyMixin)
 from payment.models import Card
-from payment.forms import StripeForm, CardListForm # StripeOneTimePaymentForm
+from payment.forms import StripeForm, CardListForm, OneTimePaymentForm
 from payment.helpers import signup_register_step4
 from payment.mixins import (StripeMixin, StripeFormValidMixin, HotelCardOnlyMixin,
     BillingSummaryContextMixin, MonthYearContextMixin)
@@ -201,52 +201,56 @@ def delete_card_view(request, pk):
     return HttpResponseRedirect(reverse('payment:card_list'))
 
 
-# class OneTimePaymentView(AdminOnlyMixin, MonthYearContextMixin, SetHeadlineMixin,
-#     FormValidMessageMixin, StripeMixin, FormView):
+class OneTimePaymentView(AdminOnlyMixin, MonthYearContextMixin, SetHeadlineMixin,
+    FormValidMessageMixin, StripeMixin, FormView):
 
-#     headline = "One Time Payment"
-#     template_name = "payment/one_time_payment.html"
-#     form_class = StripeOneTimePaymentForm
-#     success_url = reverse_lazy('payment:summary')
+    headline = "One Time Payment"
+    template_name = "payment/one_time_payment.html"
+    form_class = OneTimePaymentForm
+    success_url = reverse_lazy('payment:summary')
 
-#     def get_form_valid_message(self):
-#         return "The payment has been successfully processed. An email will be \
-# sent to {}. Thank you.".format(self.request.user.email) 
+    def get_form_valid_message(self):
+        return "The payment has been successfully processed. An email will be \
+sent to {}. Thank you.".format(self.request.user.email) 
 
-#     def get_form_kwargs(self):
-#         "The Hotel Card objects will be need for the C.Card ChoiceField."
-#         # grab the current set of form #kwargs
-#         kwargs = super(OneTimePaymentView, self).get_form_kwargs()
-#         # Update the kwargs with the user_id
-#         kwargs['hotel'] = self.hotel
-#         return kwargs
+    def get_form_kwargs(self):
+        "The Hotel Card objects will be need for the C.Card ChoiceField."
+        # grab the current set of form #kwargs
+        kwargs = super(OneTimePaymentView, self).get_form_kwargs()
+        # Update the kwargs with the user_id
+        kwargs['hotel'] = self.hotel
+        return kwargs
 
-#     def form_valid(self, form):
-#         try:
-#             #DB create
-#             (customer, card, charge) = signup_register_step4(
-#                 hotel=self.request.user.profile.hotel,
-#                 token=form.cleaned_data['stripe_token'],
-#                 email=self.request.user.email,
-#                 amount=self.hotel.acct_cost.init_amt)
-#         except stripe.error.StripeError as e:
-#             body = e.json_body
-#             err = body['error']
-#             messages.warning(self.request, err)
-#             return HttpResponseRedirect(reverse('payment:one_time_payment'))
-#         else:
-#             # send conf email
-#             email = Email(
-#                 to=self.request.user.email,
-#                 from_email=settings.DEFAULT_EMAIL_BILLING,
-#                 extra_context={
-#                     'user': self.request.user,
-#                     'customer': customer,
-#                     'charge': charge
-#                 },
-#                 subject='email/payment_subject.txt',
-#                 html_content='email/payment_email.html'
-#             )
-#             email.msg.send()
-#             return HttpResponseRedirect(self.success_url)
+    def get_context_data(self, **kwargs):
+        context = super(OneTimePaymentView, self).get_context_data(**kwargs)
+        context['card'] = self.hotel.customer.cards.get(default=True)
+        return context
 
+    # def form_valid(self, form):
+    #     try:
+    #         #DB create
+    #         (customer, card, charge) = signup_register_step4(
+    #             hotel=self.request.user.profile.hotel,
+    #             token=form.cleaned_data['stripe_token'],
+    #             email=self.request.user.email,
+    #             amount=self.hotel.acct_cost.init_amt)
+    #     except stripe.error.StripeError as e:
+    #         body = e.json_body
+    #         err = body['error']
+    #         messages.warning(self.request, err)
+    #         return HttpResponseRedirect(reverse('payment:one_time_payment'))
+    #     else:
+    #         # send conf email
+    #         email = Email(
+    #             to=self.request.user.email,
+    #             from_email=settings.DEFAULT_EMAIL_BILLING,
+    #             extra_context={
+    #                 'user': self.request.user,
+    #                 'customer': customer,
+    #                 'charge': charge
+    #             },
+    #             subject='email/payment_subject.txt',
+    #             html_content='email/payment_email.html'
+    #         )
+    #         email.msg.send()
+    #         return HttpResponseRedirect(self.success_url)
