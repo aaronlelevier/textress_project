@@ -136,6 +136,12 @@ class CardManager(StripeClient, models.Manager):
                 "The Card does not exist for customer: {}".format(customer))
         return card
 
+    def default(self, customer):
+        try:
+            return self.get(customer=customer, default=True)
+        except Card.DoesNotExist:
+            pass
+
     def _set_default(self, customer, id_):
         """Set the Default Card before calling the complete 
         ``update_default`` method."""
