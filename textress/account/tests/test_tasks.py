@@ -119,7 +119,7 @@ class CreateInitialAcctTransAndAcctStmtTests(TestCase):
                 ph_num_acct_trans.aggregate(Sum('amount'))['amount__sum'],
                 2 * -(settings.PHONE_NUMBER_MONTHLY_COST)
             )
-    # @patch("account.models.AcctTransManager.update_or_create_sms_used")
+
     def test_eod_update_or_create_sms_used(self):
         init_acct_tran = create_acct_tran(self.hotel, self.sms_used, self.today)
 
