@@ -364,6 +364,14 @@ class AcctTransManager(Dates, models.Manager):
     def trans_types(self):
         return TransTypeCache()
 
+    def check_balance_only(self, hotel):
+        """
+        Return a "Boolean" of whether or not the "balance is ok" by only 
+        suppling the "hotel" as an argument.
+        """
+        balance = self.get_balance(hotel)
+        return not self.check_recharge_required(hotel, balance)
+
     def check_balance(self, hotel):
         """
         Daily, or more often if high SMS volumes, check the Funds ``balance``
@@ -411,13 +419,13 @@ class AcctTransManager(Dates, models.Manager):
             "enough funds to process this transaction."
         )
 
-    @staticmethod
-    def charge_hotel(hotel, amount):
+    def charge_hotel(self, hotel, amount):
         try:
             charge = Charge.objects.stripe_create(hotel, amount)
         except stripe.error.StripeError:
               email.send_charge_failed_email(hotel, amount)
-              hotel.deactivate()
+              if not self.check_balance_only(hotel):
+                  hotel.deactivate()
               raise
         else:
             hotel.activate()
@@ -503,7 +511,7 @@ class AcctTransManager(Dates, models.Manager):
                 Q(insert_date=self._today)    
             )
 
-        last_acct_trans = qs.order_by('modified').last()
+        last_acct_trans = qs.order_by('-modified').first()
 
         return self.resolve_last_trans_balance(last_acct_trans)
 

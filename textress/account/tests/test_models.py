@@ -609,6 +609,26 @@ class AcctTransTests(TransactionTestCase):
     def test_trans_types(self):
         self.assertIsInstance(AcctTrans.objects.trans_types, TransTypeCache)
 
+    # check_balance_only
+
+    def test_check_balance_only(self):
+        last_acct_trans = AcctTrans.objects.order_by('modified').last()
+        last_acct_trans.balance = self.hotel.acct_cost.balance_min + 1 # this is an acceptable balance
+        last_acct_trans.save()
+
+        ret = AcctTrans.objects.check_balance_only(self.hotel)
+
+        self.assertTrue(ret)
+
+    def test_check_balance_only__not_ok(self):
+        acct_tran = AcctTrans.objects.filter(hotel=self.hotel).order_by('-modified').first()
+        acct_tran.amount = -100000
+        acct_tran.save()
+
+        ret = AcctTrans.objects.check_balance_only(self.hotel)
+
+        self.assertFalse(ret)
+
     # check_balance
 
     def test_check_balance__creates_or_updates_sms_used_record_for_today(self):
@@ -714,6 +734,10 @@ class AcctTransTests(TransactionTestCase):
         self.assertTrue(self.hotel.active)
         init_charges = Charge.objects.count()
         amount = 1000
+        # acct_trans - should have a negative balance in order to 'deactivate()' hotel
+        acct_tran = AcctTrans.objects.filter(hotel=self.hotel).order_by('-modified').first()
+        acct_tran.amount = -100000
+        acct_tran.save()
 
         with self.assertRaises(stripe.error.StripeError):
             AcctTrans.objects.charge_hotel(self.hotel, amount)
