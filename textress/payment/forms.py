@@ -25,7 +25,8 @@ class OneTimePaymentForm(Bootstrap3Form):
     def __init__(self, hotel, *args, **kwargs):
         super(OneTimePaymentForm, self).__init__(*args, **kwargs)
         self.hotel = hotel
-        self.fields['auto_pay'].initial = self.hotel.acct_cost.auto_recharge
+        self.fields['amount'].initial = self.hotel.acct_cost.recharge_amt
+        self.fields['auto_recharge'].initial = self.hotel.acct_cost.auto_recharge
 
     amount = forms.ChoiceField(choices=CHARGE_AMOUNTS, required=False)
-    auto_pay = forms.BooleanField()
+    auto_recharge = forms.BooleanField()

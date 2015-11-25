@@ -145,7 +145,7 @@ class CardManager(StripeClient, models.Manager):
     def _set_default(self, customer, id_):
         """Set the Default Card before calling the complete 
         ``update_default`` method."""
-        card = self.get(id=id_)
+        card = self.filter(customer=customer).get(id=id_)
         card.default = True
         card.save()
         return card

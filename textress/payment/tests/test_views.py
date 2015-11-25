@@ -104,7 +104,7 @@ class PaymentEmailTests(TestCase):
 
 class BillingSummaryTests(TransactionTestCase):
 
-    fixtures = ['trans_type.json']
+    fixtures = ['trans_type.json', 'payment.json']
 
     def setUp(self):
         # Users
@@ -120,6 +120,12 @@ class BillingSummaryTests(TransactionTestCase):
         self.acct_trans = create_acct_trans(self.hotel)
         self.pricing = mommy.make(Pricing, hotel=self.hotel)
         self.phone_number = mommy.make(PhoneNumber, hotel=self.hotel)
+        # Stripe
+        self.customer = Customer.objects.get(id="cus_75fWUbM8dV8R8G")
+        self.hotel.update_customer(self.customer)
+        self.cards = self.customer.cards.all()
+        self.card = self.cards.first()
+        self.card2 = self.cards.last()
         # Login
         self.client.login(username=self.admin.username, password=PASSWORD)
 
@@ -158,11 +164,38 @@ class BillingSummaryTests(TransactionTestCase):
 
     # one_time_payment
 
-    def test_one_time_payment__get(self):
+    def test_one_time_payment__initial_form_values(self):
         response = self.client.get(reverse('payment:one_time_payment'))
 
         self.assertEqual(response.status_code, 200)
         self.assertIsInstance(response.context['form'], OneTimePaymentForm)
+        self.assertEqual(
+            response.context['form']['amount'].value(),
+            self.hotel.acct_cost.recharge_amt
+        )
+        self.assertEqual(
+            response.context['form']['auto_recharge'].value(),
+            self.hotel.acct_cost.auto_recharge
+        )
+
+    def test_one_time_payment__card_context(self):
+        Card.objects.update_default(self.customer, self.card.id)
+        self.assertIsInstance(Card.objects.default(self.customer), Card)
+
+        response = self.client.get(reverse('payment:one_time_payment'))
+
+        self.assertIsInstance(response.context['card'], Card)
+        self.assertIn("change", response.content)
+        self.assertIn(reverse('payment:card_list'), response.content)
+
+    def test_one_time_payment__card_context_is_none(self):
+        Card.objects.default(self.customer).delete()
+
+        response = self.client.get(reverse('payment:one_time_payment'))
+
+        self.assertIsNone(response.context['card'])
+        self.assertIn("Add a payment method", response.content)
+        self.assertIn(reverse('payment:card_list'), response.content)
 
     # acct_stmt table - current usage, starting balance, current balance
 
@@ -316,52 +349,3 @@ class CardUpdateTests(TestCase):
         # Success Message
         m = list(response.context['messages'])
         self.assertEqual(len(m), 1)
-
-
-### COMMENT OUT:Remove for the time being. Can add in V2 of the software. Not critical at this time
-# class OneTimePaymentTests(TestCase):
-
-#     def setUp(self):
-#         self.password = PASSWORD
-#         self.hotel = create_hotel()
-#         # create "Hotel Manager" Group
-#         create._get_groups_and_perms()
-#         # Users
-#         self.admin = create_hotel_user(hotel=self.hotel, username='admin', group='hotel_admin')
-#         # Stripe Card
-#         self.card = factory.card()
-#         self.hotel.customer = self.card.customer
-#         self.hotel.save()
-#         # Login
-#         self.client.login(username=self.admin.username, password=PASSWORD)
-
-#     def tearDown(self):
-#         self.client.logout()
-
-    ### OneTimePaymentView ###
-
-    # def test_get_one_time_payment(self):
-    #     response = self.client.get(reverse('payment:one_time_payment'))
-    #     self.assertEqual(response.status_code, 200)
-
-#     def test_create(self):
-#         self.assertIsInstance(self.card, Card)
-#         self.assertIsInstance(self.hotel.customer, Customer)
-
-#     def test_response(self):
-#         response = self.client.get(reverse('payment:one_time_payment'))
-#         self.assertEqual(response.status_code, 200)
-
-#     # For Attr's
-
-#     def test_form(self):
-#         response = self.client.get(reverse('payment:one_time_payment'))
-#         self.assertIsInstance(response.context['form'], StripeOneTimePaymentForm)
-
-#     def test_hotel(self):
-#         response = self.client.get(reverse('payment:one_time_payment'))
-#         self.assertEqual(response.context['form'].hotel, self.hotel)
-
-#     def test_card_list(self):
-#         response = self.client.get(reverse('payment:one_time_payment'))
-#         self.assertTrue(response.context['form'].fields['cards'].choices)

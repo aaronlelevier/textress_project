@@ -1,85 +1,87 @@
 {% extends "cpanel/base-sidebar.html" %}
 {% load staticfiles stripe_tags %}
-
-
 {% block content %}
-
-<div class="row">
-    <div class="col-md-6 col-md-offset-3">
-        <form method="post" action="" id="checkout-form">
-            {% csrf_token %}
-            {{ form.non_field_errors }}
-            <div class="row">
-                <div class="well" style="padding:0;">
-                    <h4 class="text-center">One-Time payment amount</h4>
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <form method="post" action="" id="checkout-form">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                <div class="row">
+                    <div class="well" style="padding:0;">
+                        <h4 class="text-center">One-Time payment amount</h4>
+                    </div>
                 </div>
-            </div>
-            <div class="row" id="recharge_amount">
-                {{ form.amount.errors }}
-                <select for="id_amount" name="amount" class="form-control" style="margin-top:5px;" />
-                {% for v,t in form.amount.field.choices %}
-                    <option value="{{ v }}">{{ t }}</option>
-                {% endfor %}
-                </select>
-            </div>
-
-            <br>
-
-            <div class="row">
-                <div class="well" style="padding:0;">
-                    <h4 class="text-center">Payment Method</h4>
+                <div class="row" id="recharge_amount">
+                    {{ form.amount.errors }}
+                    <select for="id_amount" name="amount" class="form-control" style="margin-top:5px;" />
+                        {% for v,t in form.amount.field.choices %}
+                            <option value="{{ v }}">{{ t }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
-            </div>
-
-            <div class="row">
-                <div class="col-sm-12">
-                    <div class="row well" style="background-color:white;">
-                        <div class="col-sm-7" style="padding:0px;margin:0px;">
-                            <img src="{{ MEDIA_URL }}{{ card.image.image }}" style="max-width:40px;"> 
-                            <span style="margin-left:5px"><small>{{ card.brand|first_word }} ending in: </small>{{ card.last4 }}</span>
-                            <span style="margin-left:5px"><small>Expires: </small>{{ card.expires }}</span>
-                        </div>
-                        <div class="col-sm-3 col-sm-offset-2 text-center">
-                            <a href="{% url 'payment:card_list' %}">
-                                <p><strong>change</strong></p>
-                            </a>
+                <br>
+                <div class="row">
+                    <div class="well" style="padding:0;">
+                        <h4 class="text-center">Payment Method</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="row well" style="background-color:white;">
+                            {% if card %}
+                                <div class="col-sm-7" style="padding:0px;margin:0px;">
+                                    <img src="{{ MEDIA_URL }}{{ card.image.image }}" style="max-width:40px;">
+                                    <span style="margin-left:5px"><small>{{ card.brand|first_word }} ending in: </small>{{ card.last4 }}</span>
+                                    <span style="margin-left:5px"><small>Expires: </small>{{ card.expires }}</span>
+                                </div>
+                                <div class="col-sm-3 col-sm-offset-2 text-center">
+                                    <a href="{% url 'payment:card_list' %}">
+                                        <p><strong>change</strong></p>
+                                    </a>
+                                </div>
+                            {% else %}
+                                <div class="col-sm-12 text-center">
+                                    <a href="{% url 'payment:card_list' %}">
+                                        <p><strong>Add a payment method</strong></p>
+                                    </a>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <small>By clicking submit, you are agreeing to the <a href="{% url 'terms_n_cond' %}">terms and conditions</a></small>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <div class="controls">
-                            <div class="pull-right">
-                                <input type="submit" value="Submit" class="btn btn-primary" />
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="has-feedback form-group">
+                            <label class="checkbox-inline"><input for="{{ form.auto_recharge.id_for_label }}" name="{{ form.auto_recharge.html_name }}" checked="{% if form.auto_recharge.value %}checked{% endif %}" type="checkbox" /> Auto Recharge On</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="controls">
+                                <div class="pull-right">
+                                    <input type="submit" value="Submit" class="btn btn-primary" />
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <hr>
-            <div class="row">
-                <div class="col-md-12 tab-content">
-                    <div class="row">
-                        <div class="col-md-11">
-                            <p>We don't store any credit card information. All payments information is transferred via secure SSL and processed by <a href="https://stripe.com/gallery"><strong>Stripe, Inc.</strong></a></p>
+                <hr>
+                <div class="row">
+                    <div class="col-md-12 tab-content">
+                        <div class="row">
+                            <div class="col-md-11">
+                                <p>We don't store any credit card information. All payments information is transferred via secure SSL and processed by <a href="https://stripe.com/gallery"><strong>Stripe, Inc.</strong></a></p>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <a href="https://stripe.com/gallery">
+                                <img style="max-width:80%" src="{% static 'images/stripe-payments.png' %}" alt="powered-by-stripe">
+                            </a>
                         </div>
                     </div>
-                    <div class="text-center">
-                        <a href="https://stripe.com/gallery">
-                            <img style="max-width:80%" src="{% static 'images/stripe-payments.png' %}" alt="powered-by-stripe">
-                        </a>
-                    </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
-<br>
+    <br>
 {% endblock content %}

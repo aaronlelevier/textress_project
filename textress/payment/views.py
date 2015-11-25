@@ -223,7 +223,7 @@ sent to {}. Thank you.".format(self.request.user.email)
 
     def get_context_data(self, **kwargs):
         context = super(OneTimePaymentView, self).get_context_data(**kwargs)
-        context['card'] = self.hotel.customer.cards.get(default=True)
+        context['card'] = Card.objects.default(customer=self.hotel.customer)
         return context
 
     # def form_valid(self, form):
