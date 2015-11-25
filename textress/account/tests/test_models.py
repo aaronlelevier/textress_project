@@ -1,5 +1,6 @@
 import calendar
 import datetime
+from mock import patch
 import pytz
 
 from django.db.models import Max, Sum
@@ -650,6 +651,30 @@ class AcctTransTests(TransactionTestCase):
         with self.assertRaises(AutoRechargeOffExcp):
             AcctTrans.objects.recharge(self.hotel, self.hotel.acct_cost.recharge_amt)
         self.assertFalse(self.hotel.active)
+
+    # one_time_payment
+
+    @patch("account.models.AcctTransManager.charge_hotel")
+    def test_one_time_payment(self, charge_hotel_mock):
+        init_count = AcctTrans.objects.filter(hotel=self.hotel, trans_type=self.recharge_amt).count()
+
+        AcctTrans.objects.one_time_payment(self.hotel, 100)
+
+        self.assertTrue(charge_hotel_mock.called)
+        post_count = AcctTrans.objects.filter(hotel=self.hotel, trans_type=self.recharge_amt).count()
+        self.assertEqual(post_count, init_count+1)
+
+    # create_recharge_amt
+
+    def test_create_recharge_amt(self):
+        amount = 1000
+
+        ret = AcctTrans.objects.create_recharge_amt(self.hotel, amount)
+
+        self.assertIsInstance(ret, AcctTrans)
+        self.assertEqual(ret.hotel, self.hotel)
+        self.assertEqual(ret.trans_type, self.recharge_amt)
+        self.assertEqual(ret.amount, amount)
 
     # handle_auto_recharge_failed
 

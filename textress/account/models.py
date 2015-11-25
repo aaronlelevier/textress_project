@@ -389,10 +389,17 @@ class AcctTransManager(Dates, models.Manager):
         if 'test' not in sys.argv:
             self.charge_hotel(hotel, recharge_amt)
 
+        self.create_recharge_amt(hotel, recharge_amt)
+
+    def one_time_payment(self, hotel, amount):
+        self.charge_hotel(hotel, amount)
+        self.create_recharge_amt(hotel, amount)
+
+    def create_recharge_amt(self, hotel, amount):
         return self.create(
             hotel=hotel,
             trans_type=self.trans_types.recharge_amt,
-            amount=recharge_amt
+            amount=amount
         )
 
     @staticmethod
