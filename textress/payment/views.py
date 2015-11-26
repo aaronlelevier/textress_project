@@ -20,6 +20,7 @@ from payment.mixins import (StripeMixin, StripeFormValidMixin, HotelCardOnlyMixi
     BillingSummaryContextMixin, MonthYearContextMixin)
 from sms.models import PhoneNumber
 from utils.email import Email
+from utils import dj_messages
 
 
 ### REGISTRATION
@@ -202,16 +203,12 @@ def delete_card_view(request, pk):
 
 
 class OneTimePaymentView(AdminOnlyMixin, MonthYearContextMixin, SetHeadlineMixin,
-    FormValidMessageMixin, StripeMixin, FormView):
+    StripeMixin, FormView):
 
     headline = "One Time Payment"
     template_name = "payment/one_time_payment.html"
     form_class = OneTimePaymentForm
     success_url = reverse_lazy('payment:summary')
-
-    def get_form_valid_message(self):
-        return "The payment has been successfully processed. An email will be \
-sent to {}. Thank you.".format(self.request.user.email) 
 
     def get_form_kwargs(self):
         "The Hotel Card objects will be need for the C.Card ChoiceField."
@@ -226,31 +223,19 @@ sent to {}. Thank you.".format(self.request.user.email)
         context['card'] = Card.objects.default(customer=self.hotel.customer)
         return context
 
-    # def form_valid(self, form):
-    #     try:
-    #         #DB create
-    #         (customer, card, charge) = signup_register_step4(
-    #             hotel=self.request.user.profile.hotel,
-    #             token=form.cleaned_data['stripe_token'],
-    #             email=self.request.user.email,
-    #             amount=self.hotel.acct_cost.init_amt)
-    #     except stripe.error.StripeError as e:
-    #         body = e.json_body
-    #         err = body['error']
-    #         messages.warning(self.request, err)
-    #         return HttpResponseRedirect(reverse('payment:one_time_payment'))
-    #     else:
-    #         # send conf email
-    #         email = Email(
-    #             to=self.request.user.email,
-    #             from_email=settings.DEFAULT_EMAIL_BILLING,
-    #             extra_context={
-    #                 'user': self.request.user,
-    #                 'customer': customer,
-    #                 'charge': charge
-    #             },
-    #             subject='email/payment_subject.txt',
-    #             html_content='email/payment_email.html'
-    #         )
-    #         email.msg.send()
-    #         return HttpResponseRedirect(self.success_url)
+    def form_valid(self, form):
+        # super to get final form data befor processing
+        super(OneTimePaymentView, self).form_valid(form)
+        cd = form.cleaned_data
+
+        try:
+            # amount = int(cd['amount']) # form data 'amount' is a string
+            AcctTrans.objects.one_time_payment(self.hotel, cd['amount'])
+        except stripe.error.StripeError as e:
+            messages.warning(self.request, dj_messages['payment_fail'].format(
+                support_email=settings.DEFAULT_EMAIL_SUPPORT))
+            return HttpResponseRedirect(reverse('payment:one_time_payment'))
+        else:
+            messages.success(self.request, dj_messages['payment_success'].format(
+                amount=cd['amount']/100.0, email=self.hotel.admin.email))
+            return HttpResponseRedirect(self.success_url)

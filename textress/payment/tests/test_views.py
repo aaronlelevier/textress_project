@@ -19,6 +19,7 @@ from payment.models import Customer, Card, Charge
 from sms.models import PhoneNumber
 from utils import create
 from utils.email import Email
+from utils import dj_messages
 
 
 class RegistrationTests(TestCase):
@@ -197,6 +198,50 @@ class BillingSummaryTests(TransactionTestCase):
         self.assertIn("Add a payment method", response.content)
         self.assertIn(reverse('payment:card_list'), response.content)
 
+    def test_one_time_payment__post_success(self):
+        data = {
+            'amount': self.hotel.acct_cost.recharge_amt,
+            'auto_recharge': self.hotel.acct_cost.auto_recharge
+        }
+
+        response = self.client.post(reverse('payment:one_time_payment'),
+            data, follow=True)
+
+        self.assertRedirects(response, reverse('payment:summary'))
+        # success message
+        m = list(response.context['messages'])
+        self.assertEqual(len(m), 1)
+        self.assertEqual(
+            str(m[0]),
+            dj_messages['payment_success'].format(amount=data['amount']/100,
+                email=self.hotel.admin.email)
+        )
+
+    def test_one_time_payment__post_fail(self):
+        # no 'form data', so will just stay on page
+        response = self.client.post(reverse('payment:one_time_payment'), {})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['form'].errors)
+
+    def test_one_time_payment__auto_recharge_updated(self):
+        """
+        If 'auto_recharge' changes from what is in the 'hotel.acct_cost', 
+        it should be updated.
+        """
+        self.assertTrue(self.hotel.acct_cost.auto_recharge)
+        data = {
+            'amount': self.hotel.acct_cost.recharge_amt,
+            'auto_recharge': False
+        }
+
+        response = self.client.post(reverse('payment:one_time_payment'),
+            data, follow=True)
+
+        self.assertRedirects(response, reverse('payment:summary'))
+        acct_cost = AcctCost.objects.get(hotel=self.hotel)
+        self.assertFalse(acct_cost.auto_recharge)
+
     # acct_stmt table - current usage, starting balance, current balance
 
     def test_context_starting_balance_new_signup(self):
@@ -289,6 +334,12 @@ class BillingSummaryTests(TransactionTestCase):
         response = self.client.get(reverse('payment:summary'))
         self.assertTrue(response.context['acct_stmts'])
         self.assertTrue(response.context['acct_stmt'])
+
+    def test_acct_stmt__note_on_timing(self):
+        response = self.client.get(reverse('payment:summary'))
+
+        self.assertIn("&#42; Please note, account statements are updated daily, so the \
+totals may not immediately reflect your account transactions", response.content)
 
 
 class CardUpdateTests(TestCase):
