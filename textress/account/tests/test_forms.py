@@ -82,6 +82,8 @@ class PasswordChangeFormTests(TestCase):
 
 class AcctCostUpdateTests(TransactionTestCase):
 
+    fixtures = ['trans_type.json']
+
     def setUp(self):
         self.password = PASSWORD
         self.hotel = create_hotel()
