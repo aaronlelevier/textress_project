@@ -1,3 +1,5 @@
+from mock import patch
+
 from django import forms
 from django.test import TestCase
 from django.core.urlresolvers import reverse
@@ -33,10 +35,13 @@ class PhoneNumberAddTests(TestCase):
     def teardown(self):
         self.client.logout()
 
-    def test_form_success(self):
+    @patch("sms.models.PhoneNumberManager.purchase_number")
+    def test_form_success(self, _twilio_purchase_number_mock):
         # Auto-recharge = True, so this will succeed
         response = self.client.post(reverse('sms:ph_num_add'))
+
         self.assertEqual(response.status_code, 302)
+        self.assertTrue(_twilio_purchase_number_mock.called)
 
     def test_form_fail(self):
         # So the Hotel won't have enought to purchase a PH Num

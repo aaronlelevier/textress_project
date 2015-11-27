@@ -1,3 +1,5 @@
+import sys
+
 from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext, ugettext_lazy as _
@@ -76,16 +78,19 @@ hotel: {}".format(hotel))
 
     ### TWILIO
 
-    # def _twilio_purchase_number(self, hotel):
-    #     "Based on ``area_code`` of the Hotel."
-    #     number = None
-    #     while not number:
-    #         numbers = self.client.phone_numbers.search(
-    #             area_code=hotel.area_code, sms_enabled=True,
-    #             voice_enabled=True, mms_enabled=True)
-    #         if numbers:
-    #             number = numbers[0].purchase()
-    #     return number
+    def _twilio_purchase_number(self, hotel):
+        """
+        Purchase live Twilio PH # based on ``area_code`` of the Hotel.
+        """
+        if 'test' not in sys.argv:
+            number = None
+            while not number:
+                numbers = self.client.phone_numbers.search(
+                    area_code=hotel.area_code, sms_enabled=True,
+                    voice_enabled=True, mms_enabled=True)
+                if numbers:
+                    number = numbers[0].purchase()
+            return number
 
     def update_account_sid(self, hotel, number):
         '''
