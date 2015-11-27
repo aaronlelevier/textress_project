@@ -1,16 +1,15 @@
 from django.core.management.base import BaseCommand
 
-from account.models import AcctStmt
-from main.models import Hotel
+from account.tasks import get_or_create_acct_stmt_all_hotels
+from utils.models import Dates
 
 
 class Command(BaseCommand):
     help = "Update all Hotels' monthly Account Statements"
 
     def handle(self, *args, **options):
-        for hotel in Hotel.objects.all():
-            # TODO: need a filter here for "active" hotels only?
-            acct_stmt, created = AcctStmt.objects.get_or_create(hotel=hotel)
+        dates = Dates()
+        month = dates._month
+        year = dates._year
 
-            self.stdout.write("Hotel: {}; Account Statement: {} "
-                "successfully updated.".format(hotel, acct_stmt))
+        get_or_create_acct_stmt_all_hotels.delay(month, year)

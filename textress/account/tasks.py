@@ -51,22 +51,33 @@ def charge_hotel_monthly_for_phone_numbers(hotel_id):
     Creates a single monthly charge per active 'Phone Number' 
     based upon the 'CHARGE_DAY' set in the 'settings'.
     """
-    hotel = Hotel.objects.get(id=hotel_id)
-    
-    for ph in hotel.phone_numbers.all():
-        try:
-            AcctTrans.objects.get(
-                hotel=hotel,
-                trans_type__name='phone_number',
-                insert_date__day=settings.PHONE_NUMBER_MONTHLY_CHARGE_DAY,
-                desc=ph.monthly_charge_desc
-            )
-        except AcctTrans.DoesNotExist:
-            AcctTrans.objects.phone_number_charge(
-                hotel=hotel, 
-                phone_number=ph.phone_number,
-                desc=ph.monthly_charge_desc
-            )
+    dates = Dates()
+    today = dates._today.day
+
+    if today == settings.PHONE_NUMBER_MONTHLY_CHARGE_DAY:
+        hotel = Hotel.objects.get(id=hotel_id)
+        
+        for ph in hotel.phone_numbers.all():
+            try:
+                AcctTrans.objects.get(
+                    hotel=hotel,
+                    trans_type__name='phone_number',
+                    insert_date__day=settings.PHONE_NUMBER_MONTHLY_CHARGE_DAY,
+                    desc=ph.monthly_charge_desc
+                )
+            except AcctTrans.DoesNotExist:
+                AcctTrans.objects.phone_number_charge(
+                    hotel=hotel, 
+                    phone_number=ph.phone_number,
+                    desc=ph.monthly_charge_desc
+                )
+
+
+@shared_task
+def charge_hotel_monthly_for_phone_numbers_all_hotels():
+    for hotel in Hotel.objects.all():
+        charge_hotel_monthly_for_phone_numbers.delay(hotel.id)
+
 
 @shared_task
 def eod_update_or_create_sms_used():

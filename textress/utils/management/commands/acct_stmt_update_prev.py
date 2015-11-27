@@ -11,6 +11,8 @@ from main.models import Hotel
 
 class Command(BaseCommand):
     """
+    This is an extra check that all 'Hotels' have a 
+    "final end of month" AcctStmt.
 
     :note:
         if prices in ``Pricing`` model are not loaded, 

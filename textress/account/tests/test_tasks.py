@@ -6,10 +6,8 @@ from django.db.models import Sum
 
 from model_mommy import mommy
 
+from account import tasks
 from account.models import AcctTrans, AcctStmt, TransType, AcctCost, Pricing
-from account.tasks import (create_initial_acct_trans_and_stmt, get_or_create_acct_stmt,
-    charge_hotel_monthly_for_phone_numbers, eod_update_or_create_sms_used,
-    get_or_create_acct_stmt_all_hotels)
 from account.tests.factory import create_acct_stmt, create_acct_tran
 from main.models import Hotel
 from main.tests.factory import create_hotel
@@ -45,7 +43,7 @@ class CreateInitialAcctTransAndAcctStmtTests(TestCase):
     def test_acct_trans(self):
         self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel).count(), 0)
 
-        create_initial_acct_trans_and_stmt.delay(self.hotel.id)
+        tasks.create_initial_acct_trans_and_stmt.delay(self.hotel.id)
 
         # 2 Acct Trans b/c an SMS used will always be calculated for "day-of"
         # AcctTrans when calling ``AcctStmt.objects.get_or_create`` because this
@@ -59,7 +57,7 @@ class CreateInitialAcctTransAndAcctStmtTests(TestCase):
     def test_acct_stmt(self):
         self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 0)
 
-        create_initial_acct_trans_and_stmt.delay(self.hotel.id)
+        tasks.create_initial_acct_trans_and_stmt.delay(self.hotel.id)
 
         self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 1)
 
@@ -67,7 +65,7 @@ class CreateInitialAcctTransAndAcctStmtTests(TestCase):
         [x.delete() for x in Pricing.objects.filter(hotel=self.hotel)]
         self.assertEqual(Pricing.objects.filter(hotel=self.hotel).count(), 0)
 
-        create_initial_acct_trans_and_stmt.delay(self.hotel.id)
+        tasks.create_initial_acct_trans_and_stmt.delay(self.hotel.id)
 
         self.assertEqual(Pricing.objects.filter(hotel=self.hotel).count(), 1)
 
@@ -79,7 +77,7 @@ class CreateInitialAcctTransAndAcctStmtTests(TestCase):
         self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 0)
         init_acct_stmt = create_acct_stmt(self.hotel, year=today.year, month=today.month)
 
-        get_or_create_acct_stmt.delay(self.hotel.id, year=today.year, month=today.month)
+        tasks.get_or_create_acct_stmt.delay(self.hotel.id, year=today.year, month=today.month)
 
         self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 1)
         acct_stmt = AcctStmt.objects.filter(hotel=self.hotel)[0]
@@ -95,7 +93,7 @@ class CreateInitialAcctTransAndAcctStmtTests(TestCase):
         self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 0)
         self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel2).count(), 0)
 
-        get_or_create_acct_stmt_all_hotels.delay(year=today.year, month=today.month)
+        tasks.get_or_create_acct_stmt_all_hotels.delay(year=today.year, month=today.month)
 
         self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 1)
         self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel2).count(), 1)
@@ -116,7 +114,7 @@ class CreateInitialAcctTransAndAcctStmtTests(TestCase):
             ph2 = create_phone_number(self.hotel)
             self.assertEqual(self.hotel.phone_numbers.count(), 2)
 
-            charge_hotel_monthly_for_phone_numbers.delay(self.hotel.id)
+            tasks.charge_hotel_monthly_for_phone_numbers.delay(self.hotel.id)
 
             ph_num_acct_trans = AcctTrans.objects.filter(
                 hotel=self.hotel,
@@ -124,7 +122,6 @@ class CreateInitialAcctTransAndAcctStmtTests(TestCase):
                 insert_date__day=settings.PHONE_NUMBER_MONTHLY_CHARGE_DAY
             )
             self.assertEqual(ph_num_acct_trans.count(), 2)
-
             self.assertEqual(
                 ph_num_acct_trans.aggregate(Sum('amount'))['amount__sum'],
                 2 * -(settings.PHONE_NUMBER_MONTHLY_COST)
@@ -132,7 +129,7 @@ class CreateInitialAcctTransAndAcctStmtTests(TestCase):
 
             # re-running by accident won't recharge them b/c filtering out already 
             # charged "phone_numbers"
-            charge_hotel_monthly_for_phone_numbers.delay(self.hotel.id)
+            tasks.charge_hotel_monthly_for_phone_numbers.delay(self.hotel.id)
 
             ph_num_acct_trans = AcctTrans.objects.filter(
                 hotel=self.hotel,
@@ -140,20 +137,78 @@ class CreateInitialAcctTransAndAcctStmtTests(TestCase):
                 insert_date__day=settings.PHONE_NUMBER_MONTHLY_CHARGE_DAY
             )
             self.assertEqual(ph_num_acct_trans.count(), 2)
-
             self.assertEqual(
                 ph_num_acct_trans.aggregate(Sum('amount'))['amount__sum'],
                 2 * -(settings.PHONE_NUMBER_MONTHLY_COST)
             )
+
+    def test_charge_hotel_monthly_for_phone_numbers__run_on_random_day(self):
+        """
+        If 'today.day' is not the CHARGE_DAY then the Hotel shouldn't be charged 
+        the 'monthly phone number charge'.
+        """
+        dates = Dates()
+        today = dates._today.day
+        not_today = today+1
+
+        # charge day is "not today", so nothing should happen
+        with self.settings(PHONE_NUMBER_MONTHLY_CHARGE_DAY=not_today):
+            self.assertEqual(AcctTrans.objects.filter(
+                hotel=self.hotel,
+                trans_type__name='phone_number',
+                insert_date__day=today).count(), 0)
+
+            ph = create_phone_number(self.hotel)
+            self.assertEqual(self.hotel.phone_numbers.count(), 1)
+
+            tasks.charge_hotel_monthly_for_phone_numbers.delay(self.hotel.id)
+
+            self.assertEqual(AcctTrans.objects.filter(
+                hotel=self.hotel,
+                trans_type__name='phone_number',
+                insert_date__day=today).count(), 0)
+
+    # charge_hotel_monthly_for_phone_numbers_all_hotels
+
+    def test_charge_hotel_monthly_for_phone_numbers_all_hotels(self):
+        dates = Dates()
+        today = dates._today
+
+        with self.settings(PHONE_NUMBER_MONTHLY_CHARGE_DAY=today.day):
+            self.assertEqual(AcctTrans.objects.filter(
+                hotel=self.hotel,
+                trans_type__name='phone_number',
+                insert_date__day=settings.PHONE_NUMBER_MONTHLY_CHARGE_DAY).count(), 0)
+            self.assertEqual(AcctTrans.objects.filter(
+                hotel=self.hotel2,
+                trans_type__name='phone_number',
+                insert_date__day=settings.PHONE_NUMBER_MONTHLY_CHARGE_DAY).count(), 0)
+
+            ph = create_phone_number(self.hotel)
+            ph2 = create_phone_number(self.hotel2)
+            self.assertEqual(self.hotel.phone_numbers.count(), 1)
+            self.assertEqual(self.hotel2.phone_numbers.count(), 1)
+
+            tasks.charge_hotel_monthly_for_phone_numbers_all_hotels.delay()
+
+            self.assertEqual(
+                AcctTrans.objects.filter(
+                    hotel=self.hotel,
+                    trans_type__name='phone_number',
+                    insert_date__day=settings.PHONE_NUMBER_MONTHLY_CHARGE_DAY).count(), 1)
+            self.assertEqual(
+                AcctTrans.objects.filter(
+                    hotel=self.hotel2,
+                    trans_type__name='phone_number',
+                    insert_date__day=settings.PHONE_NUMBER_MONTHLY_CHARGE_DAY).count(), 1)
 
     # eod_update_or_create_sms_used
 
     def test_eod_update_or_create_sms_used(self):
         init_acct_tran = create_acct_tran(self.hotel, self.sms_used, self.today)
 
-        eod_update_or_create_sms_used.delay()
+        tasks.eod_update_or_create_sms_used.delay()
 
         post_acct_tran = AcctTrans.objects.filter(hotel=self.hotel,
             trans_type=self.sms_used).order_by('-modified').first()
-
         self.assertTrue(post_acct_tran.modified > init_acct_tran.modified)
