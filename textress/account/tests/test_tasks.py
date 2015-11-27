@@ -8,7 +8,8 @@ from model_mommy import mommy
 
 from account.models import AcctTrans, AcctStmt, TransType, AcctCost, Pricing
 from account.tasks import (create_initial_acct_trans_and_stmt, get_or_create_acct_stmt,
-    charge_hotel_monthly_for_phone_numbers, eod_update_or_create_sms_used)
+    charge_hotel_monthly_for_phone_numbers, eod_update_or_create_sms_used,
+    get_or_create_acct_stmt_all_hotels)
 from account.tests.factory import create_acct_stmt, create_acct_tran
 from main.models import Hotel
 from main.tests.factory import create_hotel
@@ -22,9 +23,15 @@ class CreateInitialAcctTransAndAcctStmtTests(TestCase):
     fixtures = ['trans_type.json']
 
     def setUp(self):
+        # Hotel 1
         self.hotel = create_hotel()
         self.pricing = mommy.make(Pricing, hotel=self.hotel)
         self.acct_cost = AcctCost.objects.get_or_create(hotel=self.hotel)
+        # Hotel 2
+        self.hotel2 = create_hotel()
+        self.pricing2 = mommy.make(Pricing, hotel=self.hotel2)
+        self.acct_cost2 = AcctCost.objects.get_or_create(hotel=self.hotel2)
+        # TransType
         self.init_amt = TransType.objects.get(name='init_amt')
         self.sms_used = TransType.objects.get(name='sms_used')
         # dates
@@ -32,6 +39,8 @@ class CreateInitialAcctTransAndAcctStmtTests(TestCase):
         self.today = self.dates._today
 
         celery_set_eager()
+
+    # create_initial_acct_trans_and_stmt
 
     def test_acct_trans(self):
         self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel).count(), 0)
@@ -62,12 +71,14 @@ class CreateInitialAcctTransAndAcctStmtTests(TestCase):
 
         self.assertEqual(Pricing.objects.filter(hotel=self.hotel).count(), 1)
 
+    # get_or_create_acct_stmt
+
     def test_get_or_create_acct_stmt(self):
         dates = Dates()
         today = dates._today
         self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 0)
-
         init_acct_stmt = create_acct_stmt(self.hotel, year=today.year, month=today.month)
+
         get_or_create_acct_stmt.delay(self.hotel.id, year=today.year, month=today.month)
 
         self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 1)
@@ -75,6 +86,21 @@ class CreateInitialAcctTransAndAcctStmtTests(TestCase):
         self.assertIsInstance(acct_stmt, AcctStmt)
         self.assertEqual(acct_stmt, init_acct_stmt)
         self.assertTrue(acct_stmt.modified > init_acct_stmt.modified)
+
+    # get_or_create_acct_stmt_all_hotels
+
+    def test_get_or_create_acct_stmt_all_hotels(self):
+        dates = Dates()
+        today = dates._today
+        self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 0)
+        self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel2).count(), 0)
+
+        get_or_create_acct_stmt_all_hotels.delay(year=today.year, month=today.month)
+
+        self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 1)
+        self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel2).count(), 1)
+
+    # charge_hotel_monthly_for_phone_numbers
 
     def test_charge_hotel_monthly_for_phone_numbers(self):
         dates = Dates()
@@ -119,6 +145,8 @@ class CreateInitialAcctTransAndAcctStmtTests(TestCase):
                 ph_num_acct_trans.aggregate(Sum('amount'))['amount__sum'],
                 2 * -(settings.PHONE_NUMBER_MONTHLY_COST)
             )
+
+    # eod_update_or_create_sms_used
 
     def test_eod_update_or_create_sms_used(self):
         init_acct_tran = create_acct_tran(self.hotel, self.sms_used, self.today)

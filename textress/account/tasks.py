@@ -11,6 +11,10 @@ from utils.models import Dates
 
 @shared_task
 def create_initial_acct_trans_and_stmt(hotel_id):
+    """
+    Run after 'registration payment', so when Admin goes to 
+    'Billing Summary' page it isn't blank, and shows initial funds.
+    """
     hotel = Hotel.objects.get(id=hotel_id)
 
     Pricing.objects.get_or_create(hotel=hotel)
@@ -25,12 +29,28 @@ def create_initial_acct_trans_and_stmt(hotel_id):
 
 @shared_task
 def get_or_create_acct_stmt(hotel_id, month, year):
+    """
+    To be run daily for each Hotel to update their 'AcctStmt'
+    """
     hotel = Hotel.objects.get(id=hotel_id)
     return AcctStmt.objects.get_or_create(hotel, month, year)
 
 
 @shared_task
+def get_or_create_acct_stmt_all_hotels(month, year):
+    """
+    Master scheduled 'AcctStmt' task to update all Hotels.
+    """
+    for hotel in Hotel.objects.all():
+        get_or_create_acct_stmt.delay(hotel.id, month, year)
+
+
+@shared_task
 def charge_hotel_monthly_for_phone_numbers(hotel_id):
+    """
+    Creates a single monthly charge per active 'Phone Number' 
+    based upon the 'CHARGE_DAY' set in the 'settings'.
+    """
     hotel = Hotel.objects.get(id=hotel_id)
     
     for ph in hotel.phone_numbers.all():
