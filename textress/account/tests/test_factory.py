@@ -55,17 +55,3 @@ class FactoryTests(TestCase):
 
         self.assertIsInstance(acct_trans, AcctTrans)
         self.assertEqual(AcctTrans.objects.count(), 1)
-
-
-class CreateAcctTransTests(TestCase):
-    """
-    Run `create_acct_trans` in setUp b/c this is a long running function, 
-    and needs to be completed before test run.
-    """
-
-    def setUp(self):
-        self.hotel = create_hotel()
-        factory.create_acct_trans(self.hotel)
-
-    def test_create_acct_trans(self):
-        self.assertTrue(AcctTrans.objects.count() > 0)

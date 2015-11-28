@@ -8,6 +8,7 @@ from djangular.forms import NgFormValidationMixin
 from concierge.models import Guest
 from utils import ph_formatter, validate_phone
 from utils.forms import Bootstrap3ModelForm
+from utils.models import Dates
 
 
 class GuestForm(NgFormValidationMixin, Bootstrap3ModelForm):
@@ -15,7 +16,9 @@ class GuestForm(NgFormValidationMixin, Bootstrap3ModelForm):
     form_name = 'guest_form'
 
     error_messages = {
-        'number_in_use': "Guest phone number exists."
+        'number_in_use': "Guest phone number exists",
+        'check_in_past_date': "Check-in is a past date",
+        'check_out_before_check_in': "Check-out date before check-in"
     }
 
     phone_number = forms.RegexField(r'^(\(\d{3}\)) (\d{3})-(\d{4})$',
@@ -76,3 +79,21 @@ class GuestForm(NgFormValidationMixin, Bootstrap3ModelForm):
 
         if qs.exists():
             raise forms.ValidationError(self.error_messages['number_in_use'])
+
+    def clean_check_in(self):
+        check_in = self.cleaned_data.get("check_in")
+
+        if check_in < Dates()._today:
+            raise forms.ValidationError(self.error_messages['check_in_past_date'])
+
+        return check_in
+
+    def clean_check_out(self):
+        check_in = self.cleaned_data.get("check_in", Dates()._today)
+        check_out = self.cleaned_data.get("check_out")
+
+        if check_out < check_in:
+            raise forms.ValidationError(self.error_messages['check_out_before_check_in']
+                .format(check_in=check_in, check_out=check_out))
+
+        return check_out

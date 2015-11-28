@@ -57,12 +57,12 @@ class PhoneNumberNotDeletedExcp(Exception):
 class ConvertCostException(Exception):
     pass
 
-class CheckOutDateException(Exception):
+class CheckOutDateException(ValidationError):
 
     def __init__(self, check_in, check_out, *args, **kwargs):
         super(CheckOutDateException, self).__init__(
-            "Check-in Date: {} greater than Check-out Date \
-            {}.".format(str(check_in), str(check_out)))
+            "Check-in Date: {} greater than Check-out Date {}.".format(
+                str(check_in), str(check_out)))
 
 
 ### MISC ###

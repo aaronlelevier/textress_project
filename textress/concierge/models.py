@@ -133,11 +133,7 @@ class Guest(BaseModel):
         return self.name
 
     def save(self, *args, **kwargs):
-        '''
-        TODO: Add logic so that all `phone_numbers` are distinct by Hotel. 
-        Enforce this logic in the save override.
-        '''
-        # NOT TESTING ONLY:
+        # NOTE: TESTING ONLY:
         if 'test' not in sys.argv:
             if not self.icon:
                 self.icon = random.choice(Icon.objects.all())
@@ -161,11 +157,9 @@ class Guest(BaseModel):
         return self.name == "Unknown Guest"
 
     def validate_phone_number_taken(self):
-        '''Ph # isn't being used by any other current Guests.
-
-        :TODO: 
-            1. Should this raise a Form Error instead? Like `validate_phone`?
-        '''
+        """
+        Assert PH # isn't being used by any other current Guests.
+        """
         if (Guest.objects.current().filter(hotel=self.hotel, phone_number=self.phone_number)
                                    .exclude(id=self.id)
                                    .exists()):

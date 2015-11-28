@@ -47,7 +47,7 @@
                                 <button onclick="window.history.back()" type="button" class="btn btn-default">
                                     Cancel
                                 </button> 
-                                <button class="btn btn-{% if btn_color %}{{ btn_color }}{% else %}primary{% endif %} next-step" ng-disabled="{{ form.form_name }}.$invalid">
+                                <button class="btn btn-{% if btn_color %}{{ btn_color }}{% else %}primary{% endif %} next-step">
                                     {% if btn_text %}{{ btn_text }}{% else %}Submit{% endif %} <i class="fa fa-arrow-circle-right"></i>
                                 </button>
                             </div>

@@ -6,6 +6,8 @@ from concierge.models import Guest, Message
 from concierge.tests.factory import make_guests, make_messages
 from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
 from utils import create
+from utils.exceptions import CheckOutDateException
+from utils.models import Dates
 
 
 class GuestViewTests(TestCase):
@@ -87,6 +89,19 @@ class GuestViewTests(TestCase):
         self.assertIsInstance(guest, Guest)
         self.assertRedirects(response, reverse('concierge:guest_detail', kwargs={'pk':guest.pk}))
 
+    def test_create__past_date_check_in(self):
+        dates = Dates()
+        self.guest_create_data['check_in'] = dates._yesterday
+        self.guest_create_data['check_out'] = dates._yesterday
+        [g.delete(override=True) for g in Guest.objects.all()]
+
+        # Login n Create a Guest
+        response = self.client.post(reverse('concierge:guest_create'),
+            self.guest_create_data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFormError(response, 'form', 'check_in', GuestForm.error_messages['check_in_past_date'])
+
     def test_validate_phone_in_use(self):
         [g.delete(override=True) for g in Guest.objects.all()]
 
@@ -125,6 +140,20 @@ class GuestViewTests(TestCase):
             self.guest_create_data)
         post_count = Guest.objects.count()
         self.assertEqual(init_count+1, post_count)
+
+    def test_validate_check_in_out(self):
+        """
+        `check_out` cannot be before the `check_in`
+        """
+        dates = Dates()
+        self.guest_create_data['check_out'] = dates._yesterday
+
+        response = self.client.post(reverse('concierge:guest_create'),
+            self.guest_create_data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFormError(response, 'form', 'check_out',
+            GuestForm.error_messages['check_out_before_check_in'])
 
     def test_update_get(self):
         response = self.client.get(reverse('concierge:guest_update', kwargs={'pk':self.guest.pk}))
