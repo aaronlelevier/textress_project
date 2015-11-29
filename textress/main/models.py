@@ -411,10 +411,14 @@ class Subaccount(BaseModel):
 
     def activate(self):
         account = self.client.accounts.update(self.sid, status="active")
+        self.active = True
+        self.save()
         return account.status
 
     def deactivate(self):
         account = self.client.accounts.update(self.sid, status="suspended")
+        self.active = False
+        self.save()
         return account.status
 
 

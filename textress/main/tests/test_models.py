@@ -288,10 +288,29 @@ class SubaccountTests(TestCase):
 
     ### Model Tests
 
+    def test_model_fields(self):
+        self.assertEqual(self.sub.hotel, self.hotel)
+        self.assertIsNotNone(self.sub.sid)
+        self.assertIsNotNone(self.sub.auth_token)
+        self.assertTrue(self.sub.active)
+
     def test_activate(self):
-        self.assertEqual(self.sub.activate(), 'active')
+        self.sub.active = False
+        self.sub.save()
+        self.assertFalse(self.sub.active)
+
+        ret = self.sub.activate()
+
+        self.assertEqual(ret, 'active')
+        self.assertTrue(self.sub.active)
 
     def test_deactivate(self):
-        self.assertEqual(self.sub.deactivate(), 'suspended')
+        self.assertTrue(self.sub.active)
+
+        ret = self.sub.deactivate()
+
+        self.assertEqual(ret, 'suspended')
+        self.assertFalse(self.sub.active)
+
         # set back to "active" b/c this is a live Twilio Subaccount
         self.assertEqual(self.sub.activate(), 'active')
