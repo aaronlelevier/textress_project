@@ -1,4 +1,5 @@
 import os
+from mock import patch
 import random
 
 from django.conf import settings
@@ -116,7 +117,9 @@ class HotelTests(TestCase):
             "{}_{}".format(self.hotel._meta.verbose_name, self.hotel.id)
         )
 
-    def test_redis_sms_count_initial(self):
+    # redis_sms_count
+
+    def test_redis_sms_count__initial(self):
         cache.delete(self.hotel.redis_key)
 
         self.assertEqual(self.hotel.redis_sms_count, 0)
@@ -128,14 +131,16 @@ class HotelTests(TestCase):
         
         self.assertEqual(self.hotel.redis_sms_count, 1)
 
-    def test_redis_incr_sms_count_initial(self):
+    # redis_incr_sms_count
+
+    def test_redis_incr_sms_count__initial(self):
         cache.delete(self.hotel.redis_key)
 
         self.hotel.redis_incr_sms_count()
 
         self.assertEqual(cache.get(self.hotel.redis_key), 1)
 
-    def test_redis_incr_sms_count_after_initial(self):
+    def test_redis_incr_sms_count__after_initial(self):
         cache.delete(self.hotel.redis_key)
         
         self.hotel.redis_incr_sms_count()
@@ -143,6 +148,38 @@ class HotelTests(TestCase):
         self.hotel.redis_incr_sms_count()
 
         self.assertEqual(cache.get(self.hotel.redis_key), 3)
+
+    @patch("account.models.AcctTransManager.check_balance")
+    def test_redis_incr_sms_count__finally(self, check_balance_mock):
+        """
+        Will call 'check_balance' and 'reset_count' if necessary when triggered.
+        """
+        cache.set(self.hotel.redis_key, settings.CHECK_SMS_LIMIT)
+
+        self.hotel.redis_incr_sms_count()
+
+        self.assertTrue(check_balance_mock.called)
+        self.assertEqual(self.hotel.redis_sms_count, 0)
+
+    # check_sms_count
+
+    def test_check_sms_count__sms_count_less_than_limit(self):
+        cache.set(self.hotel.redis_key, settings.CHECK_SMS_LIMIT-1)
+
+        self.hotel.check_sms_count()
+
+        self.assertEqual(self.hotel.redis_sms_count, settings.CHECK_SMS_LIMIT-1)
+
+    @patch("account.models.AcctTransManager.check_balance")
+    def test_check_sms_count__trigger(self, check_balance_mock):
+        cache.set(self.hotel.redis_key, settings.CHECK_SMS_LIMIT)
+
+        self.hotel.check_sms_count()
+
+        self.assertTrue(check_balance_mock.called)
+        self.assertEqual(self.hotel.redis_sms_count, 0)
+
+    # get_or_create_subaccount
 
     def test_get_or_create_subaccount(self):
         self.hotel.subaccount.delete(override=True)
