@@ -308,6 +308,17 @@ class AccountDeactivatedTests(TestCase):
         # set back to "active" b/c this is a live Twilio Subaccount
         self.assertEqual(self.sub.activate(), 'active')
 
+    def test_active_subaccount_no_warning_message(self):
+        self.assertTrue(self.hotel.subaccount.active)
+
+        response = self.client.get(reverse('account'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(
+            "SMS sending and receiving has been deactivated",
+            response.content
+        )
+
     def test_deactivated_subaccount_shows_warning_message(self):
         self.sub.deactivate()
 
