@@ -292,6 +292,39 @@ class AccountTests(TestCase):
             response.context['alerts']
 
 
+class AccountDeactivatedTests(TestCase):
+    # Test Rending of view, template path is correct, url
+    # User of each permission type needed
+
+    def setUp(self):
+        create._get_groups_and_perms()
+        self.password = PASSWORD
+
+        self.hotel = create_hotel()
+        self.admin = create_hotel_user(self.hotel, 'admin', 'hotel_admin')
+        self.manager = create_hotel_user(self.hotel, 'manager', 'hotel_manager')
+        self.user = create_hotel_user(self.hotel, 'user')
+        # Subaccount
+        self.sub = make_subaccount(self.hotel, live=True)
+        # Login
+        self.client.login(username=self.user.username, password=self.password)
+
+    def tearDown(self):
+        # set back to "active" b/c this is a live Twilio Subaccount
+        self.assertEqual(self.sub.activate(), 'active')
+
+    def test_deactivated_subaccount_shows_warning_message(self):
+        self.sub.deactivate()
+
+        response = self.client.get(reverse('account'))
+
+        self.assertEqual(response.status_code, 200)
+        m = list(response.context['messages'])
+        self.assertEqual(len(m), 1)
+        self.assertEqual(m[0], "SMS sending and receiving has been deactivated. Please \
+contact your system admin to reactivate the account. This is most likely due to insufficient funds.")
+
+
 class LoginTests(TestCase):
 
     def setUp(self):

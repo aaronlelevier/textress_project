@@ -69,9 +69,16 @@ class AccountView(LoginRequiredMixin, HotelUserMixin, SetHeadlineMixin,
         """Show alert messages for pending actions needed before the 
         Account will be fully functional."""
         context = super(AccountView, self).get_context_data(**kwargs)
+
+        subaccount = self.hotel.get_subaccount()
+        if subaccount and not subaccount.active:
+            alert = no_twilio_phone_number_alert()
+            context['alerts'] = alert_messages(messages=[alert])
+
         if not self.hotel.twilio_ph_sid:
             alert = no_twilio_phone_number_alert()
             context['alerts'] = alert_messages(messages=[alert])
+
         return context
 
 

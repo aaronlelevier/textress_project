@@ -230,6 +230,12 @@ class Hotel(TwilioClient, BaseModel):
         self.save()
         return self
 
+    def get_subaccount(self):
+        try:
+            return Subaccount.objects.get(hotel=self)
+        except Subaccount.DoesNotExist:
+            return
+
     def get_or_create_subaccount(self):
         """
         Twilio Subaccount will only be created when a Payment has been 

@@ -53,6 +53,9 @@ class HotelTests(TestCase):
             guest=self.guest
         )
 
+        # Hotel2
+        self.hotel2 = create_hotel()
+
     def test_create(self):
         self.assertIsInstance(self.hotel, Hotel)
         self.assertIsInstance(self.user, User)
@@ -178,6 +181,19 @@ class HotelTests(TestCase):
 
         self.assertTrue(check_balance_mock.called)
         self.assertEqual(self.hotel.redis_sms_count, 0)
+
+    # get_subaccount
+
+    def test_get_subaccount(self):
+        sub = make_subaccount(self.hotel2)
+
+        self.assertEqual(
+            self.hotel2.get_subaccount(),
+            self.hotel2.subaccount
+        )
+
+    def test_get_subaccount__none(self):
+        self.assertIsNone(self.hotel2.get_subaccount())
 
     # get_or_create_subaccount
 
