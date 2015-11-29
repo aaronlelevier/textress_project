@@ -1,5 +1,5 @@
 """
-TODO: Add to use proper Exception catching when charging cards
+NotImplemented: Add to use proper Exception catching when charging cards
 """
 
 try:

@@ -211,13 +211,11 @@ class HotelViewTests(TestCase):
         self.assertEqual(str(m[0]), dj_messages['hotel_updated'])
 
     def test_update_post_no_data_changes(self):
-        # TODO: need to complete this test
         self.client.login(username=self.username, password=self.password)
+
         response = self.client.post(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}),
             CREATE_HOTEL_DICT, follow=True)
-        self.assertRedirects(response, reverse('main:user_detail', kwargs={'pk': self.user.pk}))
-        response = self.client.post(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}),
-            CREATE_HOTEL_DICT, follow=True)
+
         self.assertRedirects(response, reverse('main:user_detail', kwargs={'pk': self.user.pk}))
 
 

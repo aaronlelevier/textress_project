@@ -26,6 +26,9 @@ from utils import validate_phone, dj_messages, exceptions as excp
 from utils.data import STATES, HOTEL_TYPES
 from utils.models import BaseModel
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 def viewable_user_fields_dict(user):
     "A ``Dict`` of all viewable ``User` fields to be displayed in templates."
@@ -122,7 +125,8 @@ class Hotel(TwilioClient, BaseModel):
         try:
             return TwilioRestClient(self.twilio_sid, self.twilio_auth_token, timeout=None)
         except TwilioRestException:
-            # TODO: Add logging or forms.ValidationError here?
+            logger.exception(e)
+            logger.debug("TwilioRestException connect exception", exc_info=True)
             raise
 
     def save(self, *args, **kwargs):
@@ -382,13 +386,8 @@ class SubaccountManager(TwilioClient, models.Manager):
 
 class Subaccount(BaseModel):
     """
-    Twilio Subaccount
-    -----------------
-    To handle API Calls and main entry point for Twilio per Hotel.
-
-    TODO: When customer successfully pays for Account, create a Subaccount
-        with a new PhoneNumber.
-        - Create "Dave Hotel" Subaccount w/ already created `sid`
+    :Twilio Subaccount:
+        To handle API Calls and main entry point for Twilio per Hotel.
     """
     hotel = models.OneToOneField(Hotel, related_name='subaccount')
     sid = models.CharField(_("Twilio Subaccount Sid"), primary_key=True, max_length=100)

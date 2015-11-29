@@ -87,10 +87,6 @@ def create_superuser():
 
 def make_subaccount(hotel, live=False):
     '''
-    TODO
-    ----
-    Find out how to incorporate this method because not currently being used.
-
     If not "live", override Subaccount.save() so don't create a 
     live Twilio Subaccount.
     '''

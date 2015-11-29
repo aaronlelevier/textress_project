@@ -60,8 +60,6 @@ def send_message(hotel, to, body):
     """
     Main Send Message Twilio function call.
 
-    TODO
-    ----
     Monkey patch this method in test, so the ``if 'test' in sys.argv`` is removed
     from this production code.
     """

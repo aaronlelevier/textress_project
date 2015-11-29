@@ -34,10 +34,6 @@ class HotelMixinTests(TestCase):
             )
         self.message_b = self.messages_b[0]
 
-    def test_holder(self):
-        '''TODO: Hold spot for future tests here.'''
-        self.assertEqual(1,1)
-
 
 class UserOnlyMixinTests(TestCase):
 

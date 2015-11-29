@@ -35,3 +35,11 @@ Counts of unread and total messages
 Guest with unread messages show first
 
 ** Check-in ** Message hook - for use with a "Welcome" message for example
+
+
+### USERS
+
+-Add a FormSet, so that Mgrs' can in the same view adjust
+    Group Status to "hotel_manager" or take it away.
+
+- also be able to view Group.

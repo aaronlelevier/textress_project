@@ -119,11 +119,6 @@ class HotelUserMixin(HotelContextMixin):
         except AttributeError:
             messages.warning(self.request, dj_messages['no_hotel'])
             raise PermissionDenied
-
-        # TODO: Redirect to an alert page that funds need to be added
-        if self.hotel and not self.hotel.active:
-            messages.warning(self.request, dj_messages['hotel_not_active'])
-            raise Http404
             
         return super(HotelUserMixin, self).dispatch(*args, **kwargs)
 

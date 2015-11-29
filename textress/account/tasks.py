@@ -1,3 +1,23 @@
+"""
+Future Periodic Tasks
+---------------------
+that will need to be scheduled
+
+:cron SO answer: http://stackoverflow.com/a/11775112/1913888
+
+Tasks
+-----
+1. Check daily for all registered PHs, if 30 days since the last 
+PH charge date, then charge.
+
+:cron:
+    * /12 * * * /path/to/script/to/run.py   # runs every 12 hours
+
+:logic:
+    if today.date - last_ph_num_charge.date > 30:
+        charge for ph num
+
+"""
 from __future__ import absolute_import
 
 from django.conf import settings

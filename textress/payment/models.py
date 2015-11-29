@@ -268,8 +268,6 @@ class Card(PmtBaseModel):
 
 class ChargeManager(StripeClient, models.Manager):
 
-    # TODO: Confirm ``Charge.objects.stripe_create`` is being tested
-
     def stripe_create(self, hotel, amount, currency='usd'):
         '''
         Create Charge based on Stripe Customer ID. Don't need a card token

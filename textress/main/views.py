@@ -283,11 +283,6 @@ class MgrUserDetailView(LoginRequiredMixin, SetHeadlineMixin, HotelUsersOnlyMixi
 class MgrUserUpdateView(SetHeadlineMixin, HotelUsersOnlyMixin, UserListContextMixin, UpdateView):
     '''
     Manager/Admin view of Users.
-
-    TODO: 
-        -Add a FormSet, so that Mgrs' can in the same view adjust
-            Group Status to "hotel_manager" or take it away.
-        - also be able to view Group.
     '''
     headline = "Update Profile"
     model = User
