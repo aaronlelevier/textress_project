@@ -180,7 +180,10 @@ class Hotel(TwilioClient, BaseModel):
 
     # def check_sms_count(self):
     #     if self.redis_sms_count >= settings.CHECK_SMS_LIMIT:
-    #         self.acct_trans.update_or_create_sms_used(self)
+    #         self.acct_trans.check_balance(self)
+
+    #         # reset 'sms_count' for Hotel
+    #         cache.set(self.redis_key, 0)
 
     def get_absolute_url(self):
         return reverse('main:hotel_update', kwargs={'pk':self.pk})

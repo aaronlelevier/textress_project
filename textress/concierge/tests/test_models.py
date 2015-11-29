@@ -375,20 +375,21 @@ class MessageSendTests(TestCase):
         self.guest.phone_number = settings.DEFAULT_TO_PH
         self.guest.save()
 
-    def test_create(self):
-        self.assertIsInstance(self.guest.hotel, Hotel)
-
     def test_create_that_sends(self):
+        self.assertIsInstance(self.guest.hotel, Hotel) # in order to attach Hotel to Message
+        self.assertEqual(self.guest.hotel, self.user.profile.hotel)
+
         message = Message.objects.create(
             guest=self.guest,
             to_ph=self.guest.phone_number,
             user=self.user,
             body='sent via unittest save() method'
             )
+
         self.assertIsInstance(message, Message)
-        # TODO: failing b/c ``hotel`` is not attaching to message, 
-        #   but work fine from the GUI??
-        # self.assertEqual(message.hotel, self.guest.hotel)
+        self.assertEqual(message.guest, self.guest)
+        self.assertEqual(message.to_ph, self.guest.phone_number)
+        self.assertEqual(message.user, self.user)
 
 
 class ReplyTests(TestCase):

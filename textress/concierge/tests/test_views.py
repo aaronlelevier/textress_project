@@ -37,6 +37,8 @@ class GuestViewTests(TestCase):
     def tearDown(self):
         self.client.logout()
 
+    # list
+
     def test_list(self):
         self.client.logout()
         # Dave is not logged in, so get's a 403 response
@@ -48,6 +50,8 @@ class GuestViewTests(TestCase):
         response = self.client.get(reverse('concierge:guest_list'))
         self.assertEqual(response.status_code, 200)
         assert response.context['object_list']
+
+    # detail
 
     def test_detail(self):
         # Get Guest's details
@@ -72,13 +76,11 @@ class GuestViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Message.objects.filter(guest=self.guest, read=True).count(), 10)
 
-    def test_delete_guests(self):
-        # No guests
-        [g.delete(override=True) for g in Guest.objects.all()]
-        self.assertEqual(Guest.objects.count(), 0)
+    # create
 
     def test_create(self):
         [g.delete(override=True) for g in Guest.objects.all()]
+        self.assertEqual(Guest.objects.count(), 0)
 
         # Login n Create a Guest
         response = self.client.post(reverse('concierge:guest_create'),
