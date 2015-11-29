@@ -17,7 +17,7 @@ def alert_messages(messages):
     alerts =  []
 
     html_message = """
-        <div class="alert alert-warning">
+        <div class="alert alert-{type}">
             <a href="{link}" class="no_decoration">
                 <i class="{icon}"></i>
                 <strong>{strong_message}</strong> {message}

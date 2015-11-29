@@ -1,6 +1,7 @@
 import stripe
 
 from django.conf import settings
+from django.core.urlresolvers import reverse
 
 from payment.models import Customer, Card, Charge
 from account.models import TransType, AcctTrans
@@ -28,12 +29,14 @@ def signup_register_step4(hotel, token, email, amount):
     except stripe.error.StripeError:
         raise
 
-    # else:
-    #     # Account.model records for individual transactions
-    #     # recorded for ``accounting`` purposes
-    #     trans_type = TransType.objects.get(name='init_amt')
-        
-    #     acct_trans = AcctTrans.objects.create(hotel=hotel,
-    #         trans_type=trans_type, amount=amount)
-
     return customer, card, charge
+
+
+def no_funds_alert():
+    return {
+        'type': 'danger',
+        'link': reverse('payment:one_time_payment'),
+        'strong_message': 'Alert!',
+        'message': "SMS sending and receiving has been deactivated. Please \
+contact your system admin to reactivate the account. This is most likely due to insufficient funds."
+    }

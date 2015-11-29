@@ -281,15 +281,10 @@ class AccountTests(TestCase):
     def test_alert_phone_number(self):
         self.client.login(username=self.user.username, password=self.password)
         self.assertIsNone(self.hotel.twilio_ph_sid)
+
         response = self.client.get(reverse('account'))
+
         self.assertTrue(response.context['alerts'])
-        # No alert if ``hotel.twilio_ph_sid``
-        self.hotel.twilio_ph_sid = 'some value'
-        self.hotel.save()
-        self.assertTrue(self.hotel.twilio_ph_sid)
-        response = self.client.get(reverse('account'))
-        with self.assertRaises(KeyError):
-            response.context['alerts']
 
 
 class AccountDeactivatedTests(TestCase):
@@ -319,10 +314,10 @@ class AccountDeactivatedTests(TestCase):
         response = self.client.get(reverse('account'))
 
         self.assertEqual(response.status_code, 200)
-        m = list(response.context['messages'])
-        self.assertEqual(len(m), 1)
-        self.assertEqual(m[0], "SMS sending and receiving has been deactivated. Please \
-contact your system admin to reactivate the account. This is most likely due to insufficient funds.")
+        self.assertIn(
+            "SMS sending and receiving has been deactivated",
+            response.content
+        )
 
 
 class LoginTests(TestCase):

@@ -23,6 +23,7 @@ from account.mixins import alert_messages
 from account.models import Dates, AcctCost, AcctStmt, AcctTrans, Pricing
 from account.serializers import PricingSerializer
 from main.mixins import RegistrationContextMixin, AdminOnlyMixin, HotelUserMixin
+from payment.helpers import no_funds_alert
 from payment.mixins import BillingSummaryContextMixin
 from sms.helpers import no_twilio_phone_number_alert
 from utils import email, login_messages
@@ -70,14 +71,16 @@ class AccountView(LoginRequiredMixin, HotelUserMixin, SetHeadlineMixin,
         Account will be fully functional."""
         context = super(AccountView, self).get_context_data(**kwargs)
 
+        messages = []
+
         subaccount = self.hotel.get_subaccount()
         if subaccount and not subaccount.active:
-            alert = no_twilio_phone_number_alert()
-            context['alerts'] = alert_messages(messages=[alert])
+            messages.append(no_funds_alert())
 
         if not self.hotel.twilio_ph_sid:
-            alert = no_twilio_phone_number_alert()
-            context['alerts'] = alert_messages(messages=[alert])
+            messages.append(no_twilio_phone_number_alert())
+
+        context['alerts'] = alert_messages(messages=messages)
 
         return context
 
