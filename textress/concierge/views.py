@@ -15,7 +15,7 @@ from concierge.helpers import process_incoming_message, convert_to_json_and_publ
 from concierge.forms import GuestForm
 from concierge.mixins import GuestListContextMixin
 from concierge.permissions import IsManagerOrAdmin
-from concierge.tasks import check_twilio_messages_to_merge
+from concierge.tasks import check_twilio_messages_to_merge, trigger_send_message
 from main.mixins import HotelUserMixin
 from utils import DeleteButtonMixin
 
@@ -112,8 +112,7 @@ class GuestCreateView(GuestBaseView, GuestListContextMixin, CreateView):
         self.object = form.save(commit=False)
         self.object.hotel = self.hotel
         self.object.save()
-        # TODO: convert this Trigger to a Celery task
-        Trigger.objects.send_message(self.object.id, "check_in")
+        trigger_send_message(self.object.id, "check_in")
         return super(GuestCreateView, self).form_valid(form)
 
 

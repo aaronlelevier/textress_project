@@ -197,11 +197,6 @@ class Guest(BaseModel):
         return self.save()
 
 
-@shared_task
-def trigger_send_message(guest_id, trigger_type_name):
-    return Trigger.objects.send_message(guest_id, trigger_type_name)
-
-
 ###########
 # MESSAGE #
 ###########
@@ -270,7 +265,7 @@ class MessageManager(models.Manager):
 
             except Exception as e:
                 logger.exception(e)
-                logger.debug("Failed to save SMS to DB.", exc_info=True)
+                logger.debug("'MessageManager.receive_message' Failed to save SMS to DB.", exc_info=True)
                 return None, None
             else:
                 return db_message, True
@@ -300,10 +295,9 @@ class MessageManager(models.Manager):
                     body=data['Body']
                     )
             except (ObjectDoesNotExist, Exception) as e:
-                # TODO: only reaches this point if the received Twilio Message
-                #   failed to save to the DB.
-                # this should be logged
-                print("{}, {}".format(e.__class__, e))
+                logger.exception(e)
+                logger.debug("'MessageManager.receive_message_post' Failed to save SMS to DB.", exc_info=True)
+                return None
             else:
                 return db_message
 

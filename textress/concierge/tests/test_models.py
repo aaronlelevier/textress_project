@@ -11,8 +11,7 @@ from django.utils import timezone
 
 from model_mommy import mommy
 
-from concierge.models import (Message, Guest, Hotel, Reply, TriggerType, Trigger,
-    trigger_send_message)
+from concierge.models import Message, Guest, Hotel, Reply, TriggerType, Trigger
 from concierge.tests.factory import make_guests, make_messages
 from main.tests.factory import create_hotel, create_hotel_user
 from utils import create
@@ -549,12 +548,14 @@ class TriggerTests(TestCase):
     def setUp(self):
         self.hotel = create_hotel()
         self.guest = make_guests(hotel=self.hotel, number=1)[0]
-        self.trigger_type = mommy.make(TriggerType, name="check_out")
         self.reply_letter = "T"
         self.hotel_reply = mommy.make(Reply, hotel=self.hotel, letter=self.reply_letter,
             message="Thank you for staying")
+        self.trigger_type = mommy.make(TriggerType, name="check_out")
         self.trigger = mommy.make(Trigger, hotel=self.hotel, type=self.trigger_type,
             reply=self.hotel_reply)
+
+    ### MODEL TESTS
 
     def test_foreign_keys(self):
         self.assertIsInstance(self.trigger.hotel, Hotel)
@@ -574,10 +575,21 @@ class TriggerTests(TestCase):
         with self.assertRaises(ValidationError):
             Trigger.objects.create(type=self.trigger.type, hotel=self.trigger.hotel)
 
+    ### MANAGER TESTS
 
-    def test_delete_check_out_message_unit_test(self):
+    def test_send_message__success(self):
         global Message
         Message.save = models.Model.save
 
-        ret = trigger_send_message.apply(args=(self.guest.id, 'check_out')).get()
+        ret = Trigger.objects.send_message(self.guest.id, self.trigger.type.name)
+
         self.assertIsInstance(ret, Message)
+
+    def test_send_message__trigger_does_not_exist(self):
+        self.assertIsNone(Trigger.objects.send_message(self.guest.id, 'not a trigger name'))
+
+    def test_send_message__guest_stop_is_true(self):
+        self.guest.stop = True
+        self.guest.save()
+
+        self.assertIsNone(Trigger.objects.send_message(self.guest.id, self.trigger.type.name))
