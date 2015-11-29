@@ -1,9 +1,8 @@
 from rest_framework.response import Response
 from rest_framework import generics
 
-from contact.models import Contact, Topic, Newsletter
+from contact.models import Contact, Topic
 from contact.serializers import ContactSerializer, FAQSerializer
-
 
 
 ########

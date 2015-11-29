@@ -2,16 +2,11 @@ from django.db import models
 from django.contrib import admin
 from django.forms.widgets import TextInput
 
-from contact.models import Contact, Newsletter, Topic, QA
+from contact.models import Contact, Topic, QA
 
 
 @admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(Newsletter)
-class NewsletterAdmin(admin.ModelAdmin):
     pass
 
 

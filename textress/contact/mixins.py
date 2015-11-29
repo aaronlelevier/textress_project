@@ -3,20 +3,6 @@ from django.core.urlresolvers import reverse_lazy
 
 from braces.views import FormValidMessageMixin
 
-from contact.forms import NewsletterForm
-
-
-class NewsletterMixin(FormValidMessageMixin, FormMixin):
-
-    form_class = NewsletterForm
-    success_url = reverse_lazy('index')
-    form_valid_message = "Thank you for signing up for our monthly newsletter"
-
-    def get_context_data(self, **kwargs):
-        context = super(NewsletterMixin, self).get_context_data(**kwargs)
-        context['nl_form'] = self.get_form_class()
-        return context
-
 
 class TwoFormMixin(object):
 

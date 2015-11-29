@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
-from contact.models import Newsletter, Contact
+from contact.models import Contact
 from utils.messages import dj_messages
 
 
