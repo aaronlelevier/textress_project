@@ -22,6 +22,10 @@ from utils.models import BaseModel, BaseQuerySet, BaseManager, TimeStampBaseMode
 from utils.exceptions import (CheckOutDateException, ValidSenderException,
     PhoneNumberInUse, ReplyNotFound)
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 #########
 # GUEST #
@@ -166,6 +170,10 @@ class Guest(BaseModel):
             raise PhoneNumberInUse("{} is currently in use.".format(self.phone_number))
 
     def validate_check_in_out(self, check_in, check_out):
+        """
+        This validator is at the `model` level, but there is also a validator 
+        for this on the `GuestForm`.
+        """
         if not check_in:
             check_in = timezone.now().date()
 
@@ -173,8 +181,6 @@ class Guest(BaseModel):
             check_out = check_in + datetime.timedelta(days=1)
             
         if check_in > check_out:
-            # TODO: check to see if passed to the User that there is
-            # and error in their input.
             raise CheckOutDateException(check_in, check_out)
 
         return (check_in, check_out)
@@ -263,10 +269,9 @@ class MessageManager(models.Manager):
                 db_message = self.create(**kwargs)
 
             except Exception as e:
-                # TODO: only reaches this point if the received Twilio Message
-                #   failed to save to the DB.
-                # this should be logged
-                print("{}, {}".format(e.__class__, e))
+                logger.exception(e)
+                logger.debug("Failed to save SMS to DB.", exc_info=True)
+                return None, None
             else:
                 return db_message, True
 

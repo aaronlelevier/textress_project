@@ -151,6 +151,12 @@ LOGIN_SUCCESS_URL = '/account/'
 
 
 ### EMAIL ###
+
+# django native settings for ``django.core.mail.mail_admins()``
+EMAIL_HOST_USER = 'admin@textress.com'
+EMAIL_HOST_PASSWORD = os.environ['TEXTRESS_EMAIL_PASSWORD']
+
+# other emails
 DEFAULT_FROM_EMAIL = 'sayhello@textress.com'
 DEFAULT_TO_EMAIL = DEFAULT_FROM_EMAIL
 DEFAULT_EMAIL_SAYHELLO = 'sayhello@textress.com'
@@ -159,6 +165,7 @@ DEFAULT_EMAIL_SUPPORT = 'support@textress.com'
 DEFAULT_EMAIL_BILLING = 'billing@textress.com'
 DEFAULT_EMAIL_AARON = 'aaron@textress.com'
 DEFAULT_EMAIL_NOREPLY = 'noreply@textress.com'
+
 
 ### OTHER CONTACT INFO ###
 TEXTRESS_PHONE_NUMBER = os.environ['T17_PHONE_NUMBER']
@@ -249,3 +256,62 @@ WS4REDIS_EXPIRE = 3600
 WS4REDIS_HEARTBEAT = '--heartbeat--'
 
 WS4REDIS_PREFIX = 'demo'
+
+
+### LOGGING ###
+
+LOGGING_DIR = os.path.join(os.path.dirname(BASE_DIR), "log") # ../textra_project/log/
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt' : "%d/%b/%Y %H:%M:%S"
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOGGING_DIR, 'debug.log'),
+            'formatter': 'verbose'
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+        }
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'textress': {
+            'handlers': ['file'],
+            'level': 'DEBUG'
+        }
+    }
+}
+
+# import logging, copy
+# from django.utils.log import DEFAULT_LOGGING
+
+# LOGGING = copy.deepcopy(DEFAULT_LOGGING)
+# LOGGING['filters']['suppress_deprecated'] = {
+#     '()': 'textress.settings.SuppressDeprecated'  
+# }
+# LOGGING['handlers']['console']['filters'].append('suppress_deprecated')
+
+# class SuppressDeprecated(logging.Filter):
+#     def filter(self, record):
+#         WARNINGS_TO_SUPPRESS = [
+#             'RemovedInDjango19Warning'
+#         ]
+#         # Return false to suppress message.
+#         return not any([warn in record.getMessage() for warn in WARNINGS_TO_SUPPRESS])
