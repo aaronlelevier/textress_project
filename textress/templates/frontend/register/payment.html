@@ -48,10 +48,6 @@
 
 {% block content %}
 
-    {% block beta_msg %}
-        {{ block.super }}
-    {% endblock beta_msg %}
-
     {% block form_head %}
     <div class="main-container">
         <section class="wrapper padding50">
@@ -95,21 +91,29 @@
                                         <h3 class="pull-right">Hotel Info</h3>
                                     </div>
                                     <div class="col-md-3">
-                                        <a href="{% url 'main:register_step2_update' hotel.pk %}">
+                                        {% if hotel %}
+                                            <a href="{% url 'main:register_step2_update' hotel.pk %}">
                                             <p><button type="button" class="btn btn-info btn-xs">edit</button></p>
                                         </a>
+                                        {% else %}
+                                            <a href="{% url 'main:register_step2' %}">
+                                            <p><button type="button" class="btn btn-warning btn-xs">create now</button></p>
+                                        </a>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
-                            <ul class="list-unstyled">
-                                <li><strong>Hotel name:</strong> {{ hotel.name }}</li>
-                                <li><strong>Address</strong></li>
-                                <li>{{ hotel.address_line1 }}</li>
-                                <li>{{ hotel.address_line2 }}</li>
-                                <li>{{ hotel.address_city }}, {{ hotel.address_state }} {{ hotel.address_zip }}</li>
-                                <li><strong>Phone</strong></li>
-                                <li>{{ hotel.address_phone|format_phone }}</li>
-                            </ul>
+                            {% if hotel %}
+                                <ul class="list-unstyled">
+                                    <li><strong>Hotel name:</strong> {{ hotel.name }}</li>
+                                    <li><strong>Address</strong></li>
+                                    <li>{{ hotel.address_line1 }}</li>
+                                    <li>{{ hotel.address_line2 }}</li>
+                                    <li>{{ hotel.address_city }}, {{ hotel.address_state }} {{ hotel.address_zip }}</li>
+                                    <li><strong>Phone</strong></li>
+                                    <li>{{ hotel.address_phone|format_phone }}</li>
+                                </ul>
+                            {% endif %}
                         </div>
                         <div class="row">
                             <div class="row">
@@ -118,17 +122,25 @@
                                         <h3 class="pull-right">Payment Info</h3>
                                     </div>
                                     <div class="col-md-3">
-                                        <a href="{% url 'register_step3_update' hotel.acct_cost.pk %}">
+                                        {% if acct_cost %}
+                                            <a href="{% url 'register_step3_update' hotel.acct_cost.pk %}">
                                             <p><button type="button" class="btn btn-info btn-xs">edit</button></p>
                                         </a>
+                                        {% else %}
+                                            <a href="{% url 'register_step3' %}">
+                                            <p><button type="button" class="btn btn-warning btn-xs">complete now</button></p>
+                                        </a>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
-                            <ul class="list-unstyled">
-                                <li><strong>Initial Payment:</strong> {{ acct_cost.init_amt|stripe_money }}</li>
-                                <li><strong>Balance Minimum:</strong> {{ acct_cost.balance_min|stripe_money }}</li>
-                                <li><strong>Recharge Amount:</strong> {{ acct_cost.recharge_amt|stripe_money }}</li>
-                            </ul>
+                            {% if acct_cost %}
+                                <ul class="list-unstyled">
+                                    <li><strong>Initial Payment:</strong> {{ acct_cost.init_amt|stripe_money }}</li>
+                                    <li><strong>Balance Minimum:</strong> {{ acct_cost.balance_min|stripe_money }}</li>
+                                    <li><strong>Recharge Amount:</strong> {{ acct_cost.recharge_amt|stripe_money }}</li>
+                                </ul>
+                            {% endif %}
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -137,7 +149,7 @@
                                 <h4 class="text-center">1. Payment amount</h4>
                             </div>
                             <p><strong>{{ acct_cost.init_amt|stripe_money }}</strong> will be charged today.</p>
-                            <p>This is an initial deposit of funds.  You will be charged per SMS sent, and when purchasing a phone number for the account.  Phone numbers are <strong>{{ PHONE_NUMBER_CHARGE|stripe_money }}</strong>.</p>
+                            <p>This is an initial deposit of funds.  You will be charged per SMS sent, and when purchasing a phone number for the account.  Phone numbers are <strong>{{ PHONE_NUMBER_CHARGE|stripe_money }}</strong> each monthly.</p>
                             <hr>
                             <div class="well" style="padding:0;">
                                 <h4 class="text-center">2. Payment info</h4>
@@ -231,3 +243,14 @@
 
 
 {% block footer %}{% endblock %}
+
+
+{% block page_js %}
+{{ block.super }}
+    <script src="{% static 'clipone/admin/clip-one/assets/plugins/jquery.payment.min.js' %}"></script>
+    <script>
+    jQuery(function($) {
+        $('#card').payment('formatCardNumber');
+    });
+    </script>
+{% endblock page_js %}

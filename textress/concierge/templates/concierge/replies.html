@@ -1,0 +1,204 @@
+{% extends "cpanel/base-sidebar.html" %}
+{% load staticfiles %}
+
+
+{% block head_js %}
+    {{ block.super }}
+    {% include "include/angular/concierge.html" %}
+{% endblock head_js %}
+
+
+{% block angular_app %}
+    ng-app="conciergeApp"
+{% endblock %}
+
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-md-8">
+            <h4><strong>Single letters</strong> used to trigger an auto-reply for your guest.</h4>
+            <p>All letters can only be used once. System Auto Reply letters are reserved.</p>
+        </div>
+    </div>
+
+    <br>
+
+        <div class="row" ng-controller="ReplyCtrl" ng-cloak>
+            <div class="col-sm-6">
+                <div class="user-left">
+                    <h4>System Auto Replies</h4>
+                    <table class="table table-hover guests">
+                        <tr>
+                            <th>Letter</th>
+                            <th>Description</th>
+                            <th>Message</th>
+                        </tr>
+                        <tr ng-repeat="reply in system_replies | orderBy: 'letter'">
+                            <td>[[ reply.letter ]]</td>
+                            <td>[[ reply.desc ]]</td>
+                            <td>[[ reply.message ]]</td>
+                        </tr>
+                    </table>
+                    <br>
+                    <h4>Hotel Auto Replies</h4>
+                    <table class="table table-hover guests">
+                        <tr>
+                            <th>Letter</th>
+                            <th>Description</th>
+                            <th>Message</th>
+                            <th>Delete?</th>
+                        </tr>
+                        <tr ng-repeat="reply in hotel_replies | orderBy: 'letter'">
+                            <td>[[ reply.letter ]]</td>
+                            <td>[[ reply.desc ]]</td>
+                            <td>[[ reply.message ]]</td>
+                            <td>
+                                <button type="button" class="btn btn-default btn-xs" style="margin-left:10px;" ng-click="deleteReply(reply)">X</button>
+                            </td>
+                        </tr>
+                    </table>    
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="row">
+                    <h4>Add or Edit Auto Replies</h4>
+                </div>
+
+                <form name="replyForm" role="form" class="form-horizontal">
+
+                    <div class="row margin10">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">
+                                Letter <span class="symbol required"></span>
+                            </label>
+                            <div class="col-sm-6">
+                                <select id="form-field-select-1" class="form-control" ng-model="reply.letter" ng-change="letterPicked(reply.letter)" required>
+                                    <option value="">&nbsp;</option>
+                                    <option ng-repeat="letter in hotel_letters" value="[[ letter ]]">[[ letter ]]</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row margin10">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">
+                                Message <span class="symbol required"></span>
+                            </label>
+                            <div class="col-sm-9">
+                                <textarea maxlength="254" class="form-control" ng-model="reply.message" required>[[ reply.message ]]</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row margin10">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">
+                                Description
+                            </label>
+                            <div class="col-sm-9">
+                                <textarea maxlength="254" class="form-control" ng-model="reply.desc">[[ reply.desc ]]</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row margin10">
+                        <button class="btn btn-success btn-xs btn-block" type="submit" id="submit" ng-click="saveReply(reply)" ng-disabled="replyForm.$invalid">
+                            Submit
+                        </button>
+                    </div>
+
+                </form>
+                    
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="row">
+                <div class="col-md-8">
+                    <h3>Automatic Messaging</h3>
+                </div> 
+            </div>
+            <div class="row">
+                <div class="col-md-8">
+                    <h4><strong>Built-in</strong> system generated messages that will be sent based on certain events.</h4>
+                </div>
+            </div>
+
+            <br>
+
+            <div class="row" ng-controller="TriggerCtrl" ng-cloak>
+                <div class="col-md-6">
+                    <div class="user-left">
+                        <br>
+                        <h4>Hotel Auto Replies</h4>
+                        <table class="table table-hover">
+                            <tr>
+                                <th>Trigger</th>
+                                <th>Reply Letter</th>
+                                <th>Reply Message</th>
+                                <th>Delete?</th>
+                            </tr>
+                            <tr ng-repeat="trigger in triggers | orderBy: 'type.human_name'">
+                                <td>[[ trigger.type.human_name ]]</td>
+                                <td>[[ trigger.reply.letter ]]</td>
+                                <td>[[ trigger.reply.message ]]</td>
+                                <td>
+                                    <button type="button" class="btn btn-default btn-xs" style="margin-left:10px;" ng-click="deleteTrigger(trigger)">X</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <form name="triggerForm" role="form" class="form-horizontal">
+
+                        <div class="row margin10">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">
+                                    Trigger <span class="symbol required"></span>
+                                </label>
+                                <div class="col-sm-6">
+                                    <select id="form-field-select-1" class="form-control" ng-model="trigger_type" ng-change="triggerTypePicked(trigger_type)" required>
+                                        <option value="">&nbsp;</option>
+                                        <option ng-repeat="trigger_type in trigger_types" value="[[ trigger_type ]]">[[ trigger_type.human_name ]]</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row margin10">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">
+                                    Reply Letter <span class="symbol required"></span>
+                                </label>
+                                <div class="col-sm-6">
+                                    <select id="form-field-select-1" class="form-control" ng-model="reply" ng-options="reply as reply.letter for reply in hotel_replies | orderBy : 'letter' track by reply.id" required>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row margin10">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">
+                                    Reply Message
+                                </label>
+                                <div class="col-sm-6" style="margin-top:7px">
+                                    <em>[[ reply.message ]]</em>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row margin10">
+                            <button class="btn btn-success btn-xs btn-block" type="button" id="submit" ng-click="saveTrigger(trigger_type, reply)" ng-disabled="triggerForm.$invalid">
+                                Submit
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock content %}

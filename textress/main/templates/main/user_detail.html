@@ -1,0 +1,112 @@
+{% extends "cpanel/base-sidebar.html" %}
+{% load staticfiles user_tags stripe_tags %}
+
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    {% if breadcrumbs %}
+        {{ breadcrumbs|safe }}
+    {% endif %}
+{% endblock breadcrumbs %}
+
+
+{% block headline_quicklink %}
+{% endblock headline_quicklink %}
+
+
+
+{% block content %}
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="col-md-3 text-center">
+                    <img src="{{ MEDIA_URL }}{{ user.profile.icon.icon }}" class="profile_pic">
+                </div>
+                <div class="col-md-9">
+                    <h4>Hello, I'm <strong>{{ user.username }}</strong>, and this is my profile page!</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <h3>
+                    My Info
+                    &nbsp;
+                    <a href="{% url 'main:user_update' object.id %}" class="btn btn-green btn-xs tooltips" data-placement="top" data-original-title="Edit"><i class="fa fa-edit"></i></a>
+                </h3>
+                <table class="table table-hover">
+                    <!-- user -->
+                    {% for k,v in user_dict.iteritems %}
+                    <tr>
+                        <th>{% filter title %}{{ k|proper_name }}{% endfilter %}</th> 
+                        <td>{{ v }}</td>
+                    </tr>
+                    {% endfor %}
+                    <!-- group -->
+                    {% if user.profile.is_manager or user.profile.is_admin %}
+                        <tr>
+                            <th>Group Status</th>
+                            <td>
+                                {% if user.profile.is_admin %}
+                                    Admin
+                                {% elif user.profile.is_manager %}
+                                    Manager
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <h3>
+                    My Hotel Info
+                    {% if user|has_group:"hotel_admin" %}
+                        &nbsp;
+                        <a href="{% url 'main:hotel_update' hotel.id %}" class="btn btn-green btn-xs tooltips" data-placement="top" data-original-title="Edit"><i class="fa fa-edit"></i></a>
+                    {% endif %}
+                </h3>
+                <table class="table table-hover">
+                    <tr>
+                        <th>Hotel Name</th>
+                        <td>{{ hotel.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Hotel Phone Number</th>
+                        <td>{{ hotel.address_phone|format_phone }}</td>
+                    </tr>
+                    <tr>
+                        <th>SMS Phone Number</th>
+                        <td>{{ hotel.twilio_phone_number|format_phone }}</td>
+                    </tr>
+                    <tr>
+                        <th>Address Line 1</th>
+                        <td>{{ hotel.address_line1 }}</td>
+                    </tr>
+                    <tr>
+                        <th>Address Line 2</th>
+                        <td>{{ hotel.address_line2 }}</td>
+                    </tr>
+                    <tr>
+                        <th>City</th>
+                        <td>{{ hotel.address_city }}</td>
+                    </tr>
+                    <tr>
+                        <th>State</th>
+                        <td>{{ hotel.address_state }}</td>
+                    </tr>
+                    <tr>
+                        <th>Zipcode</th>
+                        <td>{{ hotel.address_zip }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!-- end: PAGE -->        
+{% endblock content %}

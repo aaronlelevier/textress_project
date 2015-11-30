@@ -1,0 +1,6 @@
+{
+  "analytics": false,
+  "directory": "textress/source/vendor",
+  "interactive": false,
+  "json": "bower.json"
+}

@@ -1,57 +1,65 @@
-import pytest
+from mock import patch
 
 from django import forms
-from django.conf import settings
-from django.test import TestCase, LiveServerTestCase, RequestFactory
-from django.test.client import Client
+from django.test import TestCase
 from django.core.urlresolvers import reverse
 
 from model_mommy import mommy
 
-from sms.models import Text, DemoCounter
-from sms.forms import DemoForm
-from sms.helpers import sms_messages, bad_ph_error
-from utils.exceptions import DailyLimit
+from account.models import (AcctCost, AcctTrans, TransType, Pricing,
+    TRANS_TYPES, INIT_CHARGE_AMOUNT)
+from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
+from sms.forms import PhoneNumberAddForm
+from utils import create
 
 
-class DemoFormTests(TestCase):
-    
-    def test_get(self):
-        response = self.client.get(reverse('sms:demo'))
-        assert isinstance(response.context['form'], DemoForm)
+class PhoneNumberAddTests(TestCase):
 
-    def test_good_number(self):
-        # start with no counts
-        no_dc = DemoCounter.objects.delete_all()
+    fixtures = ['trans_type.json']
 
-        # submit form correctly
-        data = {'to': settings.DEFAULT_TO_PH}
-        response = self.client.post(reverse('sms:demo'), data)
-        # assert response.status_code == 200
+    def setUp(self):
+        # Hotel
+        self.hotel = create_hotel()
+        # Account
+        self.pricing = mommy.make(Pricing, hotel=self.hotel)
+        self.init_amt, _ = TransType.objects.get_or_create(name='init_amt')
+        self.acct_cost, _ = AcctCost.objects.get_or_create(self.hotel, auto_recharge=True)
+        self.acct_trans, _ = AcctTrans.objects.get_or_create(self.hotel, self.init_amt)
+        # User
+        create._get_groups_and_perms()
+        self.password = PASSWORD
+        self.user = create_hotel_user(self.hotel, username='aaron_test', group='hotel_admin')
+        #Login
+        self.client.login(username=self.user.username, password=self.password)
 
-        # now there is one record in the DB b/c the form created a ``dc``
-        dc = DemoCounter.objects.today()
-        assert isinstance(dc, DemoCounter)
-        assert dc.count == 1
+    def teardown(self):
+        self.client.logout()
 
-    def test_bad_number(self):
-        data = {'to': "abc"}
-        response = self.client.post(reverse('sms:demo'), data=data)
-        self.assertFormError(response, 'form', None, [bad_ph_error(data['to'])])
+    @patch("sms.models.PhoneNumberManager.purchase_number")
+    def test_form_success(self, _twilio_purchase_number_mock):
+        # Auto-recharge = True, so this will succeed
+        response = self.client.post(reverse('sms:ph_num_add'))
 
-    def test_daily_limit(self):
-        # set limit to the send limit for the day
-        dc = mommy.make(DemoCounter, count=settings.SMS_LIMIT)
-        data = {'to': settings.DEFAULT_TO_PH}
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(_twilio_purchase_number_mock.called)
 
-        # try to submit a SMS. Should fail because limit reached
-        response = self.client.post(reverse('sms:demo'), data)
-        assert response.status_code == 200
+    def test_form_fail(self):
+        # So the Hotel won't have enought to purchase a PH Num
+        hotel_account_balance = AcctTrans.objects.balance(self.hotel)
 
-        form = DemoForm(data=data)
-        assert form.is_valid() == False
-        # for form error testing when the error is not attached to a field
-        self.assertContains(response, sms_messages['limit_reached'], 1, 200)
+        sms_used, _ = TransType.objects.get_or_create(name='sms_used')
+        acct_tran = AcctTrans.objects.create(
+            hotel=self.hotel,
+            trans_type=sms_used,
+            amount= -(hotel_account_balance)
+        )
 
-        dc_now = DemoCounter.objects.today()
-        assert dc.count == dc_now.count
+        # setup
+        self.acct_cost.auto_recharge = False
+        self.acct_cost.save()
+        # test
+        response = self.client.post(reverse('sms:ph_num_add'))
+        self.assertEqual(response.status_code, 200) # 302 redirect would be a success. 
+        m = list(response.context['messages'])
+        self.assertEqual(len(m), 1)
+        self.assertIn("or turn Auto-recharge ON", str(m[0]))

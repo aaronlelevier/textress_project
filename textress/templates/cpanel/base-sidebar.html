@@ -1,5 +1,5 @@
 {% extends "cpanel/base.html" %}
-{% load staticfiles %}
+{% load staticfiles user_tags %}
 
 {% block page_css %}
 <link rel="stylesheet" href="{% static 'clipone/admin/clip-one/assets/plugins/fullcalendar/fullcalendar/fullcalendar.css' %}">
@@ -19,7 +19,7 @@
                     </button>
                     <!-- end: RESPONSIVE MENU TOGGLER -->
                     <!-- start: LOGO -->
-                    <a class="navbar-brand" href="{% url 'index' %}">
+                    <a class="navbar-brand" href="{% url 'account' %}">
                         TEXT<i><img src="{% static 'images/textress-logo.gif' %}" class="textress-icon-admin"></i>RESS
                     </a>
                     <!-- end: LOGO -->
@@ -27,350 +27,35 @@
                 <div class="navbar-tools">
                     <!-- start: TOP NAVIGATION MENU -->
                     <ul class="nav navbar-right">
-                        <!-- start: TO-DO DROPDOWN -->
-                        <li class="dropdown">
-                            <a data-toggle="dropdown" data-hover="dropdown" class="dropdown-toggle" data-close-others="true" href="#">
-                                <i class="clip-list-5"></i>
-                                <span class="badge"> 12</span>
-                            </a>
-                            <ul class="dropdown-menu todo">
-                                <li>
-                                    <span class="dropdown-menu-title"> You have 12 pending tasks</span>
-                                </li>
-                                <li>
-                                    <div class="drop-down-wrapper">
-                                        <ul>
-                                            <li>
-                                                <a class="todo-actions" href="javascript:void(0)">
-                                                    <i class="fa fa-square-o"></i>
-                                                    <span class="desc" style="opacity: 1; text-decoration: none;">Staff Meeting</span>
-                                                    <span class="label label-danger" style="opacity: 1;"> today</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="todo-actions" href="javascript:void(0)">
-                                                    <i class="fa fa-square-o"></i>
-                                                    <span class="desc" style="opacity: 1; text-decoration: none;"> New frontend layout</span>
-                                                    <span class="label label-danger" style="opacity: 1;"> today</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="todo-actions" href="javascript:void(0)">
-                                                    <i class="fa fa-square-o"></i>
-                                                    <span class="desc"> Hire developers</span>
-                                                    <span class="label label-warning"> tommorow</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="todo-actions" href="javascript:void(0)">
-                                                    <i class="fa fa-square-o"></i>
-                                                    <span class="desc">Staff Meeting</span>
-                                                    <span class="label label-warning"> tommorow</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="todo-actions" href="javascript:void(0)">
-                                                    <i class="fa fa-square-o"></i>
-                                                    <span class="desc"> New frontend layout</span>
-                                                    <span class="label label-success"> this week</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="todo-actions" href="javascript:void(0)">
-                                                    <i class="fa fa-square-o"></i>
-                                                    <span class="desc"> Hire developers</span>
-                                                    <span class="label label-success"> this week</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="todo-actions" href="javascript:void(0)">
-                                                    <i class="fa fa-square-o"></i>
-                                                    <span class="desc"> New frontend layout</span>
-                                                    <span class="label label-info"> this month</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="todo-actions" href="javascript:void(0)">
-                                                    <i class="fa fa-square-o"></i>
-                                                    <span class="desc"> Hire developers</span>
-                                                    <span class="label label-info"> this month</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="todo-actions" href="javascript:void(0)">
-                                                    <i class="fa fa-square-o"></i>
-                                                    <span class="desc" style="opacity: 1; text-decoration: none;">Staff Meeting</span>
-                                                    <span class="label label-danger" style="opacity: 1;"> today</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="todo-actions" href="javascript:void(0)">
-                                                    <i class="fa fa-square-o"></i>
-                                                    <span class="desc" style="opacity: 1; text-decoration: none;"> New frontend layout</span>
-                                                    <span class="label label-danger" style="opacity: 1;"> today</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="todo-actions" href="javascript:void(0)">
-                                                    <i class="fa fa-square-o"></i>
-                                                    <span class="desc"> Hire developers</span>
-                                                    <span class="label label-warning"> tommorow</span>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </li>
-                                <li class="view-all">
-                                    <a href="javascript:void(0)">
-                                        See all tasks <i class="fa fa-arrow-circle-o-right"></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <!-- end: TO-DO DROPDOWN-->
-                        <!-- start: NOTIFICATION DROPDOWN -->
-                        <li class="dropdown">
-                            <a data-toggle="dropdown" data-hover="dropdown" class="dropdown-toggle" data-close-others="true" href="#">
-                                <i class="clip-notification-2"></i>
-                                <span class="badge"> 11</span>
-                            </a>
-                            <ul class="dropdown-menu notifications">
-                                <li>
-                                    <span class="dropdown-menu-title"> You have 11 notifications</span>
-                                </li>
-                                <li>
-                                    <div class="drop-down-wrapper">
-                                        <ul>
-                                            <li>
-                                                <a href="javascript:void(0)">
-                                                    <span class="label label-primary"><i class="fa fa-user"></i></span>
-                                                    <span class="message"> New user registration</span>
-                                                    <span class="time"> 1 min</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="javascript:void(0)">
-                                                    <span class="label label-success"><i class="fa fa-comment"></i></span>
-                                                    <span class="message"> New comment</span>
-                                                    <span class="time"> 7 min</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="javascript:void(0)">
-                                                    <span class="label label-success"><i class="fa fa-comment"></i></span>
-                                                    <span class="message"> New comment</span>
-                                                    <span class="time"> 8 min</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="javascript:void(0)">
-                                                    <span class="label label-success"><i class="fa fa-comment"></i></span>
-                                                    <span class="message"> New comment</span>
-                                                    <span class="time"> 16 min</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="javascript:void(0)">
-                                                    <span class="label label-primary"><i class="fa fa-user"></i></span>
-                                                    <span class="message"> New user registration</span>
-                                                    <span class="time"> 36 min</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="javascript:void(0)">
-                                                    <span class="label label-warning"><i class="fa fa-shopping-cart"></i></span>
-                                                    <span class="message"> 2 items sold</span>
-                                                    <span class="time"> 1 hour</span>
-                                                </a>
-                                            </li>
-                                            <li class="warning">
-                                                <a href="javascript:void(0)">
-                                                    <span class="label label-danger"><i class="fa fa-user"></i></span>
-                                                    <span class="message"> User deleted account</span>
-                                                    <span class="time"> 2 hour</span>
-                                                </a>
-                                            </li>
-                                            <li class="warning">
-                                                <a href="javascript:void(0)">
-                                                    <span class="label label-danger"><i class="fa fa-shopping-cart"></i></span>
-                                                    <span class="message"> Transaction was canceled</span>
-                                                    <span class="time"> 6 hour</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="javascript:void(0)">
-                                                    <span class="label label-success"><i class="fa fa-comment"></i></span>
-                                                    <span class="message"> New comment</span>
-                                                    <span class="time"> yesterday</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="javascript:void(0)">
-                                                    <span class="label label-primary"><i class="fa fa-user"></i></span>
-                                                    <span class="message"> New user registration</span>
-                                                    <span class="time"> yesterday</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="javascript:void(0)">
-                                                    <span class="label label-primary"><i class="fa fa-user"></i></span>
-                                                    <span class="message"> New user registration</span>
-                                                    <span class="time"> yesterday</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="javascript:void(0)">
-                                                    <span class="label label-success"><i class="fa fa-comment"></i></span>
-                                                    <span class="message"> New comment</span>
-                                                    <span class="time"> yesterday</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="javascript:void(0)">
-                                                    <span class="label label-success"><i class="fa fa-comment"></i></span>
-                                                    <span class="message"> New comment</span>
-                                                    <span class="time"> yesterday</span>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </li>
-                                <li class="view-all">
-                                    <a href="javascript:void(0)">
-                                        See all notifications <i class="fa fa-arrow-circle-o-right"></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <!-- end: NOTIFICATION DROPDOWN -->
-                        <!-- start: MESSAGE DROPDOWN -->
-                        <li class="dropdown">
-                            <a class="dropdown-toggle" data-close-others="true" data-hover="dropdown" data-toggle="dropdown" href="#">
-                                <i class="clip-bubble-3"></i>
-                                <span class="badge"> 9</span>
-                            </a>
-                            <ul class="dropdown-menu posts">
-                                <li>
-                                    <span class="dropdown-menu-title"> You have 9 messages</span>
-                                </li>
-                                <li>
-                                    <div class="drop-down-wrapper">
-                                        <ul>
-                                            <li>
-                                                <a href="javascript:;">
-                                                    <div class="clearfix">
-                                                        <div class="thread-image">
-                                                            <img alt="" src="{% static 'clipone/admin/clip-one/assets/images/avatar-2.jpg' %}">
-                                                        </div>
-                                                        <div class="thread-content">
-                                                            <span class="author">Nicole Bell</span>
-                                                            <span class="preview">Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.</span>
-                                                            <span class="time"> Just Now</span>
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="javascript:;">
-                                                    <div class="clearfix">
-                                                        <div class="thread-image">
-                                                            <img alt="" src="{% static 'clipone/admin/clip-one/assets/images/avatar-1.jpg' %}">
-                                                        </div>
-                                                        <div class="thread-content">
-                                                            <span class="author">Peter Clark</span>
-                                                            <span class="preview">Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.</span>
-                                                            <span class="time">2 mins</span>
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="javascript:;">
-                                                    <div class="clearfix">
-                                                        <div class="thread-image">
-                                                            <img alt="" src="{% static 'clipone/admin/clip-one/assets/images/avatar-3.jpg' %}">
-                                                        </div>
-                                                        <div class="thread-content">
-                                                            <span class="author">Steven Thompson</span>
-                                                            <span class="preview">Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.</span>
-                                                            <span class="time">8 hrs</span>
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="javascript:;">
-                                                    <div class="clearfix">
-                                                        <div class="thread-image">
-                                                            <img alt="" src="{% static 'clipone/admin/clip-one/assets/images/avatar-1.jpg' %}">
-                                                        </div>
-                                                        <div class="thread-content">
-                                                            <span class="author">Peter Clark</span>
-                                                            <span class="preview">Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.</span>
-                                                            <span class="time">9 hrs</span>
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="javascript:;">
-                                                    <div class="clearfix">
-                                                        <div class="thread-image">
-                                                            <img alt="" src="{% static 'clipone/admin/clip-one/assets/images/avatar-5.jpg' %}">
-                                                        </div>
-                                                        <div class="thread-content">
-                                                            <span class="author">Kenneth Ross</span>
-                                                            <span class="preview">Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.</span>
-                                                            <span class="time">14 hrs</span>
-                                                        </div>
-                                                    </div>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </li>
-                                <li class="view-all">
-                                    <a href="#">
-                                        See all messages <i class="fa fa-arrow-circle-o-right"></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <!-- end: MESSAGE DROPDOWN -->
                         <!-- start: USER DROPDOWN -->
                         <li class="dropdown current-user">
                             <a data-toggle="dropdown" data-hover="dropdown" class="dropdown-toggle" data-close-others="true" href="#">
-                                <img src="{% static 'clipone/admin/clip-one/assets/images/avatar-1-small.jpg' %}" class="circle-img" alt="">
-                                <span class="username">Peter Clark</span>
+                                <img src="{{ MEDIA_URL }}{{ user.profile.icon.icon }}" class="circle-img" alt="" style="max-width:26px;">
+                                <span class="username">{{ user.username }}</span>
                                 <i class="clip-chevron-down"></i>
                             </a>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a href="{% url 'account' %}">
+                                    <a href="{% url 'main:user_detail' user.pk %}">
                                         <i class="clip-user-2"></i>
                                         &nbsp;My Profile
                                     </a>
-                                </li>
-                                    <a href="#">
-                                        <i class="clip-bubble-4"></i>
-                                        &nbsp;My Messages (3)
+                                <li>
+                                    <a href="{% url 'concierge:guest_list' %}">
+                                        <i class="clip-users-2"></i>
+                                        &nbsp;My Guests
                                     </a>
                                 </li>
                                 <li class="divider"></li>
                                 <li>
-                                    <a href="{% url 'login' %}">
+                                    <a href="{% url 'logout' %}">
                                         <i class="clip-exit"></i>
-                                        &nbsp;Log Out
+                                        &nbsp;Logout
                                     </a>
                                 </li>
                             </ul>
                         </li>
                         <!-- end: USER DROPDOWN -->
-                        <!-- start: PAGE SIDEBAR TOGGLE -->
-                        <li>
-                            <a class="sb-toggle" href="#"><i class="fa fa-outdent"></i></a>
-                        </li>
-                        <!-- end: PAGE SIDEBAR TOGGLE -->
                     </ul>
                     <!-- end: TOP NAVIGATION MENU -->
                 </div>
@@ -407,26 +92,192 @@
                             </a>
                             <ul class="sub-menu">
                                 <li>
-                                    <a href="{% url 'main:user_update' user.pk %}">
+                                    <a href="{% url 'main:user_detail' user.pk %}">
                                         <span class="title"> My Profile </span>
-                                        <span class="badge badge-new">Me</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'password_change' %}">
+                                        <span class="title"> Change Password </span>
+                                    </a>
+                                </li>
+                                {% if user|has_group:"hotel_admin" %}
+                                    <li>
+                                        <a href="{% url 'main:hotel_update' user.profile.hotel.pk %}">
+                                            <span class="title"> Hotel Info </span>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </li>
+
+                        <li>
+                            <a href="javascript:void(0)"><i class="clip-users-2"></i>
+                                <span class="title"> Manage Guests </span><i class="icon-arrow"></i>
+                                <span class="selected"></span>
+                            </a>
+                            <ul class="sub-menu">
+                                <li>
+                                    <a href="{% url 'concierge:guest_list' %}">
+                                        <span class="title"> Guest List</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'concierge:guest_create' %}">
+                                        <span class="title"> Add a Guest</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <a href="javascript:void(0)"><i class="clip-users-2"></i>
+                                <span class="title"> Manage Users </span><i class="icon-arrow"></i>
+                                <span class="selected"></span>
+                            </a>
+                            <ul class="sub-menu">
+                                <li>
+                                    <a href="{% url 'main:manage_user_list' %}">
+                                        <span class="title"> User List</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'main:create_user' %}">
+                                        <span class="title"> Add a User</span>
+                                    </a>
+                                </li>
+                                {% if user|has_group:"hotel_admin" %}
+                                <li>
+                                    <a href="{% url 'main:create_manager' %}">
+                                        <span class="title"> Add a Manager</span>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </li>
+
+                        {% if user|has_group:"hotel_admin" %}
+                        <li>
+                            <a href="{% url 'concierge:replies' %}"><i class="clip-quotes-right"></i>
+                                <span class="title"> Auto Replies </span><span class="selected"></span>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% if user|has_group:"hotel_admin" %}
+                        <li>
+                            <a href="javascript:void(0)"><i class="clip-phone"></i>
+                                <span class="title"> Phone Numbers </span><i class="icon-arrow"></i>
+                                <span class="selected"></span>
+                            </a>
+                            <ul class="sub-menu">
+                                <li>
+                                    <a href="{% url 'sms:ph_num_list' %}">
+                                        <span class="title"> Phone Numbers List </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'sms:ph_num_add' %}">
+                                        <span class="title"> Add a Phone Number </span>
                                     </a>
                                 </li>
                             </ul>
                         </li>
                         <li>
-                            <a href="{% url 'account' %}"><i class="clip-users-2"></i>
-                                <span class="title"> Manage Guests </span><span class="selected"></span>
+                            <a href="javascript:void(0)"><i class="clip-tag"></i>
+                                <span class="title"> Billing </span><i class="icon-arrow"></i>
+                                <span class="selected"></span>
                             </a>
+                            <ul class="sub-menu">
+                                <li>
+                                    <a href="{% url 'payment:summary' %}">
+                                        <span class="title"> Overview </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'acct_cost_update' hotel.pk %}">
+                                        <span class="title"> Account Payment Settings </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'payment:card_list' %}">
+                                        <span class="title"> Change / Add Payment Method </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'payment:one_time_payment' %}">
+                                        <span class="title"> Add Funds </span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'acct_pmt_history' %}">
+                                        <span class="title"> View Payment History </span>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
-                        <li>
-                            <a href="{% url 'account' %}"><i class="clip-bubble"></i>
-                                <span class="title"> Manage Messages </span><span class="selected"></span>
-                            </a>
-                        </li>
+                        {% endif %}
+                        
                     </ul>
                 </div>
             </div>
+
+            {% block page_header %}
+                <!-- start: PAGE -->
+                <div class="main-content">
+
+                    {% block modal %}
+                    {% endblock modal %}
+                    
+                    <div class="container">
+                        <!-- start: PAGE HEADER -->
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <!-- start: PAGE TITLE & BREADCRUMB -->
+                                <ol class="breadcrumb">
+                                    {% block breadcrumbs %}
+                                        <li>
+                                            <i class="clip-home-3"></i>
+                                            <a href="{% url 'account' %}">
+                                                Home
+                                            </a>
+                                        </li>
+                                    {% endblock breadcrumbs %}
+                                        <li class="active">
+                                            {{ headline }}
+                                        </li>
+                                    {% block searchbar %}
+                                    {% endblock searchbar %}
+                                </ol>
+
+                                {% if messages %}
+                                <div class="row" style="background-color: #363839;">
+                                    <div class="container">
+                                    {% for message in messages %}
+                                        <h4 class="text-center" style="color: white;">{{ message }}</h4>
+                                    {% endfor %}</div>
+                                </div>
+                                {% endif %}
+
+                                {% if alerts %}
+                                    <div class="row margin10">
+                                        {% for alert in alerts %}
+                                            {{ alert|safe }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                <div class="page-header">
+                                    <h1>
+                                        {{ headline }} 
+                                        {% if headline_small %}<small>{{ headline_small }}</small>{% endif %}
+                                        {% block headline_quicklink %}{% endblock headline_quicklink %}
+                                    </h1> 
+                                </div>
+                                <!-- end: PAGE TITLE & BREADCRUMB -->
+                            </div>
+                        </div>
+            {% endblock page_header %}
 
 
             {% block content %}

@@ -1,0 +1,50 @@
+[
+{
+  "fields": {
+    "image": "card_images/visa.png",
+    "name": "Visa"
+  },
+  "model": "payment.cardimage",
+  "pk": 1
+},
+{
+  "fields": {
+    "image": "card_images/mastercard.png",
+    "name": "MasterCard"
+  },
+  "model": "payment.cardimage",
+  "pk": 2
+},
+{
+  "fields": {
+    "image": "card_images/amex.png",
+    "name": "American Express"
+  },
+  "model": "payment.cardimage",
+  "pk": 3
+},
+{
+  "fields": {
+    "image": "card_images/discover.png",
+    "name": "Discover"
+  },
+  "model": "payment.cardimage",
+  "pk": 4
+},
+{
+  "fields": {
+    "image": "card_images/jcb.png",
+    "name": "JCB"
+  },
+  "model": "payment.cardimage",
+  "pk": 5
+},
+{
+  "fields": {
+    "image": "card_images/dinersclub.png",
+    "name": "Diners Club"
+  },
+  "model": "payment.cardimage",
+  "pk": 6
+}
+]

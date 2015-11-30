@@ -1,19 +1,41 @@
+import datetime
+
 from django.conf import settings
 from django.http import Http404, HttpResponseRedirect
-from django.core.urlresolvers import reverse, reverse_lazy
-from django.contrib.auth.views import redirect_to_login
-from django.shortcuts import get_object_or_404
-from django.views.generic.base import View
+from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist
-from django.contrib import auth, messages
+from django.contrib import messages
 
-from braces.views import LoginRequiredMixin, GroupRequiredMixin
+import stripe
 
 from payment.models import Card
-from main.models import Hotel
+from payment.helpers import signup_register_step4
+from utils import dj_messages, mixins
+from utils.email import Email
 
 
-### STRIPE MIXINS ###
+### MISC.
+
+class BillingSummaryContextMixin(mixins.BreadcrumbBaseMixin):
+
+    def __init__(self):
+        self.clip_icon = 'clip-banknote'
+        self.url = reverse('payment:summary')
+        self.url_name = 'Billing Overview'
+
+
+class MonthYearContextMixin(object):
+    "For Form Month/Year dropdown ChoiceFields."
+
+    def get_context_data(self, **kwargs):
+        context = super(MonthYearContextMixin, self).get_context_data(**kwargs)
+        context['months'] = ['<option value="{num:02d}">{num:02d}</option>'.format(num=i) for i in range(1,13)]
+        cur_year = datetime.date.today().year
+        context['years'] = ['<option value="{num}">{num}</option>'.format(num=i) for i in range(cur_year, cur_year+12)]
+        return context
+
+
+### STRIPE
 
 class StripeMixin(object):
     
@@ -23,72 +45,43 @@ class StripeMixin(object):
         return context
 
 
-### ACCT COST MIXINS ###
+class StripeFormValidMixin(object):
+    '''
+    Logic for different Views that need to process Payments 
+    using a Stripe Form.
+    '''
 
-class AcctCostContextMixin(object):
-
-    def get_context_data(self, **kwargs):
-        context = super(AcctCostContextMixin, self).get_context_data(**kwargs)
-        context['acct_cost'] = self.hotel.acct_cost
-        return context
-
-
-### HOTEL MIXINS ###
-
-class HotelContextMixin(object):
-    '''Add Hotel Obj to Context.'''
-    
-    def get_context_data(self, **kwargs):
-        context = super(HotelContextMixin, self).get_context_data(**kwargs)
-        context['hotel'] = self.hotel
-        return context
-
-
-class HotelUserMixin(HotelContextMixin):
-    "User must have a Hotel attr."
-    def dispatch(self, *args, **kwargs):
+    def form_valid(self, form):
         try:
-            self.hotel = self.request.user.profile.hotel
-        except AttributeError:
-            messages.warning(self.request, "No Hotel associated with this account.")
-
-        # TODO: Redirect to an alert page that funds need to be added
-        if self.hotel and not self.hotel.active:
-            # raise Http404
-            messages.warning(self.request, "The Hotel associated with this account is not active.")
-            
-        return super(HotelUserMixin, self).dispatch(*args, **kwargs)
-
-
-class HotelAdminCheckMixin(HotelContextMixin):
-    "Only the Admin for the Hotel can access this page when using this mixin"
-    def dispatch(self, *args, **kwargs):
-        admin_hotel = get_object_or_404(Hotel, admin_id=self.request.user.id)
-        if admin_hotel != self.hotel:
-            raise Http404
-        return super(HotelAdminCheckMixin, self).dispatch(*args, **kwargs)
-
-
-class AdminOnlyMixin(HotelContextMixin, GroupRequiredMixin, View):
-    '''Only the Admin of the Hotel can access.'''
-    
-    group_required = "hotel_admin"
-    
-    def dispatch(self, request, *args, **kwargs):
-        # Login Required
-        if not request.user.is_authenticated():
-            return redirect_to_login(request.get_full_path())
-
-        self.hotel = self.request.user.profile.hotel
-        
-        # test only Admin allowed
-        if request.user.id != self.hotel.admin_id:
-            raise Http404
-        
-        return super(AdminOnlyMixin, self).dispatch(request, *args, **kwargs)
+            #DB create
+            (customer, card, charge) = signup_register_step4(
+                hotel=self.request.user.profile.hotel,
+                token=form.cleaned_data['stripe_token'],
+                email=self.request.user.email,
+                amount=self.hotel.acct_cost.init_amt)
+        except stripe.error.StripeError as e:
+            body = e.json_body
+            err = body['error']
+            messages.warning(self.request, err)
+            return HttpResponseRedirect(reverse('payment:register_step4'))
+        else:
+            # send conf email
+            email = Email(
+                to=self.request.user.email,
+                from_email=settings.DEFAULT_EMAIL_BILLING,
+                extra_context={
+                    'user': self.request.user,
+                    'customer': customer,
+                    'charge': charge
+                },
+                subject='email/payment_subject.txt',
+                html_content='email/payment_email.html'
+            )
+            email.msg.send()
+            return HttpResponseRedirect(self.success_url)
 
 
-### CARD MIXINS ###
+### CARD
 
 class HotelCardOnlyMixin(object):
     '''Make sure that the Card belongs to the Hotel.'''

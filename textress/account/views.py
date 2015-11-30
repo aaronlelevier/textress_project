@@ -1,42 +1,34 @@
-import calendar
-
-from django.conf import settings
 from django.shortcuts import render
 from django.utils.translation import ugettext_lazy as _
-from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect
+from django.conf import settings
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib import auth, messages
-from django.contrib.auth import REDIRECT_FIELD_NAME, views as auth_views
-from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.auth.models import User, Group, AnonymousUser
+from django.contrib.auth.decorators import login_required
 
-from django.views.generic import View, ListView, DetailView
-from django.views.generic.base import TemplateView, RedirectView
-from django.views.generic.edit import FormView, CreateView, UpdateView, FormMixin
-from django.db.models import Avg, Max, Min, Sum
+from django.views.generic import View, ListView
+from django.views.generic.base import TemplateView
+from django.views.generic.edit import FormView, CreateView, UpdateView
 from django.views.generic.edit import ModelFormMixin
 
+from rest_framework import generics
 from rest_framework.response import Response
-from rest_framework import generics, permissions, mixins
 
-from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
-    GroupRequiredMixin, SetHeadlineMixin, AnonymousRequiredMixin)
+from braces.views import (LoginRequiredMixin, GroupRequiredMixin, SetHeadlineMixin,
+    StaticContextMixin, FormValidMessageMixin)
 
-from account.decorators import anonymous_required
 from account.forms import (AuthenticationForm, CloseAccountForm,
-    CloseAcctConfirmForm, AcctCostForm)
-from account.helpers import login_messages
-from account.models import AcctCost, AcctStmt, AcctTrans, Pricing
+    CloseAcctConfirmForm, AcctCostForm, AcctCostUpdateForm)
+from account.mixins import alert_messages
+from account.models import Dates, AcctCost, AcctStmt, AcctTrans, Pricing
 from account.serializers import PricingSerializer
-from main.mixins import RegistrationContextMixin
-from main.models import UserProfile, Subaccount
-from main.forms import UserCreateForm
-from payment.mixins import AdminOnlyMixin, HotelUserMixin, HotelAdminCheckMixin
-from sms.models import PhoneNumber
-from utils import email
+from main.mixins import RegistrationContextMixin, AdminOnlyMixin, HotelUserMixin
+from payment.helpers import no_funds_alert
+from payment.mixins import BillingSummaryContextMixin
+from sms.helpers import no_twilio_phone_number_alert
+from utils import email, login_messages
+from utils.mixins import FormUpdateMessageMixin
 
-
-# from main.tasks import hello_world
 
 ### ACCOUNT ERROR / REDIRCT ROUTING VIEWS ###
 
@@ -65,20 +57,32 @@ def verify_logout(request):
 
 ### ACCOUNT VIEWS ###
 
-class AccountView(LoginRequiredMixin, HotelUserMixin, TemplateView):
+class AccountView(LoginRequiredMixin, HotelUserMixin, SetHeadlineMixin,
+    StaticContextMixin, TemplateView):
     """
-    Main Account (profile) View.
-
-    First time this is dispatched, make sure:
-    - Hotel has a subaccount_sid
-    - Assign a Twilio Ph #
+    Account Dashboard ~ User Home Page
     """
+    headline = 'Dashboard'
+    static_context = {'headline_small': 'guest list & quick links'}
     template_name = 'cpanel/account.html'
 
-    # def get_context_data(self, **kwargs):
-    #     context = super(AccountView, self).get_context_data(**kwargs)
-    #     context['hotel'] = self.hotel
-    #     return context
+    def get_context_data(self, **kwargs):
+        """Show alert messages for pending actions needed before the 
+        Account will be fully functional."""
+        context = super(AccountView, self).get_context_data(**kwargs)
+
+        messages = []
+
+        subaccount = self.hotel.get_subaccount()
+        if subaccount and not subaccount.active:
+            messages.append(no_funds_alert())
+
+        if not self.hotel.twilio_ph_sid:
+            messages.append(no_twilio_phone_number_alert())
+
+        context['alerts'] = alert_messages(messages=messages)
+
+        return context
 
 
 ### REGISTRATION VIEWS ###
@@ -138,9 +142,23 @@ class RegisterAcctCostUpdateView(RegisterAcctCostBaseView, UpdateView):
             acct_cost = None
 
         if not acct_cost:
-            raise Http404
+            return HttpResponseRedirect(reverse('register_step3'))
 
         return super(RegisterAcctCostUpdateView, self).dispatch(request, *args, **kwargs)
+
+
+#############
+# ACCT COST #
+#############
+
+class AcctCostUpdateView(AdminOnlyMixin, BillingSummaryContextMixin,
+    SetHeadlineMixin, FormUpdateMessageMixin, UpdateView):
+
+    headline = "Payment Refill Settings"
+    template_name = "cpanel/form.html"
+    model = AcctCost
+    form_class = AcctCostUpdateForm
+    success_url = reverse_lazy('payment:summary')
 
 
 #############
@@ -157,57 +175,54 @@ class AcctStmtListView(AdminOnlyMixin, SetHeadlineMixin, ListView):
         return AcctStmt.objects.filter(hotel=self.hotel)
 
     def get(self, request, *args, **kwargs):
-        '''Ensure the current month's AcctStmt is up to date.
-
-        TODO: Make this a daiy job, and not in the View.get()
+        '''
+        Ensure the current month's AcctStmt is up to date.
         '''
         # acct_stmt = update_current_acct_stmt(hotel=self.hotel)
         return super(AcctStmtListView, self).get(request, *args, **kwargs)
 
 
-class AcctStmtDetailView(AdminOnlyMixin, TemplateView):
+class AcctStmtDetailView(AdminOnlyMixin, SetHeadlineMixin, BillingSummaryContextMixin, TemplateView):
     '''
     All AcctTrans for a single Month.
-
-    Organized in 4 blocks, by:
-        Initial Monthly Balance
-        Credits - detail
-                - total
-        Debits  - detail
-                - total
-        Balance - total
     '''
+    headline = "Account Statement Detail"
     template_name = 'account/acct_trans_detail.html'
 
     def get_context_data(self, **kwargs):
-        '''
-        TODO
-        ----
-        Move get custom `context` logic to a helper method to clean up view.
-        '''
         context = super(AcctStmtDetailView, self).get_context_data(**kwargs)
-
         # Use All Time Hotel Transactions to get the Balance
+        _date = Dates().first_of_month(int(kwargs['month']), int(kwargs['year']))
         all_trans = AcctTrans.objects.filter(hotel=self.hotel)
-
-        # New Context
-        context['init_balance'] = (all_trans.previous_monthly_trans(hotel=self.hotel,
-                                                                    month=kwargs['month'],
-                                                                    year=kwargs['year'])
-                                            .balance())
-        monthly_trans = (all_trans.monthly_trans(hotel=self.hotel,
-                                                 month=kwargs['month'],
-                                                 year=kwargs['year'])
-                                  .order_by('created'))
-        context['monthly_trans'] = monthly_trans
-        context['balance'] = all_trans.balance()
-
+        # Table Context
+        context['monthly_trans'] = AcctTrans.objects.monthly_trans(self.hotel, _date).order_by('-created')
+        context['acct_stmt'] = (AcctStmt.objects.filter(hotel=self.hotel)
+                                                .get(month=kwargs['month'], year=kwargs['year']))
+        context['acct_stmts'] = AcctStmt.objects.filter(hotel=self.hotel)
         return context
+
+
+class AcctPmtHistoryView(AdminOnlyMixin, SetHeadlineMixin, BillingSummaryContextMixin, ListView):
+    '''
+    Simple table view of payments that uses pagination.
+    '''
+    headline = "Account Payments"
+    model = AcctTrans
+    template_name = "account/acct_pmt_history.html"
+    paginate_by = 2 if settings.DEBUG else 10
+
+    def get_queryset(self):
+        queryset = AcctTrans.objects.filter(hotel=self.hotel,
+            trans_type__name__in=['init_amt', 'recharge_amt']).order_by('-insert_date')
+        return queryset
 
 
 ##############
 # CLOSE ACCT #
 ##############
+
+# NotImplemented: Manually handle closing of Accounts to start, until it becomes an issue,
+# then automate this.
 
 class CloseAcctView(AdminOnlyMixin, SetHeadlineMixin, FormView):
     '''
@@ -257,8 +272,7 @@ class CloseAcctConfirmView(AdminOnlyMixin, SetHeadlineMixin, FormView):
 
     def form_valid(self, form):
         '''
-        TODO: dispatch request to Celery
-            - Send email that "request has been submitted"
+        Send email that "request has been submitted"
         '''
         msg = email.close_account_email(self.request.user)
         msg.send()
@@ -267,8 +281,8 @@ class CloseAcctConfirmView(AdminOnlyMixin, SetHeadlineMixin, FormView):
 
 class CloseAcctSuccessView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
     '''
-    TODO
-    ----
+    NotImplemented
+    --------------
     `context`: 
         submitted, takes: 
             Takes 24 hours to process request
@@ -319,10 +333,9 @@ class PricingListAPIView(generics.ListAPIView):
     queryset = Pricing.objects.all()
     serializer_class = PricingSerializer
 
-    def list(self, request, *args, **kwargs):
-        '''For JSON Encoding.'''
-
-        serializer = PricingSerializer(self.queryset, many=True)
+    def list(self, request):
+        queryset = self.get_queryset()
+        serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data)
 
 

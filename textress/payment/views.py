@@ -1,36 +1,31 @@
-import datetime
-
 from django.conf import settings
-from django.shortcuts import render, render_to_response, get_object_or_404
-from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse, reverse_lazy
-from django.template import RequestContext
 from django.contrib import messages
-from django.views.generic import (ListView, DetailView, DeleteView, TemplateView,
-    FormView, UpdateView)
-from django.forms.models import model_to_dict
-from django.core.exceptions import ObjectDoesNotExist
-from django.forms.models import model_to_dict
+from django.views.generic import TemplateView, FormView
+from django.contrib.auth.decorators import login_required
 
 import stripe
-from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
-    GroupRequiredMixin)
+from braces.views import SetHeadlineMixin, FormValidMessageMixin
 
+from account.mixins import AcctCostContextMixin
+from account.models import AcctCost, AcctStmt, AcctTrans
+from account.tasks import create_initial_acct_trans_and_stmt
+from main.mixins import (RegistrationContextMixin, HotelContextMixin, HotelUserMixin,
+    AdminOnlyMixin)
 from payment.models import Card
-from payment.forms import StripeForm
+from payment.forms import StripeForm, CardListForm, OneTimePaymentForm
 from payment.helpers import signup_register_step4
-from payment.mixins import (StripeMixin, HotelContextMixin, HotelUserMixin,
-    HotelAdminCheckMixin, AdminOnlyMixin, HotelCardOnlyMixin, AcctCostContextMixin)
-from account.models import AcctCost
-from main.models import Hotel
-from main.mixins import RegistrationContextMixin
+from payment.mixins import (StripeMixin, StripeFormValidMixin, HotelCardOnlyMixin,
+    BillingSummaryContextMixin, MonthYearContextMixin)
 from sms.models import PhoneNumber
 from utils.email import Email
+from utils import dj_messages
 
 
-### REGISTRATION VIEWS ###
+### REGISTRATION
 
-class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin,
+class RegisterPmtView(AdminOnlyMixin, RegistrationContextMixin, MonthYearContextMixin,
     AcctCostContextMixin, StripeMixin, FormView):
     """
     Step #4 of Registration
@@ -48,10 +43,6 @@ class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin,
         context = super(RegisterPmtView, self).get_context_data(**kwargs)
         context['step_number'] = 3
         context['step'] = context['steps'][context['step_number']]
-        # form choices
-        context['months'] = ['<option value="{num:02d}">{num:02d}</option>'.format(num=i) for i in range(1,13)]
-        cur_year = datetime.date.today().year
-        context['years'] = ['<option value="{num}">{num}</option>'.format(num=i) for i in range(cur_year, cur_year+12)]
         context['PHONE_NUMBER_CHARGE'] = settings.PHONE_NUMBER_CHARGE
         return context
 
@@ -83,20 +74,29 @@ class RegisterPmtView(RegistrationContextMixin, AdminOnlyMixin,
             )
             email.msg.send()
 
+            # Creat initial: AcctStmt / AcctTrans
+            create_initial_acct_trans_and_stmt.delay(self.hotel.id)
+
             return HttpResponseRedirect(self.success_url)
 
 
 class RegisterSuccessView(RegistrationContextMixin, AdminOnlyMixin, TemplateView):
     """
-    Step #5 of Registration - Success
+    Step #5 of Registration - Payment Success
 
-    Confirmation Details: User account, Hotel, Stripe
+    Confirmation Details: User, Hotel, Customer(Stripe)
 
-    TODO: 
-        - create payment conf details Here
-
+    If the User hasn't completed all steps, redirect to Step4 to display needed 
+    steps b/4 they can complete Payment.
     """
     template_name = 'frontend/register/success.html'
+
+    def get(self, request, *args, **kwargs):
+        # Only allow if Payment is complete
+        if self.hotel.registration_complete:
+            return super(RegisterSuccessView, self).get(request, *args, **kwargs)
+        else:
+            return HttpResponseRedirect(reverse('payment:register_step4'))
 
     def get_context_data(self, **kwargs):
         context = super(RegisterSuccessView, self).get_context_data(**kwargs)
@@ -105,67 +105,137 @@ class RegisterSuccessView(RegistrationContextMixin, AdminOnlyMixin, TemplateView
         return context
 
 
+### BILLING
+
+class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
+    '''
+    Main Billing Summary View with links to view more detail of 
+    payment transactions, and manage account payment settings.
+    '''
+
+    headline = "Billing Overview"
+    template_name = 'payment/summary.html'
+
+    def get(self, request, *args, **kwargs):
+        """
+        If no AcctStmt's exist for the Hotel, bypyass this section.
+        """
+        context = self.get_context_data(**kwargs)
+
+        queryset = AcctStmt.objects.filter(hotel=self.hotel)
+        if queryset:
+            try:
+                date = request.GET.get('date')
+                year, month = date.split('-')
+                acct_stmt = queryset.get(year=year, month=month)  
+            except (KeyError, AttributeError):
+                acct_stmt = queryset.first()
+            finally:
+                context.update({
+                    'year': acct_stmt.year,
+                    'month': acct_stmt.month,
+                    'acct_stmt': acct_stmt
+                })
+        else:
+            context['acct_stmt'] = None
+
+        return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super(SummaryView, self).get_context_data(**kwargs)
+        # new
+        context['acct_stmt_starting_balance'] = AcctStmt.objects.starting_balance(hotel=self.hotel)
+        # legacy
+        context['acct_stmts'] = AcctStmt.objects.filter(hotel=self.hotel)
+        context['acct_cost'], created = AcctCost.objects.get_or_create(hotel=self.hotel)
+        context['acct_trans'] = AcctTrans.objects.filter(hotel=self.hotel,
+            trans_type__name__in=['init_amt', 'recharge_amt']).order_by('-insert_date')[:4]
+        return context
+
+
 ### CARD VIEWS ###
 
-class CardListView(AdminOnlyMixin, ListView):
-    '''All Cards for the Hotel.
-
-    TODO: Later maybe add this as a template sub-piece to the 
-        accounts:account View w/ Admin Permission Tag on the Template.
+class CardListView(AdminOnlyMixin, BillingSummaryContextMixin, MonthYearContextMixin,
+    SetHeadlineMixin, FormValidMessageMixin, StripeMixin, FormView):
     '''
-    template_name = 'list.html'
+    Admin Only. Add a Card to an existing Customer Account View.
+    '''
+    headline = "Manage Payment Methods"
+    template_name = "payment/card_list.html"
+    form_class = CardListForm
+    success_url = reverse_lazy('payment:card_list')
 
-    def get_queryset(self):
-        return Card.objects.filter(customer=self.hotel.customer)
+    def get_form_valid_message(self):
+        return "The payment has been successfully processed. An email will be \
+sent to {}. Thank you.".format(self.request.user.email)
 
-
-class CardCreateView(AdminOnlyMixin, 
-                     StripeMixin,
-                     AcctCostContextMixin,
-                     TemplateView):
-    '''Admin Only. Add a Card to an existing Customer Account View.'''
-
-    # TODO: prbly change template_name later?
-    template_name = 'payment/payment.html' 
-    form_class = StripeForm
-    success_url = reverse_lazy('accounts:account')
-
-    def post(self, request, *args, **kwargs):
+    def form_valid(self, form):
         try:
-            card = Card.objects.stripe_create(customer=self.hotel.customer,
-                token=request.POST['stripeToken'])
-        except stripe.error.CardError as e:
+            #DB create
+            Card.objects.stripe_create(
+                customer=self.request.user.profile.hotel.customer,
+                token=form.cleaned_data['stripe_token']
+                )
+        except stripe.error.StripeError as e:
             body = e.json_body
             err = body['error']
-            print(err)
             messages.warning(self.request, err)
-            return HttpResponseRedirect(reverse('payment:card_create'))
+            return HttpResponseRedirect(reverse('payment:one_time_payment'))
         else:
             return HttpResponseRedirect(self.success_url)
 
 
-class CardDetailView(AdminOnlyMixin, HotelCardOnlyMixin, DetailView):
-    '''All Cards for the Hotel. Only viewable by the Admin.
-
-    dispatch kwargs['pk']: \w+ regex ok b/c using card.short_pk (shortened
-        version of the Stripe Card ID)
-    '''
-    model = Card
-    template_name = 'detail_view.html'
+@login_required(login_url=reverse_lazy('login'))
+def set_default_card_view(request, pk):
+    card = Card.objects.update_default(request.user.profile.hotel.customer, pk)
+    messages.success(request, '{0} ending in: {1} set as primary'.format(
+        card.brand, card.last4))
+    return HttpResponseRedirect(reverse('payment:card_list'))
 
 
-class CardUpdateView(AdminOnlyMixin, HotelCardOnlyMixin, UpdateView):
+@login_required(login_url=reverse_lazy('login'))
+def delete_card_view(request, pk):
+    card = Card.objects.get(pk=pk)
+    Card.objects.delete_card(request.user.profile.hotel.customer, pk)
+    messages.success(request, '{0} ending in: {1} deleted'.format(
+        card.brand, card.last4))
+    return HttpResponseRedirect(reverse('payment:card_list'))
 
-    model = Card
-    fields = ['default']
-    template_name = 'account/account_form.html'
 
-    def get_success_url(self): 
-        return reverse_lazy('payment:card_detail', kwargs={'pk': self.object.short_pk})
+class OneTimePaymentView(AdminOnlyMixin, MonthYearContextMixin, SetHeadlineMixin,
+    StripeMixin, FormView):
 
+    headline = "One Time Payment"
+    template_name = "payment/one_time_payment.html"
+    form_class = OneTimePaymentForm
+    success_url = reverse_lazy('payment:summary')
 
-class CardDeleteView(AdminOnlyMixin, HotelCardOnlyMixin, DeleteView):
+    def get_form_kwargs(self):
+        "The Hotel Card objects will be need for the C.Card ChoiceField."
+        # grab the current set of form #kwargs
+        kwargs = super(OneTimePaymentView, self).get_form_kwargs()
+        # Update the kwargs with the user_id
+        kwargs['hotel'] = self.hotel
+        return kwargs
 
-    model = Card
-    template_name = 'account/account_form.html'
-    success_url = reverse_lazy('payment:card_list')
+    def get_context_data(self, **kwargs):
+        context = super(OneTimePaymentView, self).get_context_data(**kwargs)
+        context['card'] = Card.objects.default(customer=self.hotel.customer)
+        return context
+
+    def form_valid(self, form):
+        # super to get final form data befor processing
+        super(OneTimePaymentView, self).form_valid(form)
+        cd = form.cleaned_data
+
+        try:
+            # amount = int(cd['amount']) # form data 'amount' is a string
+            AcctTrans.objects.one_time_payment(self.hotel, cd['amount'])
+        except stripe.error.StripeError as e:
+            messages.warning(self.request, dj_messages['payment_fail'].format(
+                support_email=settings.DEFAULT_EMAIL_SUPPORT))
+            return HttpResponseRedirect(reverse('payment:one_time_payment'))
+        else:
+            messages.success(self.request, dj_messages['payment_success'].format(
+                amount=cd['amount']/100.0, email=self.hotel.admin.email))
+            return HttpResponseRedirect(self.success_url)

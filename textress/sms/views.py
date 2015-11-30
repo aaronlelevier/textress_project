@@ -1,113 +1,123 @@
-import re
-import twilio
+import sys
 
 from django.conf import settings
-from django.shortcuts import render
-from django.views.generic import FormView, CreateView
+from django.template.loader import render_to_string
+from django.views.generic import FormView, DeleteView
 from django.core.urlresolvers import reverse, reverse_lazy
+from django.http import HttpResponseRedirect
 from django.contrib import messages
-from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.contrib.auth.decorators import login_required
 
-from braces.views import LoginRequiredMixin, PermissionRequiredMixin
+from braces.views import (SetHeadlineMixin, FormValidMessageMixin,
+    FormInvalidMessageMixin)
 
-from .models import Text, DemoCounter, PhoneNumber
-from .forms import (DemoForm, PhoneNumberForm, PhoneNumberSelectForm,
-    PhoneNumberAddForm)
-from .helpers import send_text, sms_messages, get_weather
-from payment.views import HotelAdminCheckMixin
-from utils.exceptions import DailyLimit
+from account.mixins import alert_messages
+from main.mixins import AdminOnlyMixin
+from sms.forms import PhoneNumberAddForm
+from sms.helpers import no_twilio_phone_number_alert
+from sms.models import PhoneNumber
+from utils.exceptions import PhoneNumberNotDeletedExcp
+from utils.forms import EmptyForm
 
 
-class DemoView(FormView):
+class PhoneNumberBaseView(AdminOnlyMixin, SetHeadlineMixin, FormValidMessageMixin, FormView):
+    '''All phone number views require the same permissions, and context mixins. 
+    Just the attrs are different.'''
+    pass
+
+
+class PhoneNumberListView(PhoneNumberBaseView):
     """
-    Let's User try out Twilio SMS sending.
-    Max SMS send limit == settings.SMS_LIMIT
+    Lists all PhoneNumber Obj available for the Hotel with a Form
+    to change the `is_primary` PhoneNumber.
     """
-    template_name = 'sms/demo.html'
-    form_class = DemoForm
-    success_url = reverse_lazy('sms:demo')
+    headline = "Phone Number List"
+    template_name = 'sms/ph_num_list.html'
+    form_class = EmptyForm
+    success_url = reverse_lazy('sms:ph_num_list')
+    form_valid_message = "Primary Phone Number successfully updated"
+
+    def get_context_data(self, **kwargs):
+        context = super(PhoneNumberListView, self).get_context_data(**kwargs)
+        context['phone_numbers'] = self.hotel.phone_numbers.order_by('-default')
+        context['addit_info'] = render_to_string('cpanel/forms/form_ph_list.html',
+            {'ph_num_monthly_cost': settings.PHONE_NUMBER_MONTHLY_COST})
+        if not self.hotel.twilio_ph_sid:
+            alert = no_twilio_phone_number_alert()
+            context['alerts'] = alert_messages(messages=[alert])
+        return context
+
+
+class PhoneNumberAddView(FormInvalidMessageMixin, PhoneNumberBaseView):
+    '''
+    Form with no input, just confirms purchasing the ph num.
+    '''
+    headline = "Purchase a Phone Number"
+    template_name = 'cpanel/form.html'
+    form_class = PhoneNumberAddForm
+    success_url = reverse_lazy('sms:ph_num_list')
+    form_valid_message = "Phone Number successfully purchased"
+    form_invalid_message = (
+        "Please refill your account balance in order to "
+        "process this transation or turn Auto-recharge ON."
+    )
+
+    def get_context_data(self, **kwargs):
+        context = super(PhoneNumberAddView, self).get_context_data(**kwargs)
+        context['addit_info'] = render_to_string("cpanel/forms/form_ph_add.html",
+            {'amount': settings.PHONE_NUMBER_CHARGE, 'hotel': self.hotel})
+        context['btn_text'] = "Purchase"
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super(PhoneNumberAddView, self).get_form_kwargs()
+        kwargs['hotel'] = self.hotel
+        return kwargs
 
     def form_valid(self, form):
-        cd = form.cleaned_data
-        text = Text.objects.create(**cd)
-        if text:
-            try:
-                sent = send_text(text)
-                msg = sms_messages['sent']
-            except twilio.TwilioRestException:
-                msg = sms_messages['send_failed']
-            messages.info(self.request, msg)
-        return super(DemoView, self).form_valid(form)
+        "Purchase Twilio Ph # Obj here, and add to related models."
+        # Remove for Demos
+        # if not settings.DEBUG and 'test' not in sys.argv:
+        phone_number = PhoneNumber.objects.purchase_number(hotel=self.hotel)
+        return super(PhoneNumberAddView, self).form_valid(form)
 
 
-# class PhoneNumberListView(LoginRequiredMixin,
-#                           HotelAdminCheckMixin,
-#                           FormView):
-#     """Lists all PhoneNumber Obj available for the Hotel with a Form
-#     to change the `is_primary` PhoneNumber."""
-#     template_name = 'sms/phone_number_list.html'
-#     form_class = PhoneNumberForm
-#     success_url = reverse_lazy('sms:phone_number_list')
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['phone_numbers'] = self.hotel.phonenumber_set.all()
-#         return context
-
-#     def get_form_kwargs(self):
-#         """Attaches the Hotel's PhoneNumbers to the Form, so that each
-#         PhoneNumber is available to set as "Primary" Ph # for the Hotel."""
-#         kwargs = super().get_form_kwargs()
-#         kwargs['phone_numbers'] = self.hotel.phonenumber_set.all()
-#         return kwargs
-
-#     def form_valid(self, form):
-#         print(form.cleaned_data)
-#         return super().form_valid(form)
+@login_required(login_url=reverse_lazy('login'))
+def set_default_phone_number_view(request, pk):
+    ph = PhoneNumber.objects.update_default(request.user.profile.hotel, pk)
+    return HttpResponseRedirect(reverse('sms:ph_num_list'))
 
 
-# class PhoneNumberSelectView(LoginRequiredMixin,
-#                             HotelAdminCheckMixin,
-#                             FormView):
-#     """Adds a Twilio PhoneNumber Obj. as a cookie, and sends the User
-#     to a `Confirm Purchase View`."""
-#     template_name = 'radio_form.html'
-#     form_class = PhoneNumberSelectForm
-#     success_url = reverse_lazy('sms:phone_number_add')
+class PhoneNumberDeleteView(PhoneNumberBaseView, DeleteView):
+    '''
+    Admin confirms to Delete PhoneNumber here before deleting.
+    '''
+    group_required = ["hotel_admin"]
+    headline = "Delete Phone Number"
+    template_name = 'cpanel/form.html'
+    form_class = EmptyForm
+    success_url = reverse_lazy('sms:ph_num_list')
+    model = PhoneNumber
+    pk_url_kwarg = 'sid'
 
-#     def get_form_kwargs(self):
-#         """Needed kwargs to get available phone numbers based on Hotel
-#         and save it to request.session['cookie']."""
-#         kwargs = super().get_form_kwargs()
-#         kwargs['request'] = self.request
-#         kwargs['twilio_hotel'] = TwilioHotel(hotel=self.hotel)
-#         return kwargs
+    def get_context_data(self, **kwargs):
+        # custom context to display Delete wanted by user
+        context = super(PhoneNumberDeleteView, self).get_context_data(**kwargs)
+        context['addit_info'] = render_to_string('cpanel/forms/form_ph_delete.html',
+            {'ph': self.object})
+        # Submit Button Context
+        context['btn_color'] = 'danger'
+        context['btn_text'] = 'Delete'
+        return context
+    
+    def get_form_valid_message(self):
+        # dynamic msg success to show which ph num was deleted
+        return u"Phone number: {0} deleted!".format(self.object.friendly_name)
 
-#     def form_valid(self, form):
-#         print(form.cleaned_data)
-#         return super().form_valid(form)
-
-
-# class PhoneNumberAddView(LoginRequiredMixin,
-#                          HotelAdminCheckMixin,
-#                          FormView):
-#     template_name = 'basic_form.html'
-#     form_class = PhoneNumberAddForm
-#     success_url = reverse_lazy('sms:phone_number_list')
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['question'] = "Purchase {} for $1".format(self.request.session['phone_number'])
-#         context['submit_button'] = "Confirm"
-#         return context
-
-#     def form_valid(self, form):
-#         "Purchase Twilio Ph # Obj here, and add to related models."
-#         phone_number = PhoneNumber.objects.twilio_create(
-#             phone_number=self.request.session['phone_number'], hotel=self.hotel)
-#         return super().form_valid(form)
-
-
-
-
-
+    def form_valid(self, form):
+        try:
+            self.object.delete()
+        except PhoneNumberNotDeletedExcp:
+            messages.add_message(self.request, messages.INFO, "Phone number delete \
+failed. Please contact support at: {}".format(settings.DEFAULT_EMAIL_SUPPORT))
+        return HttpResponseRedirect(self.get_success_url())

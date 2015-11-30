@@ -20,13 +20,11 @@
                         <h2 class="StepTitle">{{ step }}</h2>
                     </div>
                     <div class="row">
-                        <h3>Payment Confirmation</h3>
+                        <h3>Payment Details</h3>
+                        <p>Charged: <strong>{{ hotel.acct_cost.init_amt|stripe_money }}</strong></p>
+                        <p>Date: {{ hotel.acct_cost.created }}</p>
                         <p>Customer ID: {{ hotel.customer.id }}</p>
                         <p>Confirmation was emailed to: {{ hotel.customer.email }}</p>
-                    </div>
-                    <div class="row">
-                        <h3>Charged</h3>
-                        <p>{{ hotel.acct_cost.init_amt|stripe_money }}</p>
                     </div>
                 </div>
 

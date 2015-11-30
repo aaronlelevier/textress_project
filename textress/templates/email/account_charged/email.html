@@ -1,0 +1,21 @@
+{% load stripe_tags %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    </head>
+    <body>
+        <div class="container">
+            <p style="text-align:right">Transaction ID: <em>{{ charge.short_pk }}</em></p>
+            <p>Hello {{ user }},</p>
+            <p>Your payment for {{ charge.amount|stripe_money }} has been processed.</p>
+            <p>If you have any questions, or concerns, please reply directly to this email.</p>
+            <br>
+            <p>Thank you,</p>
+            <p>Textress</p>
+            <p><a href="mailto:billing@textress.com">billing@textress.com</a></p>
+            <p>Ph: 775-419-4000</p>
+            <br>
+        </div>
+    </body>
+</html>

@@ -1,8 +1,5 @@
-from django.core.exceptions import PermissionDenied
-from django.contrib.auth.models import Group
-
 from rest_framework import permissions
-
+from rest_framework.exceptions import PermissionDenied
 
 '''
 Instructions
@@ -25,17 +22,16 @@ class IsHotelObject(permissions.BasePermission):
             hotel = request.user.profile.hotel
         except AttributeError:
             raise PermissionDenied
-
         return obj.hotel == request.user.profile.hotel
 
 
 class IsManagerOrAdmin(permissions.BasePermission):
-    '''Must be a Manager or Admin to access any REST 
-    EndPoint.'''
-
+    '''
+    Must be a Manager or Admin to access any REST EndPoint.
+    '''
     def has_permission(self, request, view):
-        return (request.user.groups.filter(name__in=["hotel_admin",
-                                                     "hotel_manager"]))
+        return (request.user.is_superuser or
+                request.user.groups.filter(name__in=["hotel_admin", "hotel_manager"]))
 
 
 class IsHotelUser(permissions.BasePermission):
@@ -45,8 +41,8 @@ class IsHotelUser(permissions.BasePermission):
         return obj.profile.hotel == request.user.profile.hotel
 
 
+class IsHotelOfUser(permissions.BasePermission):
+    '''The Hotel Obj. is the User's Hotel.'''
 
-
-
-
-
+    def has_object_permission(self, request, view, obj):
+        return obj == request.user.profile.hotel

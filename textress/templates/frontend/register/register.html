@@ -7,10 +7,6 @@
 
 {% block content %}
 
-    {% block beta_msg %}
-        {{ block.super }}
-    {% endblock beta_msg %}
-
     {% block form_head %}
     <div class="main-container">
         <section class="wrapper padding50">
@@ -53,5 +49,15 @@
 <script type="text/javascript" src="{% static 'forms/js/ng-django-forms.js' %}"></script>
 <script type="text/javascript">
     var my_app = angular.module('django-forms', ['ng.django.forms']);
+</script>
+
+<script src="{% static 'clipone/admin/clip-one/assets/plugins/jquery.maskedinput/src/jquery.maskedinput.js' %}"></script>
+<script>
+    jQuery(document).ready(function() {
+        Main.init();
+    });
+    jQuery(function($){
+       $("#id_address_phone").mask("(999) 999-9999");
+    });
 </script>
 {% endblock page_js %}

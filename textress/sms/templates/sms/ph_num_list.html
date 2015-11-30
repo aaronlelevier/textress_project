@@ -1,0 +1,47 @@
+{% extends "cpanel/base-sidebar.html" %}
+
+{% block content %}
+
+        {% if addit_info %}
+            {{ addit_info|safe }}
+        {% endif %}
+    
+        <div class="row">
+            <div class="col-sm-12">
+                {% if phone_numbers %}
+                    <table class="table table-hover">
+                        <tr>
+                            <th>Phone Number</th>
+                            <th>Primary</th>
+                            <th>Delete</th>
+                        </tr>
+                        {% for ph in phone_numbers %}
+                            <tr>
+                                <td>{{ ph.friendly_name }}</td>
+                                <td>
+                                    {% if ph.default %}
+                                        <a href="#" onclick="return false;">
+                                            <button type="button" class="btn btn-teal btn-xs">Primary</button>
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'sms:set_default_phone_number' ph.sid %}">
+                                            <button type="button" class="btn btn-success btn-xs">Set as Primary</button>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'sms:ph_num_delete' ph.sid %}">
+                                        <button type="button" class="btn btn-danger btn-xs">Delete</button>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+        <!-- end: PAGE CONTENT -->
+    </div>
+</div>
+<!-- end: PAGE -->        
+{% endblock content %}

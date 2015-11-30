@@ -8,6 +8,5 @@ class PricingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Pricing
-        fields = ('id', 'tier', 'tier_name', 'desc', 'price', 'start', 'end',
-            'created', 'modified')
+        fields = ('id', 'hotel', 'cost',)
         read_only_fields = ('created', 'modified',)

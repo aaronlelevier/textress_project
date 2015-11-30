@@ -1,0 +1,105 @@
+{% extends "cpanel/base-sidebar.html" %}
+{% load staticfiles %}
+
+
+{% block page_css %}
+    {{ block.super }}
+    <style type="text/css">
+      .sortorder:after {
+        content: '\25b2';
+      }
+      .sortorder.reverse:after {
+        content: '\25bc';
+      }
+    </style>
+{% endblock page_css %}
+
+
+{% block head_js %}
+    {{ block.super }}
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular.min.js"></script>
+    <script src="{% static 'vendor/angular-resource/angular-resource.min.js' %}"></script>
+    <script src="{% static 'vendor/angular-ui-router/release/angular-ui-router.min.js' %}"></script>
+    <script src="{% static 'angular/main/app.js' %}"></script>
+    <script src="{% static 'angular/main/services.js' %}"></script>
+    <script src="{% static 'angular/main/controllers.js' %}"></script>
+    <script src="{% static 'angular/config.js' %}"></script>
+{% endblock head_js %}
+
+
+{% block angular_app %}
+    ng-app="mainApp"
+{% endblock %}
+
+
+{% block content %}
+
+        <div class="row">
+            <div class="col-md-8">
+                <h4>Search for Users. Get Details, Edit, Remove.</h4>
+            </div>
+        </div>
+
+        <br>
+    
+        <div class="row" ng-controller="UserListCtrl" id="userListCtrl" ng-cloak>
+            <div class="col-sm-12">
+                <table class="table table-hover guests">
+                    <tr>
+                        <th>
+                            Icon
+                        </th>
+                        <th>
+                            <a href="" class="no_decoration" ng-click="order('username')">Username</a>
+                            <span class="sortorder" ng-show="predicate === 'username'" ng-class="{reverse:reverse}"></span>
+                        </th>
+                        <th>
+                            <a href="" class="no_decoration" ng-click="order('email')">Email</a>
+                            <span class="sortorder" ng-show="predicate === 'email'" ng-class="{reverse:reverse}"></span>
+                        </th>
+                        <th>
+                            <a href="" class="no_decoration" ng-click="order('first_name')">First Name</a>
+                            <span class="sortorder" ng-show="predicate === 'first_name'" ng-class="{reverse:reverse}"></span>
+                        </th>
+                        <th>
+                            <a href="" class="no_decoration" ng-click="order('last_name')">Last Name</a>
+                            <span class="sortorder" ng-show="predicate === 'last_name'" ng-class="{reverse:reverse}"></span>
+                        </th>
+                        <th>&nbsp;</th>
+                        <th>Details</th>
+                        <th>Update</th>
+                        <th>Delete</th>
+                    </tr>
+                    <tr ng-repeat="user in users | orderBy:predicate:reverse">
+                        <td>
+                            <img ng-src="[[ user.profile.icon.icon ]]" class="circle-img" alt="" style="max-width:26px;">
+                        </td>
+                        <td><a href="/account/manage-users/update/[[ user.id ]]/">[[ user.username ]]</a></td>
+                        <td>[[ user.first_name ]]</td>
+                        <td>[[ user.last_name ]]</td>
+                        <td>[[ user.email ]]</td>
+                        <td>&nbsp;</td>
+                        <td>
+                            <a href="/account/manage-users/detail/[[ user.id ]]/">
+                                <button type="button" class="btn btn-success btn-xs">Details</button>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="/account/manage-users/update/[[ user.id ]]/">
+                                <button type="button" class="btn btn-warning btn-xs">Update</button>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="/account/manage-users/delete/[[ user.id ]]/">
+                                <button type="button" class="btn btn-danger btn-xs">Delete</button>
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <!-- end: PAGE CONTENT -->
+    </div>
+</div>
+<!-- end: PAGE -->        
+{% endblock content %}

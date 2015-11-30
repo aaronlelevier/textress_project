@@ -1,0 +1,35 @@
+[
+{
+  "fields": {
+    "created": "2015-09-25T13:25:29.662Z",
+    "hotel": null,
+    "modified": "2015-09-25T13:25:29.662Z",
+    "letter": "S",
+    "message": ""
+  },
+  "model": "concierge.reply",
+  "pk": 1
+},
+{
+  "fields": {
+    "created": "2015-09-25T13:25:29.699Z",
+    "hotel": null,
+    "modified": "2015-09-25T13:25:29.699Z",
+    "letter": "Y",
+    "message": ""
+  },
+  "model": "concierge.reply",
+  "pk": 2
+},
+{
+  "fields": {
+    "created": "2015-09-25T13:25:29.704Z",
+    "hotel": null,
+    "modified": "2015-09-25T13:25:29.704Z",
+    "letter": "H",
+    "message": "Reply 'S' to STOP, 'Y' to 'reactive SMS messaging'."
+  },
+  "model": "concierge.reply",
+  "pk": 3
+}
+]

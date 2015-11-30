@@ -7,7 +7,8 @@ from django.utils import timezone
 
 from model_mommy import mommy
 
-from ..models import Message, Guest
+from concierge.models import Message, Guest
+from utils import create
 
 
 def make_guests(hotel, number=10):
@@ -19,21 +20,25 @@ def make_guests(hotel, number=10):
             name="Guest{}".format(str(i)),
             check_in=today,
             check_out=check_out,
-            phone_number=settings.DEFAULT_TO_PH)
+            phone_number=create._generate_ph())
 
     return Guest.objects.filter(hotel=hotel)
 
 
-def make_messages(hotel, user, guest, insert_date=timezone.now().date(), number=10):
+def make_messages(hotel, user, guest, insert_date=None, number=10):
     '''
     Randomly choose if the Guest or User is sending the Message.
     Then fill in the details.
 
-    `number` - the number of sent messegas in the b/n the Guest n User.
+    :insert_date: if None, creates the `messegas` for yesterday
+    :number: the number of sent messegas in the b/n the Guest n User.
     '''
     # Monkey-patch Message so as not to send live SMS
     global Message
     Message.save = models.Model.save
+
+    if not insert_date:
+        insert_date = timezone.now().date() - datetime.timedelta(days=1)
 
     for i in range(number):
 
@@ -43,6 +48,7 @@ def make_messages(hotel, user, guest, insert_date=timezone.now().date(), number=
         # Guest Sender
         if sender:
             mommy.make(Message,
+                sid=create._generate_name(),
                 hotel=hotel,
                 guest=guest,
                 user=None,
@@ -54,6 +60,7 @@ def make_messages(hotel, user, guest, insert_date=timezone.now().date(), number=
         # User Sender
         else:
             mommy.make(Message,
+                sid=create._generate_name(),
                 hotel=hotel,
                 guest=guest,
                 user=user,
@@ -64,6 +71,4 @@ def make_messages(hotel, user, guest, insert_date=timezone.now().date(), number=
                 )
 
     return Message.objects.filter(hotel=hotel)
-
-
-
+    

@@ -2,116 +2,130 @@
 {% load staticfiles %}
 
 
+{% block head_js %}
+    {{ block.super }}
+    {% include "include/angular/concierge.html" %}
+{% endblock head_js %}
+
+
+{% block angular_app %}
+    ng-app="conciergeApp"
+{% endblock %}
+
+
 {% block content %}
-<!-- start: PAGE -->
-<div class="main-content">
-    <!-- start: PANEL CONFIGURATION MODAL FORM -->
-    <div class="modal fade" id="panel-config" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                        &times;
-                    </button>
-                    <h4 class="modal-title">Panel Configuration</h4>
-                </div>
-                <div class="modal-body">
-                    Here will be a configuration form
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">
-                        Close
-                    </button>
-                    <button type="button" class="btn btn-primary">
-                        Save changes
-                    </button>
-                </div>
-            </div>
-            <!-- /.modal-content -->
-        </div>
-        <!-- /.modal-dialog -->
-    </div>
-    <!-- /.modal -->
-    <!-- end: SPANEL CONFIGURATION MODAL FORM -->
-    <div class="container">
-        <!-- start: PAGE HEADER -->
-        <div class="row">
-            <div class="col-sm-12">
-                <!-- start: PAGE TITLE & BREADCRUMB -->
-                <ol class="breadcrumb">
-                    <li>
-                        <i class="clip-home-3"></i>
-                        <a href="#">
-                            Home
-                        </a>
-                    </li>
-                    <li class="active">
-                        Demo Dashboard
-                    </li>
-                    <li class="search-box">
-                        <form class="sidebar-search">
-                            <div class="form-group">
-                                <input type="text" placeholder="Start Searching...">
-                                <button class="submit">
-                                    <i class="clip-search-3"></i>
-                                </button>
+    <!-- start: PAGE CONTENT -->
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="user-left">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <a href="{% url 'concierge:guest_create' %}">
+                            <div class="core-box">
+                                <div class="heading">
+                                    <i class="clip-user-5 circle-icon circle-green"></i>
+                                    <h2>Add a Guest</h2>
+                                </div>
+                                <div class="content">
+                                For adding new guests. Requires Name, phone number, room number, check-in and check-out date.
+                                </div>
                             </div>
-                        </form>
-                    </li>
-                </ol>
-                <div class="page-header">
-                    <h1>Demo Dashboard <small>overview &amp; stats </small></h1>
+                        </a>
+                    </div>
                 </div>
-                <!-- end: PAGE TITLE & BREADCRUMB -->
-            </div>
-        </div>
-        <!-- end: PAGE HEADER -->
-        <!-- start: PAGE CONTENT -->
-        <div class="row">
-            <div class="col-sm-4">
-                <div class="core-box">
-                    <div class="heading">
-                        <i class="clip-user-4 circle-icon circle-green"></i>
-                        <h2>Manage Users</h2>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <a href="{% url 'concierge:guest_list' %}">
+                            <div class="core-box">
+                                <div class="heading">
+                                    <i class="clip-users-2 circle-icon circle-teal"></i>
+                                    <h2>Guest List</h2>
+                                </div>
+                                <div class="content">
+                                    All current hotel guests. Manage guest messages, and use for an overview of individual guest records.
+                                </div>
+                            </div>
+                        </a>
                     </div>
-                    <div class="content">
-                        Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
-                    </div>
-                    <a class="view-more" href="#">
-                        View More <i class="clip-arrow-right-2"></i>
-                    </a>
                 </div>
-            </div>
-            <div class="col-sm-4">
-                <div class="core-box">
-                    <div class="heading">
-                        <i class="clip-clip circle-icon circle-teal"></i>
-                        <h2>Manage Guests</h2>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <a href="{% url 'main:user_detail' user.pk %}">
+                            <div class="core-box">
+                                <div class="heading">
+                                    <i class="clip-user-3 circle-icon circle-bricky"></i>
+                                    <h2>My Profile</h2>
+                                </div>
+                                <div class="content">
+                                    View and update my information. My site settings.
+                                </div>
+                            </div>
+                        </a>
                     </div>
-                    <div class="content">
-                        Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
-                    </div>
-                    <a class="view-more" href="#">
-                        View More <i class="clip-arrow-right-2"></i>
-                    </a>
-                </div>
-            </div>
-            <div class="col-sm-4">
-                <div class="core-box">
-                    <div class="heading">
-                        <i class="clip-database circle-icon circle-bricky"></i>
-                        <h2>Manage Orders</h2>
-                    </div>
-                    <div class="content">
-                        Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
-                    </div>
-                    <a class="view-more" href="#">
-                        View More <i class="clip-arrow-right-2"></i>
-                    </a>
                 </div>
             </div>
         </div>
+
+        <div class="col-sm-8" ng-controller="GuestMsgPreviewCtrl" id="GuestMsgPreviewCtrl" ng-cloak>
+            <div class="panel-body panel-scroll" style="height:300px">
+
+            <table class="table table-hover guests">
+                <tr>
+                    <th>Icon</th>
+                    <th>Guest</th>
+                    <th>Last Message</th>
+                    <th>Date Time</th>
+                    <th>Unread</th>
+                </tr>
+                <tr class="activities" ng-repeat="guest in guests | orderBy:'messages[0].read':false">
+                    <td>
+                        <img ng-src="[[ guest.icon.icon ]]" class="profile_thumbnail">
+                    </td>
+                    <td>
+                        <a ng-href="/guests/detail/[[ guest.id ]]/">
+                            <strong>[[ guest.name ]]</strong>
+                        </a>
+                    </td>
+                    <td>
+                        <q ng-if="guest.messages[0]">[[ guest.messages | orderBy:'-created' | lastMsg:'body' ]]</q>
+                    </td>
+                    <td>
+                        <span class="message-time" ng-if="guest.messages[0]">
+                            [[ guest.messages | orderBy:'-created' | lastMsg:'created' | date :'medium' ]]
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge [[ (guest.messages | numRead) ? 'badge-new-msg' : 'badge-old-msg' ]]">[[ guest.messages | numRead ]]</span>
+                    </td>
+                </tr>
+            </table>
+
+            </div>
+        </div>
+
     </div>
 </div>
 <!-- end: PAGE -->        
 {% endblock content %}
+
+
+{% block page_js %}
+<script src="{% static 'js/ws4redis.js' %}" type="text/javascript"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    var ws4redis = WS4Redis({
+        uri: '{{ WEBSOCKET_URI }}foobar?subscribe-broadcast&publish-broadcast',
+        receive_message: receiveMessage,
+        heartbeat_msg: {{ WS4REDIS_HEARTBEAT }}
+    });
+
+    function receiveMessage(message) {
+        // console.log('message made it to "account" page', message);
+        // re-apply $scope to get the latest msg count
+        angular.element('#GuestMsgPreviewCtrl').scope().getMessage(message);
+        angular.element('#GuestMsgPreviewCtrl').scope().$apply();
+    }
+});
+</script>
+{% endblock page_js %}
+

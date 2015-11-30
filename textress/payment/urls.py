@@ -8,16 +8,17 @@ register_patterns = patterns('',
     url(r'^success/$', views.RegisterSuccessView.as_view(), name='register_success'),
     )
 
-card_patterns = patterns('',
-    url(r'^$', views.CardListView.as_view(), name='card_list'),
-    url(r'^create/$', views.CardCreateView.as_view(), name='card_create'),
-    url(r'^detail/(?P<pk>\w+)/$', views.CardDetailView.as_view(), name='card_detail'),
-    url(r'^update/(?P<pk>\w+)/$', views.CardUpdateView.as_view(), name='card_update'),
-    url(r'^remove/(?P<pk>\w+)/$', views.CardDeleteView.as_view(), name='card_delete'),
+payment_patterns = patterns('',
+    url(r'^$', views.SummaryView.as_view(), name='summary'),
+    url(r'^manage-payment-methods/$', views.CardListView.as_view(), name='card_list'),
+    url(r'^set-default-card(?P<pk>\w+)/$', views.set_default_card_view, name='set_default_card'),
+    url(r'^delete-card/(?P<pk>\w+)/$', views.delete_card_view, name='delete_card'),
+    # Stripe
+    url(r'^one-time-payment/$', views.OneTimePaymentView.as_view(), name='one_time_payment'),
     )
 
 urlpatterns = patterns('',
     # Registration
     url(r'^register/', include(register_patterns)),
-    url(r'^payment/cards/', include(card_patterns)),
+    url(r'^billing/', include(payment_patterns)),
     )

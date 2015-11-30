@@ -1,32 +1,26 @@
-import os
-import pytest
-from unittest.mock import MagicMock
+"""
+NOTE: (ayl 11-01-15) Leave this for now, but the main tests are in: ``main.tests.test_views``
+"""
 
-from django.db import models
 from django.conf import settings
-from django.test import TestCase, LiveServerTestCase, RequestFactory
-from django.test.client import Client
+from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, Group
-from django.http import Http404
-from django.core.exceptions import ObjectDoesNotExist
 
 import stripe
-from model_mommy import mommy
 
-from main.forms import UserCreateForm, HotelCreateForm, RegisterAdminUpdateForm
+from main.forms import UserCreateForm, HotelCreateForm, UserUpdateForm
 from main.models import Hotel, UserProfile, Subaccount
-from main.tests.factory import CREATE_USER_DICT, CREATE_HOTEL_DICT, create_hotel
-from sms.models import PhoneNumber
+from main.tests.factory import (CREATE_USER_DICT, CREATE_HOTEL_DICT,
+    create_hotel, create_hotel_user)
 from utils import create
-from utils.data import STATES, HOTEL_TYPES
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 class RegistrationTests(TestCase):
 
-    fixtures = ['main.json', 'payment.json']
+    # fixtures = ['main.json', 'payment.json']
 
     def setUp(self):
         create._get_groups_and_perms()
@@ -52,7 +46,7 @@ class RegistrationTests(TestCase):
         # Dave wants to go back and update his email, so he now get's the Update Form
         response = self.client.get(reverse('main:register_step1_update', kwargs={'pk': user.pk}))
         self.assertEqual(response.status_code, 200)
-        assert isinstance(response.context['form'], RegisterAdminUpdateForm)
+        assert isinstance(response.context['form'], UserUpdateForm)
 
         # Dave logs out and now can't access the RegisterAdminUpdateView
         self.client.logout()
@@ -98,17 +92,9 @@ class UserViewTests(TestCase):
         # create "Hotel Manager" Group
         create._get_groups_and_perms()
 
-        # Manager
-        self.mgr = mommy.make(User, username='mgr')
-        self.mgr.groups.add(Group.objects.get(name="hotel_manager"))
-        self.mgr.set_password(self.password)
-        self.mgr.save()
-        self.mgr.profile.update_hotel(hotel=self.hotel)
-
-        self.user = mommy.make(User, username='user')
-        self.user.set_password(self.password)
-        self.user.save()
-        self.user.profile.update_hotel(hotel=self.hotel)
+        # Users
+        self.mgr = create_hotel_user(hotel=self.hotel, username='mgr', group='hotel_manager')
+        self.user = create_hotel_user(hotel=self.hotel, username='user')
 
     def test_create(self):
         # both have a hotel attr
@@ -122,15 +108,15 @@ class UserViewTests(TestCase):
     def test_detail(self):
         # User Can Login
         self.client.login(username=self.user.username, password=self.password)
-        response = self.client.get(reverse('main:user_detail', kwargs={'pk': self.user.pk}))
-        assert response.status_code == 200
+        response = self.client.get(reverse('main:user_update', kwargs={'pk': self.user.pk}))
+        self.assertEqual(response.status_code, 200)
         assert response.context['object'] == self.user
 
         # Mgr can't access
         self.client.logout()
         self.client.login(username=self.mgr.username, password=self.password)
-        response = self.client.get(reverse('main:user_detail', kwargs={'pk': self.user.pk}))
-        assert response.status_code == 404
+        response = self.client.get(reverse('main:user_update', kwargs={'pk': self.user.pk}))
+        self.assertEqual(response.status_code, 403)
 
     def test_update(self):
         # User can update
@@ -139,13 +125,13 @@ class UserViewTests(TestCase):
         # Mgr can't Access
         self.client.login(username=self.mgr.username, password=self.password)
         response = self.client.get(reverse('main:user_update', kwargs={'pk': self.user.pk}))
-        assert response.status_code == 404
+        self.assertEqual(response.status_code, 403)
 
         # Login n Get
         self.client.logout()
         self.client.login(username=self.user.username, password=self.password)
         response = self.client.get(reverse('main:user_update', kwargs={'pk': self.user.pk}))
-        assert response.status_code == 200
+        self.assertEqual(response.status_code, 200)
 
         # Post
         response = self.client.post(reverse('main:user_update', kwargs={'pk': self.user.pk}),
@@ -153,10 +139,8 @@ class UserViewTests(TestCase):
             follow=True)
         # User updated n redirects
         updated_user = User.objects.get(username=self.user.username)
-        assert fname != updated_user.first_name
-        self.assertRedirects(response, reverse('main:user_detail',
-            kwargs={'pk': updated_user.pk}))
-
+        self.assertNotEqual(fname, updated_user.first_name)
+        self.assertRedirects(response, reverse('main:user_detail', kwargs={'pk': self.user.pk}))
 
 
 class ManageUsersTests(TestCase):
@@ -168,17 +152,9 @@ class ManageUsersTests(TestCase):
         # create "Hotel Manager" Group
         create._get_groups_and_perms()
 
-        # Manager
-        self.mgr = mommy.make(User, username='mgr')
-        self.mgr.groups.add(Group.objects.get(name="hotel_manager"))
-        self.mgr.set_password(self.password)
-        self.mgr.save()
-        self.mgr.profile.update_hotel(hotel=self.hotel)
-
-        self.user = mommy.make(User, username='user')
-        self.user.set_password(self.password)
-        self.user.save()
-        self.user.profile.update_hotel(hotel=self.hotel)
+        # Users
+        self.mgr = create_hotel_user(hotel=self.hotel, username='mgr', group='hotel_manager')
+        self.user = create_hotel_user(hotel=self.hotel, username='user')
 
     def test_list(self):
         # mgr can access
@@ -190,20 +166,6 @@ class ManageUsersTests(TestCase):
         self.client.logout()
         self.client.login(username=self.user.username, password=self.password)
         response = self.client.get(reverse('main:manage_user_list'))
-        assert response.status_code == 302
-
-    def test_detail(self):
-        # mgr can access
-        self.client.login(username=self.mgr.username, password=self.password)
-        response = self.client.get(reverse('main:manage_user_detail',
-            kwargs={'pk': self.user.pk}))
-        assert response.status_code == 200
-
-        # normal user cannot
-        self.client.logout()
-        self.client.login(username=self.user.username, password=self.password)
-        response = self.client.get(reverse('main:manage_user_detail',
-            kwargs={'pk': self.user.pk}))
         assert response.status_code == 302
 
 
@@ -265,9 +227,6 @@ class ManageUsersTests(TestCase):
         assert Group.objects.get(name="hotel_manager") in new_user.groups.all()
         self.assertRedirects(response, reverse('main:manage_user_list'))
 
-
-    # NEXT: Add tests for "Update" from Mgr point of view
-
     def test_update(self):
         # User can update
         fname = self.user.first_name
@@ -290,38 +249,4 @@ class ManageUsersTests(TestCase):
         # User updated n redirects
         updated_user = User.objects.get(username=self.user.username)
         assert fname != updated_user.first_name
-        self.assertRedirects(response, reverse('main:manage_user_detail',
-            kwargs={'pk': updated_user.pk}))
-
-    def test_delete(self):
-        # User to test deleting
-        del_user = User.objects.create(username='del_user', email=settings.DEFAULT_TO_EMAIL,
-            password=self.password)
-        del_user.profile.update_hotel(self.hotel)
-        assert isinstance(del_user, User)
-        assert del_user.profile.hotel == self.hotel
-
-        # User can't access
-        self.client.login(username=self.user.username, password=self.password)
-        response = self.client.get(reverse('main:manage_user_delete', kwargs={'pk': del_user.pk}))
-        assert response.status_code == 302
-
-        # Mgr Only can Access
-        self.client.logout()
-        self.client.login(username=self.mgr.username, password=self.password)
-        response = self.client.get(reverse('main:manage_user_delete', kwargs={'pk': del_user.pk}))
-        assert response.status_code == 200
-
-        # Post
-        response = self.client.post(reverse('main:manage_user_delete', kwargs={'pk': del_user.pk}),
-            follow=True)
-        # User updated n redirects
         self.assertRedirects(response, reverse('main:manage_user_list'))
-        with pytest.raises(ObjectDoesNotExist):
-            updated_del_user = User.objects.get(username=del_user.username)
-
-
-
-
-
-

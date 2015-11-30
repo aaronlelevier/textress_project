@@ -1,122 +1,90 @@
+from __future__ import absolute_import
+
+import sys
+import calendar
 import datetime
+import pytz
 
 from django.db import models
-from django.db.models import Avg, Max, Min, Sum
+from django.db.models import Max, Sum, Q
 from django.conf import settings
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.core.cache import cache
 from django.core.urlresolvers import reverse
-from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.translation import ugettext, ugettext_lazy as _
+from django.dispatch import receiver
+from django.db.models.signals import post_save
 
 import stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 from main.models import Hotel
-# from payment.models import Card, Charge
-from utils.exceptions import InvalidAmtException
-
-
-class Dates(object):
-
-    @property
-    def _now(self):
-        return timezone.now()
-
-    @property
-    def _today(self):
-        return self._now.date()
-
-    @property
-    def _year(self):
-        return self._now.year
-
-    @property
-    def _month(self):
-        return self._now.month
-
-
-class AbstractBase(Dates, models.Model):
-    created = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        abstract = True
+from payment.models import Charge
+from utils import email
+from utils.exceptions import RechargeFailedExcp, AutoRechargeOffExcp
+from utils.models import Dates, TimeStampBaseModel
 
 
 ###########
 # PRICING #
 ###########
 
-class PricingManager(models.Manager):
-
-    def get_cost(self, units, units_prev=0):
-        """
-        Global Monthly Cost Calculator
-        ------------------------------
-        Get the cost of units used based upon the current ``Pricing`` 
-        Tier.
-
-        units - current units used this month
-        units_prev - previous units balance calculated for this month
-        """
-        tiers = self.order_by('-end')
-        units_to_expense = units - units_prev
-        cost = 0
-        while units_to_expense > 0:
-            for t in tiers:
-                if units >= t.start:
-                    if units >= t.end:
-                        # -1 b/c tier2 300-201=99 not 100 for ex
-                        units_to_subtract = t.end - (t.start if t.start == 0 else t.start-1)
-                    else:
-                        units_to_subtract = units - (t.start if t.start == 0 else t.start-1)
-                    cost += units_to_subtract * t.price
-                    units_to_expense -= units_to_subtract
-        return cost
-
-
-class Pricing(AbstractBase):
-    """Pricing Tiers that gradually decrease in Price as Volumes increase. 
-    Based on monthly volumes."""
-
-    tier = models.PositiveIntegerField(_("Tier"))
-    tier_name = models.CharField(_("Tier Name"), max_length=55, blank=True,
-        help_text="If blank, will be the Tier's Price per SMS")
-    desc = models.CharField(_("Description"), max_length=255, blank=True,
-        help_text="Used for Pricing Biz Page Description.")
-    price = models.DecimalField(_("Price per SMS"), max_digits=5, decimal_places=4,
-        help_text="Price in $'s. Ex: 0.0525")
-    start = models.PositiveIntegerField(_("SMS Start"), help_text="Min SMS per Tier")
-    end = models.PositiveIntegerField(_("SMS End"), help_text="Max SMS per Tier")
-
-    objects = PricingManager()
+class Pricing(TimeStampBaseModel):
+    """
+    Pricing per SMS will be fixed, and will be $0.05 per SMS unless there is a business
+    need to do otherwise.
+    """
+    hotel = models.OneToOneField(Hotel, related_name='pricing', blank=True, null=True)
+    cost = models.FloatField(blank=True, default=settings.DEFAULT_SMS_COST,
+        help_text="Price in Stripe units, so -> 5.00 == $0.05")
 
     class Meta:
         verbose_name_plural = "Pricing"
-        ordering = ('tier',)
 
     def __str__(self):
-        return "{0:.4f}".format(self.price)
+        return "Hotel: {}; Price per SMS: ${:.2f}".format(self.hotel, self.cost)
 
     def save(self, *args, **kwargs):
-        """Default ``tier_name`` with the exception of the 'Free Tier'. Middle 
-        Tiers use the same ``desc``."""
-
-        if not self.tier_name:
-            self.tier_name = "{0:.4f}".format(self.price)
-
-        if not self.desc:
-            self.desc = "Next {0:3g}k SMS per month".format((self.end-self.start+1)/1000)
-
+        if not self.hotel:
+            self.check_for_default_pricing()
         return super(Pricing, self).save(*args, **kwargs)
+
+    def check_for_default_pricing(self):
+        """
+        Only allow one Pricing Obj to have a blank Hotel FK
+        to be used w/ 'index.html'
+        """
+        default = Pricing.objects.filter(hotel__isnull=True)
+
+        if self.id:
+            default = default.exclude(id=self.id)
+
+        if default:
+            raise Exception("Default Pricing object with No Hotel already exists.")
+
+    def get_cost(self, sms_used_count):
+        """
+        ** Always Negative **
+        Expenses are negative, added Funds are Positive.
+        """
+        return -(self.cost * sms_used_count)
 
 
 ##############
 # TRANS TYPE #
 ##############
 
-class TransType(AbstractBase):
+# Global static list for tests
+TRANS_TYPES = [
+    ('init_amt', 'init_amt'),
+    ('recharge_amt', 'recharge_amt'),
+    ('sms_used', 'sms_used'),
+    ('phone_number', 'phone_number'),
+]
+
+class TransType(TimeStampBaseModel):
     """Name and Description for different transaction types.
 
     Types (to start):
@@ -125,30 +93,45 @@ class TransType(AbstractBase):
     2   init_amt        initial account funding
     3   recharge_amt    Recharge amount selected by the Hotel
     4   sms_used        daily deduction for sms used for that day; cache - sms used during the day to save DB trips
-    5   bulk_discount   credit applied from previous months use based on bulk
-
-    TODO:
-        - cache `sms_used` during the day to save DB trips
+    5   phone_number    Monthly phone number cost. Is charged at the initial purchase of a phone number, and monthly after that.
     """
     name = models.CharField(_("Name"), unique=True, max_length=50)
     desc = models.CharField(_("Description"), max_length=255)
 
     class Meta:
         verbose_name = "Transaction Type"
-        ordering = ['id']
 
     def __str__(self):
         return self.name
+
+
+class TransTypeCache(object):
+
+    def __init__(self):
+        self.trans_types = [x[0] for x in TRANS_TYPES]
+
+        for t in self.trans_types:
+            setattr(self, t, self.get_or_set_value(t))
+
+    def get_or_set_value(self, name):
+        value = cache.get(name)
+        if not value:
+            cache.set(name, TransType.objects.get(name=name))
+        return cache.get(name)
 
 
 #############
 # ACCT COST #
 #############
 
-CHARGE_AMOUNTS = [(100, '${:.2f}'.format(1))] + [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
-# replace ``CHARGE_AMOUNTS`` with the below amount choices once Stripe Payments confirmed to work.
-# CHARGE_AMOUNTS = [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
-BALANCE_AMOUNTS = [(100, '${:.2f}'.format(1))] + [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
+# AcctCost Amount Choices
+INIT_CHARGE_AMOUNT = 500
+CHARGE_AMOUNTS = [(INIT_CHARGE_AMOUNT, '${:.2f}'.format(INIT_CHARGE_AMOUNT/100))] + \
+    [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
+
+INIT_BALANCE_AMOUNT = 100
+BALANCE_AMOUNTS = [(INIT_BALANCE_AMOUNT, '${:.2f}'.format(INIT_BALANCE_AMOUNT/100))] + \
+    [(amt, '${:.2f}'.format(amt/100)) for amt in range(1000, 11000, 1000)]
 
 
 class AcctCostManager(models.Manager):
@@ -160,9 +143,9 @@ class AcctCostManager(models.Manager):
         Will - get, create, or update the AcctCost record for the Hotel.
         '''
         try:
-            acct_cost = AcctCost.objects.get(hotel=hotel)
-        except ObjectDoesNotExist:
-            acct_cost = AcctCost.objects.create(hotel=hotel, **kwargs)
+            acct_cost = self.get(hotel=hotel)
+        except AcctCost.DoesNotExist:
+            acct_cost = self.create(hotel=hotel, **kwargs)
             return acct_cost, True
         else:
             for k,v in kwargs.items():
@@ -171,7 +154,7 @@ class AcctCostManager(models.Manager):
             return acct_cost, False
 
 
-class AcctCost(AbstractBase):
+class AcctCost(TimeStampBaseModel):
     """
     Initial Charge and Recharge configuration settings here.
 
@@ -179,14 +162,12 @@ class AcctCost(AbstractBase):
 
     Note:
 
-        - All Amounts in Stripe Amount. 
-            - ex: if DB record = 1000, then amount in dollars = 10.00
-
-        - Used to have a ``per_sms`` static cost here, and I was going to 
-        adjust billing at the end of the month for the ``bulk_discount``.  
+    - All Amounts in Stripe Amount. 
         
-        - NOW: will apply discounts as they happen through "Daily AcctTrans" 
-        Records.
+        - ex: if DB record = 1000, then amount in dollars = 10.00
+
+    - Will apply discounts as they happen through "Daily AcctTrans" 
+    Records.
     """
     hotel = models.OneToOneField(Hotel, related_name='acct_cost')
     init_amt = models.PositiveIntegerField(_("Amount to Add"), 
@@ -194,7 +175,9 @@ class AcctCost(AbstractBase):
     balance_min = models.PositiveIntegerField(_("Balance Minimum"),
         choices=BALANCE_AMOUNTS, default=BALANCE_AMOUNTS[0][0])
     recharge_amt = models.PositiveIntegerField(_("Recharge Amount"),
-        choices=CHARGE_AMOUNTS, default=CHARGE_AMOUNTS[0][0])
+        choices=CHARGE_AMOUNTS, default=CHARGE_AMOUNTS[0][0],
+        help_text="A higher Recharge Amount is recommended to decrease payment transactions.")
+    auto_recharge = models.BooleanField("Auto Recharge On", blank=True, default=True)
 
     objects = AcctCostManager()
 
@@ -209,86 +192,133 @@ class AcctCost(AbstractBase):
 # ACCT STMT #
 #############
 
-class AcctStmtManager(models.Manager):
+class AcctStmtManager(Dates, models.Manager):
 
-    def acct_trans_balance(self, hotel, date):
-        """
-        Calculate the current balance based on sms_used for today.
+    def starting_balance(self, hotel, date=None):
+        date = date or self._today
+        prev_month = self.prev_month(date)
+        prev_year = self.prev_year(date)
 
-        Calculate `balance`
-
-        If `balance` < 0, recharge account, and recalculate `balance`
-
-        Return: `balance`
-        """
-        sms_used, created = AcctTrans.objects.sms_used(hotel, insert_date=date)
-
-        balance = AcctTrans.objects.filter(hotel=hotel).balance()
-
-        if balance < 0:
-            recharge_amt = AcctTrans.objects.recharge(hotel, balance)
-            balance = AcctTrans.objects.filter(hotel=hotel).balance()
-
-        return balance
+        try:
+            return self.get(hotel=hotel, month=prev_month, year=prev_year).balance
+        except AcctStmt.DoesNotExist:
+            return 0
     
-    def get_or_create(self, hotel, month=timezone.now().month, year=timezone.now().year):
+    def get_or_create(self, hotel, month=None, year=None):
         """
-        1 Stmt p/Hotel, p/Month, but updated daily upon User request.
+        1 Stmt p/Hotel, p/Month, but updated daily until month end.
 
-        Will get, create, or update - current month record.
+        Will get, create, or update: single Month's AcctStmt.
 
         Return: AcctStmt, created
         """
-        date = datetime.date(year, month, 1)
-        total_sms = hotel.messages.monthly_all(date=date).count()
+        date = self.first_of_month(month, year)
+
+        # sms fields: re-calculate 'sms_used' for today in order to get most
+        # up to date usage balance
+        AcctTrans.objects.update_or_create_sms_used(hotel, self._today)
+        # fields
+        total_sms = self.get_total_sms(hotel, date)
+        total_sms_costs = self.get_total_sms_costs(hotel, total_sms)
+        funds_added = AcctTrans.objects.funds_added(hotel, date)
+        phone_numbers = self.get_phone_numbers(hotel, date)
+        monthly_costs = self.get_monthly_costs(hotel, date)
+        balance = AcctTrans.objects.monthly_trans(hotel, date).balance()
 
         values = {
+            'funds_added': funds_added,
+            'phone_numbers': phone_numbers,
             'total_sms': total_sms,
-            'monthly_costs': 3, #Pricing.objects.get_cost(units=total_sms),
-            'balance': self.acct_trans_balance(hotel, date)
+            'total_sms_costs': total_sms_costs,
+            'monthly_costs': monthly_costs,
+            'balance': balance
         }
         try:
-            acct_stmt = self.get(hotel=hotel, month=month, year=year)
+            acct_stmt = self.get(hotel=hotel, month=date.month, year=date.year)
             for k,v in values.items():
                 setattr(acct_stmt, k, v)
             acct_stmt.save()
             return acct_stmt, False
         except ObjectDoesNotExist:
-            acct_stmt = self.create(hotel=hotel, month=month, year=year,
+            acct_stmt = self.create(hotel=hotel, month=date.month, year=date.year,
                 **values)
             return acct_stmt, True
 
+    @staticmethod
+    def get_phone_numbers(hotel, date):
+        """
+        A count of 'phone_numbers' purchased during the month.
+        """
+        return (AcctTrans.objects.monthly_trans(hotel, date)
+                                 .filter(trans_type__name='phone_number')
+                                 .count())
 
-class AcctStmt(AbstractBase):
+    @staticmethod
+    def get_total_sms(hotel, date):
+        return (AcctTrans.objects.monthly_trans(hotel, date)
+                                 .filter(trans_type__name='sms_used')
+                                 .aggregate(Sum('sms_used'))['sms_used__sum'] or 0)
+
+    @staticmethod
+    def get_total_sms_costs(hotel, total_sms):
+        try:
+            return hotel.pricing.get_cost(total_sms)
+        except Exception: # RelatedObjectDoesNotExist
+            return -(total_sms * settings.DEFAULT_SMS_COST)
+
+    @staticmethod
+    def get_monthly_costs(hotel, date):
+        """
+        'phone_number' is the only current ``trans_type`` w/ a monthly cost.
+        """
+        return (AcctTrans.objects.monthly_trans(hotel, date)
+                                 .filter(trans_type__name='phone_number')
+                                 .balance())
+
+
+class AcctStmt(TimeStampBaseModel):
     """
     Monthly usage stats for each hotel.
 
-    Level: One record per Hotel per Month.
+    :When are AcctStmt's generated?:
+        1. Daily (3 am) <- planned time
+        3. After a month has ended (Final month-end Stmt)
 
-    Purpose: Hotels will have a: Monthly and Daily view of their Usage.
+    :Level: One record per Hotel per Month.
+
+    :Purpose: Hotels will have a Monthly and Daily view of their Usage.
     """
     # Keys
     hotel = models.ForeignKey(Hotel, related_name='acct_stmt')
     # Auto Fields
-    year = models.IntegerField(_("Year"), blank=True)
-    month = models.IntegerField(_("Month"), blank=True)
-    monthly_costs = models.FloatField(_("Total Monthly Cost"), blank=True,
-        default=settings.DEFAULT_MONTHLY_FEE)
-    total_sms = models.IntegerField(blank=True, default=0)
-    balance = models.FloatField(_("Current Funds Balance"), blank=True, default=0,
-        help_text="Monthly Cost + (SMS Used * Cost Per SMS)")
+    year = models.PositiveIntegerField()
+    month = models.PositiveIntegerField()
+    funds_added = models.PositiveIntegerField(blank=True, default=0,
+        help_text="from 'init_amt' or 'recharge_amt' AcctTrans.")
+    phone_numbers = models.PositiveIntegerField(blank=True, default=0)
+    monthly_costs = models.IntegerField(blank=True, default=0,
+        help_text="Only active Phone Numbers have a monthly cost at this time, \
+but other costs may be added. Additional feature costs, surcharge for REST API access, etc...")
+    total_sms = models.PositiveIntegerField(blank=True, default=0)
+    total_sms_costs = models.IntegerField(blank=True, default=0,
+        help_text="This will be negative (debits are negative).")
+    balance = models.IntegerField(_("Current Funds Balance"), blank=True, default=0)
 
     objects = AcctStmtManager()
 
     class Meta:
+        ordering = ('-year', '-month',)
         verbose_name = "Account Statement"
 
     def __str__(self):
-        return "{self.hotel}: {self.month}-{self.year} Monthly Costs:{self.monthly_costs:.2f} \
-        Balance:{self.balance}".format(self=self)
+        return "{} {}".format(calendar.month_name[self.month], self.year)
 
     def get_absolute_url(self):
         return reverse('acct_stmt_detail', kwargs={'year':self.year, 'month':self.month})
+
+    @property
+    def month_abbr(self):
+        return "{} {}".format(calendar.month_abbr[self.month], self.year)
 
 
 ##############
@@ -297,17 +327,20 @@ class AcctStmt(AbstractBase):
 
 class AcctTransQuerySet(models.query.QuerySet):
 
-    def monthly_trans(self, hotel, month, year):
+    def monthly_trans(self, hotel, date):
+        """
+        Return all transactions for the ``hotel`` that happened during 
+        the month of the given ``date``.
+        """
         return (self.filter(hotel=hotel,
-                            insert_date__month=month,
-                            insert_date__year=year))
+                            insert_date__month=date.month,
+                            insert_date__year=date.year))
 
-    def previous_monthly_trans(self, hotel, month, year):
-        first_of_month = datetime.date(int(year), int(month), 1)
-        return self.filter(hotel=hotel, insert_date__lt=first_of_month)
+    def balance(self, hotel=None):
+        if hotel:
+            self = self.filter(hotel=hotel)
 
-    def balance(self):
-        return self.aggregate(Sum('amount'))['amount__sum']
+        return self.aggregate(Sum('amount'))['amount__sum'] or 0
 
 
 class AcctTransManager(Dates, models.Manager):
@@ -315,121 +348,291 @@ class AcctTransManager(Dates, models.Manager):
     def get_queryset(self):
         return AcctTransQuerySet(self.model, self._db)
 
-    def monthly_trans(self, hotel, month=timezone.now().month, year=timezone.now().year):
-        return self.get_queryset().monthly_trans(hotel=hotel,
-            month=month, year=year)
+    def monthly_trans(self, hotel, date=None):
+        """Default to return the Hotel's current month's transactions
+        if not date is supplied."""
+        date = date or self._today
+        return self.get_queryset().monthly_trans(hotel, date)
 
-    def previous_monthly_trans(self, hotel, month, year):
-        '''All transactions b/4 the `month` and `year`.'''
-        return self.get_queryset().previous_monthly_trans(hotel=hotel,
-            month=month, year=year)
-
-    def balance(self):
-        '''Sum `amount` for any queryset object.'''
-        return self.get_queryset().balance()
-
-    def sms_used_max_date(self):
-        sms_used = TransType.objects.get(name='sms_used')
-        return (self.filter(trans_type=sms_used)
-                    .aggregate(Max('insert_date'))['insert_date__max'])
-
-    def sms_used_on_date(self, date):
-        return self.sms_used_max_date() == date
-
-    def amount(self, hotel, trans_type):
-        '''Return the Amount ($) based on the Hotel,TransType.'''
-        acct_cost = AcctCost.objects.get(hotel=hotel)
-        return getattr(acct_cost, trans_type.name)
-
-    def recharge(self, hotel, balance):
+    def balance(self, hotel=None):
         '''
-        `recharge_amt` ex: self.amount = 1000
-                           current balance = -25
-                           recharge = 1000-(-25) = 1025
+        Calculates current balance (Expensive).
         '''
-        trans_type = TransType.objects.get(name='recharge_amt')
-        amount = self.amount(hotel, trans_type) - balance
+        return self.get_queryset().balance(hotel)
 
-        # TODO: need to charge credit card here in order to "recharge"
-        #   the account
-        acct_tran = self.create(hotel=hotel, trans_type=trans_type,
-            amount=amount)
-        
-        return acct_tran
+    @property
+    def trans_types(self):
+        return TransTypeCache()
+
+    def check_balance_only(self, hotel):
+        """
+        Return a "Boolean" of whether or not the "balance is ok" by only 
+        suppling the "hotel" as an argument.
+        """
+        balance = self.get_balance(hotel)
+        return not self.check_recharge_required(hotel, balance)
 
     def check_balance(self, hotel):
-        balance = AcctTrans.objects.filter(hotel=hotel).balance()
-        if balance < 0:
-            acct_tran = self.recharge(hotel, balance)
+        """
+        Daily, or more often if high SMS volumes, check the Funds ``balance``
+        of the Hotel to see if a ``recharge`` is required.
 
-    def sms_used(self, hotel, trans_type=None, insert_date=None):
-        '''
-        get_or_create() the `sms_used` record p/Hotel p/Day.
+        Before this method: run ``update_or_create_sms_used`` so that all charges
+        are posted.
+        """
+        self.update_or_create_sms_used(hotel)
+        balance = self.get_balance(hotel)
+        recharge_required = self.check_recharge_required(hotel, balance)
 
-        Return: acct_tran, created
-        '''
-        trans_type = TransType.objects.get(name='sms_used')
-        
-        # get all hotel messages for the month based on "sent"
-        sms_used = hotel.messages.monthly_all(insert_date).count()
-        # vs. what has been accounted for
-        sms_used_prev = (self.monthly_trans(hotel=hotel)
-                             .aggregate(Max('sms_used'))['sms_used__max'])
-        
-        values = {
-            'sms_used': sms_used,
-            'amount': Pricing.objects.get_cost(units=sms_used, units_prev=sms_used_prev)
-        }
-        if not sms_used:
-            return None, None
+        if recharge_required:
+            recharge_amt = self.calculate_recharge_amount(hotel, balance)
+            self.recharge(hotel, recharge_amt)
+
+    def recharge(self, hotel, recharge_amt):
+        if not hotel.acct_cost.auto_recharge:
+            self.handle_auto_recharge_failed(hotel)
+
+        # if ``charge_hotel`` is called here, all ``recharge`` tests will need a Stripe
+        # Customer in order to pass, and will run slow b/c have to hit the Stripe API ea time.
+        if 'test' not in sys.argv:
+            self.charge_hotel(hotel, recharge_amt)
+
+        self.create_recharge_amt(hotel, recharge_amt)
+
+    def one_time_payment(self, hotel, amount):
+        self.charge_hotel(hotel, amount)
+        self.create_recharge_amt(hotel, amount)
+
+    def create_recharge_amt(self, hotel, amount):
+        return self.create(
+            hotel=hotel,
+            trans_type=self.trans_types.recharge_amt,
+            amount=amount
+        )
+
+    @staticmethod
+    def handle_auto_recharge_failed(hotel):
+        email.send_auto_recharge_failed_email(hotel)
+        hotel.deactivate()
+        raise AutoRechargeOffExcp(
+            "Auto-recharge is off, and the account doesn't have "
+            "enough funds to process this transaction."
+        )
+
+    def charge_hotel(self, hotel, amount):
+        try:
+            charge = Charge.objects.stripe_create(hotel, amount)
+        except stripe.error.StripeError:
+              email.send_charge_failed_email(hotel, amount)
+              if not self.check_balance_only(hotel):
+                  hotel.deactivate()
+              raise
         else:
-            try:
-                acct_tran = self.get(hotel=hotel, trans_type=trans_type, insert_date=insert_date)
-                for k,v in values.items():
-                    setattr(acct_tran, k, v)
-                return acct_tran.save(), False
-            except ObjectDoesNotExist:
-                acct_tran = self.create(hotel=hotel, trans_type=trans_type, insert_date=insert_date,
-                    **values)
-                return acct_tran, True
+            hotel.activate()
+            email.send_account_charged_email(hotel, charge)
 
-    def get_or_create(self, hotel, trans_type, *args, **kwargs):
+    def update_or_create_sms_used(self, hotel, date=None):
+        """
+        Complete regardless of there being "zero" SMS for the date.
+        """
+        date = date or self._today
+
+        try:
+            acct_trans = self.get(hotel=hotel, trans_type=self.trans_types.sms_used,
+                insert_date=date)
+        except AcctTrans.DoesNotExist:
+            return self.create_sms_used(hotel, date)
+        else:
+            sms_used_count = self.sms_used_count(hotel, date)
+            if acct_trans.sms_used == sms_used_count:
+                return acct_trans
+            else:
+                return self.update_hotel_sms_used(acct_trans, hotel, sms_used_count)
+
+    # @staticmethod
+    def update_hotel_sms_used(self, acct_trans, hotel, sms_used_count):
+        """
+        ``pricing.get_cost`` will always return a negative (debits are negative)
+        so as we add "sms cost", "amount" goes down.
+        """
+        sms_used_cost = hotel.pricing.get_cost(sms_used_count)
+
+        acct_trans.sms_used = sms_used_count
+        acct_trans.amount = sms_used_cost
+        acct_trans.balance = self.get_balance(hotel, excludes=True) + sms_used_cost
+        acct_trans.save()
+
+        return acct_trans
+
+    def sms_used_count(self, hotel, date=None):
+        date = date or self._today
+        return hotel.messages.filter(insert_date=date).count()
+
+    def create_sms_used(self, hotel, date):
+        # SMS counts needed to get the daily incremental "sms_used" cost
+        sms_used = self.sms_used_count(hotel, date)
+        sms_used_prior_mtd = self.sms_used_mtd_prior_to_this_date(hotel, date)
+        amount = hotel.pricing.get_cost(sms_used)
+
+        return self.create(
+            hotel=hotel,
+            trans_type=self.trans_types.sms_used,
+            amount=amount,
+            sms_used=sms_used,
+            insert_date=date
+        )
+
+    def sms_used_mtd_prior_to_this_date(self, hotel, date=None):
+        """
+        Calculate MTD sms_used prior to ``date``. Main purpose is to calculate
+        the "sms used as of yesterday" but can be used for any date.
+        """
+        date = date or self._today
+        date_prior = date - datetime.timedelta(days=1)
+
+        if date_prior.month != date.month:
+            return 0
+
+        return (AcctTrans.objects.filter(hotel=hotel,
+                                         insert_date__month=date.month,
+                                         insert_date__lte=date)
+                                  .aggregate(Sum('sms_used'))['sms_used__sum']) or 0
+
+    def get_balance(self, hotel, excludes=None):
+        """
+        Cheaply get the Hotel's Funds 'balance' without Summing all
+        acct_trans record amounts.
+        """
+        qs = self.filter(hotel=hotel)
+
+        if excludes:
+            qs = qs.exclude(
+                Q(trans_type=self.trans_types.sms_used) & \
+                Q(insert_date=self._today)    
+            )
+
+        last_acct_trans = qs.order_by('-modified').first()
+
+        return self.resolve_last_trans_balance(last_acct_trans)
+
+    @staticmethod
+    def resolve_last_trans_balance(last_acct_trans):
+        try:
+            if not last_acct_trans.balance:
+                balance = 0
+            else:
+                balance = last_acct_trans.balance
+        except AttributeError:
+            balance = 0
+
+        return balance
+
+    @staticmethod
+    def check_recharge_required(hotel, balance):
+        return balance < hotel.acct_cost.balance_min
+
+    @staticmethod
+    def calculate_recharge_amount(hotel, balance):
+        return hotel.acct_cost.recharge_amt - balance
+
+    def phone_number_charge(self, hotel, phone_number, desc=None):
+        """
+        Creates an AcctTrans charge for a PH.  This could be an initial 
+        charge or monthly.
+
+        :hotel: Hotel object
+        :phone_number: twilio ``phone_number`` as a string
+        :desc:
+            to be used to differentiate from "monthly phone_number charges 
+            vs. first time purchase charge.
+        """
+        self.check_balance(hotel)
+        amount = -(settings.PHONE_NUMBER_MONTHLY_COST)
+
+        if 'test' not in sys.argv:
+            self.charge_hotel(hotel, amount)
+
+        return self.create(
+            hotel=hotel,
+            trans_type=self.trans_types.phone_number,
+            amount=amount,
+            desc=desc or "PH charge ${:.2f} for PH#: {}".format(amount/100, phone_number)
+        )
+
+    def sms_used_mtd(self, hotel, insert_date):
+        """
+        MTD SMS used by the Hotel.
+
+        NOTE: Used by ``AcctStmt``
+        """
+        trans_type = self.trans_types.sms_used
+
+        sms_used_mtd = (self.filter(trans_type=trans_type)
+                            .monthly_trans(hotel=hotel, date=insert_date)
+                            .aggregate(Max('sms_used'))['sms_used__max'])
+        return sms_used_mtd or 0
+
+    ### LEGACY METHODS THAT ARE STILL "NEED TO BE REFACTORED WIP" ###
+
+    ### GET_OR_CREATE
+
+    def get_or_create(self, hotel, trans_type, date=None):
         """
         Use get_or_create, so as not to duplicate charges, or daily records
 
+        `sms_used` - get's the SMS used for the day, and calculates the cost.
         `init_amt` - initial funding amount
         `recharge_amt` - recharge funding amount
-        `sms_used` - get's the SMS used for the day, and calculates the cost.
-        `bulk_discount` - amount is not predefined for this b/c will vary
-            based on usage.
-
         """
-        insert_date = kwargs.get('insert_date', self._today)
-        
+        date = date or self._today
+
         if trans_type.name == 'sms_used':
-            sms_used = hotel.messages.filter(insert_date=insert_date).count()
-            acct_tran, created = self.sms_used(hotel, trans_type, insert_date)
+            acct_tran = self.update_or_create_sms_used(hotel, date)
+            return acct_tran, True
 
-            # check if balance < 0, if so charge C.Card, and if fail, suspend Twilio Acct.
-            # don't worry about raising an error here.  Twilio Acct will be suspended
-            # and an email will be sent to myself and the Hotel of the C.Card Charge fail.
-            recharge = self.check_balance(hotel)
+        elif trans_type.name == 'init_amt':
+            return self.get_or_create_init_amt(hotel, date)
 
-        elif trans_type.name in ('init_amt', 'recharge_amt'):
-            amount = self.amount(hotel, trans_type)
-            acct_tran = self.create(hotel=hotel, trans_type=trans_type,
-                insert_date=insert_date, amount=amount)
-            created = True
+        elif trans_type.name == 'recharge_amt':
+            return self.get_or_create_recharge_amt(hotel, date)
 
-        return acct_tran, created
-        
+    def get_or_create_init_amt(self, hotel, date):
+        amount = hotel.acct_cost.init_amt
+        trans_type = self.trans_types.init_amt
 
-class AcctTrans(AbstractBase):
+        acct_tran = self.create(
+            hotel=hotel,
+            trans_type=trans_type,
+            insert_date=date,
+            amount=amount,
+            balance=amount
+        )
+        return acct_tran, True
+
+    def get_or_create_recharge_amt(self, hotel, date):
+        amount = hotel.acct_cost.recharge_amt
+        trans_type = self.trans_types.recharge_amt
+
+        acct_tran = self.create(
+            hotel=hotel,
+            trans_type=trans_type,
+            insert_date=date,
+            amount=amount
+        )
+        return acct_tran, True
+
+    def funds_added(self, hotel, date=None):
+        return (self.monthly_trans(hotel, date)
+                    .filter(trans_type__name__in=['init_amt', 'recharge_amt'])
+                    .aggregate(Sum('amount'))['amount__sum'] or 0)
+
+
+class AcctTrans(TimeStampBaseModel):
     """
-    Account Transactions per day.
+    Account Transactions per: Hotel / TransType / Day.
 
-    :sms_used:
-        1 transaction p/ day for total sms used
+    :insert_date: `datetime` b/c some `trans_types` could happen more than 1x p/ day
+    :sms_used: 1 transaction p/ day for total sms used
 
     :Goal:
         To keep a running balance by day of how much the Hotel 
@@ -440,24 +643,38 @@ class AcctTrans(AbstractBase):
     hotel = models.ForeignKey(Hotel, related_name='acct_trans')
     trans_type = models.ForeignKey(TransType)
     # Auto
-    amount = models.FloatField(_("Amount"), blank=True, null=True,
+    amount = models.IntegerField(_("Amount"), blank=True, null=True,
         help_text="Negative for Usage, Positive for 'Funds Added' records.")
-    sms_used = models.IntegerField(blank=True, null=True,
+    desc = models.CharField(max_length=100, blank=True, null=True,
+        help_text="Use to store additional filter logic")
+    sms_used = models.PositiveIntegerField(blank=True, default=0,
         help_text="NULL unless trans_type=sms_used")
-    insert_date = models.DateField(_("Insert Date"), blank=True, null=True) # auto_now_add=True) # add back in Prod
+    insert_date = models.DateField(_("Insert Date"), blank=True, null=True)
+    balance = models.PositiveIntegerField(_("Balance"), blank=True,
+        help_text="Current blance, just like in a Bank Account.")
 
     objects = AcctTransManager()
 
     class Meta:
         verbose_name = "Account Transaction"
+        ordering = ('-insert_date',)
 
     def __str__(self):
-        return """Date: {self.insert_date} Hotel: {self.hotel} TransType: {self.trans_type} \
-        Amount: ${amount:.2f}""".format(self=self, amount=self.amount/100.0)
+        return "Date: {self.insert_date} Hotel: {self.hotel} TransType: {self.trans_type} \
+Amount: ${amount:.2f}".format(self=self, amount=float(self.amount)/100.0)
 
     def save(self, *args, **kwargs):
         # For testing only
         if not self.insert_date:
             self.insert_date = timezone.now().date()
 
+        self.update_balance()
+
         return super(AcctTrans, self).save(*args, **kwargs)
+
+    def update_balance(self):
+        if self.trans_type.name == 'sms_used':
+            self.balance = AcctTrans.objects.get_balance(
+                hotel=self.hotel, excludes=True) + self.amount
+        else:
+            self.balance = AcctTrans.objects.get_balance(hotel=self.hotel) + self.amount

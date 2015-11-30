@@ -4296,12 +4296,16 @@ body.header-default .daterangepicker {
 	overflow: hidden;
 }
 
+/* ------------------------------------------- */
+/* SMS Messages */
+/* ------------------------------------------- */
+
 .other .messages:after {
 	-moz-border-bottom-colors: none;
 	-moz-border-left-colors: none;
 	-moz-border-right-colors: none;
 	-moz-border-top-colors: none;
-	border-color: #E5E5EA #E5E5EA rgba(0, 0, 0, 0) rgba(0, 0, 0, 0);
+	border-color: #8c8c8c #8c8c8c rgba(0, 0, 0, 0) rgba(0, 0, 0, 0);
 	border-style: solid;
 	border-width: 5px;
 	content: "";
@@ -4313,16 +4317,17 @@ body.header-default .daterangepicker {
 }
 .other .messages {
 	margin-left: 62px;
-	background: #E5E5EA;
+	background: #8c8c8c;
+	border-bottom-right-radius: 0;
+	color: #ffffff;
 }
 .other .avatar {
 	float: left;
 }
 .self .messages {
-	border-bottom-right-radius: 0;
 	margin-right: 62px;
-	background: #33CA22;
-	color: #ffffff;
+	background: #E5E5EA;
+	border-bottom-right-radius: 0;
 }
 .self .avatar {
 	float: right;
@@ -4332,7 +4337,7 @@ body.header-default .daterangepicker {
 	-moz-border-left-colors: none;
 	-moz-border-right-colors: none;
 	-moz-border-top-colors: none;
-	border-color: #33CA22 rgba(0, 0, 0, 0) rgba(0, 0, 0, 0) #33CA22;
+	border-color: #E5E5EA rgba(0, 0, 0, 0) rgba(0, 0, 0, 0) #E5E5EA;
 	border-style: solid;
 	border-width: 5px;
 	top: 0;

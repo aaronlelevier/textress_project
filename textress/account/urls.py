@@ -2,8 +2,8 @@ from django.conf.urls import patterns, include, url
 from django.contrib.auth import views as auth_views
 
 from account import views
-from account.forms import (AuthenticationForm, PasswordResetForm, SetPasswordForm,
-    PasswordChangeForm)
+from account.forms import (AuthenticationForm, PasswordResetForm,
+    SetPasswordForm, PasswordChangeForm)
 
 
 register_patterns = patterns('',
@@ -16,6 +16,11 @@ api_patterns = patterns('',
     url(r'^account/pricing/$', views.PricingListAPIView.as_view(), name='api_pricing'),
     url(r'^account/pricing/(?P<pk>\d+)/$', views.PricingRetrieveAPIView.as_view(), name='api_pricing'),
     )
+
+acct_cost_patterns = patterns('',
+    url(r'^refill-settings/(?P<pk>\w+)/$', views.AcctCostUpdateView.as_view(), name='acct_cost_update'),
+    url(r'^history/$', views.AcctPmtHistoryView.as_view(), name='acct_pmt_history'),
+)
 
 acct_stmt_patterns = patterns('',
     url(r'^$', views.AcctStmtListView.as_view(), name='acct_stmt_list'),
@@ -82,12 +87,14 @@ account_patterns = patterns('',
     url(r'^private/$', views.private, name='private'),
     url(r'^login-error/$', views.login_error, name='login_error'),
 )
-### NOT IN USE: END
 
 urlpatterns = patterns('',
     url(r'^api/', include(api_patterns)),
     url(r'^account/', include(account_patterns)),
     url(r'^register/', include(register_patterns)),
-    # url(r'^statements/', include(acct_stmt_patterns)),
-    # url(r'^close/', include(close_acct_patterns)),
+    # Maybe ``payments`` will include other URL patterns besides ``AcctCost`` because
+    # I may want to reuse the namespace for other URLs.
+    url(r'^payments/', include(acct_cost_patterns)),
+    url(r'^statements/', include(acct_stmt_patterns)),
+    url(r'^close/', include(close_acct_patterns)),
     )

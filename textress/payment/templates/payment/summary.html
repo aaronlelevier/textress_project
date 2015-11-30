@@ -1,0 +1,131 @@
+{% extends "cpanel/base-sidebar.html" %}
+{% load staticfiles stripe_tags %}
+
+
+{% block content %}
+
+        <div class="row">
+            <div class="col-md-4">
+                <h3 class="lead">Current Funds Balance</h3>
+                <h3>{{ acct_stmt.balance|stripe_money }}</h3>
+            </div>
+            <div class="col-md-4">
+                <h3 class="lead">Auto Recharge: {% if acct_cost.auto_recharge %}ON{% else %}OFF{% endif %}</h3>
+                <p>If the balance falls below {{ acct_cost.balance_min|stripe_money }}</p>
+                <p>refill the balance to {{ acct_cost.recharge_amt|stripe_money }}</p>
+                <a href="{% url 'acct_cost_update' acct_cost.pk %}">
+                    <p><strong>Change Refill Settings</strong></p>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <h3 class="lead">Manage Payments</h3>
+                <a href="{% url 'payment:card_list' %}">
+                    <p><strong>Change / Add Payment Method</strong></p>
+                </a>
+                <a href="{% url 'payment:one_time_payment' %}">
+                    <p><strong>Add Funds</strong></p>
+                </a>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            {% if acct_stmt %}
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <h3 class="lead">Account Statement</h3>
+                        </div>
+                        <div class="col-md-4" style="margin-top: 20px;">
+                            <div class="btn btn-default btn-xs pull-right">
+                                <a class="btn dropdown-toggle no_decoration" data-toggle="dropdown" href="#">{{ acct_stmt }} <span class="caret"></span></a>
+                                    <ul class="dropdown-menu">
+                                        {% for as in acct_stmts %}
+                                        <li><a href="{% url 'payment:summary' %}?date={{ as.year }}-{{ as.month }}">{{ as.month_abbr }}</a></li>
+                                        {% endfor %}
+                                    </ul>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table class="table table-hover">
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Number</th>
+                                    <th>Amount</th>
+                                </tr>
+                                <tr>
+                                    <td>Starting Balance</td>
+                                    <td></td>
+                                    <td>{{ acct_stmt_starting_balance|stripe_money }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Funds Added</td>
+                                    <td></td>
+                                    <td>{{ acct_stmt.funds_added|stripe_money }}</td>
+                                </tr>
+                                <tr>
+                                    <td>SMS</td>
+                                    <td>{{ acct_stmt.total_sms }}</td>
+                                    <td>{{ acct_stmt.total_sms_costs|stripe_money }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Phone Numbers</td>
+                                    <td>{{ acct_stmt.phone_numbers }}</td>
+                                    <td>{{ acct_stmt.monthly_costs|stripe_money }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Current Funds Balance</strong></td>
+                                    <td></td>
+                                    <td><strong>{{ acct_stmt.balance|stripe_money }}</strong></td>
+                                </tr>
+                            </table>
+                            <a href="{% url 'acct_stmt_detail' year month %}">
+                                <p class="pull-right"><strong>View Usage Detail</strong></p>
+                            </a>
+                            <p><small>&#42; Please note, account statements are updated daily, so the totals may not immediately reflect your account transactions.</small></p>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h3 class="lead">No Account Statements Posted</h3>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            <div class="col-md-6">
+                <div class="row">
+                    <h3 class="lead">Recent Payments</h3>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <table class="table table-hover">
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                            </tr>
+                            {% for at in acct_trans %}
+                            <tr>
+                                <td>{{ at.insert_date }}</td>
+                                <td>{{ at.trans_type.name|format_snake_case }}</td>
+                                <td>{{ at.amount|stripe_money }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                        <a href="{% url 'acct_pmt_history' %}">
+                            <p class="pull-right"><strong>View Payment History</strong></p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end: PAGE CONTENT -->
+    </div>
+</div>
+<!-- end: PAGE -->        
+{% endblock content %}

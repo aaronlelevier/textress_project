@@ -1,0 +1,1 @@
+Auto-recharge failed for payment to {{ site_name }}

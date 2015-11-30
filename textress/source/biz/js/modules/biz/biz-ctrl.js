@@ -3,10 +3,6 @@ define([
 ], function(module) {
     'use strict';
 
-    module.controller('NewsletterCtrl', ['$scope', function($scope) {
-        $scope.dj_test = "`test`: angular is loaded";
-    }]);
-
     module.controller('PricingCtrl', ['$scope', 'Pricing', function($scope, Pricing) {
         //prices will be from a DRF REST endpoint, so when changed in the DB,
         //they are auto-reflected here

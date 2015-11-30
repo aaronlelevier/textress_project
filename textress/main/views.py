@@ -1,32 +1,32 @@
 from django.conf import settings
 from django.contrib import auth, messages
 from django.contrib.auth.models import User, Group
-from django.shortcuts import render, get_object_or_404
-from django.views.generic import (CreateView, FormView, DetailView,
-    ListView, UpdateView, DeleteView)
-from django.views.generic.base import View, ContextMixin, TemplateView
+from django.views.generic import CreateView, DetailView, UpdateView
+from django.views.generic.base import View, TemplateView
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth.forms import UserCreationForm
-from django.http import HttpResponse, Http404, HttpResponseRedirect
-from django.template import RequestContext
+from django.http import HttpResponseRedirect
 
-from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
-    GroupRequiredMixin, AnonymousRequiredMixin, SetHeadlineMixin)
+from rest_framework.response import Response
+from rest_framework import permissions, generics
+from braces.views import (LoginRequiredMixin, GroupRequiredMixin,
+     SetHeadlineMixin, FormValidMessageMixin, FormInvalidMessageMixin)
 
-from main.models import Hotel, UserProfile, Subaccount
-from main.forms import UserCreateForm, HotelCreateForm, UserUpdateForm
-from main.mixins import (HotelMixin, UserOnlyMixin, HotelUsersOnlyMixin,
-    RegistrationContextMixin)
-from account.helpers import add_group
-from contact.mixins import NewsletterMixin, TwoFormMixin
-from account.helpers import login_messages
-from payment.mixins import HotelUserMixin, HotelContextMixin
+from concierge.permissions import (IsHotelObject, IsManagerOrAdmin, IsHotelUser,
+    IsHotelOfUser)
+from main.models import Hotel, UserProfile, Subaccount, viewable_user_fields_dict
+from main.forms import UserCreateForm, HotelCreateForm, UserUpdateForm, DeleteUserForm
+from main.mixins import (UserOnlyMixin, HotelUsersOnlyMixin,
+    MyHotelOnlyMixin, RegistrationContextMixin, HotelUserMixin, HotelContextMixin,
+    UserListContextMixin)
+from main.serializers import UserSerializer, HotelSerializer
+from utils import dj_messages, login_messages, EmptyForm, DeleteButtonMixin
 
 
 ### Hotel ###
 
-class HotelUpdateView(HotelUsersOnlyMixin, GroupRequiredMixin, SetHeadlineMixin, UpdateView):
+class HotelUpdateView(HotelUsersOnlyMixin, GroupRequiredMixin, SetHeadlineMixin, 
+    FormValidMessageMixin, UpdateView):
     '''
     Will use permissions in templating to only expose this View to Hotel Admins.
     Also, view URL is only accessible by Admins.
@@ -35,14 +35,17 @@ class HotelUpdateView(HotelUsersOnlyMixin, GroupRequiredMixin, SetHeadlineMixin,
     headline = "Update Hotel Info"
     model = Hotel
     form_class = HotelCreateForm
-    fields = ['name', 'address_phone', 'address_line1', 'address_line2',
-        'address_city', 'address_state', 'address_zip']
     template_name = 'cpanel/form.html'
+    form_valid_message = dj_messages['hotel_updated']
 
     def get_success_url(self):
-        return reverse('account')
+        return reverse('main:user_detail', kwargs={'pk': self.request.user.pk})
 
-
+    def get_form_kwargs(self):
+        "Set Hotel as a form attr."
+        kwargs = super(HotelUpdateView, self).get_form_kwargs()
+        kwargs['hotel'] = self.object
+        return kwargs
 
 
 ### REGISTRATION VIEWS ###
@@ -64,6 +67,7 @@ class RegisterAdminBaseView(RegistrationContextMixin, View):
         context['step'] = context['steps'][context['step_number']]
         return context
 
+
 class RegisterAdminCreateView(RegisterAdminBaseView, CreateView):
     '''
     Step #1 of Registration - CreateView
@@ -81,7 +85,8 @@ class RegisterAdminCreateView(RegisterAdminBaseView, CreateView):
         except (AttributeError, ObjectDoesNotExist):
             return super(RegisterAdminCreateView, self).dispatch(request, *args, **kwargs)
         else:
-            return HttpResponseRedirect(reverse('main:register_step1_update', kwargs={'pk': user.pk}))
+            return HttpResponseRedirect(reverse('main:register_step1_update',
+                kwargs={'pk': user.pk}))
 
     def form_valid(self, form):
         # Call super-override so ``User`` object is available
@@ -89,8 +94,10 @@ class RegisterAdminCreateView(RegisterAdminBaseView, CreateView):
         cd = form.cleaned_data
 
         # Add User to "Admin" Group
-        user = add_group(user=User.objects.get(username=cd['username']),
-            group='hotel_admin')
+        user = User.objects.get(username=cd['username'])
+        group = Group.objects.get(name='hotel_admin')
+        user.groups.add(group)
+        user.save()
 
         # Login
         user = auth.authenticate(username=cd['username'], password=cd['password1'])
@@ -105,12 +112,11 @@ class RegisterAdminCreateView(RegisterAdminBaseView, CreateView):
 class RegisterAdminUpdateView(GroupRequiredMixin, RegisterAdminBaseView,
     UserOnlyMixin, UpdateView):
     '''
-    For Registration Update User info only.
+    For Registration Update of Admin User info only.
     '''
     group_required = ["hotel_admin"]
     model = User
     form_class = UserUpdateForm
-    fields = ['first_name', 'last_name', 'email']
 
 
 class RegisterHotelBaseView(GroupRequiredMixin, RegistrationContextMixin, View):
@@ -129,6 +135,12 @@ class RegisterHotelBaseView(GroupRequiredMixin, RegistrationContextMixin, View):
         context['step'] = context['steps'][context['step_number']]
         return context
 
+    def get_form_kwargs(self):
+        "Set Hotel as a form attr."
+        kwargs = super(RegisterHotelBaseView, self).get_form_kwargs()
+        kwargs['hotel'] = self.object
+        return kwargs
+
 
 class RegisterHotelCreateView(RegisterHotelBaseView, CreateView):
     """
@@ -145,7 +157,8 @@ class RegisterHotelCreateView(RegisterHotelBaseView, CreateView):
         except (AttributeError, ObjectDoesNotExist):
             return super(RegisterHotelCreateView, self).dispatch(request, *args, **kwargs)
         else:
-            return HttpResponseRedirect(reverse('main:register_step2_update', kwargs={'pk': hotel.pk}))
+            return HttpResponseRedirect(reverse('main:register_step2_update',
+                kwargs={'pk': hotel.pk}))
 
     def form_valid(self, form):
         # Call super-override so ``Hotel`` object is available
@@ -158,65 +171,72 @@ class RegisterHotelCreateView(RegisterHotelBaseView, CreateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-class RegisterHotelUpdateView(HotelUsersOnlyMixin, RegisterHotelBaseView, UpdateView):
+class RegisterHotelUpdateView(MyHotelOnlyMixin, RegisterHotelBaseView, UpdateView):
     pass
 
 
-#########
-# USERS #
-#########
+##############
+# MY PROFILE #
+##############
 
-class UserDetailView(UserOnlyMixin, DetailView):
+class UserDetailView(LoginRequiredMixin, SetHeadlineMixin, UserOnlyMixin, DetailView):
     '''User's DetailView of themself.'''
 
+    headline = "My Profile"
     model = User
-    template_name = 'detail_view.html'
+    template_name = 'main/user_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(UserDetailView, self).get_context_data(**kwargs)
+        context['user_dict'] = viewable_user_fields_dict(self.request.user)
+        context['hotel'] = self.hotel
+        return context
 
 
-class UserUpdateView(SetHeadlineMixin, UserOnlyMixin, UpdateView):
+class UserUpdateView(SetHeadlineMixin, FormValidMessageMixin, LoginRequiredMixin,
+    UserOnlyMixin, UpdateView):
     '''User's UpdateView of themself.'''
+
     headline = "Update Profile"
     model = User
     form_class = UserUpdateForm
-    fields = ['first_name', 'last_name', 'email']
     template_name = 'cpanel/form.html'
+    form_valid_message = dj_messages['profile_updated']
 
     def get_success_url(self):
-        return reverse('account')
+        return reverse('main:user_detail', kwargs={'pk': self.request.user.pk})
 
 
 ################
 # MANAGE USERS #
 ################
 
-class MgrUserListView(GroupRequiredMixin, HotelUserMixin, ListView):
-    '''List all Users for a Hotel, except for the Admin, for the 
-    Admin or Managers to `view/add/edit/delete.'''
+class MgrUserListView(SetHeadlineMixin, GroupRequiredMixin, HotelUserMixin, TemplateView):
+    '''
+    :Angular View:
+        So can be a TemplateView since the Object List is 
+        generated from a REST Endpoint.
 
+    List all Users for a Hotel, except for the Admin, for the 
+    Admin or Managers to `view/add/edit/delete.
+    '''
+    headline = 'User List'
     group_required = ["hotel_admin", "hotel_manager"]
-    template_name = 'list_view.html'
-    
-    def get_queryset(self):
-        return (User.objects.select_related('userprofile')
-                            .filter(profile__hotel=self.hotel)
-                            .exclude(pk=self.hotel.admin_id))
+    template_name = 'main/user_list.html'
 
 
-class MgrUserDetailView(HotelUsersOnlyMixin, DetailView):
-    '''Admin or Managers detail view of the User.'''
+class UserCreateView(SetHeadlineMixin, HotelUserMixin, LoginRequiredMixin, GroupRequiredMixin,
+    UserListContextMixin, CreateView):
+    """
+    Create a Normal Hotel User w/ no permissions.
+    Auto-add all created Users to the Group of the Hotel
+    """
 
-    group_required = ["hotel_admin", "hotel_manager"]
-    model = User
-    template_name = 'detail_view.html'
-
-
-class UserCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView):
-    "Create a Normal Hotel User w/ no permissions."
-
+    headline = "Add a User"
     group_required = ["hotel_admin", "hotel_manager"]
     model = User
     form_class = UserCreateForm
-    template_name = 'main/hotel_form.html'
+    template_name = 'cpanel/form.html'
     success_url = reverse_lazy('main:manage_user_list')
 
     def form_valid(self, form):
@@ -233,6 +253,8 @@ class UserCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView):
 class ManagerCreateView(UserCreateView):
     "Create Manager Hotel User w/ Manager Permissions"
 
+    headline = "Add a Manager"
+
     def form_valid(self, form):
         super(ManagerCreateView, self).form_valid(form)
 
@@ -243,29 +265,94 @@ class ManagerCreateView(UserCreateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-class MgrUserUpdateView(HotelUsersOnlyMixin, UpdateView):
-    '''User's UpdateView of themself.
+class MgrUserDetailView(LoginRequiredMixin, SetHeadlineMixin, HotelUsersOnlyMixin,
+    UserListContextMixin, DetailView):
+    '''User's DetailView of themself.'''
 
-    TODO: 
-        -Add a FormSet, so that Mgrs' can in the same view adjust
-            Group Status to "hotel_manager" or take it away.
-        - also be able to view Group.
-    '''
+    headline = "User Profile"
     model = User
-    fields = ['first_name', 'last_name', 'email']
-    template_name = 'account/account_form.html'
+    template_name = 'main/user_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(MgrUserDetailView, self).get_context_data(**kwargs)
+        context['user_dict'] = viewable_user_fields_dict(self.object)
+        context['hotel'] = self.hotel
+        return context
+
+
+class MgrUserUpdateView(SetHeadlineMixin, HotelUsersOnlyMixin, UserListContextMixin, UpdateView):
+    '''
+    Manager/Admin view of Users.
+    '''
+    headline = "Update Profile"
+    model = User
+    form_class = UserUpdateForm
+    template_name = 'cpanel/form.html'
 
     def get_success_url(self):
-        return reverse('main:manage_user_detail', kwargs={'pk': self.object.pk})
+        return reverse('main:manage_user_list')
 
 
-class MgrUserDeleteView(HotelUsersOnlyMixin, DeleteView):
-    '''A Mgr can delete any User for their Hotel except the AdminUser.
-
-    TODO: This should be a "hide" not a "delete"
-        add django-braces - GroupRequiredMixin
+class MgrUserDeleteView(SetHeadlineMixin, DeleteButtonMixin, HotelUsersOnlyMixin,
+    GroupRequiredMixin, UserListContextMixin, FormInvalidMessageMixin, UpdateView):
     '''
-
-    model = User
-    template_name = 'account/account_form.html'
+    A Mgr+ can delete any User for their Hotel except the AdminUser.
+    '''
+    headline = "User Delete View"
+    groups = ['hotel_admin', 'hotel_manager']
+    model = UserProfile
+    form_class = DeleteUserForm
+    template_name = 'cpanel/form.html'
     success_url = reverse_lazy('main:manage_user_list')
+    form_invalid_message = dj_messages['delete_admin_fail']
+
+    def get_form_kwargs(self):
+        kwargs = super(MgrUserDeleteView, self).get_form_kwargs()
+        kwargs['user'] = self.object.user
+        print kwargs['user']
+        return kwargs
+
+    def form_valid(self, form):
+        self.object.hide()
+        return super(MgrUserDeleteView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super(MgrUserDeleteView, self).get_context_data(**kwargs)
+        context['addit_info'] = '''
+            <h4>Are you sure that you want to delete <strong>{}</strong>?</h4>
+            '''.format(self.object.user.username)
+        return context
+
+
+##################
+# REST API VIEWS #
+##################
+
+### USER ###
+
+class UserListAPIView(generics.ListAPIView):
+
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin)
+
+    def list(self, request):
+        users = User.objects.filter(profile__hotel=request.user.profile.hotel)
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
+
+
+class UserRetrieveAPIView(generics.RetrieveAPIView):
+
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelUser)
+
+
+### HOTEL ###
+
+class HotelRetrieveAPIView(generics.RetrieveAPIView):
+
+    queryset = Hotel.objects.all()
+    serializer_class = HotelSerializer
+    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelOfUser)

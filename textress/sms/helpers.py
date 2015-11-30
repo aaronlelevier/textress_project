@@ -1,19 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-import os
+import sys
 import re
 import requests
 import xmltodict
 
-import twilio
-from twilio.rest import TwilioRestClient
-
 from django import forms
 from django.conf import settings
-from django.core.mail import send_mail, EmailMessage, EmailMultiAlternatives
-from django.template.loader import render_to_string
-from django.utils.timezone import now 
+from django.core.urlresolvers import reverse
+
+import twilio
+from twilio.rest import TwilioRestClient
 
 
 sms_messages = {
@@ -61,12 +58,18 @@ def send_text(text):
 
 def send_message(hotel, to, body):
     """
-    Send Message for Concierge App.
+    Main Send Message Twilio function call.
 
-    Use `hotel` to connect the correct Twilio Client.
+    Monkey patch this method in test, so the ``if 'test' in sys.argv`` is removed
+    from this production code.
     """
-    client = TwilioRestClient(hotel.twilio_sid, hotel.twilio_auth_token)
+    # so not sending live SMS with ``./manage.py test``
+    if 'test' in sys.argv:
+        # sms count
+        hotel.redis_incr_sms_count()
+        return True
 
+    client = TwilioRestClient(hotel.twilio_sid, hotel.twilio_auth_token)
     try:
         message = client.messages.create(
             to=to,
@@ -76,6 +79,8 @@ def send_message(hotel, to, body):
     except twilio.TwilioRestException as e:
         raise e
     else:
+        # sms count
+        hotel.redis_incr_sms_count()
         return message
 
 
@@ -102,6 +107,7 @@ def bad_ph_error(to):
     return "'{}' is not a valid phone #.\
             Please enter a 10 digit phone #.".format(to)
 
+
 def clean_to(obj, cleaned_data):
     """
     Check that it's a valid ph.
@@ -118,3 +124,12 @@ def clean_to(obj, cleaned_data):
         to = "+1" + new_to
         cleaned_data['to'] = to
     return obj, cleaned_data
+
+
+def no_twilio_phone_number_alert():
+    return {
+        'type': 'warning',
+        'link': reverse('sms:ph_num_add'),
+        'strong_message': 'Alert!',
+        'message': 'Click here to purchase a phone number in order to send SMS.'
+    }

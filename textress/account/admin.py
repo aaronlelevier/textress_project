@@ -16,7 +16,7 @@ class TransTypeAdmin(admin.ModelAdmin):
 
 @admin.register(AcctCost)
 class AcctCostAdmin(admin.ModelAdmin):
-    list_display = ('hotel', 'init_amt', 'balance_min', 'recharge_amt',)
+    list_display = ('hotel', 'auto_recharge', 'init_amt', 'balance_min', 'recharge_amt',)
     readonly_fields = ('created', 'modified',)
 
 
@@ -28,11 +28,12 @@ class AcctStmtAdmin(admin.ModelAdmin):
 
 @admin.register(AcctTrans)
 class AcctTransAdmin(admin.ModelAdmin):
-    list_display = ('hotel', 'created', 'insert_date', 'trans_type',)
+    list_display = ('hotel', 'created', 'insert_date', 'trans_type', 'amount',
+        'sms_used', 'balance',)
     readonly_fields = ('created', 'modified',)
 
 
 @admin.register(Pricing)
 class PricingAdmin(admin.ModelAdmin):
-    list_display = ('tier', 'tier_name', 'desc', 'price', 'start', 'end',)
+    list_display = ('hotel', 'cost',)
     readonly_fields = ('created', 'modified',)

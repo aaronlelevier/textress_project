@@ -36,6 +36,11 @@
         {% block page_css %}
         {% endblock page_css %}
 
+
+        {% block head_js %}
+        <script src="{% static 'clipone/admin/clip-one/assets/plugins/jQuery-lib/2.0.3/jquery.min.js' %}"></script>
+        {% endblock head_js %}
+
     </head>
 
         <!-- Contains the initial <body> tag all the way up until the start of the JS Scripts-->
@@ -43,7 +48,6 @@
         {% endblock body %}
 
         {% block main_js %}
-        <script src="{% static 'clipone/admin/clip-one/assets/plugins/jQuery-lib/2.0.3/jquery.min.js' %}"></script>
         <script src="{% static 'clipone/admin/clip-one/assets/plugins/jquery-ui/jquery-ui-1.10.2.custom.min.js' %}"></script>
         <script src="{% static 'clipone/admin/clip-one/assets/plugins/bootstrap/js/bootstrap.min.js' %}"></script>
         <script src="{% static 'clipone/admin/clip-one/assets/plugins/bootstrap-hover-dropdown/bootstrap-hover-dropdown.min.js' %}"></script>
@@ -54,6 +58,9 @@
         <script src="{% static 'clipone/admin/clip-one/assets/plugins/less/less-1.5.0.min.js' %}"></script>
         <script src="{% static 'clipone/admin/clip-one/assets/plugins/jquery-cookie/jquery.cookie.js' %}"></script>
         <script src="{% static 'clipone/admin/clip-one/assets/plugins/bootstrap-colorpalette/js/bootstrap-colorpalette.js' %}"></script>
+
+        <script src="{% static 'clipone/admin/clip-one/assets/plugins/jquery.maskedinput/src/jquery.maskedinput.js' %}"></script>
+
         <script src="{% static 'clipone/admin/clip-one/assets/js/main.js' %}"></script>
         <script src="{% static 'js/custom.js' %}"></script>
         {% endblock main_js %}
@@ -66,6 +73,12 @@
         <script>
             jQuery(document).ready(function() {
                 Main.init();
+            });
+            jQuery(function($){
+               $("#id_address_phone").mask("(999) 999-9999");
+               $("#id_phone_number").mask("(999) 999-9999");
+               $("#id_check_in").mask("9999-99-99");
+               $("#id_check_out").mask("9999-99-99");
             });
         </script>
         {% endblock init_js %}

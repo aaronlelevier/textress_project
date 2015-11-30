@@ -1,251 +1,161 @@
-import json
-import re
-import datetime
-from collections import OrderedDict
-import twilio
-from twilio import twiml, TwilioRestException 
+from django.contrib.auth.models import Group
+from django.shortcuts import render
+from django.views.generic import View, DetailView, ListView, TemplateView
+from django.views.generic.edit import CreateView, UpdateView
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 
-from django.contrib.auth.models import User
-from django.contrib import messages
-from django.shortcuts import render, get_object_or_404
-from django.views.generic import View, FormView, DetailView, ListView
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.core.urlresolvers import reverse, reverse_lazy
-from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponse, Http404, HttpResponseRedirect
-from django.views.decorators.csrf import csrf_exempt, csrf_protect, ensure_csrf_cookie
-from django.http import HttpResponse
-from django.utils import timezone
+from braces.views import (LoginRequiredMixin, SetHeadlineMixin, CsrfExemptMixin,
+    StaticContextMixin)
+from twilio import twiml
 
-from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
-from rest_framework.decorators import detail_route, list_route
-from rest_framework.response import Response
-from rest_framework import mixins, generics, status, permissions, viewsets
-
-from braces.views import (LoginRequiredMixin, PermissionRequiredMixin,
-    CsrfExemptMixin)
-
-from concierge.models import Message, Guest
-from concierge.helpers import process_incoming_message
-from concierge.forms import MessageForm
-from concierge.permissions import IsHotelObject, IsManagerOrAdmin, IsHotelUser
-from concierge.serializers import (
-    MessageSerializer,
-    GuestMessageSerializer,
-    GuestBasicSerializer,
-    UserSerializer
-    )
-
-from sms.helpers import send_text, send_message, sms_messages
-from main.models import Hotel, UserProfile
-from main.views import HotelMixin
-from payment.views import HotelUserMixin
-from utils.exceptions import (DailyLimit, NotHotelGuestException,
-    HotelGuestNotFoundException)
+from concierge.models import Message, Guest, Trigger
+from concierge.helpers import process_incoming_message, convert_to_json_and_publish_to_redis
+from concierge.forms import GuestForm
+from concierge.mixins import GuestListContextMixin
+from concierge.permissions import IsManagerOrAdmin
+from concierge.tasks import check_twilio_messages_to_merge, trigger_send_message
+from main.mixins import HotelUserMixin
+from utils import DeleteButtonMixin
 
 
-class ReceiveSMSView(CsrfExemptMixin, View):
+class ReceiveSMSView(CsrfExemptMixin, TemplateView):
+    '''
+    Main SMS Receiving endpoint for url to be configured on Twilio.
+    '''
+    template_name = 'blank.html'
+
+    @csrf_exempt
+    def dispatch(self, *args, **kwargs):
+        return super(ReceiveSMSView, self).dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         return render(request, 'blank.html', content_type="text/xml")
 
     def post(self, request, *args, **kwargs):
+        # must return this to confirm SMS received for Twilio API
         resp = twiml.Response()
-
         # if a msg is returned, attach and reply to Guest
-        msg = process_incoming_message(data=request.POST)
-        if msg:
-            resp.message(msg)
+        msg, reply = process_incoming_message(data=request.POST)
+        # Incoming Message from Guest
+        convert_to_json_and_publish_to_redis(msg)
+        # Auto-reply Logic
+        if reply and reply.message:
+            resp.message(reply.message)
+            # delay 5 seconds, query Twilio for this Guest, and find any 
+            # missing SMS for Today, and merge them into the DB            
+            check_twilio_messages_to_merge.apply_async(
+                (msg.guest,),
+                countdown=5
+            )
 
-        return render(request, 'blank.html', {'resp': str(resp)},
-            content_type='text/xml')
+        return HttpResponse(str(resp), content_type='text/xml')
 
 
 ###############
 # GUEST VIEWS #
 ###############
 
-class GuestListView(HotelUserMixin, ListView):
+class GuestBaseView(SetHeadlineMixin, LoginRequiredMixin, HotelUserMixin, View):
+    headline = "Guest View"
     model = Guest
+
+
+class GuestListView(GuestBaseView, ListView):
+    '''
+    Angular View
+    ------------
+    Lists all Guests w/ links for Detail, Update, Delete.
+    '''
+    headline = "Guest List"
+
+
+class GuestDetailView(GuestBaseView, GuestListContextMixin, DetailView):
+    '''
+    Angular View
+    ------------
+    Guest Message View to Send/Receive SMS from.
+    '''
+    def get(self, request, *args, **kwargs):
+        """All Messages should be marked as 'read=True' when the User 
+        goes to the Guests' DetailView."""
+        self.object = self.get_object()
+        Message.objects.filter(guest=self.object, read=False).update(read=True)
+
+        # test block
+        check_twilio_messages_to_merge(self.object)
+
+        return super(GuestDetailView, self).get(request, *args, **kwargs)
+
+    def get_headline(self):
+        return u"{} Detail".format(self.object)
 
     def get_context_data(self, **kwargs):
-        context = super(GuestListView, self).get_context_data(**kwargs)
-        context['object_list'] = self.model.objects.current().filter(
-            hotel=self.hotel)
+        context = super(GuestDetailView, self).get_context_data(**kwargs)
+        context.update(groups=Group.objects.all())
         return context
 
+    @csrf_exempt
+    def dispatch(self, *args, **kwargs):
+        return super(GuestDetailView, self).dispatch(*args, **kwargs)
 
-class GuestDetailView(HotelUserMixin, DetailView):
+
+class GuestCreateView(GuestBaseView, GuestListContextMixin, CreateView):
+    
+    headline = "Add a Guest"
+    template_name = 'cpanel/form.html'
     model = Guest
-
-
-class GuestCreateView(HotelUserMixin, CreateView):
-    model = Guest
-    fields = ['name', 'room_number', 'phone_number', 'check_in', 'check_out']
+    form_class = GuestForm
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
         self.object.hotel = self.hotel
         self.object.save()
-        hotel, created = Hotel.objects.get_or_create(guest=self.object)
+        trigger_send_message(self.object.id, "check_in")
         return super(GuestCreateView, self).form_valid(form)
 
 
-class GuestUpdateView(HotelUserMixin, UpdateView):
-    '''
-    TODO
-    ----
-    Add Js ph # prettifier
-    '''
+class GuestUpdateView(GuestBaseView, GuestListContextMixin, UpdateView):
+
+    headline = "Update Guest"
+    template_name = 'cpanel/form.html'
     model = Guest
-    fields = ['name', 'room_number', 'phone_number', 'check_in', 'check_out']
+    form_class = GuestForm
+
+    def get_form_kwargs(self):
+        "Set Guest as a form attr."
+        kwargs = super(GuestUpdateView, self).get_form_kwargs()
+        kwargs['guest'] = self.object
+        return kwargs  
 
 
-class GuestDeleteView(HotelUserMixin, View):
-    '''Hide only. Don't `delete` any guest records b/c don't want to
-    delete the related `Messages`.'''
+class GuestDeleteView(GuestBaseView, DeleteButtonMixin, TemplateView):
+    '''
+    Hide only. Don't `delete` any guest records b/c don't want to
+    delete the related `Messages`.
+    '''
+    headline = "Delete Guest"
+    template_name = 'cpanel/form.html'
 
-    template_name = 'concierge/guest_delete.html'
-
-    def get(self, request, *args, **kwargs):
+    def get_context_data(self, **kwargs):
+        context = super(GuestDeleteView, self).get_context_data(**kwargs)
         self.object = Guest.objects.get(pk=kwargs['pk'])
-        return render(request, self.template_name, {'object': self.object})
+        context['addit_info'] = "<div><h1 class='lead'>Are you sure that you want to delete \
+        <strong>{}</strong>?</h1></div>".format(self.object)
+        return context
 
     def post(self, request, *args, **kwargs):
         self.object = Guest.objects.get(pk=kwargs['pk'])
-        self.object.hide()
+        self.object.delete()
         return HttpResponseRedirect(reverse('concierge:guest_list'))
 
 
-#################
-# MESSAGE VIEWS #
-#################
-
-class MessageListView(HotelMixin, FormView):
+class ReplyView(IsManagerOrAdmin, SetHeadlineMixin, StaticContextMixin,
+    HotelUserMixin, TemplateView):
     """
-    All Messages for 1 Guest.
-    A Form at the bottom to send new Messages.
+    :Angular View: Handle all Reply create/edit/delete UI.
     """
-    form_class = MessageForm
-    template_name = 'concierge/conversation_detail.html'
-
-    def form_valid(self, form):
-        cd = form.cleaned_data
-        messages.info(self.request, sms_messages['sent'])
-        return super(MessageListView, self).form_valid(form)
-
-    def dispatch(self, request, *args, **kwargs):
-        self.hotel = request.user.profile.hotel
-        self.guest = get_object_or_404(Guest, pk=self.kwargs['pk'], hotel=self.hotel)
-        return super(MessageListView, self).dispatch(request, *args, **kwargs)
-
-    def get_success_url(self):
-        return reverse('concierge:message_list', kwargs={'pk':self.guest.pk})
-
-    def get_context_data(self, **kwargs):
-        context = super(MessageListView, self).get_context_data(**kwargs)
-        context['guest_messages'] = Message.objects.filter(guest=self.guest).order_by('created')
-        return context
-
-
-class MessageDetailView(HotelMixin, DetailView):
-    model = Message
-
-
-########
-# REST #
-########
-
-class MessageListCreateAPIView(generics.ListCreateAPIView):
-    
-    queryset = Message.objects.all()
-    serializer_class = MessageSerializer
-    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
-
-    def list(self, request, *args, **kwargs):
-        """
-        Message records for the User's Hotel. (Same for all Viewsets)
-        try/except because AnonymousUser has no 'profile' attr.
-        """
-        try:
-            messages = Message.objects.filter(guest__hotel=request.user.profile.hotel)
-        except AttributeError:
-            raise Http404
-        serializer = MessageSerializer(messages, many=True)
-        return Response(serializer.data)
-
-
-class MessageRetrieveAPIView(generics.RetrieveAPIView):
-    queryset = Message.objects.all()
-    serializer_class = MessageSerializer
-    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
-
-
-class GuestMessageListAPIView(generics.ListAPIView):
-    """Filter for Guests for the User's Hotel only."""
-    queryset = Guest.objects.all()
-    serializer_class = GuestMessageSerializer
-    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
-
-    def list(self, request):
-        try:
-            guests = Guest.objects.filter(hotel=request.user.profile.hotel)
-        except AttributeError:
-            raise Http404
-        serializer = GuestMessageSerializer(guests, many=True)
-        return Response(serializer.data)
-
-
-class GuestMessageRetrieveAPIView(generics.RetrieveAPIView):
-
-    queryset = Guest.objects.all()
-    serializer_class = GuestMessageSerializer
-    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
-
-
-class GuestListCreateAPIView(generics.ListCreateAPIView):
-
-    queryset = Guest.objects.all()
-    serializer_class = GuestBasicSerializer
-    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
-
-    def list(self, request):
-        guests = Guest.objects.filter(hotel=request.user.profile.hotel)
-        serializer = GuestBasicSerializer(guests, many=True)
-        return Response(serializer.data)
-
-    def perform_create(self, serializer):
-        serializer.save(hotel=self.request.user.profile.hotel)
-
-
-class GuestRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
-
-    queryset = Guest.objects.all()
-    serializer_class = GuestBasicSerializer
-    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
-
-
-class UserListCreateAPIView(generics.ListCreateAPIView):
-
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin,)
-
-    def list(self, request):
-        users = User.objects.filter(profile__hotel=request.user.profile.hotel)
-        serializer = UserSerializer(users, many=True)
-        return Response(serializer.data)
-
-    def perform_update(self, serializer):
-        user = serializer.save()
-        user_profile = user.profile
-        user_profile.update_hotel(hotel=self.request.profile.hotel)
-
-
-class UserRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
-
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelUser)
-
+    headline = "Auto Replies"
+    template_name = "concierge/replies.html"
+    static_context = {'headline_small': '& Automatic Messaging'}

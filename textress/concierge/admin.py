@@ -1,25 +1,30 @@
-from django import forms
 from django.contrib import admin
-from django.db import models
-from django.forms import TextInput, Textarea
 
-from concierge.models import Guest, Message, Reply
+from concierge.models import Guest, Message, Reply, TriggerType, Trigger
 
 
+@admin.register(Guest)
 class GuestAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'hotel',)
+    list_display = ('name', 'pk', 'hotel', 'hidden',)
 
 
+@admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
     list_display = ('pk', 'guest', 'created', 'body',)
     readonly_fields = ('created',)
 
 
+@admin.register(Reply)
 class ReplyAdmin(admin.ModelAdmin):
-    list_display = ('hotel', 'letter', 'message', 'func_call',)
+    list_display = ('hotel', 'letter', 'message',)
     readonly_fields = ('created', 'modified')
 
 
-admin.site.register(Guest, GuestAdmin)
-admin.site.register(Message, MessageAdmin)
-admin.site.register(Reply, ReplyAdmin)
+@admin.register(TriggerType)
+class TriggerType(admin.ModelAdmin):
+    list_display = ('id', 'name', 'human_name', 'desc',)
+
+
+@admin.register(Trigger)
+class Trigger(admin.ModelAdmin):
+    list_display = ('id', 'hotel', 'type', 'reply')

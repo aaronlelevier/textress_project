@@ -1,44 +1,37 @@
-import os
-import time
-import pytest
-import stripe
-
 from django.conf import settings
-from django.test import TestCase, LiveServerTestCase, RequestFactory
-from django.test.client import Client
+from django.test import TestCase, TransactionTestCase
+from django.utils import timezone
 from django.core.urlresolvers import reverse
-from django.contrib.auth.models import User, Group
-from django.http import Http404
+from django.contrib.auth.models import User
 
 from model_mommy import mommy
 
-from account.models import AcctCost
-from account.tests.factory import CREATE_ACCTCOST_DICT
+from account.models import (Pricing, AcctCost, AcctStmt, AcctTrans,
+    CHARGE_AMOUNTS, BALANCE_AMOUNTS)
+from account.tests.factory import (CREATE_ACCTCOST_DICT, create_acct_stmt,
+    create_acct_stmts, create_acct_trans)
 from main.models import Hotel
-from main.tests.test_models import create_hotel
-from main.tests.factory import CREATE_USER_DICT, CREATE_HOTEL_DICT
+from main.tests.factory import (CREATE_USER_DICT, CREATE_HOTEL_DICT, PASSWORD,
+    create_hotel, create_hotel_user)
+from payment.forms import StripeForm, OneTimePaymentForm
+from payment.tests import factory
 from payment.models import Customer, Card, Charge
+from sms.models import PhoneNumber
 from utils import create
 from utils.email import Email
+from utils import dj_messages
 
 
 class RegistrationTests(TestCase):
 
     def setUp(self):
         create._get_groups_and_perms()
-        self.username = CREATE_USER_DICT['username']
-        self.password = '1234'
 
-        # Step 1
-        response = self.client.post(reverse('main:register_step1'),
-            CREATE_USER_DICT)
-        self.client.login(username=self.username, password=self.password)
-        # Step 2
-        response = self.client.post(reverse('main:register_step2'),
-            CREATE_HOTEL_DICT)
-        # Step 3
-        response = self.client.post(reverse('register_step3'), # no namespace b/c in "account" app
-            CREATE_ACCTCOST_DICT)
+        self.hotel = create_hotel()
+        self.user = create_hotel_user(self.hotel, group='hotel_admin')
+        self.acct_cost = mommy.make(AcctCost, hotel=self.hotel)
+        # Login
+        self.client.login(username=self.user.username, password=PASSWORD)
 
     def test_register_step4_get(self):
         # Step 4
@@ -48,13 +41,36 @@ class RegistrationTests(TestCase):
     def test_register_step4_context(self):
         # Step 4
         response = self.client.get(reverse('payment:register_step4'))
-        assert isinstance(response.context['acct_cost'], AcctCost)
-        assert response.context['months']
-        assert response.context['years']
-        assert response.context['PHONE_NUMBER_CHARGE']
-
+        self.assertIsInstance(response.context['form'], StripeForm)
+        self.assertIsInstance(response.context['hotel'], Hotel)
+        self.assertIsInstance(response.context['acct_cost'], AcctCost)
+        self.assertTrue(response.context['months'])
+        self.assertTrue(response.context['years'])
+        self.assertTrue(response.context['PHONE_NUMBER_CHARGE'])
         self.assertContains(response, response.context['step'])
         self.assertContains(response, response.context['step_number'])
+
+    def test_register_success(self):
+        # valid Customer, so can access
+        customer = mommy.make(Customer)
+        hotel = Hotel.objects.first()
+        hotel = hotel.update_customer(customer)
+        response = self.client.get(reverse('payment:register_success'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, response.context['step'])
+        self.assertContains(response, response.context['step_number'])
+
+    def test_register_success_fail(self):
+        self.client.logout()
+        # random Admin User who hasn't paid gets redirected
+        # Users
+        hotel_b = create_hotel(name='hotel_b')
+        admin_b = create_hotel_user(hotel=hotel_b, username='admin_b', group='hotel_admin')
+        hotel_b = hotel_b.set_admin_id(user=admin_b)
+
+        self.client.login(username=admin_b.username, password=PASSWORD)
+        response = self.client.get(reverse('payment:register_success'))
+        self.assertRedirects(response, reverse('payment:register_step4'))
 
 
 class PaymentEmailTests(TestCase):
@@ -62,17 +78,16 @@ class PaymentEmailTests(TestCase):
     def setUp(self):
         create._get_groups_and_perms()
         self.username = CREATE_USER_DICT['username']
-        self.password = '1234'
+        self.password = PASSWORD
 
-        # Step 1
-        response = self.client.post(reverse('main:register_step1'),
-            CREATE_USER_DICT)
+        self.hotel = create_hotel()
+        self.user = create_hotel_user(self.hotel)
         self.client.login(username=self.username, password=self.password)
 
     def test_email(self):
         user = User.objects.first()
-        customer = mommy.make(Customer, email=user.email)
-        charge = mommy.make(Charge, customer=customer)
+        customer = factory.customer()
+        charge = factory.charge(customer.id)
 
         email = Email(
             to=user.email,
@@ -88,147 +103,300 @@ class PaymentEmailTests(TestCase):
         email.msg.send()
 
 
-# class CardTests(TestCase):
+class BillingSummaryTests(TransactionTestCase):
 
-#     def setUp(self):
-#         self.password = '1234'
-#         self.hotel = create_hotel()
-#         self.other_hotel = create_hotel('other')
+    fixtures = ['trans_type.json', 'payment.json']
 
-#         # create "Hotel Manager" Group
-#         create._get_groups_and_perms()
+    def setUp(self):
+        # Users
+        create._get_groups_and_perms()
+        self.password = PASSWORD
+        self.hotel = create_hotel()
+        self.admin = create_hotel_user(hotel=self.hotel, username='admin', group='hotel_admin')
+        self.user = create_hotel_user(hotel=self.hotel, username='user')
+        # Billing Stmt Fixtures
+        self.acct_cost, created = AcctCost.objects.get_or_create(self.hotel)
+        self.acct_stmts = create_acct_stmts(self.hotel)
+        self.acct_stmt = self.acct_stmts[-1]
+        self.acct_trans = create_acct_trans(self.hotel)
+        self.pricing = mommy.make(Pricing, hotel=self.hotel)
+        self.phone_number = mommy.make(PhoneNumber, hotel=self.hotel)
+        # Stripe
+        self.customer = Customer.objects.get(id="cus_75fWUbM8dV8R8G")
+        self.hotel.update_customer(self.customer)
+        self.cards = self.customer.cards.all()
+        self.card = self.cards.first()
+        self.card2 = self.cards.last()
+        # Login
+        self.client.login(username=self.admin.username, password=PASSWORD)
 
-#         # Admin
-#         self.admin = mommy.make(User, username='admin')
-#         self.admin.groups.add(Group.objects.get(name="hotel_admin"))
-#         self.admin.set_password(self.password)
-#         self.admin.save()
-#         self.admin.profile.update_hotel(hotel=self.hotel)
+    def tearDown(self):
+        self.client.logout()
 
-#         # Manager
-#         self.mgr = mommy.make(User, username='mgr')
-#         self.mgr.groups.add(Group.objects.get(name="hotel_manager"))
-#         self.mgr.set_password(self.password)
-#         self.mgr.save()
-#         self.mgr.profile.update_hotel(hotel=self.hotel)
+    def test_get(self):
+        response = self.client.get(reverse('payment:summary'))
+        self.assertEqual(response.status_code, 200)
 
-#         # User
-#         self.user = mommy.make(User, username='user')
-#         self.user.set_password(self.password)
-#         self.user.save()
-#         self.user.profile.update_hotel(hotel=self.hotel)
+    def test_context(self):
+        response = self.client.get(reverse('payment:summary'))
+        self.assertIsInstance(response.context['acct_stmt'], AcctStmt)
+        # User's current fund's balance show's in context
+        self.assertIsNotNone(response.context['acct_stmts'][0].balance)
+        # Other context
+        self.assertIsInstance(response.context['acct_trans'][0], AcctTrans)
+        self.assertIsInstance(response.context['acct_cost'], AcctCost)
 
-#         # Other Hotel Admin
-#         self.other_admin = mommy.make(User, username='other_admin')
-#         self.other_admin.groups.add(Group.objects.get(name="hotel_admin"))
-#         self.other_admin.set_password(self.password)
-#         self.other_admin.save()
-#         self.other_admin.profile.update_hotel(hotel=self.other_hotel)
+    def test_context__manage_payments(self):
+        response = self.client.get(reverse('payment:summary'))
 
-#         # Stripe
-#         self.customer = mommy.make(Customer)
-#         self.hotel.customer = self.customer
-#         self.hotel.admin_id = self.admin.id
-#         self.hotel.save()
+        self.assertIn("Manage Payments", response.content)
 
-#         self.cards = mommy.make(Card, customer=self.customer, _quantity=3)
-#         self.card = self.cards[0]
+    def test_context__chage_or_add_payment_method(self):
+        response = self.client.get(reverse('payment:summary'))
 
-#     def test_create(self):
-#         assert isinstance(self.hotel, Hotel)
-#         assert isinstance(self.card, Card)
+        self.assertIn("Change / Add Payment Method", response.content)
+        self.assertIn(reverse("payment:card_list"), response.content)
 
-#         assert self.mgr.profile.hotel == self.hotel
-#         assert self.user.profile.hotel == self.hotel
-#         assert self.hotel.admin_id == self.admin.id
+    def test_context__add_funds(self):
+        response = self.client.get(reverse('payment:summary'))
 
-#         assert len(self.cards) == 3
-#         for card in self.cards:
-#             assert card.customer == self.hotel.customer
+        self.assertIn("Add Funds", response.content)
+        self.assertIn(reverse("payment:one_time_payment"), response.content)
+
+    # one_time_payment
+
+    def test_one_time_payment__initial_form_values(self):
+        response = self.client.get(reverse('payment:one_time_payment'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.context['form'], OneTimePaymentForm)
+        self.assertEqual(
+            response.context['form']['amount'].value(),
+            self.hotel.acct_cost.recharge_amt
+        )
+        self.assertEqual(
+            response.context['form']['auto_recharge'].value(),
+            self.hotel.acct_cost.auto_recharge
+        )
+
+    def test_one_time_payment__card_context(self):
+        Card.objects.update_default(self.customer, self.card.id)
+        self.assertIsInstance(Card.objects.default(self.customer), Card)
+
+        response = self.client.get(reverse('payment:one_time_payment'))
+
+        self.assertIsInstance(response.context['card'], Card)
+        self.assertIn("change", response.content)
+        self.assertIn(reverse('payment:card_list'), response.content)
+
+    def test_one_time_payment__card_context_is_none(self):
+        Card.objects.default(self.customer).delete()
+
+        response = self.client.get(reverse('payment:one_time_payment'))
+
+        self.assertIsNone(response.context['card'])
+        self.assertIn("Add a payment method", response.content)
+        self.assertIn(reverse('payment:card_list'), response.content)
+
+    def test_one_time_payment__post_success(self):
+        data = {
+            'amount': self.hotel.acct_cost.recharge_amt,
+            'auto_recharge': self.hotel.acct_cost.auto_recharge
+        }
+
+        response = self.client.post(reverse('payment:one_time_payment'),
+            data, follow=True)
+
+        self.assertRedirects(response, reverse('payment:summary'))
+        # success message
+        m = list(response.context['messages'])
+        self.assertEqual(len(m), 1)
+        self.assertEqual(
+            str(m[0]),
+            dj_messages['payment_success'].format(amount=data['amount']/100,
+                email=self.hotel.admin.email)
+        )
+
+    def test_one_time_payment__post_fail(self):
+        # no 'form data', so will just stay on page
+        response = self.client.post(reverse('payment:one_time_payment'), {})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['form'].errors)
+
+    def test_one_time_payment__auto_recharge_updated(self):
+        """
+        If 'auto_recharge' changes from what is in the 'hotel.acct_cost', 
+        it should be updated.
+        """
+        self.assertTrue(self.hotel.acct_cost.auto_recharge)
+        data = {
+            'amount': self.hotel.acct_cost.recharge_amt,
+            'auto_recharge': False
+        }
+
+        response = self.client.post(reverse('payment:one_time_payment'),
+            data, follow=True)
+
+        self.assertRedirects(response, reverse('payment:summary'))
+        acct_cost = AcctCost.objects.get(hotel=self.hotel)
+        self.assertFalse(acct_cost.auto_recharge)
+
+    # acct_stmt table - current usage, starting balance, current balance
+
+    def test_context_starting_balance_new_signup(self):
+        """
+        Starting balance (from previous month) should be 'zero' for new signups.
+        """
+        response = self.client.get(reverse('payment:summary'))
+
+        self.assertIn("Starting Balance", response.content)
+        self.assertEqual(response.context['acct_stmt_starting_balance'], 0)
+
+    def test_context_funds_added(self):
+        """
+        Funds added for the month should be that month's 'init_amt' + 'recharge_amt' (s)
+        """
+        self.assertTrue(self.hotel.acct_trans.filter(
+            trans_type__name__in=['recharge_amt', 'init_amt']).exists())
+
+        response = self.client.get(reverse('payment:summary'))
+
+        self.assertIn("Funds Added", response.content)
+        self.assertEqual(response.context['acct_stmt'].funds_added, 0)
+
+    def test_context_total_sms(self):
+        response = self.client.get(reverse('payment:summary'))
+
+        self.assertIn("SMS", response.content)
+        self.assertEqual(
+            response.context['acct_stmt'].total_sms,
+            self.acct_stmt.total_sms
+        )
+
+    def test_context_total_sms_cost(self):
+        self.acct_stmt.total_sms_costs = AcctStmt.objects.get_total_sms_costs(
+            self.hotel, self.acct_stmt.total_sms)
+        self.acct_stmt.save()
+
+        response = self.client.get(reverse('payment:summary'))
+
+        self.assertEqual(
+            response.context['acct_stmt'].total_sms_costs,
+            AcctStmt.objects.get_total_sms_costs(self.hotel, response.context['acct_stmt'].total_sms)
+        )
+
+    def test_context_phone_numbers(self):
+        self.acct_stmt.phone_numbers = self.hotel.phone_numbers.count()
+        self.acct_stmt.save()
+
+        response = self.client.get(reverse('payment:summary'))
+
+        self.assertIn("Phone Numbers", response.content)
+        self.assertEqual(
+            response.context['acct_stmt'].phone_numbers,
+            self.acct_stmt.phone_numbers
+        )
+
+    def test_context_monthly_costs(self):
+        """
+        monthly_costs - just phone_number costs for the time being.
+        """
+        phone_numbers = self.hotel.phone_numbers.count()
+        self.acct_stmt.monthly_costs = phone_numbers * settings.PHONE_NUMBER_MONTHLY_COST
+        self.acct_stmt.save()
+
+        response = self.client.get(reverse('payment:summary'))
+
+        self.assertEqual(
+            response.context['acct_stmt'].monthly_costs,
+            self.acct_stmt.monthly_costs
+        )
+
+    def test_context_current_funds_balance(self):
+        response = self.client.get(reverse('payment:summary'))
+
+        self.assertIn("Current Funds Balance", response.content)
+        self.assertEqual(
+            response.context['acct_stmt'].balance,
+            self.acct_stmt.balance
+        )
+
+    def test_acct_stmts_preview_none(self):
+        [x.delete() for x in AcctStmt.objects.filter(hotel=self.hotel)]
+        response = self.client.get(reverse('payment:summary'))
+        self.assertFalse(response.context['acct_stmts'])
+        self.assertFalse(response.context['acct_stmt'])
+
+    def test_acct_stmts_preview_exist(self):
+        today = timezone.now().date()
+        create_acct_stmt(self.hotel, today.year, today.month)
+        response = self.client.get(reverse('payment:summary'))
+        self.assertTrue(response.context['acct_stmts'])
+        self.assertTrue(response.context['acct_stmt'])
+
+    def test_acct_stmt__note_on_timing(self):
+        response = self.client.get(reverse('payment:summary'))
+
+        self.assertIn("&#42; Please note, account statements are updated daily, so the \
+totals may not immediately reflect your account transactions", response.content)
 
 
-#     def test_list_loggedOut(self):
-#         # Not Logged in can't access
-#         response = self.client.get('payment:card_list')
-#         response.status_code == 302
+class CardUpdateTests(TestCase):
 
-#     def test_list_admin(self):
-#         # Admin has full access
-#         self.client.login(username=self.admin.username, password=self.password)
-#         response = self.client.get('payment:card_list')
-#         response.status_code == 200
+    def setUp(self):
+        # User Info
+        self.password = PASSWORD
+        self.hotel = create_hotel()
+        # create "Hotel Manager" Group
+        create._get_groups_and_perms()
+        self.admin = create_hotel_user(hotel=self.hotel, username='admin', group='hotel_admin')
+        # 2 Customers w/ 2 Cards each.
+        self.customer = factory.customer()
+        self.card = factory.card(customer_id=self.customer.id)
+        self.card2 = factory.card(customer_id=self.customer.id)
+        self.hotel.customer = self.customer
+        self.hotel.save()
+        # Login
+        self.client.login(username=self.admin.username, password=PASSWORD)
 
-#     def test_list_mgr(self):
-#         # Mgr Can't Access
-#         self.client.login(username=self.mgr.username, password=self.password)
-#         response = self.client.get('payment:card_list')
-#         response.status_code == 404
+    def tearDown(self):
+        self.client.logout()
 
-#     def test_list_user(self):
-#         # User Can't Access
-#         self.client.login(username=self.user.username, password=self.password)
-#         response = self.client.get('payment:card_list')
-#         response.status_code == 404
+    def test_card_list_response(self):
+        response = self.client.get(reverse('payment:card_list'))
+        self.assertEqual(response.status_code, 200)
 
-#     def test_detail(self):
-#         ### Other Users can't Login Fail tests ###
+    def test_card_list_context(self):
+        response = self.client.get(reverse('payment:card_list'))
+        self.assertTrue(response.context['form'])
 
-#         # User Can't Access
-#         self.client.login(username=self.user.username, password=self.password)
-#         response = self.client.get(reverse('payment:card_detail', kwargs={'pk': self.card.short_pk}))
-#         response.status_code == 404
+    def test_card_list_billing_summary_breadcrumbs(self):
+        # Also tests: ``BreadcrumbBaseMixin``
+        response = self.client.get(reverse('payment:card_list'))
+        self.assertTrue(response.context['breadcrumbs'])
 
-#         # Mgr Can't Access
-#         self.client.logout()
-#         self.client.login(username=self.mgr.username, password=self.password)
-#         response = self.client.get(reverse('payment:card_detail', kwargs={'pk': self.card.short_pk}))
-#         response.status_code == 404
+    def test_set_default_card_view(self):
+        # default = False
+        self.card.default = False
+        self.card.save()
+        self.assertFalse(self.card.default)
+        # set to True
+        response = self.client.get(reverse('payment:set_default_card',
+            kwargs={'pk': self.card.id}), follow=True)
+        self.assertRedirects(response, reverse('payment:card_list'))
+        card = Card.objects.get(id=self.card.id)
+        self.assertTrue(card.default)
+        # Success Message
+        m = list(response.context['messages'])
+        self.assertEqual(len(m), 1)
 
-#         # Mgr Can't Access
-#         self.client.logout()
-#         self.client.login(username=self.other_admin.username, password=self.password)
-#         response = self.client.get(reverse('payment:card_detail', kwargs={'pk': self.card.short_pk}))
-#         response.status_code == 404
-
-#         ### Real Tests of View w/ Authenticated Admin ###
-
-#         # Admin has full access
-#         self.client.login(username=self.admin.username, password=self.password)
-#         response = self.client.get(reverse('payment:card_detail', kwargs={'pk': self.card.short_pk}))
-#         assert response.status_code == 200
-
-#         # Get the Object
-#         print(response.context['object'])
-#         assert response.context['object'] == self.card
-
-#     def test_update(self):
-#         # Admin has full access
-#         self.client.login(username=self.admin.username, password=self.password)
-#         response = self.client.get(reverse('payment:card_update', kwargs={'pk': self.card.short_pk}))
-#         assert response.status_code == 200
-
-#         # Set a card to Default=False, then use the UpdateView to change it
-#         card = self.cards[1]
-#         card.default = False
-#         card.save()
-#         assert not card.default
-
-#         response = self.client.post(reverse('payment:card_update', kwargs={'pk': card.short_pk}),
-#             {'default': True}, follow=True)
-#         updated_card = Card.objects.get(short_pk=card.short_pk)
-#         assert updated_card.default
-#         self.assertRedirects(response, reverse('payment:card_detail', kwargs={'pk': card.short_pk}))
-
-
-#     def test_delete(self):
-#         # Admin has full access
-#         self.client.login(username=self.admin.username, password=self.password)
-#         response = self.client.get(reverse('payment:card_delete', kwargs={'pk': self.card.short_pk}))
-#         assert response.status_code == 200
-
-#         # 3 Cards exist b/4 deleteting 1 via the View, then only 2 exist
-#         assert len(Card.objects.all()) == 3
-#         response = self.client.post(reverse('payment:card_delete', kwargs={'pk': self.cards[-1].short_pk}),
-#             follow=True)
-#         assert len(Card.objects.all()) == 2
-#         self.assertRedirects(response, reverse('payment:card_list'))
+    def test_delete_card_view(self):
+        response = self.client.get(reverse('payment:delete_card',
+            kwargs={'pk': self.card.id}), follow=True)
+        self.assertRedirects(response, reverse('payment:card_list'))
+        with self.assertRaises(Card.DoesNotExist):
+            Card.objects.get(id=self.card.id)
+        # Success Message
+        m = list(response.context['messages'])
+        self.assertEqual(len(m), 1)

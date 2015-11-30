@@ -1,28 +1,20 @@
-import re
-
 from django import forms
-from django.conf import settings
-from django.contrib import auth, messages
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 from django.utils.translation import ugettext, ugettext_lazy as _
-from django.utils import six
 
-from djangular.forms import (NgFormValidationMixin, NgDeclarativeFieldsMetaclass,
-    NgModelFormMetaclass, NgFormBaseMixin, NgModelFormMixin)
-from djangular.styling.bootstrap3.forms import (Bootstrap3Form,
-    Bootstrap3ModelForm, Bootstrap3FormMixin)
+from djangular.forms import NgFormValidationMixin
 
-from .models import Hotel
-from account.helpers import login_messages
-from concierge.models import validate_phone
+from main.helpers import user_in_group
+from main.models import Hotel, UserProfile
+from utils import ph_formatter, validate_phone, dj_messages
+from utils.forms import Bootstrap3ModelForm
 
 
-class UserCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):
+class UserCreateForm(Bootstrap3ModelForm):
     '''
     Form used during Registration to Create the Admin User.
     '''
-    # djangular req
+    # djangular requires this
     form_name = 'user_create_form'
 
     # UserCreationForm
@@ -37,23 +29,20 @@ class UserCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):
     last_name = forms.CharField(label=_("Last Name"), required=True)
     email = forms.EmailField(label=_("Email"), required=True)
 
-    username = forms.RegexField(label=_("Username"), max_length=30,
-        regex=r'^[\w.@+-_]+$',
+    username = forms.RegexField(label=_("Username"), max_length=30, regex=r'^[\w.@+-_]+$',
         help_text=_("Required. 30 characters or fewer. Letters, digits and "
-                      "@/./+/-/_ only."),
+                    "@/./+/-/_ only."),
         error_messages={
             'invalid': _("This value may contain only letters, numbers and "
                          "@/./+/-/_ characters.")})
-    password1 = forms.CharField(label=_("Password"),
-        widget=forms.PasswordInput)
-    password2 = forms.CharField(label=_("Password confirmation"),
-        widget=forms.PasswordInput,
+    password1 = forms.CharField(label=_("Password"), widget=forms.PasswordInput)
+    password2 = forms.CharField(label=_("Confirm Password"), widget=forms.PasswordInput,
         help_text=_("Enter the same password as above, for verification."))
 
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'email',
-            'username', 'password1', 'password2',)
+                  'username', 'password1', 'password2',)
 
     def clean_username(self):
         # Since User.username is unique, this check is redundant,
@@ -87,34 +76,101 @@ class UserCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):
         return user
 
 
-class UserUpdateForm(NgFormValidationMixin, Bootstrap3ModelForm):
+class UserUpdateForm(Bootstrap3ModelForm):
     '''
     Form used during Registration to Update the Admin User.
     '''
-    # djangular req
     form_name = 'admin_update_form'
+
+    first_name = forms.CharField(label=_("First Name"), required=True)
+    last_name = forms.CharField(label=_("Last Name"), required=True)
+    email = forms.EmailField(label=_("Email"), required=True)
 
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email']
 
 
-class HotelCreateForm(NgFormValidationMixin, Bootstrap3ModelForm):
-    # djangular req
+class DeleteUserForm(forms.ModelForm):
+    """
+    Users are hidden, not deleted.
+
+    The purpose of this form is to not allow Admin Users to essentially delete (hide)
+    themselves, and instead raise a form error.
+    """
+    class Meta:
+        model = UserProfile
+        fields = []
+
+    def __init__(self, user, *args, **kwargs):
+        super(DeleteUserForm, self).__init__(*args, **kwargs)
+        self.user = user
+
+    def clean(self):
+        cleaned_data = super(DeleteUserForm, self).clean()
+
+        if user_in_group(self.user, 'hotel_admin'):
+            raise forms.ValidationError(dj_messages['delete_admin_fail'])
+
+        return cleaned_data
+
+
+class HotelCreateForm(Bootstrap3ModelForm):
+    "Used for Hotel Update/Create"
+
     form_name = 'hotel_create_form'
 
     error_messages = {
-        'invalid_ph':_('Please enter a 10-digit phone number'),
+        'invalid_ph': _('Please enter a 10-digit phone number'),
+        'duplicate_address_phone': _('"Hotel phone number exists."')
     }
+
+    address_phone = forms.RegexField(r'^(\(\d{3}\)) (\d{3})-(\d{4})$',
+        label='Phone number',
+        error_messages={'invalid': 'Phone number have 10 digits'},
+        help_text='Allowed phone number format: (702) 510-5555')
 
     class Meta:
         model = Hotel
         fields = ['name', 'address_phone', 'address_line1', 'address_line2',
-            'address_city', 'address_state', 'address_zip']
+                  'address_city', 'address_state', 'address_zip']
 
-    def clean_phone(self):
+    def __init__(self, hotel=None, *args, **kwargs):
+        super(HotelCreateForm, self).__init__(*args, **kwargs)
+        self.hotel = hotel
+
+        try:
+            address_phone = hotel.address_phone
+        except AttributeError:
+            self.initial['address_phone'] = ""
+        else:
+            self.initial['address_phone'] = ph_formatter(
+                getattr(hotel, 'address_phone', None))
+
+    def clean_address_phone(self):
         """
         Return the Twilio formatted PH #
         """
-        phone = self.cleaned_data.get('address_phone')
-        return validate_phone(phone)
+        self.cleaned_data = super(HotelCreateForm, self).clean()
+
+        address_phone = self.cleaned_data.get('address_phone')
+
+        # returns a validated and formatted phone # ex: "+17025108888"
+        # all phone #'s saved to the DB in this format
+        phone = validate_phone(address_phone)
+
+        self._validate_phone_in_use(phone)
+
+        return phone
+
+    def _validate_phone_in_use(self, phone):
+        """Silently pass if the Hotel is updating something, but leaving 
+        the PH # as is."""
+
+        qs = Hotel.objects.filter(address_phone=phone)
+
+        if self.hotel:
+            qs = qs.exclude(id=self.hotel.id)
+
+        if qs.exists():
+            raise forms.ValidationError(self.error_messages['duplicate_address_phone'])

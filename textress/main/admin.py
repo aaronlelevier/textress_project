@@ -1,7 +1,11 @@
 from django.contrib import admin
 
-from main.models import Hotel, UserProfile, Subaccount
+from main.models import Hotel, UserProfile, Subaccount, Icon
 
+
+@admin.register(Icon)
+class IconAdmin(admin.ModelAdmin):
+    pass
 
 @admin.register(Hotel)
 class HotelAdmin(admin.ModelAdmin):

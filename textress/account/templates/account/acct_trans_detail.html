@@ -1,31 +1,57 @@
-{% extends "base_test.html" %}
-{% load stripe_tags %}
+{% extends "cpanel/base-sidebar.html" %}
+{% load staticfiles stripe_tags %}
 
-{% block main %}
-<h4>Montly transaction details</h4>
+{% block breadcrumbs %}
+    {{ block.super }}
+    {% if breadcrumbs %}
+        {{ breadcrumbs|safe }}
+    {% endif %}
+{% endblock breadcrumbs %}
 
-    <h5>Initial Balance</h5>
-    <p>{{ init_balance|stripe_money }}</p>
 
-    <h5>Credit</h5>
-    <ul>
-    {% for trans in monthly_trans.credit %}
-        <li>{{ trans }}</li>
-    {% empty %}
-        <li>No Credit Transactions</li>
-    {% endfor %}
-    </ul>
-    <p>Credit Total: {{ monthly_trans.credit.balance|stripe_money }}</p>
+{% block content %}
 
-    <h5>Debit</h5>
-    <ul>
-    {% for trans in monthly_trans.debit %}
-        <li>{{ trans }}</li>
-    {% empty %}
-        <li>No Debit Transactions</li>
-    {% endfor %}
-    </ul>
-    <p>Debit Total: {{ monthly_trans.debit.balance|stripe_money }}</p>
+    <div class="row" style="margin-bottom:10px;">
+        <div class="col-md-12">
+            <div class="btn btn-default btn-xs pull-right">
+                <a class="btn dropdown-toggle no_decoration" data-toggle="dropdown" href="#">{{ acct_stmt }} <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        {% for as in acct_stmts %}
+                        <li><a href="{% url 'acct_stmt_detail' as.year as.month %}">{{ as.month_abbr }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </a>
+            </div>
+        </div>
+    </div>
 
-<h5>Balance: {{ balance|stripe_money }}</h5>
-{% endblock main %}
+    <div class="row">
+        <div class="col-md-12">
+            {% if monthly_trans %}
+                <table class="table table-hover">
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>SMS Count</th>
+                        <th>Debit</th>
+                        <th>Credit</th>
+                        <th>Balance</th>
+                    </tr>
+                    {% for trans in monthly_trans %}
+                        <tr>
+                            <td>{{ trans.insert_date }}</td>
+                            <td>{{ trans.trans_type.name|format_snake_case }}</td>
+                            <td>{{ trans.sms_used }}</td>
+                            <td>{% if trans.trans_type.name == 'sms_used' %}{{ trans.amount|stripe_money }}{% endif %}</td>
+                            <td>{% if trans.trans_type.name != 'sms_used' %}{{ trans.amount|stripe_money }}{% endif %}</td>
+                            <td>{{ trans.balance|stripe_money }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <h3>No monthly transactions</h3>
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock content %}

@@ -1,42 +1,42 @@
 [
 {
-  "pk": 1,
   "fields": {
+    "desc": "initial account funding",
     "modified": "2015-01-05T01:13:18.378Z",
     "name": "init_amt",
-    "desc": "initial account funding",
     "created": "2014-12-27T13:47:57.473Z"
   },
-  "model": "account.transtype"
+  "model": "account.transtype",
+  "pk": 1
 },
 {
-  "pk": 2,
   "fields": {
+    "desc": "Recharge amount selected by the Hotel",
     "modified": "2015-01-05T01:13:52.203Z",
     "name": "recharge_amt",
-    "desc": "Recharge amount selected by the Hotel",
     "created": "2014-12-27T13:53:19.757Z"
   },
-  "model": "account.transtype"
+  "model": "account.transtype",
+  "pk": 2
 },
 {
-  "pk": 3,
   "fields": {
+    "desc": "daily deduction for sms used for that day; cache - sms used during the day to save DB trips",
     "modified": "2014-12-27T13:54:02.052Z",
     "name": "sms_used",
-    "desc": "daily deduction for sms used for that day; cache - sms used during the day to save DB trips",
     "created": "2014-12-27T13:54:02.052Z"
   },
-  "model": "account.transtype"
+  "model": "account.transtype",
+  "pk": 3
 },
 {
-  "pk": 4,
   "fields": {
-    "modified": "2015-01-04T23:28:28.339Z",
-    "name": "bulk_discount",
-    "desc": "credit applied from previous months use based on bulk",
-    "created": "2015-01-04T23:28:28.339Z"
+    "desc": "Monthly phone number cost. Is charged at the initial purchase of a phone number, and monthly after that.",
+    "modified": "2015-08-19T12:37:20.468Z",
+    "name": "phone_number",
+    "created": "2015-08-19T12:37:20.468Z"
   },
-  "model": "account.transtype"
+  "model": "account.transtype",
+  "pk": 4
 }
 ]
