@@ -1,0 +1,22 @@
+[
+{
+  "fields": {
+    "name": "hotel_admin",
+    "permissions": [
+      102
+    ]
+  },
+  "model": "auth.group",
+  "pk": 1
+},
+{
+  "fields": {
+    "name": "hotel_manager",
+    "permissions": [
+      103
+    ]
+  },
+  "model": "auth.group",
+  "pk": 2
+}
+]

@@ -1,3 +1,5 @@
+#!/bin/bash -lx
+
 echo "START BUILD"
 
 

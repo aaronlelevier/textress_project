@@ -166,6 +166,9 @@ DEFAULT_EMAIL_BILLING = 'billing@textress.com'
 DEFAULT_EMAIL_AARON = 'aaron@textress.com'
 DEFAULT_EMAIL_NOREPLY = 'noreply@textress.com'
 
+SUPERUSER_USERNAME = 'aaron'
+SUPERUSER_EMAIL = 'aaron@textress.com'
+SUPERUSER_PASSWORD = os.environ['T17_DB_PASSWORD']
 
 ### OTHER CONTACT INFO ###
 TEXTRESS_PHONE_NUMBER = os.environ['T17_PHONE_NUMBER']

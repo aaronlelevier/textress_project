@@ -19,6 +19,8 @@ base:
     - supervisord.rproxy
 
   'roles:appserver':
+    - redis
+    - rabbitmq
     - uwsgi
 
   'roles:database':
