@@ -27,7 +27,7 @@
     "hotel": null,
     "modified": "2015-09-25T13:25:29.704Z",
     "letter": "H",
-    "message": "Please call the main hotel phone number for help. Sorry about the inconvenience."
+    "message": "Reply 'S' to STOP, 'Y' to 'reactive SMS messaging'."
   },
   "model": "concierge.reply",
   "pk": 3
