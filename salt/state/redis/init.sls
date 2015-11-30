@@ -1,6 +1,6 @@
 install-redis:
   pkg.installed:
-    - name: redis
+    - name: redis-server
 
 redis:
   service.running:
