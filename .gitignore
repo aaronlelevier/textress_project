@@ -23,5 +23,4 @@ so_*
 logs/*
 !.gitkeep
 node_modules/
-tmp
-vendor/
+tmp/
