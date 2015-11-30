@@ -43,3 +43,10 @@ Guest with unread messages show first
     Group Status to "hotel_manager" or take it away.
 
 - also be able to view Group.
+
+
+### VENDOR
+
+- do package upgrades to 'angular' packages
+- put their versions in 'packages.json'
+- remove the /vendor/ folder from version control
