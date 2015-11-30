@@ -2,7 +2,7 @@ install-redis:
   pkg.installed:
     - name: redis-server
 
-redis:
+redis-server:
   service.running:
     - enable: True
     - reload: True
