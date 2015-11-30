@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -19,14 +19,6 @@ class Migration(migrations.Migration):
                 ('email', models.EmailField(max_length=100, verbose_name='Email')),
                 ('subject', models.CharField(max_length=255, verbose_name='Subject', blank=True)),
                 ('message', models.TextField(max_length=2000, verbose_name='Message')),
-            ],
-        ),
-        migrations.CreateModel(
-            name='Newsletter',
-            fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('created', models.DateTimeField(auto_now_add=True)),
-                ('email', models.EmailField(unique=True, max_length=100, verbose_name='Email')),
             ],
         ),
         migrations.CreateModel(

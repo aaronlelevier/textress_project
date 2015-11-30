@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -12,6 +12,11 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AddField(
+            model_name='pricing',
+            name='hotel',
+            field=models.OneToOneField(related_name='pricing', null=True, blank=True, to='main.Hotel'),
+        ),
         migrations.AddField(
             model_name='accttrans',
             name='hotel',

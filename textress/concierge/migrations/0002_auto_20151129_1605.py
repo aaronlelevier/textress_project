@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations, models
 from django.conf import settings
 
 
@@ -14,6 +14,21 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AddField(
+            model_name='trigger',
+            name='hotel',
+            field=models.ForeignKey(to='main.Hotel'),
+        ),
+        migrations.AddField(
+            model_name='trigger',
+            name='reply',
+            field=models.ForeignKey(to='concierge.Reply'),
+        ),
+        migrations.AddField(
+            model_name='trigger',
+            name='type',
+            field=models.ForeignKey(to='concierge.TriggerType'),
+        ),
         migrations.AddField(
             model_name='reply',
             name='hotel',
