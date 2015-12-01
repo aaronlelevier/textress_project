@@ -1,23 +1,22 @@
 include:
-    - packages
+  - packages
 
-python-pip:
-    pkg.installed
 
-upgrade_pip:
-    cmd.run:
-        - name: easy_install -U pip
-        - require: 
-            -pkg: python-pip
+update-salt-pip-requirements:
+  cmd.run:
+    - name: cp /opt/django/requirements.txt /srv/salt/pip/requirements.txt
 
-/opt/django/requirements.txt:
-    file.managed:
-        - source: salt://pip/requirements.txt
-  
-pip:
-    pip.installed:
-        - requirements: salt://pip/requirements.txt
-        - require: 
-            - sls: packages
-            - file: /opt/django/requirements.txt
-            - cmd: upgrade_pip
+
+# pip:
+#   pip.installed:
+#     - requirements: salt://pip/requirements.txt
+#     - require:
+#       - sls: packages
+#       - file: /opt/django/requirements.txt
+
+
+/root/.virtualenvs/textress:
+  virtualenv.managed:
+    - requirements: salt://pip/requirements.txt
+    - require:
+      - sls: packages
