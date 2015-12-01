@@ -6,7 +6,7 @@ base:
     - cmd
     - bashrc
     - packages
-    - pip
+    - virtualenv
     - environ
     - git
     - keys
