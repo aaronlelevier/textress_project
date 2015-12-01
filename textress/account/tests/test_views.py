@@ -31,8 +31,9 @@ class AcctStmtViewTests(TestCase):
         self.year = self.today.year
         self.month = self.today.month
         # Account Data
-        self.acct_stmt = create_acct_stmt(hotel=self.hotel, year=self.year, month=self.month)
+        self.pricing = mommy.make(Pricing, hotel=self.hotel)
         self.acct_trans = create_acct_trans(hotel=self.hotel)
+        self.acct_stmt = AcctStmt.objects.get_or_create(hotel=self.hotel, year=self.year, month=self.month)
         # Login
         self.client.login(username=self.admin.username, password=PASSWORD)
 
@@ -72,7 +73,7 @@ class AcctStmtViewTests(TestCase):
 
         self.assertTrue(response.context['monthly_trans'])
         # the "sms_used" AcctTrans is populating the table how we expect
-        self.assertIn(acct_tran.insert_date.strftime("%b. %d, %Y"), response.content)
+        self.assertIn(acct_tran.insert_date.strftime("%b. %-d, %Y"), response.content)
         self.assertIn("sms used", response.content)
         self.assertIn(str(acct_tran.sms_used), response.content)
         self.assertIn('${:.2f}'.format(acct_tran.amount/100.0), response.content)
