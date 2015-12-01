@@ -2,6 +2,7 @@
 {
   "fields": {
     "created": "2015-09-25T13:25:29.662Z",
+    "desc": "",
     "hotel": null,
     "modified": "2015-09-25T13:25:29.662Z",
     "letter": "S",
@@ -13,6 +14,7 @@
 {
   "fields": {
     "created": "2015-09-25T13:25:29.699Z",
+    "desc": "",
     "hotel": null,
     "modified": "2015-09-25T13:25:29.699Z",
     "letter": "Y",
@@ -24,6 +26,7 @@
 {
   "fields": {
     "created": "2015-09-25T13:25:29.704Z",
+    "desc": "",
     "hotel": null,
     "modified": "2015-09-25T13:25:29.704Z",
     "letter": "H",

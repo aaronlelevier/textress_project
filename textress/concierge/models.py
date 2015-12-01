@@ -518,6 +518,7 @@ class TriggerType(TimeStampBaseModel):
             self.human_name = self.name.replace('_', ' ')
         super(TriggerType, self).save(*args, **kwargs)
 
+
 class TriggerManager(models.Manager):
 
     def send_message(self, guest_id, trigger_type_name):

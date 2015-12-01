@@ -1,5 +1,7 @@
 #!/bin/bash -lx
 
+echo "Only for loading reloading database data, not a full deploy script."
+
 echo "MUST BE AT './manage.py' DIR LEVEL!"
 
 dropdb textress
@@ -28,8 +30,8 @@ echo "system auto replies and trigger types"
 ./manage.py loaddata trigger_type.json
 
 echo "index.html fixtures"
-./manage.py loaddata qa.json
 ./manage.py loaddata topic.json
+./manage.py loaddata qa.json
 
 echo "Stripe card images"
 ./manage.py loaddata card_images.json
