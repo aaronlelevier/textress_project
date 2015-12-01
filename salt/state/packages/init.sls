@@ -11,3 +11,5 @@ mypkgs:
       - supervisor
       - libncurses5-dev
       - uwsgi-plugin-python
+      - libxml2-dev
+      - libxslt1-dev
