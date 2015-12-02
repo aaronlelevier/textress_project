@@ -7,7 +7,8 @@ update-salt-states:
     - require:
       - sls: git
 
-
+# put project 'reqs.txt' in 'salt dir' so can pip
+# install them on minion appserver(s)
 copy-pip-requirements:
   cmd.run:
     - name: cp /opt/django/requirements.txt /srv/salt/virtualenv/requirements.txt
