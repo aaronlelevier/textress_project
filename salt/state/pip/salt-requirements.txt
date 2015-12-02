@@ -1,0 +1,7 @@
+Jinja2==2.8
+MarkupSafe==0.23
+msgpack-python==0.4.6
+requests==2.2.1
+salt===2015.2.0-985-gbbdf316
+six==1.5.2
+supervisor==3.0b2

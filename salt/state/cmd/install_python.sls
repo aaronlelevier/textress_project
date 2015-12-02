@@ -1,3 +1,7 @@
+# Installs python 2.7.10 from source w/ required Ubuntu packages
+
+# Should these packages be put in 'package state.sls'?
+
 python-2.7.10-required-packages:
   pkg.installed:
     - pkgs:
