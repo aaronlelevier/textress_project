@@ -39,6 +39,7 @@ jupyter-core==4.0.4
 kombu==3.0.26
 logilab-common==1.1.0
 mistune==0.7.1
+model-mommy==1.2.5
 nbconvert==4.0.0
 nbformat==4.0.0
 notebook==4.0.4
