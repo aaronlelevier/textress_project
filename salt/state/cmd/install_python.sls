@@ -1,7 +1,6 @@
 # Installs python 2.7.10 from source w/ required Ubuntu packages
 
-# Should these packages be put in 'package state.sls'?
-
+# Should this block of "packages" be put in 'package state.sls'?
 python-2.7.10-required-packages:
   pkg.installed:
     - pkgs:
@@ -19,10 +18,8 @@ python-2.7.10-required-packages:
 
 install-python-2.7.10-from-tarball:
   cmd.run:
-    - names:
-      - cd /usr/src
-      - wget https://www.python.org/ftp/python/2.7.10/Python-2.7.10.tgz
-      - tar xzf Python-2.7.10.tgz
-      - cd Python-2.7.10
-      - ./configure
-      - make altinstall
+    - name: |
+        wget https://www.python.org/ftp/python/2.7.10/Python-2.7.10.tgz && \
+        tar xzf Python-2.7.10.tgz && cd Python-2.7.10 && \
+        ./configure && make altinstall
+    - cwd: /usr/src

@@ -1,6 +1,15 @@
 from .base import *
 
 
+THIRD_PARTY_APPS = (
+    'django_nose',
+    'django_coverage',
+    'django_extensions',
+)
+
+INSTALLED_APPS = set(INSTALLED_APPS + THIRD_PARTY_APPS)
+
+
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 NOSE_ARGS = [

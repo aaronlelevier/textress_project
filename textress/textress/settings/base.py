@@ -27,13 +27,10 @@ DEFAULT_APPS = (
 
 THIRD_PARTY_APPS = (
     'psycopg2',
-    'django_nose',
     'rest_framework',
     'rest_framework.authtoken',
     'djangular',
-    'django_coverage',
     'ws4redis',
-    'django_extensions',
 )
 
 LOCAL_APPS = (

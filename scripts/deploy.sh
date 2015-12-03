@@ -22,8 +22,8 @@ echo "system auto replies and trigger types"
 ./manage.py loaddata trigger_type.json
 
 echo "index.html fixtures"
-./manage.py loaddata qa.json
 ./manage.py loaddata topic.json
+./manage.py loaddata qa.json
 
 echo "guest+user profile icons"
 ./manage.py loaddata icons.json
