@@ -2,6 +2,6 @@
 
 install-pip:
   cmd.run:
-    - name: |
-      easy_install -U pip==7.1.0
-      pip install virtualenv
+    - names:
+      - easy_install -U pip==7.1.0
+      - pip install virtualenv
