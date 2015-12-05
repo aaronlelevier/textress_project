@@ -17,6 +17,6 @@ db:
 run-postgresql:
     service.running:
         - enable: true
-        - name: postgresql-9.3
+        - name: postgresql
         - require:
             - pkg: install-postgresql
