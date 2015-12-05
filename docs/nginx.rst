@@ -67,6 +67,7 @@ nginx + uwsgi proxy test
 
 SSL
 ---
+Go to the "Renew Certificate" section in NameCheap, and follow the below steps to generate the initial CSR.
 
 .. code-block::
 
@@ -80,3 +81,13 @@ SSL
 
     # csr
     openssl req -new -sha256 -key /etc/nginx/ssl/textress.com.key -out /etc/nginx/ssl/textress.com.csr
+
+Call Namecheap for ``bundle.crt``
+
+Concat to create ``chained.crt``
+
+`resource <http://nginx.org/en/docs/http/configuring_https_servers.html>`_
+
+.. code-block::
+
+    cat www.example.com.crt bundle.crt > www.example.com.chained.crt
