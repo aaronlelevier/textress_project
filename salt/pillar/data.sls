@@ -3,4 +3,4 @@
 #   key: value
 
 # db
-T17_DB_NAME: textra_17
+T17_DB_NAME: textress

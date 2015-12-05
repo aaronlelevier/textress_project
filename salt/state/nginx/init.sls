@@ -9,9 +9,8 @@ nginx-rproxy:
   # Place a customized Nginx config file
   file:
     - managed
-    - source: salt://nginx/files/textress.conf.jin
+    - source: salt://nginx/files/textress.conf
     - name: /opt/django/textress.conf
-    - template: jinja
     - require:
       - pkg: nginx-rproxy
   # Ensure Nginx is always running.
