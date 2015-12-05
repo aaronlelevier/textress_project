@@ -27,7 +27,7 @@ nginx-rproxy:
   cmd:
     - run
     - name: |
-          rm /etc/nginx/sites-enabled/default && \
+          rm /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/textress.conf && \
           ln -s /opt/django/textress.conf /etc/nginx/sites-enabled/textress.conf && \
           sudo /etc/init.d/nginx restart
     - require:
