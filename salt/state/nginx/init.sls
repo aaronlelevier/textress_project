@@ -27,9 +27,9 @@ nginx-rproxy:
   # Restart Nginx for the initial installation.
   cmd:
     - run
-    - names:
-      - rm /etc/nginx/sites-enabled/default
-      - ln -s /opt/django/textress.conf /etc/nginx/sites-enabled/textress.conf
-      - sudo /etc/init.d/nginx restart
+    - name: |
+          rm /etc/nginx/sites-enabled/default && \
+          ln -s /opt/django/textress.conf /etc/nginx/sites-enabled/textress.conf && \
+          sudo /etc/init.d/nginx restart
     - require:
       - file: nginx-rproxy

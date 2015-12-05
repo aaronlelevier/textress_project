@@ -14,9 +14,7 @@ base:
 
   'roles:rproxy':
     - cmd.rproxy
-    - cmd.collectstatic
     - keys.ssl
-    - supervisord.rproxy
 
   'roles:appserver':
     - redis

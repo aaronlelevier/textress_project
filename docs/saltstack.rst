@@ -28,6 +28,19 @@ Misc Install commands
     # Restart salt#minion:
     salt-minion restart
 
+**M2Crypto** - requirements in order to install
+
+https://docs.saltstack.com/en/latest/topics/development/hacking.html
+
+or ->
+
+.. code-block::
+
+    apt-get update
+    apt-get install -y --no-install-recommends python python-setuptools python-virtualenv python-dev gcc swig dialog libaugeas0 libssl-dev libffi-dev ca-certificates dpkg-dev
+
+    ln -s /usr/include/x86_64-linux-gnu/openssl/opensslconf.h /usr/include/openssl/opensslconf.h
+
 
 Common Commands
 ---------------
@@ -121,10 +134,4 @@ Salt Cloud
 States
 ------
 cmd separate out cmds that need to be run on a per server-function basis
-
-
-
-
-
-
 

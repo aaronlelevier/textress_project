@@ -8,9 +8,13 @@ cmd_update:
 include:
   - git
 
+
+# TODO: need to make sure "virtualenv" is enabled when 
+# running "collectstatic"
+
 collectstatic:
   cmd.run:
-    - name: python manage.py collectstatic
+    - name: /root/.virtualenvs/textress/bin/python manage.py collectstatic
     - cwd: /opt/django/textress
     - require:
       - sls: git
