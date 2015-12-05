@@ -10,7 +10,7 @@ nginx-rproxy:
   file:
     - managed
     - source: salt://nginx/files/textress.conf
-    - name: /opt/django/textress.conf
+    - name: /etc/nginx/sites-enabled/textress.conf
     - require:
       - pkg: nginx-rproxy
   # Ensure Nginx is always running.
@@ -26,9 +26,6 @@ nginx-rproxy:
   # Restart Nginx for the initial installation.
   cmd:
     - run
-    - name: |
-          rm /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/textress.conf && \
-          ln -s /opt/django/textress.conf /etc/nginx/sites-enabled/textress.conf && \
-          sudo /etc/init.d/nginx restart
+    - name: sudo /etc/init.d/nginx restart
     - require:
       - file: nginx-rproxy
