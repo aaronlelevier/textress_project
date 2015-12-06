@@ -5,12 +5,6 @@ cmd_update:
       - ufw allow 443/tcp
       - ufw status
 
-include:
-  - git
-
-
-# TODO: need to make sure "virtualenv" is enabled when 
-# running "collectstatic"
 
 collectstatic:
   cmd.run:
