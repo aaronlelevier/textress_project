@@ -7,6 +7,7 @@ uwsgi:
   file:
     - managed
     - source: salt://uwsgi/files/uwsgi.ini
+    - name: /opt/django/uwsgi.ini
     - require:
       - pkg: uwsgi
   service.running:
