@@ -5,6 +5,13 @@ echo "START BUILD"
 
 npm install
 
+DB_NAME="textress"
+export PGPASSWORD=postgres # not the real PW
+wait
+dropdb $DB_NAME -U postgres
+wait
+createdb $DB_NAME -U postgres -O postgres
+
 
 cd textress
 echo "DATABASE"
