@@ -1,13 +1,10 @@
 import os
 import sys
 
-# py2
-#sys.path.append('/usr/local/lib/python2.7/dist-packages')
-
 # py3
-sys.path.append('/usr/bin/python3.4')
-sys.path.append('/usr/local/lib/python3.4/dist-packages')
-sys.path.append('/root/.virtualenvs/textra_17/lib/python3.4/site-packages')
+sys.path.append('/usr/bin/python2.7')
+sys.path.append('/usr/local/lib/python2.7/dist-packages')
+sys.path.append('/root/.virtualenvs/textress/lib/python2.7/site-packages')
 
 # project
 sys.path.append('/opt/django')
