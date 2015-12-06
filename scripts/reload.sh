@@ -17,15 +17,17 @@ echo "RELOAD SERVER SCRIPTS"
 cd ../
 
 wait
-echo "UWSGI"
-sudo kill -INT `cat /var/run/nginx.pid`
+echo "uWSGI"
+sudo killall -s INT uwsgi
 wait
 sudo /usr/local/lib/uwsgi/uwsgi --ini uwsgi.ini
-wait
-ps aux | grep uwsgi
 
 wait
 echo "NGINX"
 sudo cp textress.conf /etc/nginx/sites-enabled/textress.conf
 wait
 sudo service nginx restart
+
+echo "Check uWSGI process count"
+wait
+ps aux | grep uwsgi
