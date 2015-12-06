@@ -27,6 +27,13 @@ Output / Upload Database
     exit
 
 
+Setup where Local Server & Database on same Server
+--------------------------------------------------
+Look in ``salt/state/postgres/pg_hba.conf`` and copy to ``/etc/postgresql/9.3/main/pg_hba.conf``
+
+In ``psql``: ``ALTER ROLE <username> WITH PASSWORD '<password>';
+
+
 Allow remote access
 -------------------
 
