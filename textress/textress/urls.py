@@ -44,6 +44,9 @@ urlpatterns = patterns('',
     url(r'^500/$', views.handler500, name='500'),
 )
 
+handler404 = 'textress.views.handler404'
+handler500 = 'textress.views.handler500'
+
 if settings.DEBUG:
     urlpatterns += patterns('',
         (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes':True}),
