@@ -40,3 +40,12 @@ def no_funds_alert():
         'message': "SMS sending and receiving has been deactivated. Please \
 contact your system admin to reactivate the account. This is most likely due to insufficient funds."
     }
+
+
+def no_customer_alert():
+    return {
+        'type': 'danger',
+        'link': reverse('payment:one_time_payment'),
+        'strong_message': 'Alert!',
+        'message': "No account funds. Click the link to add initial funds and avoid the account being deactivated."
+    }

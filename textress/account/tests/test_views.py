@@ -15,6 +15,7 @@ from account.tests.factory import (create_acct_stmts, create_acct_stmt,
 from main.models import Hotel
 from main.tests.factory import (create_hotel, create_hotel_user, make_subaccount,
     CREATE_USER_DICT, CREATE_HOTEL_DICT, PASSWORD)
+from payment.models import Customer
 from utils import create
 
 
@@ -309,6 +310,8 @@ class AccountDeactivatedTests(TestCase):
         # set back to "active" b/c this is a live Twilio Subaccount
         self.assertEqual(self.sub.activate(), 'active')
 
+    # subaccount - warnings
+
     def test_active_subaccount_no_warning_message(self):
         self.assertTrue(self.hotel.subaccount.active)
 
@@ -328,6 +331,32 @@ class AccountDeactivatedTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(
             "SMS sending and receiving has been deactivated",
+            response.content
+        )
+
+    # not stripe customer - warnings
+
+    def test_no_stripe_customer_warning(self):
+        self.assertIsNone(self.hotel.customer)
+
+        response = self.client.get(reverse('account'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            "No account funds. Click the link to add initial funds and avoid the account being deactivated.",
+            response.content
+        )
+
+    def test_no_stripe_customer_warning__not_present(self):
+        customer = mommy.make(Customer)
+        self.hotel = self.hotel.update_customer(customer)
+        self.assertIsNotNone(self.hotel.customer)
+
+        response = self.client.get(reverse('account'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(
+            "No account funds. Click the link to add initial funds and avoid the account being deactivated.",
             response.content
         )
 

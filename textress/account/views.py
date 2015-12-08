@@ -23,7 +23,7 @@ from account.mixins import alert_messages
 from account.models import Dates, AcctCost, AcctStmt, AcctTrans, Pricing
 from account.serializers import PricingSerializer
 from main.mixins import RegistrationContextMixin, AdminOnlyMixin, HotelUserMixin
-from payment.helpers import no_funds_alert
+from payment.helpers import no_funds_alert, no_customer_alert
 from payment.mixins import BillingSummaryContextMixin
 from sms.helpers import no_twilio_phone_number_alert
 from utils import email, login_messages
@@ -67,22 +67,33 @@ class AccountView(LoginRequiredMixin, HotelUserMixin, SetHeadlineMixin,
     template_name = 'cpanel/account.html'
 
     def get_context_data(self, **kwargs):
-        """Show alert messages for pending actions needed before the 
-        Account will be fully functional."""
+        """
+        Show alert messages for pending actions needed before the 
+        Account will be fully functional.
+        """
         context = super(AccountView, self).get_context_data(**kwargs)
+        context['alerts'] = alert_messages(messages=self._get_alert_messages())
+        return context
 
+    def _get_alert_messages(self):
+        """
+        Generates 'bootstrap' Alert, Info, etc... messages if any part of 
+        the Hotel's required configuration is not set, and gives the User 
+        a link to navigate to, to set the needed configuration.
+        """
         messages = []
 
         subaccount = self.hotel.get_subaccount()
         if subaccount and not subaccount.active:
             messages.append(no_funds_alert())
 
+        if not self.hotel.customer:
+            messages.append(no_customer_alert())
+
         if not self.hotel.twilio_ph_sid:
             messages.append(no_twilio_phone_number_alert())
 
-        context['alerts'] = alert_messages(messages=messages)
-
-        return context
+        return messages
 
 
 ### REGISTRATION VIEWS ###
