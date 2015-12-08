@@ -1,6 +1,14 @@
 Celery
 ======
 
+Ubuntu
+------
+Celery should not be run under the **root** user. Create a separate user, and put Celery in a ``virtualenv``, so it is not installed globally.
+
+
+Start all process for Celery
+----------------------------
+
 .. code-block::
 
     # start Redis
@@ -11,6 +19,30 @@ Celery
 
     # start Celery
     celery -A textress worker -l info
+
+
+supervisord
+-----------
+Note: ``supervisorctl <cmd>`` would't work at first, and had to reinstall through this process to get it to work.
+
+Removal
+
+.. code-block::
+
+    # remove
+    apt-get purge supervisor
+    rm -rf /etc/supervisor
+    rm -rf /var/log/supervisor
+
+Installation
+
+.. code-block::
+
+    pip install meld3
+    apt-get install supervisor
+
+
+`Celery and Supervisor example config <https://github.com/celery/celery/blob/3.1/extra/supervisord/celeryd.conf>`_
 
 
 Cron
