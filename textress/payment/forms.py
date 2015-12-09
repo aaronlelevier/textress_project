@@ -12,6 +12,12 @@ class CardListForm(StripeForm):
     '''
     Card: Choose Existing Card, or Add a new one 
     '''
+    def __init__(self, hotel, *args, **kwargs):
+        super(CardListForm, self).__init__(*args, **kwargs)
+
+        if not hotel.customer or not hotel.customer.cards.all():
+            self.fields['add_card'].initial = True
+
     add_card = forms.BooleanField(label='Add a Card',
         initial=False, required=False)
 

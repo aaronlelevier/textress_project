@@ -363,6 +363,8 @@ class CardUpdateTests(TestCase):
     def tearDown(self):
         self.client.logout()
 
+    # card_list
+
     def test_card_list_response(self):
         response = self.client.get(reverse('payment:card_list'))
         self.assertEqual(response.status_code, 200)
@@ -375,6 +377,31 @@ class CardUpdateTests(TestCase):
         # Also tests: ``BreadcrumbBaseMixin``
         response = self.client.get(reverse('payment:card_list'))
         self.assertTrue(response.context['breadcrumbs'])
+
+    def test_card_list__no_current_cards(self):
+        """
+        The "Add a card" checkbox should default to 'True' for a better User UX.
+        """
+        self.hotel.customer.cards.all().delete()
+        self.assertFalse(self.customer.cards.all())
+
+        response = self.client.get(reverse('payment:card_list'))
+
+        self.assertTrue(response.context['form'].fields['add_card'].initial)
+
+    def test_card_list__no_customer(self):
+        """
+        The "Add a card" checkbox should default to 'True' if no 'Customer'
+        """
+        self.hotel.customer = None
+        self.hotel.save()
+        self.assertIsNone(self.hotel.customer)
+
+        response = self.client.get(reverse('payment:card_list'))
+
+        self.assertTrue(response.context['form'].fields['add_card'].initial)
+
+    # set_default_card
 
     def test_set_default_card_view(self):
         # default = False
@@ -390,6 +417,8 @@ class CardUpdateTests(TestCase):
         # Success Message
         m = list(response.context['messages'])
         self.assertEqual(len(m), 1)
+
+    # delete_card
 
     def test_delete_card_view(self):
         response = self.client.get(reverse('payment:delete_card',

@@ -165,6 +165,11 @@ class CardListView(AdminOnlyMixin, BillingSummaryContextMixin, MonthYearContextM
     form_class = CardListForm
     success_url = reverse_lazy('payment:card_list')
 
+    def get_form_kwargs(self):
+        kwargs = super(CardListView, self).get_form_kwargs()
+        kwargs['hotel'] = self.hotel
+        return kwargs
+
     def get_form_valid_message(self):
         return "The payment has been successfully processed. An email will be \
 sent to {}. Thank you.".format(self.request.user.email)
