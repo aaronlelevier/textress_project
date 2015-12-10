@@ -1,13 +1,15 @@
+from django.conf import settings
 from django.contrib import messages
-from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
 from django.core.exceptions import PermissionDenied
+from django.core.urlresolvers import reverse
+from django.http import Http404, HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 from django.views.generic.base import View
-from django.http import Http404
 
 from braces.views import GroupRequiredMixin
 
+from account.models import AcctCost
 from main.helpers import get_user_hotel
 from main.models import Hotel
 from utils import dj_messages, mixins
@@ -112,14 +114,26 @@ class HotelUserMixin(HotelContextMixin):
     '''
     User must have belong to a Hotel, and the Hotel must be in good standing. 
     If the Hotel has no $$, then active=False.
+
+    :LOGIN_VERIFIER:
+        Makes sure all "registration" steps have been completed, and if they 
+        haven't, will redirect the User accordingly.
     '''
     def dispatch(self, *args, **kwargs):
-        try:
-            self.hotel = self.request.user.profile.hotel
-        except AttributeError:
-            messages.warning(self.request, dj_messages['no_hotel'])
-            raise PermissionDenied
-            
+        self.hotel = self.request.user.profile.hotel
+
+        if settings.LOGIN_VERIFIER:
+
+            if not self.hotel:
+                messages.warning(self.request, dj_messages['complete_registration'])
+                return HttpResponseRedirect(reverse('main:register_step2'))
+            elif not AcctCost.objects.filter(hotel=self.hotel).exists():
+                messages.warning(self.request, dj_messages['complete_registration'])
+                return HttpResponseRedirect(reverse('register_step3'))
+            elif not self.hotel.customer:
+                messages.warning(self.request, dj_messages['complete_registration'])
+                return HttpResponseRedirect(reverse('payment:register_step4'))
+
         return super(HotelUserMixin, self).dispatch(*args, **kwargs)
 
 

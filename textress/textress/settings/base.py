@@ -136,6 +136,9 @@ SITE =  "textress.com"
 SITE_NAME = 'Textress'
 SITE_URL = "https://textress.com"
 
+### Set to True in Production, this will redirect Users that haven't completed
+### the Registration process.
+LOGIN_VERIFIER = False
 
 ### STATIC ACCOUNT URLS ###
 LOGIN_URL = '/account/login/'

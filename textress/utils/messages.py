@@ -14,7 +14,8 @@ dj_messages = {
     'payment_success': "Payment of ${amount:.2f} successfully processed. Email \
 confirmation sent to {email}",
     'payment_fail': "Payment failure, please check your payment method or contact \
-{support_email} for further assistance."
+{support_email} for further assistance.",
+    'complete_registration': "Please complete registration in order to active your account"
     }
 
 login_messages = {

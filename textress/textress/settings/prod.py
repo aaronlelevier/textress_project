@@ -12,6 +12,8 @@ SITE_URL = "textress.com"
 STRIPE_SECRET_KEY = os.environ['STRIPE_LIVE_SECRET_KEY']
 STRIPE_PUBLIC_KEY = os.environ['STRIPE_LIVE_PUBLIC_KEY']
 
+LOGIN_VERIFIER = True
+
 LOGGING_DIR = '/var/log/django'
 
 

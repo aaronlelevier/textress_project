@@ -1,9 +1,14 @@
-from django.test import TestCase
+from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.test import TestCase
 
+from model_mommy import mommy
+
+from account.models import AcctCost
 from concierge.tests.factory import make_guests, make_messages
-from main.tests.factory import create_hotel_user, create_hotel, PASSWORD
+from main.tests.factory import create_user, create_hotel_user, create_hotel, PASSWORD
 from utils import create
+from utils.messages import dj_messages, login_messages
 
 
 class HotelMixinTests(TestCase):
@@ -94,6 +99,56 @@ class HotelAccessMixinTests(TestCase):
         self.client.login(username=self.admin_a.username, password=PASSWORD)
         response = self.client.get(reverse('main:register_step2_update', kwargs={'pk':self.hotel_a.pk}))
         self.assertEqual(response.status_code, 200)
+
+
+class HotelUserMixinTests(TestCase):
+
+    def setUp(self):
+        create._get_groups_and_perms()
+        self.user, _ = create_user(group='hotel_admin')
+
+    def test_login_verifier(self):
+        self.assertFalse(settings.LOGIN_VERIFIER)
+
+    def test_hotel_not_created_redirect(self):
+        with self.settings(LOGIN_VERIFIER=True):
+            response = self.client.post(reverse('login'),
+                {'username': self.user.username, 'password': PASSWORD}, follow=True)
+
+            self.assertRedirects(response, reverse('main:register_step2'))
+            m = list(response.context['messages'])
+            self.assertEqual(len(m), 2)
+            self.assertEqual(str(m[0]), login_messages['now_logged_in'])
+            self.assertEqual(str(m[1]), dj_messages['complete_registration'])
+
+    def test_acct_cost_not_created(self):
+        hotel = create_hotel()
+        hotel.set_admin_id(self.user)
+
+        with self.settings(LOGIN_VERIFIER=True):
+            response = self.client.post(reverse('login'),
+                {'username': self.user.username, 'password': PASSWORD}, follow=True)
+
+            self.assertRedirects(response, reverse('register_step3'))
+            m = list(response.context['messages'])
+            self.assertEqual(len(m), 2)
+            self.assertEqual(str(m[0]), login_messages['now_logged_in'])
+            self.assertEqual(str(m[1]), dj_messages['complete_registration'])
+
+    def test_customer_not_created(self):
+        hotel = create_hotel()
+        hotel.set_admin_id(self.user)
+        mommy.make(AcctCost, hotel=hotel)
+
+        with self.settings(LOGIN_VERIFIER=True):
+            response = self.client.post(reverse('login'),
+                {'username': self.user.username, 'password': PASSWORD}, follow=True)
+
+            self.assertRedirects(response, reverse('payment:register_step4'))
+            m = list(response.context['messages'])
+            self.assertEqual(len(m), 2)
+            self.assertEqual(str(m[0]), login_messages['now_logged_in'])
+            self.assertEqual(str(m[1]), dj_messages['complete_registration'])
 
 
 class RegistrationContextMixinTests(TestCase):
