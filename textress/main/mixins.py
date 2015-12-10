@@ -48,27 +48,45 @@ class UserOnlyMixin(HotelContextMixin):
         return super(UserOnlyMixin, self).dispatch(request, *args, **kwargs)
 
 
-class HotelUsersOnlyMixin(HotelContextMixin, GroupRequiredMixin, View):
+class UsersHotelMatchesHotelMixin(HotelContextMixin, GroupRequiredMixin, View):
     '''
-    Users must belong to the Hotel of the User record that they are requesting.
-
-    Requesting User must be a: Admin/Manager
+    The requesting Hotel must match the User's Hotel.
     '''
     group_required = ["hotel_admin", "hotel_manager"]
 
     def dispatch(self, request, *args, **kwargs):
-        user = get_object_or_404(User, pk=kwargs['pk']) 
-        # check that this is the User's Hotel before dispatching
+        self.hotel = get_object_or_404(Hotel, pk=kwargs.get('pk', None))
+
         try:
-            self.hotel = user.profile.hotel
-            user_hotel = self.hotel == self.request.user.profile.hotel
+            user_hotel = self.request.user.profile.hotel
         except AttributeError:
-            user_hotel = None
-
-        if not user_hotel:
             raise PermissionDenied
+        else:
+            if self.hotel != user_hotel:
+                raise PermissionDenied
 
-        return super(HotelUsersOnlyMixin, self).dispatch(request, *args, **kwargs)
+        return super(UsersHotelMatchesHotelMixin, self).dispatch(request, *args, **kwargs)
+
+
+class UsersHotelMatchesUsersHotelMixin(HotelContextMixin, GroupRequiredMixin, View):
+    '''
+    The requested User's Hotel must match the User's Hotel.
+    '''
+    group_required = ["hotel_admin", "hotel_manager"]
+
+    def dispatch(self, request, *args, **kwargs):
+        requested_user = get_object_or_404(User, pk=kwargs.get('pk', None))
+
+        try:
+            self.hotel = self.request.user.profile.hotel
+            requested_user_hotel = requested_user.profile.hotel
+        except AttributeError:
+            raise PermissionDenied
+        else:
+            if self.hotel != requested_user_hotel:
+                raise PermissionDenied
+
+        return super(UsersHotelMatchesUsersHotelMixin, self).dispatch(request, *args, **kwargs)
 
 
 class MyHotelOnlyMixin(HotelContextMixin, GroupRequiredMixin, View):

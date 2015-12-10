@@ -142,81 +142,93 @@ class HotelViewTests(TestCase):
 
     def setUp(self):
         create._get_groups_and_perms()
-        
-        # Login Credentials
-        self.username = 'test'
-        self.password = '1234'
+        self.hotel = create_hotel()
+        self.user = create_hotel_user(self.hotel, group='hotel_admin')
 
-        # requires Admin User and Hotel 
-        # Dave
-        response = self.client.post(reverse('main:register_step1'),
-            CREATE_USER_DICT)
-        # Hotel
-        response = self.client.post(reverse('main:register_step2'),
-            CREATE_HOTEL_DICT)
-        self.user = User.objects.first()
-        self.hotel = self.user.profile.hotel
+    def tearDown(self):
+        self.client.logout()
 
     def test_update_get(self):
-        self.client.login(username=self.username, password=self.password)
-        # Dave can access HotelUpdateView
-        response = self.client.get(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}))
-        self.assertEqual(response.status_code, 200)
-        
-        # Logged in Message
-        m = list(response.context['messages'])
-        self.assertEqual(len(m), 1)
-        self.assertEqual(str(m[0]), "You are now logged in")
+        """
+        A "Hotel Admin" can visit their Hotel UpdateView
+        """
+        self.client.login(username=self.user.username, password=PASSWORD)
 
-    def test_update_get_other_user(self):
-        # normal Hotel Users should not be able to access this View.
-        self.client.logout()
-        # User
-        user = create_hotel_user(self.hotel)
-        self.assertEqual(self.hotel, user.profile.hotel)
-        # Login
-        self.client.login(username=user.username, password=self.password)
-        # View
         response = self.client.get(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}))
-        self.assertEqual(response.status_code, 302)
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_update_get_other_user__mgr_plus(self):
+        other_hotel = create_hotel()
+        user = create_hotel_user(other_hotel, group='hotel_manager')
+        self.client.login(username=user.username, password=PASSWORD)
+
+        response = self.client.get(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}))
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_update_get_other_user__none_mgr_plus(self):
+        other_hotel = create_hotel()
+        user = create_hotel_user(other_hotel)
+        self.client.login(username=user.username, password=PASSWORD)
+
+        response = self.client.get(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}))
+
+        self.assertEqual(response.status_code, 403)
 
     def test_update_get_other_manager(self):
-        # Managers should not be able to access this View.
-        self.client.logout()
-        # User
+        """
+        Managers should not be able to access this View.
+        """
         user = create_hotel_user(self.hotel, group='hotel_manager')
-        self.assertEqual(self.hotel, user.profile.hotel)
-        # Login
-        self.client.login(username=user.username, password=self.password)
-        # View
-        response = self.client.get(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}))
-        self.assertEqual(response.status_code, 302)
+        self.client.login(username=user.username, password=PASSWORD)
+
+        response = self.client.get(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}),
+            follow=True)
+
+        self.assertRedirects(
+            response,
+            reverse('login') + '?next=' + '/account/hotel/update/{}/'.format(self.hotel.pk)
+        )
+
+
+class HotelViewUpdateTests(TestCase):
+
+    def setUp(self):
+        create._get_groups_and_perms()
+        self.hotel = create_hotel()
+        self.user = create_hotel_user(self.hotel, group='hotel_admin')
+        # data
+        self.data = {
+            'name': self.hotel.name,
+            'address_phone': self.hotel.address_phone,
+            'address_line1': self.hotel.address_line1,
+            'address_city': self.hotel.address_city,
+            'address_state': self.hotel.address_state,
+            'address_zip': self.hotel.address_zip
+        }
+        # login
+        self.client.login(username=self.user.username, password=PASSWORD)
+
+    def tearDown(self):
+        self.client.logout()
 
     def test_update_post(self):
-        self.client.login(username=self.username, password=self.password)
-        response = self.client.get(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}))
+        """
+        Dave changes his street address, and the change is saved in the DB
+        """
+        self.data['address_phone'] = create._generate_ph()
 
-        # Dave changes his street address, and the change is saved in the DB
-        CREATE_HOTEL_DICT['address_phone'] = create._generate_ph()
         response = self.client.post(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}),
-            CREATE_HOTEL_DICT, follow=True)
-        # hotel info updated
-        self.assertRedirects(response, reverse('main:user_detail', kwargs={'pk': self.hotel.pk}))
+            self.data, follow=True)
+
+        self.assertRedirects(response, reverse('main:user_detail', kwargs={'pk': self.user.pk}))
         updated_hotel = Hotel.objects.get(admin_id=self.user.pk)
         self.assertNotEqual(self.hotel.address_phone, updated_hotel.address_phone)
-        
         # success message
         m = list(response.context['messages'])
         self.assertEqual(len(m), 1)
         self.assertEqual(str(m[0]), dj_messages['hotel_updated'])
-
-    def test_update_post_no_data_changes(self):
-        self.client.login(username=self.username, password=self.password)
-
-        response = self.client.post(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}),
-            CREATE_HOTEL_DICT, follow=True)
-
-        self.assertRedirects(response, reverse('main:user_detail', kwargs={'pk': self.user.pk}))
 
 
 class UserUpdateTest(TestCase):

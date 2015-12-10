@@ -16,16 +16,16 @@ from concierge.permissions import (IsHotelObject, IsManagerOrAdmin, IsHotelUser,
     IsHotelOfUser)
 from main.models import Hotel, UserProfile, Subaccount, viewable_user_fields_dict
 from main.forms import UserCreateForm, HotelCreateForm, UserUpdateForm, DeleteUserForm
-from main.mixins import (UserOnlyMixin, HotelUsersOnlyMixin,
+from main.mixins import (UserOnlyMixin, UserListContextMixin,
     MyHotelOnlyMixin, RegistrationContextMixin, HotelUserMixin, HotelContextMixin,
-    UserListContextMixin)
+    UsersHotelMatchesHotelMixin, UsersHotelMatchesUsersHotelMixin)
 from main.serializers import UserSerializer, HotelSerializer
 from utils import dj_messages, login_messages, EmptyForm, DeleteButtonMixin
 
 
 ### Hotel ###
 
-class HotelUpdateView(HotelUsersOnlyMixin, GroupRequiredMixin, SetHeadlineMixin, 
+class HotelUpdateView(UsersHotelMatchesHotelMixin, GroupRequiredMixin, SetHeadlineMixin, 
     FormValidMessageMixin, UpdateView):
     '''
     Will use permissions in templating to only expose this View to Hotel Admins.
@@ -265,7 +265,7 @@ class ManagerCreateView(UserCreateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-class MgrUserDetailView(LoginRequiredMixin, SetHeadlineMixin, HotelUsersOnlyMixin,
+class MgrUserDetailView(LoginRequiredMixin, SetHeadlineMixin, UsersHotelMatchesUsersHotelMixin,
     UserListContextMixin, DetailView):
     '''User's DetailView of themself.'''
 
@@ -280,7 +280,8 @@ class MgrUserDetailView(LoginRequiredMixin, SetHeadlineMixin, HotelUsersOnlyMixi
         return context
 
 
-class MgrUserUpdateView(SetHeadlineMixin, HotelUsersOnlyMixin, UserListContextMixin, UpdateView):
+class MgrUserUpdateView(UsersHotelMatchesUsersHotelMixin, SetHeadlineMixin,
+    UserListContextMixin, UpdateView):
     '''
     Manager/Admin view of Users.
     '''
@@ -293,7 +294,7 @@ class MgrUserUpdateView(SetHeadlineMixin, HotelUsersOnlyMixin, UserListContextMi
         return reverse('main:manage_user_list')
 
 
-class MgrUserDeleteView(SetHeadlineMixin, DeleteButtonMixin, HotelUsersOnlyMixin,
+class MgrUserDeleteView(SetHeadlineMixin, DeleteButtonMixin, UsersHotelMatchesUsersHotelMixin,
     GroupRequiredMixin, UserListContextMixin, FormInvalidMessageMixin, UpdateView):
     '''
     A Mgr+ can delete any User for their Hotel except the AdminUser.

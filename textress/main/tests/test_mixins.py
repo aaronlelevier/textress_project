@@ -76,18 +76,6 @@ class HotelAccessMixinTests(TestCase):
         self.admin_b = create_hotel_user(self.hotel_b, username='admin_b', group='hotel_admin')
         self.user_b = create_hotel_user(self.hotel_b, username='user_b')
 
-    ### HotelUsersOnlyMixin ###
-
-    def test_HotelUsersOnlyMixin_get_wrong_hotel(self):
-        self.client.login(username=self.admin_a.username, password=PASSWORD)
-        response = self.client.get(reverse('main:manage_user_update', kwargs={'pk':self.user_b.pk}))
-        self.assertEqual(response.status_code, 403)
-
-    def test_HotelUsersOnlyMixin_get_right_hotel(self):
-        self.client.login(username=self.admin_a.username, password=PASSWORD)
-        response = self.client.get(reverse('main:manage_user_update', kwargs={'pk':self.user_a.pk}))
-        self.assertEqual(response.status_code, 200)
-
     ### MyHotelOnlyMixin ###
 
     def test_MyHotelOnlyMixin_get_wrong_hotel(self):
