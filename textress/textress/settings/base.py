@@ -115,8 +115,7 @@ ADMIN_MEDIA_PREFIX = '/admin-media/'
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'source'),
-    # os.path.join(BASE_DIR, 'media'),
-    )
+)
 
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'

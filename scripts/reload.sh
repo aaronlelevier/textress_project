@@ -1,12 +1,20 @@
 #!/bin/bash -lx
 
 echo "Only for loading reloading database data, not a full deploy script."
-
 echo "MUST BE AT './manage.py' DIR LEVEL!"
 
 export DJANGO_SETTINGS_MODULE='textress.settings.prod'
 
 source /root/.virtualenvs/textress/bin/activate
+
+wait
+echo "CREATE STATIC ASSETS DIRS"
+if [ ! -d "/var/www/static" ]; then mkdir -p /var/www/static; fi
+if [ ! -d "/var/www/media" ]; then mkdir -p /var/www/media; fi
+
+wait
+echo "COPY STATIC ASSETS"
+./manage.py collectstatic --noinput
 
 wait
 ./manage.py migrate

@@ -7,6 +7,9 @@ ALLOWED_HOSTS = ['textress.com']
 
 SITE_URL = "textress.com"
 
+STATIC_ROOT = "/var/www/static/"
+MEDIA_ROOT = "/var/www/media/"
+
 STRIPE_SECRET_KEY = os.environ['STRIPE_LIVE_SECRET_KEY']
 STRIPE_PUBLIC_KEY = os.environ['STRIPE_LIVE_PUBLIC_KEY']
 
