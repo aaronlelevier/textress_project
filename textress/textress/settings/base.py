@@ -1,6 +1,7 @@
 import os
 import sys
 
+
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']

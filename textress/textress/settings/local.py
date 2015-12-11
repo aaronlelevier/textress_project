@@ -7,7 +7,6 @@ THIRD_PARTY_APPS = (
 
 INSTALLED_APPS += THIRD_PARTY_APPS
 
-
 SITE_URL = "http://localhost:8000"
 
 if 'test' in sys.argv:

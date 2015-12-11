@@ -1,6 +1,4 @@
-import os
-
-from textress.settings.base import *
+from .base import *
 
 
 DEBUG = False

@@ -17,6 +17,11 @@ NOSE_ARGS = [
     '--cover-package=account,concierge,contact,main,payment,sms,textress,utils',
 ]
 
+DATABASES['default'] = {
+    'ENGINE': 'django.db.backends.sqlite3',
+    'NAME': 'tests.db',
+}
+
 PASSWORD_HASHERS = ('django.contrib.auth.hashers.MD5PasswordHasher', )
 
 DEFAULT_FILE_STORAGE = 'inmemorystorage.InMemoryStorage'
