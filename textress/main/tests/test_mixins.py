@@ -98,6 +98,25 @@ class HotelUserMixinTests(TestCase):
     def test_login_verifier(self):
         self.assertFalse(settings.LOGIN_VERIFIER)
 
+    def test_superusers_exempt(self):
+        """
+        No extra configuration on ``HotelUserMixin`` needed for the "superuser", 
+        if they just go strait to the "django admin" they can access it.
+        """
+        self.user.is_superuser = True
+        self.user.is_staff = True
+        self.user.save()
+
+        with self.settings(LOGIN_VERIFIER=True):
+            response = self.client.post(reverse('login'),
+                {'username': self.user.username, 'password': PASSWORD}, follow=True)
+
+            # Gets redirect to the "CreateHotel" registration step, b/c doesn't 
+            # have a Hotel, but from there can go to the "django admin"
+            self.assertRedirects(response, reverse('main:register_step2'))
+            response = self.client.get('/aronysidoro/')
+            self.assertEqual(response.status_code, 200)
+
     def test_hotel_not_created_redirect(self):
         with self.settings(LOGIN_VERIFIER=True):
             response = self.client.post(reverse('login'),
