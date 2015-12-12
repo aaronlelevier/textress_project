@@ -18,7 +18,7 @@ class Command(BaseCommand):
         if prices in ``Pricing`` model are not loaded, 
         this command will cause an infinite loop.
     """
-    help = "Update all Hotels' monthly Account Statements"
+    help = "Update all Hotels' 'End of Month' Account Statements"
 
     def handle(self, *args, **options):
         dates = Dates()

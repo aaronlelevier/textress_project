@@ -5,6 +5,9 @@ from utils.models import Dates
 
 
 class Command(BaseCommand):
+    """
+    Daily job to update all Hotels' AcctStmt MTD.
+    """
     help = "Update all Hotels' monthly Account Statements"
 
     def handle(self, *args, **options):
