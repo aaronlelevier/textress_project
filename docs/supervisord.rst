@@ -1,6 +1,30 @@
 supervisord
 ===========
 
+Installation
+------------
+Note: ``supervisorctl <cmd>`` would't work at first, and had to reinstall through this process to get it to work.
+
+Removal
+
+.. code-block::
+
+    # remove
+    apt-get purge supervisor
+    rm -rf /etc/supervisor
+    rm -rf /var/log/supervisor
+
+Installation
+
+.. code-block::
+
+    pip install meld3
+    apt-get install supervisor
+
+
+`Celery and Supervisor example config <https://github.com/celery/celery/blob/3.1/extra/supervisord/celeryd.conf>`_
+
+
 GENERAL COMMANDS
 ----------------
 
