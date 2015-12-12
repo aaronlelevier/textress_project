@@ -202,6 +202,22 @@ class CreateInitialAcctTransAndAcctStmtTests(TestCase):
                     trans_type__name='phone_number',
                     insert_date__day=settings.PHONE_NUMBER_MONTHLY_CHARGE_DAY).count(), 1)
 
+            # If ran again, won't re-charge the Hotel(s) for their monthly 
+            # PhoneNumber b/c already charged them for the month
+
+            tasks.charge_hotel_monthly_for_phone_numbers_all_hotels.delay()
+
+            self.assertEqual(
+                AcctTrans.objects.filter(
+                    hotel=self.hotel,
+                    trans_type__name='phone_number',
+                    insert_date__day=settings.PHONE_NUMBER_MONTHLY_CHARGE_DAY).count(), 1)
+            self.assertEqual(
+                AcctTrans.objects.filter(
+                    hotel=self.hotel2,
+                    trans_type__name='phone_number',
+                    insert_date__day=settings.PHONE_NUMBER_MONTHLY_CHARGE_DAY).count(), 1)
+
     # eod_update_or_create_sms_used
 
     def test_eod_update_or_create_sms_used(self):
