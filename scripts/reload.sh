@@ -17,6 +17,10 @@ echo "COPY STATIC ASSETS"
 ./manage.py collectstatic --noinput
 
 wait
+echo "COPY MEDIA ASSETS"
+cp -R media/ /var/www/
+
+wait
 ./manage.py migrate
 
 wait
@@ -38,4 +42,5 @@ sudo service nginx restart
 
 echo "Check uWSGI process count"
 wait
+sleep 5s
 ps aux | grep uwsgi
