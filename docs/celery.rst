@@ -23,6 +23,8 @@ Start all process for Celery
 Cron
 ----
 
+`Blog about Cron <http://kvz.io/blog/2007/07/29/schedule-tasks-on-linux-using-crontab/>`_
+
 .. code-block::
 
     # open "crontab" in vim
