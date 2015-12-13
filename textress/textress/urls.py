@@ -48,6 +48,9 @@ handler404 = 'textress.views.handler404'
 handler500 = 'textress.views.handler500'
 
 if settings.DEBUG:
+    import debug_toolbar
     urlpatterns += patterns('',
-        (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes':True}),
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+        (r'^media/(?P<path>.*)$', 'django.views.static.serve',
+            {'document_root': settings.MEDIA_ROOT, 'show_indexes':True}),
 )

@@ -12,7 +12,8 @@
         <meta content="" name="author" />
 
         {% block main_css %}
-        <link href="{% static 'clipone/frontend/clip-one/assets/plugins/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" media="screen">
+        <!-- <link href="{% static 'clipone/frontend/clip-one/assets/plugins/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" media="screen"> -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
         <link rel="stylesheet" href="{% static 'clipone/frontend/clip-one/assets/plugins/font-awesome/css/font-awesome.min.css' %}">
         <link rel="stylesheet" href="{% static 'clipone/frontend/clip-one/assets/fonts/style.css' %}">
         <link rel="stylesheet" href="{% static 'clipone/frontend/clip-one/assets/plugins/animate.css/animate.min.css' %}">
@@ -26,7 +27,7 @@
         {% endblock page_css %}
 
         {% block head_js %}
-        <script src="{% static 'vendor/jquery/dist/jquery.min.js' %}"></script>
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js" crossorigin="anonymous"></script>
         {% endblock head_js %}
     </head>
     <!-- end: HEAD -->
@@ -152,7 +153,7 @@
 
 
 {% block main_js %}
-<script src="{% static 'clipone/frontend/clip-one/assets/plugins/bootstrap/js/bootstrap.min.js' %}"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 <script src="{% static 'clipone/frontend/clip-one/assets/plugins/jquery.transit/jquery.transit.js' %}"></script>
 <script src="{% static 'clipone/frontend/clip-one/assets/plugins/hover-dropdown/twitter-bootstrap-hover-dropdown.min.js' %}"></script>
 <script src="{% static 'clipone/frontend/clip-one/assets/plugins/jquery.appear/jquery.appear.js' %}"></script>
