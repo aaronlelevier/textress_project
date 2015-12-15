@@ -257,6 +257,7 @@ class UserViewTests(TestCase):
         create._get_groups_and_perms()
 
         # Users
+        self.admin = create_hotel_user(hotel=self.hotel, username='admin', group='hotel_admin')
         self.mgr = create_hotel_user(hotel=self.hotel, username='mgr', group='hotel_manager')
         self.user = create_hotel_user(hotel=self.hotel, username='user')
 
@@ -300,6 +301,26 @@ class UserViewTests(TestCase):
         response = self.client.get(reverse('main:user_update', kwargs={'pk': self.user.pk}))
         self.assertEqual(response.status_code, 403)
 
+    # test ``main.templatetags.user_tags.user_has_group``
+
+    def test_user_has_group__can_view(self):
+        self.client.login(username=self.admin.username, password=self.password)
+        response = self.client.get(reverse('account'))
+        self.assertIn('Hotel Info', response.content)
+        self.assertIn('Add a Manager', response.content)
+        self.assertIn('Auto Replies', response.content)
+        self.assertIn('Phone Numbers', response.content)
+        self.assertIn('Billing', response.content)
+
+    def test_user_has_group__cannot_view(self):
+        self.client.login(username=self.mgr.username, password=self.password)
+        response = self.client.get(reverse('account'))
+        self.assertNotIn('Hotel Info', response.content)
+        self.assertNotIn('Add a Manager', response.content)
+        self.assertNotIn('Auto Replies', response.content)
+        self.assertNotIn('Phone Numbers', response.content)
+        self.assertNotIn('Billing', response.content)
+
 
 class ManageUsersTests(TestCase):
 
@@ -334,6 +355,14 @@ class ManageUsersTests(TestCase):
         self.assertTrue(response.context['breadcrumbs'])
         self.assertTrue(response.context['user_dict'])
         self.assertTrue(response.context['hotel'])
+        # can't view "edit" link b/c not admin
+        self.assertNotIn(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}), response.content)
+
+    def test_detail_admin(self):
+        # can view "edit" link b/c is an admin
+        self.client.login(username=self.admin.username, password=self.password)
+        response = self.client.get(reverse('main:manage_user_detail', kwargs={'pk':self.user.pk}))
+        self.assertIn(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}), response.content)
 
     ### CREATE USER ###
 

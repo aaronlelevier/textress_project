@@ -101,7 +101,7 @@
                                         <span class="title"> Change Password </span>
                                     </a>
                                 </li>
-                                {% if user|has_group:"hotel_admin" %}
+                                {% if user_groups|user_has_group:"hotel_admin" %}
                                     <li>
                                         <a href="{% url 'main:hotel_update' user.profile.hotel.pk %}">
                                             <span class="title"> Hotel Info </span>
@@ -146,7 +146,7 @@
                                         <span class="title"> Add a User</span>
                                     </a>
                                 </li>
-                                {% if user|has_group:"hotel_admin" %}
+                                {% if user_groups|user_has_group:"hotel_admin" %}
                                 <li>
                                     <a href="{% url 'main:create_manager' %}">
                                         <span class="title"> Add a Manager</span>
@@ -156,7 +156,7 @@
                             </ul>
                         </li>
 
-                        {% if user|has_group:"hotel_admin" %}
+                        {% if user_groups|user_has_group:"hotel_admin" %}
                         <li>
                             <a href="{% url 'concierge:replies' %}"><i class="clip-quotes-right"></i>
                                 <span class="title"> Auto Replies </span><span class="selected"></span>
@@ -164,7 +164,7 @@
                         </li>
                         {% endif %}
                         
-                        {% if user|has_group:"hotel_admin" %}
+                        {% if user_groups|user_has_group:"hotel_admin" %}
                         <li>
                             <a href="javascript:void(0)"><i class="clip-phone"></i>
                                 <span class="title"> Phone Numbers </span><i class="icon-arrow"></i>

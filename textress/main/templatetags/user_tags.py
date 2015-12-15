@@ -20,5 +20,15 @@ def has_group(user, group_name):
 
 
 @register.filter
+def user_has_group(user_groups, group_name):
+    ret = False
+    for group in user_groups:
+        if group == group_name:
+            ret = True
+            continue
+    return ret
+
+
+@register.filter
 def proper_name(value):
     return value.replace('_',' ')

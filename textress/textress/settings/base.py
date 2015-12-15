@@ -79,7 +79,10 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                # 3rd Party
                 'ws4redis.context_processors.default',
+                # Local
+                'utils.context_processors.user_groups',
             ],
         },
     },
