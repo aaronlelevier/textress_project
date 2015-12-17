@@ -7,10 +7,10 @@ ALLOWED_HOSTS = ['textress.com']
 
 SITE_URL = "textress.com"
 
-MIDDLEWARE_CLASSES += (
-    'django.middleware.cache.UpdateCacheMiddleware',
-    'django.middleware.cache.FetchFromCacheMiddleware',
-)
+# MIDDLEWARE_CLASSES += (
+#     'django.middleware.cache.UpdateCacheMiddleware',
+#     'django.middleware.cache.FetchFromCacheMiddleware',
+# )
 
 STATIC_ROOT = "/var/www/static/"
 MEDIA_ROOT = "/var/www/media/"
