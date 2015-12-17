@@ -29,11 +29,10 @@ REST_FRAMEWORK.update({
     )
 })
 
-
 # HTTPS
-# os.environ['HTTPS'] = "on"
-# os.environ['wsgi.url_scheme'] = 'https'
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
-# SESSION_EXPIRE_AT_BROWSER_CLOSE=True
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+os.environ['HTTPS'] = "on"
+os.environ['wsgi.url_scheme'] = 'https'
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE=True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
