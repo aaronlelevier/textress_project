@@ -31,8 +31,12 @@ cd ../
 wait
 echo "uWSGI"
 sudo killall -s INT uwsgi
+echo "uWSGI for main Django App"
 wait
 sudo /usr/local/lib/uwsgi/uwsgi --ini uwsgi.ini
+echo "uWSGI for django-websocket-redis"
+wait
+sudo /usr/local/lib/uwsgi_ws/uwsgi --ini uwsgi_ws.ini
 
 wait
 echo "NGINX"
