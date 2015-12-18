@@ -5,6 +5,17 @@ Ubuntu
 ------
 Celery should not be run under the **root** user. Create a separate user, and put Celery in a ``virtualenv``, so it is not installed globally.
 
+Common Commands
+---------------
+.. code-block::
+
+    celery inspect active
+
+    celery inspect scheduled
+
+    # this is the command that will show the same as run w/ "log info" in dev.
+    celery inspect registered  
+
 
 Start all process for Celery
 ----------------------------

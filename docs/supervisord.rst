@@ -45,6 +45,15 @@ GENERAL COMMANDS
     /var/log/supervisor/
 
 
+Reload and Update
+
+.. code-block::
+
+    supervisorctl reread
+
+    supervisorctl update
+
+
 SYMLINK
 -------
 
