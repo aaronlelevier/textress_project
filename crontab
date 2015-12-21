@@ -1,4 +1,4 @@
-01 2 * * * /root/.virtualenvs/textress/bin/python /opt/django/textress/manage.py charge_monthly_phone_numbers
-10 2 * * * /root/.virtualenvs/textress/bin/python /opt/django/textress/manage.py acct_stmt_update
-20 2 * * * /root/.virtualenvs/textress/bin/python /opt/django/textress/manage.py acct_stmt_update_prev
-30 2 * * * /root/.virtualenvs/textress/bin/python /opt/django/textress/manage.py archive_guests
+01 2 * * * /home/web/.virtualenvs/textress/bin/python /opt/django/textress/manage.py charge_monthly_phone_numbers
+10 2 * * * /home/web/.virtualenvs/textress/bin/python /opt/django/textress/manage.py acct_stmt_update
+20 2 * * * /home/web/.virtualenvs/textress/bin/python /opt/django/textress/manage.py acct_stmt_update_prev
+30 2 * * * /home/web/.virtualenvs/textress/bin/python /opt/django/textress/manage.py archive_guests

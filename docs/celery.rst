@@ -14,7 +14,7 @@ Common Commands
     celery inspect scheduled
 
     # this is the command that will show the same as run w/ "log info" in dev.
-    celery inspect registered  
+    celery inspect registered
 
 
 Start all process for Celery
@@ -46,6 +46,14 @@ Cron
 
     # cron mail location
     vi /var/mail/aaron
+
+Log Location
+
+.. code-block::
+
+    /var/log/syslog
+
+    grep CRON /var/log/syslog
 
 
 Tests
