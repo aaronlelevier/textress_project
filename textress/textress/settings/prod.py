@@ -22,14 +22,14 @@ LOGIN_VERIFIER = True
 
 LOGGING_DIR = '/var/log/django'
 
-### THIRD PARTY APPS
+### THIRD PARTY APPS ###
 REST_FRAMEWORK.update({
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
     )
 })
 
-# HTTPS
+### HTTPS ###
 os.environ['HTTPS'] = "on"
 os.environ['wsgi.url_scheme'] = 'https'
 SESSION_COOKIE_SECURE = True

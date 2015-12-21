@@ -101,22 +101,17 @@ DATABASES = {
     }
 }
 
+
 ### SITE ###
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'America/Los_Angeles'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
-
 
 SESSION_COOKIE_AGE = 5400
 SESSION_SAVE_EVERY_REQUEST = True
-
 
 ADMIN_MEDIA_PREFIX = '/admin-media/'
 
@@ -159,11 +154,16 @@ LOGIN_SUCCESS_URL = '/account/'
 
 ### EMAIL ###
 
-# django native settings for ``django.core.mail.mail_admins()``
-EMAIL_HOST_USER = 'admin@textress.com'
-EMAIL_HOST_PASSWORD = os.environ['TEXTRESS_EMAIL_PASSWORD']
+# DJRILL
+# MANDRILL_API_KEY = os.environ['T17_MANDRILL_API_KEY']
+# EMAIL_BACKEND = "djrill.mail.backends.djrill.DjrillBackend"
 
-# other emails
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# All 500 errors when ``DEBUG=False`` will be sent to this list
+ADMINS = [('Aaron', 'pyaaron@gmail.com')]
+
+# Emails
 DEFAULT_FROM_EMAIL = 'sayhello@textress.com'
 DEFAULT_TO_EMAIL = DEFAULT_FROM_EMAIL
 DEFAULT_EMAIL_SAYHELLO = 'sayhello@textress.com'
@@ -173,9 +173,19 @@ DEFAULT_EMAIL_BILLING = 'billing@textress.com'
 DEFAULT_EMAIL_AARON = 'aaron@textress.com'
 DEFAULT_EMAIL_NOREPLY = 'noreply@textress.com'
 
+# SMTP Email Settings (Zoho)
+# django native settings used for ``django.core.mail.mail_admins()``
+EMAIL_USE_SSL = True
+EMAIL_HOST = 'smtp.zoho.com'
+EMAIL_HOST_USER = 'admin@textress.com'
+EMAIL_HOST_PASSWORD = os.environ['TEXTRESS_EMAIL_PASSWORD']
+EMAIL_PORT = 465
+
+
 SUPERUSER_USERNAME = 'aaron'
 SUPERUSER_EMAIL = 'aaron@textress.com'
 SUPERUSER_PASSWORD = os.environ['T17_DB_PASSWORD']
+
 
 ### OTHER CONTACT INFO ###
 TEXTRESS_PHONE_NUMBER = os.environ['T17_PHONE_NUMBER']
@@ -206,10 +216,6 @@ RESERVED_REPLY_LETTERS = ['Y', 'S'] # 'H' for HELP will be added to each Hotel u
 
 ### 3RD PARTY APPS CONFIG ###
 
-# DJRILL
-MANDRILL_API_KEY = os.environ['T17_MANDRILL_API_KEY']
-EMAIL_BACKEND = "djrill.mail.backends.djrill.DjrillBackend"
-
 # DJANGO-REST-FRAMEWORK
 REST_FRAMEWORK = {
     'PAGINATE_BY': 100,
@@ -222,7 +228,7 @@ REST_FRAMEWORK = {
 }
 
 
-### TWILIO
+### TWILIO ###
 
 # master
 PHONE_NUMBER = os.environ['TWILIO_PHONE_NUMBER']
@@ -236,20 +242,20 @@ TWILIO_AUTH_TOKEN_TEST = os.environ['TWILIO_AUTH_TOKEN_TEST']
 TWILIO_RESOURCE_URI = "www.twilio.com/2010-01-01/Accounts/"+TWILIO_ACCOUNT_SID
 
 
-### STRIPE
+### STRIPE ###
 
 STRIPE_SECRET_KEY = os.environ['STRIPE_TEST_SECRET_KEY']
 STRIPE_PUBLIC_KEY = os.environ['STRIPE_TEST_PUBLIC_KEY']
 
 
-### REDIS
+### REDIS ###
 
 SESSION_ENGINE = 'redis_sessions.session'
 
 SESSION_REDIS_PREFIX = 'session'
 
 
-### DJANGO-WEBSOCKET-REDIS
+### DJANGO-WEBSOCKET-REDIS ###
 
 WEBSOCKET_URL = '/ws/'
 
@@ -275,6 +281,11 @@ LOGGING_DIR = os.path.join(os.path.dirname(BASE_DIR), "log") # ../textra_project
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
+    },
     'formatters': {
         'verbose': {
             'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
@@ -293,14 +304,15 @@ LOGGING = {
         },
         'mail_admins': {
             'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler'
         }
     },
     'loggers': {
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
-            'propagate': False,
+            'propagate': True,
         },
         'textress': {
             'handlers': ['file'],
