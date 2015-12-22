@@ -549,9 +549,6 @@ class AcctTransManager(Dates, models.Manager):
         self.check_balance(hotel)
         amount = -(settings.PHONE_NUMBER_MONTHLY_COST)
 
-        if 'test' not in sys.argv:
-            self.charge_hotel(hotel, amount)
-
         return self.create(
             hotel=hotel,
             trans_type=self.trans_types.phone_number,

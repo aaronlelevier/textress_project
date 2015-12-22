@@ -1024,12 +1024,16 @@ class AcctTransTests(TransactionTestCase):
     # phone_number_charge
 
     def test_phone_number_charge(self):
-        acct_tran = AcctTrans.objects.phone_number_charge(self.hotel, 'twilio-ph-num')
+        desc = 'twilio-ph-num'
+
+        acct_tran = AcctTrans.objects.phone_number_charge(self.hotel, desc)
 
         self.assertIsInstance(acct_tran, AcctTrans)
         self.assertEqual(acct_tran.trans_type, self.phone_number)
         self.assertEqual(acct_tran.amount, -settings.PHONE_NUMBER_MONTHLY_COST)
         self.assertEqual(acct_tran.hotel, self.hotel)
+        self.assertEqual(acct_tran.desc, "PH charge ${:.2f} for PH#: {}".format(
+            -settings.PHONE_NUMBER_MONTHLY_COST/100, desc))
 
     # sms_used_mtd
 
