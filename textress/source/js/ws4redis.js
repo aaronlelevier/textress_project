@@ -15,7 +15,8 @@ function WS4Redis(options, $) {
 
     function connect(uri) {
         try {
-            console.log("Connecting to " + uri + " ...");
+            // Comment out: only needed for debugging
+            // console.log("Connecting to " + uri + " ...");
             deferred = $.Deferred();
             ws = new WebSocket(uri);
             ws.onopen = on_open;
@@ -43,7 +44,8 @@ function WS4Redis(options, $) {
     }
 
     function on_open() {
-        console.log('Connected!');
+        // Comment out: only needed for debugging
+        // console.log('Connected!');
         // new connection, reset attemps counter
         attempts = 1;
         deferred.resolve();
@@ -54,7 +56,8 @@ function WS4Redis(options, $) {
     }
 
     function on_close(evt) {
-        console.log("Connection closed!");
+        // Comment out: only needed for debugging
+        // console.log("Connection closed!");
         if (!timer) {
             // try to reconnect
             var interval = generateInteval(attempts);

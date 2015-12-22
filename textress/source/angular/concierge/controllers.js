@@ -145,8 +145,9 @@ conciergeControllers.controller('GuestMessageCtrl',
             message.$save(function() {
                 $scope.messages.unshift(message);
             }).then(function(response) {
-                console.log('typeof:', typeof(response), 'id:', response.id, 'response:', response);
-                console.log('Acutual msg being sent:', JSON.stringify(response));
+                // Comment out: only needed for debugging
+                // console.log('typeof:', typeof(response), 'id:', response.id, 'response:', response);
+                // console.log('Acutual msg being sent:', JSON.stringify(response));
                 ws4redis.send_message(JSON.stringify(response));
             });
         }
@@ -162,13 +163,16 @@ conciergeControllers.controller('GuestMessageCtrl',
                 // `message` is an array when sent from the User/Guest's View.
                 // when sitting on another view, and receiving from Redis, it is an object.
                 // goal: convert to JSON in order to handle
-                console.log('typeof:', typeof(message));
-                console.log('message pre-JSON:', message);
+
+                // Comment out: only needed for debugging
+                // console.log('typeof:', typeof(message));
+                // console.log('message pre-JSON:', message);
                 if (typeof(message) !== "object") {
                     message = JSON.parse(message);
                 }
-                console.log('message post-JSON:', message);
-                console.log('typeof:', typeof(message));
+                // Comment out: only needed for debugging
+                // console.log('message post-JSON:', message);
+                // console.log('typeof:', typeof(message));
 
                 if (message.guest == GuestUser.id) {
                     Message.get({
@@ -262,10 +266,12 @@ conciergeControllers.controller('ReplyCtrl', ['$scope', 'Reply', 'ReplyHotelLett
                     message: reply.message
                 });
                 reply.$save(function(response) {
-                        console.log(response);
+                        // Comment out: only needed for debugging
+                        // console.log(response);
                     },
                     function(err) {
-                        console.log(err);
+                        // Comment out: only needed for debugging
+                        // console.log(err);
                     }).then(function(response) {
                     $scope.hotel_replies.push(response);
                 });;
@@ -376,10 +382,12 @@ conciergeControllers.controller('TriggerCtrl',
                     reply: reply.id
                 });
                 trigger.$save(function(response) {
-                        console.log(response);
+                        // Comment out: only needed for debugging
+                        // console.log(response);
                     },
                     function(err) {
-                        console.log(err);
+                        // Comment out: only needed for debugging
+                        // console.log(err);
                     }).then(function(response) {
                     response.reply = reply;
                     response.type = trigger_type;
