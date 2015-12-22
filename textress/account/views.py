@@ -210,6 +210,7 @@ class AcctStmtDetailView(AdminOnlyMixin, SetHeadlineMixin, BillingSummaryContext
         context['acct_stmt'] = (AcctStmt.objects.filter(hotel=self.hotel)
                                                 .get(month=kwargs['month'], year=kwargs['year']))
         context['acct_stmts'] = AcctStmt.objects.filter(hotel=self.hotel)
+        context['debit_trans_types'] = ['sms_used', 'phone_number']
         return context
 
 

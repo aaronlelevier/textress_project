@@ -42,8 +42,13 @@
                             <td>{{ trans.insert_date }}</td>
                             <td>{{ trans.trans_type.name|format_snake_case }}</td>
                             <td>{{ trans.sms_used }}</td>
-                            <td>{% if trans.trans_type.name == 'sms_used' %}{{ trans.amount|stripe_money }}{% endif %}</td>
-                            <td>{% if trans.trans_type.name != 'sms_used' %}{{ trans.amount|stripe_money }}{% endif %}</td>
+                            {% if trans.trans_type.name in debit_trans_types %}
+                                <td>{{ trans.amount|stripe_money }}</td>
+                                <td></td>
+                            {% else %}
+                                <td></td>
+                                <td>{{ trans.amount|stripe_money }}</td>
+                            {% endif %}
                             <td>{{ trans.balance|stripe_money }}</td>
                         </tr>
                     {% endfor %}

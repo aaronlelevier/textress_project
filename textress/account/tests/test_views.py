@@ -59,6 +59,8 @@ class AcctStmtViewTests(TestCase):
             kwargs={'year': self.year, 'month': self.month}))
         self.assertTrue(response.context['acct_stmt'])
         self.assertTrue(response.context['acct_stmts'])
+        for ea in ['sms_used', 'phone_number']:
+            self.assertIn(ea, response.context['debit_trans_types'])
 
     def test_acct_stmt_detail_breadcrumbs(self):
         response = self.client.get(reverse('acct_stmt_detail',
