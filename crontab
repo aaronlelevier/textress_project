@@ -1,4 +1,7 @@
 01 2 * * * /home/web/.virtualenvs/textress/bin/python /opt/django/textress/manage.py charge_monthly_phone_numbers
 10 2 * * * /home/web/.virtualenvs/textress/bin/python /opt/django/textress/manage.py acct_stmt_update
 20 2 * * * /home/web/.virtualenvs/textress/bin/python /opt/django/textress/manage.py acct_stmt_update_prev
-30 2 * * * /home/web/.virtualenvs/textress/bin/python /opt/django/textress/manage.py archive_guests
+
+# working 'cron job' w/ trouble shooting outputs (works w/ Environ VARs)
+*/1 * * * * . $HOME/.bashrc; bash /opt/django/scripts/archive_guests.sh 1> /dev/null 2> /home/web/archive_guests.err
+
