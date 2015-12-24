@@ -210,18 +210,19 @@ conciergeControllers.controller('ReplyCtrl', ['$scope', 'Reply', 'ReplyHotelLett
 
         CurrentUser.query().$promise.then(function (result) {
             $scope.hotel_id = result.hotel_id;
+
+            // do inside the `promise` so `hotel_id` is resolved 1st
+            Reply.query({
+                hotel: $scope.hotel_id
+            }).$promise.then(function (response) {
+                $scope.hotel_replies = response;
+            })
         });
 
         Reply.query({
             hotel__isnull: true
         }).$promise.then(function (response) {
             $scope.system_replies = response;
-        })
-
-        Reply.query({
-            hotel: $scope.hotel_id
-        }).$promise.then(function (response) {
-            $scope.hotel_replies = response;
         })
 
         ReplyHotelLetters.query().$promise.then(function (response) {
@@ -302,12 +303,12 @@ conciergeControllers.controller('TriggerCtrl',
 
         CurrentUser.query().$promise.then(function (response) {
             $scope.hotel_id = response.hotel_id;
-        });
 
-        Reply.query({
-            hotel: $scope.hotel_id
-        }).$promise.then(function (response) {
-            $scope.hotel_replies = response;
+            Reply.query({
+                hotel: $scope.hotel_id
+            }).$promise.then(function (response) {
+                $scope.hotel_replies = response;
+            });
         });
 
         $scope.trigger_types = TriggerType.query();
