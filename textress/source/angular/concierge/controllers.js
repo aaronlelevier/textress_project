@@ -310,13 +310,8 @@ conciergeControllers.controller('TriggerCtrl',
             $scope.hotel_replies = response;
         });
 
-        Trigger.query().$promise.then(function (response) {
-            $scope.triggers = response;
-        });
-
-        TriggerType.query().$promise.then(function (response) {
-            $scope.trigger_type = response;
-        });
+        $scope.trigger_types = TriggerType.query();
+        $scope.triggers = Trigger.query();
 
         $scope.$watch(function() {
                 return $scope.trigger;
