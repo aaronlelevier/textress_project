@@ -35,6 +35,13 @@ echo
 ubuntu server
 -------------
 
+`Set Timezone <https://help.ubuntu.com/community/UbuntuTime>`_
+
+.. code-block::
+
+    echo "Australia/Adelaide" | sudo tee /etc/timezone
+    sudo dpkg-reconfigure --frontend noninteractive tzdata
+
 .. code-block::
 
     # reboot
