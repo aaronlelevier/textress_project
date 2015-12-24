@@ -1,7 +1,4 @@
-01 2 * * * /home/web/.virtualenvs/textress/bin/python /opt/django/textress/manage.py charge_monthly_phone_numbers
-10 2 * * * /home/web/.virtualenvs/textress/bin/python /opt/django/textress/manage.py acct_stmt_update
-20 2 * * * /home/web/.virtualenvs/textress/bin/python /opt/django/textress/manage.py acct_stmt_update_prev
-
-# working 'cron job' w/ trouble shooting outputs (works w/ Environ VARs)
-*/1 * * * * . $HOME/.bashrc; bash /opt/django/scripts/archive_guests.sh 1> /dev/null 2> /home/web/archive_guests.err
-
+01 3 * * * . $HOME/.bashrc; MGMT_CMD=charge_monthly_phone_numbers && bash /opt/django/scripts/custom_mgmt_commands.sh $MGMT_CMD 1> /dev/null 2> /home/web/${MGMT_CMD}.err
+10 3 * * * . $HOME/.bashrc; MGMT_CMD=acct_stmt_update && bash /opt/django/scripts/custom_mgmt_commands.sh $MGMT_CMD 1> /dev/null 2> /home/web/${MGMT_CMD}.err
+20 3 * * * . $HOME/.bashrc; MGMT_CMD=acct_stmt_update_prev && bash /opt/django/scripts/custom_mgmt_commands.sh $MGMT_CMD 1> /dev/null 2> /home/web/${MGMT_CMD}.err
+30 3 * * * . $HOME/.bashrc; MGMT_CMD=archive_guests && bash /opt/django/scripts/custom_mgmt_commands.sh $MGMT_CMD 1> /dev/null 2> /home/web/${MGMT_CMD}.err
