@@ -147,6 +147,7 @@ class GuestDeleteView(GuestBaseView, DeleteButtonMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         self.object = Guest.objects.get(pk=kwargs['pk'])
+        trigger_send_message(self.object.id, "check_out")
         self.object.delete()
         return HttpResponseRedirect(reverse('concierge:guest_list'))
 

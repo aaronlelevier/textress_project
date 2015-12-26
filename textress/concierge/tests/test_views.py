@@ -1,3 +1,5 @@
+from mock import patch
+
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 
@@ -23,7 +25,7 @@ class GuestViewTests(TestCase):
         self.guest = self.guests.first()
 
         self.guest_create_data = {
-            'hotel':self.user.profile.hotel,
+            'hotel':self.hotel,
             'name': 'Test Guest',
             'room_number': create._generate_int(5),
             'phone_number': create._generate_ph(),
@@ -78,7 +80,8 @@ class GuestViewTests(TestCase):
 
     # create
 
-    def test_create(self):
+    @patch("concierge.tasks.trigger_send_message")
+    def test_create(self, check_in_msg_mock):
         [g.delete(override=True) for g in Guest.objects.all()]
         self.assertEqual(Guest.objects.count(), 0)
 
@@ -89,6 +92,8 @@ class GuestViewTests(TestCase):
         # Now 1 guest
         guest = Guest.objects.first()
         self.assertIsInstance(guest, Guest)
+        self.assertEqual(guest.hotel, self.hotel)
+        self.assertTrue(check_in_msg_mock.called)
         self.assertRedirects(response, reverse('concierge:guest_detail', kwargs={'pk':guest.pk}))
 
     def test_create__past_date_check_in(self):
@@ -157,6 +162,8 @@ class GuestViewTests(TestCase):
         self.assertFormError(response, 'form', 'check_out',
             GuestForm.error_messages['check_out_before_check_in'])
 
+    # update
+
     def test_update_get(self):
         response = self.client.get(reverse('concierge:guest_update', kwargs={'pk':self.guest.pk}))
         self.assertEqual(response.status_code, 200)
@@ -180,14 +187,19 @@ class GuestViewTests(TestCase):
         new_guest = Guest.objects.get(name=guest_info_dict['name'])
         self.assertNotEqual(self.guest.name, new_guest.name)
 
+    # delete
+
     def test_delete(self):
         guest = Guest.objects.first()
         self.assertTrue(isinstance(guest, Guest))
         self.assertFalse(guest.hidden)
 
         # Hide
-        response = self.client.post(reverse('concierge:guest_delete', kwargs={'pk': guest.pk}),
-            {}, follow=True)
+        response = self.client.post(reverse('concierge:guest_delete',
+            kwargs={'pk': guest.pk}), {}, follow=True)
+
+        # self.assertTrue(check_out_msg_mock.called) ## manually tested for the time being, b/c @patch
+                                                     ## doesn't work for patching the same method 2x
         self.assertRedirects(response, reverse('concierge:guest_list'))
         # hide guest worked
         updated_guest = Guest.objects.get(pk=guest.pk)
