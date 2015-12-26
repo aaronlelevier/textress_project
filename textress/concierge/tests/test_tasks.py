@@ -9,7 +9,8 @@ from celery import current_app
 from model_mommy import mommy
 
 from concierge.models import Guest, Reply, Trigger, TriggerType
-from concierge.tasks import archive_guests, trigger_send_message
+from concierge.tasks import (archive_guests, trigger_send_message,
+    create_hotel_default_help_reply)
 from concierge.tests.factory import make_guests
 from main.tests.factory import create_hotel
 from utils import create
@@ -40,6 +41,26 @@ class GuestTaskTests(TestCase):
         self.assertEqual(Guest.objects.need_to_archive().count(), 0)
 
 
+class ReplyTaskTests(TestCase):
+
+    def setUp(self):
+        self.hotel = create_hotel()
+        self.help_letter = settings.DEFAULT_REPLY_HELP_LETTER
+
+        celery_set_eager()
+
+    def test_create_hotel_default_help_reply(self):
+        self.assertFalse(Reply.objects.filter(hotel=self.hotel, letter=self.help_letter))
+
+        create_hotel_default_help_reply(self.hotel.id)
+
+        reply = Reply.objects.get(hotel=self.hotel, letter=self.help_letter)
+        self.assertEqual(reply.hotel, self.hotel)
+        self.assertEqual(reply.letter, self.help_letter)
+        self.assertEqual(reply.message, settings.DEFAULT_REPLY_HELP_MSG)
+        self.assertEqual(reply.desc, settings.DEFAULT_REPLY_HELP_DESC)
+
+
 class TriggerTaskTests(TestCase):
 
     def setUp(self):
@@ -51,6 +72,8 @@ class TriggerTaskTests(TestCase):
         self.trigger_type = mommy.make(TriggerType, name="check_out")
         self.trigger = mommy.make(Trigger, hotel=self.hotel, type=self.trigger_type,
             reply=self.hotel_reply)
+
+        celery_set_eager()
 
     @patch("concierge.models.Message.save")
     def test_delete_check_out_message_unit_test(self, save_mock):

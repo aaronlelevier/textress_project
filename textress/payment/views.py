@@ -11,6 +11,7 @@ from braces.views import SetHeadlineMixin, FormValidMessageMixin
 from account.mixins import AcctCostContextMixin
 from account.models import AcctCost, AcctStmt, AcctTrans
 from account.tasks import create_initial_acct_trans_and_stmt
+from concierge.tasks import create_hotel_default_help_reply
 from main.mixins import (RegistrationContextMixin, HotelContextMixin, HotelUserMixin,
     AdminOnlyMixin)
 from payment.models import Card
@@ -74,8 +75,11 @@ class RegisterPmtView(AdminOnlyMixin, RegistrationContextMixin, MonthYearContext
             )
             email.msg.send()
 
-            # Creat initial: AcctStmt / AcctTrans
+            # Creat initial:
+            # AcctStmt / AcctTrans
             create_initial_acct_trans_and_stmt.delay(self.hotel.id)
+            # Hotel starter 'help' Reply
+            create_hotel_default_help_reply(self.hotel.id)
 
             return HttpResponseRedirect(self.success_url)
 

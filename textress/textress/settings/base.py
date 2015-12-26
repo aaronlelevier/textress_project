@@ -212,6 +212,9 @@ DEFAULT_FROM_PH = os.environ['TWILIO_PHONE_NUMBER'] # +17024302691
 DEFAULT_FROM_PH_BAD = "+1234567890"
 
 RESERVED_REPLY_LETTERS = ['Y', 'S'] # 'H' for HELP will be added to each Hotel upon signup
+DEFAULT_REPLY_HELP_LETTER = "H"
+DEFAULT_REPLY_HELP_MSG = "Reply 'S' to STOP, 'Y' to 'reactive SMS messaging'."
+DEFAULT_REPLY_HELP_DESC = "Default Help Reply"
 
 
 ### 3RD PARTY APPS CONFIG ###
