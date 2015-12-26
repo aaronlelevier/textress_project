@@ -382,14 +382,16 @@ class Message(BaseModel):
 
 class ReplyManager(models.Manager):
 
-    def check_for_data_update(self, guest, reply):
-        "Currently only support 'stop messages'."
-        if reply.letter == "S":
-            guest.stop = guest.hidden = True
-            guest.save()
-        elif reply.letter == "Y":
-            guest.stop = guest.hidden = False
-            guest.save()
+    def process_reply(self, guest, hotel, body):
+        """Check for an 'auto-reply'. If one exists, return it, and make 
+        an necessary data changes."""
+        try:
+            reply = self.get_reply(hotel, body)
+        except ReplyNotFound:
+            return
+        else:
+            self.check_for_data_update(guest, reply)
+            return reply
 
     def get_reply(self, hotel, body):
         '''
@@ -410,16 +412,14 @@ class ReplyManager(models.Manager):
             except Reply.DoesNotExist:
                 raise ReplyNotFound
 
-    def process_reply(self, guest, hotel, body):
-        """Check for an 'auto-reply'. If one exists, return it, and make 
-        an necessary data changes."""
-        try:
-            reply = self.get_reply(hotel, body)
-        except ReplyNotFound:
-            return
-        else:
-            self.check_for_data_update(guest, reply)
-            return reply
+    def check_for_data_update(self, guest, reply):
+        "Currently only support 'stop messages'."
+        if reply.letter == "S":
+            guest.stop = guest.hidden = True
+            guest.save()
+        elif reply.letter == "Y":
+            guest.stop = guest.hidden = False
+            guest.save()
 
 
 REPLY_LETTERS = [(x,x) for x in string.ascii_uppercase]

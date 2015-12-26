@@ -424,6 +424,18 @@ class ReplyTests(TestCase):
 
     ### MANAGER TESTS
 
+    def test_process_reply_return_reply(self):
+        reply = Reply.objects.process_reply(self.guest, self.hotel_w_reply, self.letter_help)
+
+        self.assertIsInstance(reply, Reply)
+        self.assertEqual(reply.hotel, self.hotel_w_reply)
+        self.assertEqual(reply.letter, self.letter_help)
+
+    def test_process_reply_return_none(self):
+        reply = Reply.objects.process_reply(self.guest, self.hotel_w_reply, "normal body of msg")
+
+        self.assertIsNone(reply)
+
     def test_get_reply_hotel(self):
         reply = Reply.objects.get_reply(self.hotel_w_reply, "H")
         self.assertEqual(reply.hotel, self.hotel_w_reply)
@@ -461,14 +473,6 @@ class ReplyTests(TestCase):
 
         self.assertFalse(self.guest.stop)
         self.assertFalse(self.guest.hidden)
-
-    def test_process_reply_return_reply(self):
-        reply = Reply.objects.process_reply(self.guest, self.hotel_w_reply, self.letter_help)
-        self.assertIsInstance(reply, Reply)
-
-    def test_process_reply_return_none(self):
-        reply = Reply.objects.process_reply(self.guest, self.hotel_w_reply, "normal body of msg")
-        self.assertIsNone(reply)
 
     ### MODEL TESTS
 
