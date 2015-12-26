@@ -155,10 +155,8 @@ LOGIN_SUCCESS_URL = '/account/'
 ### EMAIL ###
 
 # DJRILL
-# MANDRILL_API_KEY = os.environ['T17_MANDRILL_API_KEY']
-# EMAIL_BACKEND = "djrill.mail.backends.djrill.DjrillBackend"
-
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+MANDRILL_API_KEY = os.environ['T17_MANDRILL_API_KEY']
+EMAIL_BACKEND = "djrill.mail.backends.djrill.DjrillBackend"
 
 # All 500 errors when ``DEBUG=False`` will be sent to this list
 ADMINS = [('Aaron', 'pyaaron@gmail.com')]
@@ -175,11 +173,12 @@ DEFAULT_EMAIL_NOREPLY = 'noreply@textress.com'
 
 # SMTP Email Settings (Zoho)
 # django native settings used for ``django.core.mail.mail_admins()``
-EMAIL_USE_SSL = True
-EMAIL_HOST = 'smtp.zoho.com'
-EMAIL_HOST_USER = 'admin@textress.com'
-EMAIL_HOST_PASSWORD = os.environ['TEXTRESS_EMAIL_PASSWORD']
-EMAIL_PORT = 465
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_USE_SSL = True
+# EMAIL_HOST = 'smtp.zoho.com'
+# EMAIL_HOST_USER = 'admin@textress.com'
+# EMAIL_HOST_PASSWORD = os.environ['TEXTRESS_EMAIL_PASSWORD']
+# EMAIL_PORT = 465
 
 
 SUPERUSER_USERNAME = 'aaron'

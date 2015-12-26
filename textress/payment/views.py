@@ -49,7 +49,6 @@ class RegisterPmtView(AdminOnlyMixin, RegistrationContextMixin, MonthYearContext
 
     def form_valid(self, form):
         try:
-            #DB create
             (customer, card, charge) = signup_register_step4(
                 hotel=self.request.user.profile.hotel,
                 token=form.cleaned_data['stripe_token'],
@@ -61,7 +60,6 @@ class RegisterPmtView(AdminOnlyMixin, RegistrationContextMixin, MonthYearContext
             messages.warning(self.request, err)
             return HttpResponseRedirect(reverse('payment:register_step4'))
         else:
-            # send conf email
             email = Email(
                 to=self.request.user.email,
                 from_email=settings.DEFAULT_EMAIL_BILLING,
@@ -75,11 +73,8 @@ class RegisterPmtView(AdminOnlyMixin, RegistrationContextMixin, MonthYearContext
             )
             email.msg.send()
 
-            # Creat initial:
-            # AcctStmt / AcctTrans
             create_initial_acct_trans_and_stmt.delay(self.hotel.id)
-            # Hotel starter 'help' Reply
-            create_hotel_default_help_reply(self.hotel.id)
+            create_hotel_default_help_reply.delay(self.hotel.id)
 
             return HttpResponseRedirect(self.success_url)
 

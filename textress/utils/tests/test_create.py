@@ -1,15 +1,14 @@
 import datetime
 
 from django.test import TestCase
-from django.contrib.auth.models import Group, Permission, User
+from django.contrib.auth.models import Group
 from django.core.management import execute_from_command_line
 from django.utils import timezone
 
 from model_mommy import mommy
 
-from main.models import Hotel, UserProfile
 from main.tests.factory import create_hotel
-from concierge.models import Guest, Message
+from concierge.models import Guest
 from utils import create
 from utils.tests.runners import celery_set_eager
 

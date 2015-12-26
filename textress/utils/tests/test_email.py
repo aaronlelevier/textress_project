@@ -4,7 +4,7 @@ from django.core.mail import EmailMultiAlternatives
 
 from model_mommy import mommy
 
-from account.models import AcctTrans, AcctCost
+from account.models import AcctCost
 from main.tests.factory import create_hotel, create_hotel_user
 from payment.tests.factory import charge, customer
 from utils import create, email
@@ -21,14 +21,14 @@ class EmailTests(TestCase):
             )
 
     def test_create(self):
-        assert isinstance(self.email, Email)
+        self.assertIsInstance(self.email, Email)
 
     def test_content(self):
-        assert hasattr(self.email, 'html_content')
-        assert hasattr(self.email, 'text_content')
+        self.assertTrue(hasattr(self.email, 'html_content'))
+        self.assertTrue(hasattr(self.email, 'text_content'))
 
     def test_msg(self):
-        assert isinstance(self.email.msg, EmailMultiAlternatives)
+        self.assertIsInstance(self.email.msg, EmailMultiAlternatives)
 
 
 class LiveEmailTests(TestCase):
@@ -48,12 +48,10 @@ class LiveEmailTests(TestCase):
             )
         return email.msg.send()
 
-
     def test_send_auto_recharge_failed_email(self):
         mommy.make(AcctCost, hotel=self.hotel)
         # send
         email.send_auto_recharge_failed_email(self.hotel)
-
 
     def test_send_account_charged_email(self):
         _customer = customer()
@@ -61,7 +59,6 @@ class LiveEmailTests(TestCase):
         _charge = charge(_customer.id)
         # send
         email.send_account_charged_email(self.hotel, _charge)
-
 
     def test_send_charge_failed_email(self):
         _customer = customer()
