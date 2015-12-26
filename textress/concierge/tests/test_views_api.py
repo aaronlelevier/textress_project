@@ -310,6 +310,8 @@ class ReplyAPIViewTests(APITestCase):
         # Hotel 2
         self.hotel_2 = create_hotel()
         self.reply_2 = mommy.make(Reply, hotel=self.hotel_2, letter="A")
+        # System Reply
+        self.system_reply = Reply.objects.get(letter="S")
         # Login
         self.client.login(username=self.admin.username, password=PASSWORD)
 
@@ -338,8 +340,7 @@ class ReplyAPIViewTests(APITestCase):
         # Hotel Reply
         self.assertIn(self.reply.id, [x['id'] for x in data])
         # System Reply
-        sys_reply = Reply.objects.filter(hotel__isnull=True).first()
-        self.assertIn(sys_reply.id, [x['id'] for x in data])
+        self.assertIn(self.system_reply.id, [x['id'] for x in data])
         # Other Hotel Reply
         self.assertNotIn(self.reply_2.id, [x['id'] for x in data])
 
@@ -369,9 +370,13 @@ class ReplyAPIViewTests(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.data["message"], Reply.objects.get(id=self.reply.id).message)
 
-    def test_delete_other_hotel_reply_fails(self):
+    def test_delete__other_hotel_reply_fails(self):
         response = self.client.delete("/api/reply/{}/".format(self.reply_2.id))
         self.assertEqual(response.status_code, 404)
+
+    def test_delete__system_reply_fails(self):
+        response = self.client.delete("/api/reply/{}/".format(self.system_reply.id))
+        self.assertEqual(response.status_code, 403)
 
     def test_get_queryset(self):
         response = self.client.get('/api/reply/?id={}'.format(self.reply.id))
