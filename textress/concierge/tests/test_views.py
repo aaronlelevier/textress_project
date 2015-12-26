@@ -1,10 +1,10 @@
-from mock import patch
-
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 
+from model_mommy import mommy
+
 from concierge.forms import GuestForm
-from concierge.models import Guest, Message
+from concierge.models import Guest, Message, Trigger, TriggerType, Reply
 from concierge.tests.factory import make_guests, make_messages
 from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
 from utils import create
@@ -80,8 +80,7 @@ class GuestViewTests(TestCase):
 
     # create
 
-    @patch("concierge.tasks.trigger_send_message")
-    def test_create(self, check_in_msg_mock):
+    def test_create(self):
         [g.delete(override=True) for g in Guest.objects.all()]
         self.assertEqual(Guest.objects.count(), 0)
 
@@ -93,7 +92,6 @@ class GuestViewTests(TestCase):
         guest = Guest.objects.first()
         self.assertIsInstance(guest, Guest)
         self.assertEqual(guest.hotel, self.hotel)
-        self.assertTrue(check_in_msg_mock.called)
         self.assertRedirects(response, reverse('concierge:guest_detail', kwargs={'pk':guest.pk}))
 
     def test_create__past_date_check_in(self):
@@ -198,8 +196,6 @@ class GuestViewTests(TestCase):
         response = self.client.post(reverse('concierge:guest_delete',
             kwargs={'pk': guest.pk}), {}, follow=True)
 
-        # self.assertTrue(check_out_msg_mock.called) ## manually tested for the time being, b/c @patch
-                                                     ## doesn't work for patching the same method 2x
         self.assertRedirects(response, reverse('concierge:guest_list'))
         # hide guest worked
         updated_guest = Guest.objects.get(pk=guest.pk)
@@ -210,3 +206,102 @@ class GuestViewTests(TestCase):
     def test_replies(self):
         response = self.client.get(reverse('concierge:replies'))
         self.assertEqual(response.status_code, 200)
+
+
+class GuestViewTriggerReplyTests(TestCase):
+
+    def setUp(self):
+        create._get_groups_and_perms()
+
+        # set User "aaron_test" from fixtures as an attr on this class
+        self.hotel = create_hotel()
+        self.user = create_hotel_user(self.hotel, group='hotel_admin')
+
+        self.guests = make_guests(self.hotel)
+        self.guest = self.guests.first()
+
+        self.guest_create_data = {
+            'hotel':self.hotel,
+            'name': 'Test Guest',
+            'room_number': create._generate_int(5),
+            'phone_number': create._generate_ph(),
+            'check_in': create._generate_date(),
+            'check_out': create._generate_date()
+        }
+
+        # Login
+        self.client.login(username=self.user.username, password=PASSWORD)
+
+    def tearDown(self):
+        self.client.logout()
+
+    # create
+
+    def test_create__no_triggered_check_in_msg(self):
+        [g.delete(override=True) for g in Guest.objects.all()]
+        self.assertEqual(Guest.objects.count(), 0)
+        self.assertEqual(Message.objects.count(), 0)
+
+        # Login n Create a Guest
+        response = self.client.post(reverse('concierge:guest_create'),
+            self.guest_create_data, follow=True)
+
+        self.assertEqual(Message.objects.count(), 0)
+
+    def test_create__check_in_msg(self):
+        # check-in
+        check_in_letter = "W"
+        check_in_message = "Welcome"
+        check_in_trigger_name = "check_in"
+        check_in_reply = mommy.make(Reply, hotel=self.hotel, letter=check_in_letter,
+            message=check_in_message)
+        check_in_trigger_type = mommy.make(TriggerType, name=check_in_trigger_name)
+        check_in_trigger = mommy.make(Trigger, hotel=self.hotel, type=check_in_trigger_type,
+            reply=check_in_reply)
+        # Guest / Message setup
+        [g.delete(override=True) for g in Guest.objects.all()]
+        self.assertEqual(Guest.objects.count(), 0)
+        self.assertEqual(Message.objects.count(), 0)
+
+        # Login n Create a Guest
+        response = self.client.post(reverse('concierge:guest_create'),
+            self.guest_create_data, follow=True)
+
+        self.assertEqual(Message.objects.count(), 1)
+        msg = Message.objects.first()
+        self.assertEqual(Guest.objects.count(), 1)
+        self.assertEqual(msg.guest, Guest.objects.first())
+        self.assertEqual(msg.body, check_in_message)
+
+    # delete
+
+    def test_delete__no_triggered_check_out_msg(self):
+        guest = Guest.objects.first()
+        self.assertEqual(Message.objects.count(), 0)
+
+        response = self.client.post(reverse('concierge:guest_delete',
+            kwargs={'pk': guest.pk}), {}, follow=True)
+
+        self.assertEqual(Message.objects.count(), 0)
+
+    def test_delete__check_out_msg(self):
+        # check-out
+        check_out_letter = "T"
+        check_out_message = "Thank you"
+        check_out_trigger_name = "check_out"
+        check_out_reply = mommy.make(Reply, hotel=self.hotel, letter=check_out_letter,
+            message=check_out_message)
+        check_out_trigger_type = mommy.make(TriggerType, name=check_out_trigger_name)
+        check_out_trigger = mommy.make(Trigger, hotel=self.hotel, type=check_out_trigger_type,
+            reply=check_out_reply)
+        # Guest / Message setup
+        guest = Guest.objects.first()
+        self.assertEqual(Message.objects.count(), 0)
+
+        response = self.client.post(reverse('concierge:guest_delete',
+            kwargs={'pk': guest.pk}), {}, follow=True)
+
+        self.assertEqual(Message.objects.count(), 1)
+        msg = Message.objects.first()
+        self.assertEqual(msg.guest, guest)
+        self.assertEqual(msg.body, check_out_message)

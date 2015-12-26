@@ -52,7 +52,7 @@ class ReplyTaskTests(TestCase):
     def test_create_hotel_default_help_reply(self):
         self.assertFalse(Reply.objects.filter(hotel=self.hotel, letter=self.help_letter))
 
-        create_hotel_default_help_reply(self.hotel.id)
+        create_hotel_default_help_reply.delay(self.hotel.id)
 
         reply = Reply.objects.get(hotel=self.hotel, letter=self.help_letter)
         self.assertEqual(reply.hotel, self.hotel)
@@ -66,17 +66,21 @@ class TriggerTaskTests(TestCase):
     def setUp(self):
         self.hotel = create_hotel()
         self.guest = make_guests(hotel=self.hotel, number=1)[0]
-        self.reply_letter = "T"
-        self.hotel_reply = mommy.make(Reply, hotel=self.hotel, letter=self.reply_letter,
-            message="Thank you for staying")
-        self.trigger_type = mommy.make(TriggerType, name="check_out")
-        self.trigger = mommy.make(Trigger, hotel=self.hotel, type=self.trigger_type,
-            reply=self.hotel_reply)
+
+        # check-out
+        self.check_out_letter = "T"
+        self.check_out_message = "Thank you"
+        self.check_out_trigger_name = "check_out"
+        self.check_out_reply = mommy.make(Reply, hotel=self.hotel, letter=self.check_out_letter,
+            message=self.check_out_message)
+        self.check_out_trigger_type = mommy.make(TriggerType, name=self.check_out_trigger_name)
+        self.check_out_trigger = mommy.make(Trigger, hotel=self.hotel, type=self.check_out_trigger_type,
+            reply=self.check_out_reply)
 
         celery_set_eager()
 
     @patch("concierge.models.Message.save")
     def test_delete_check_out_message_unit_test(self, save_mock):
-        trigger_send_message(self.guest.id, 'check_out')
+        trigger_send_message.delay(self.guest.id, self.check_out_trigger_name)
 
         self.assertTrue(save_mock.called)
