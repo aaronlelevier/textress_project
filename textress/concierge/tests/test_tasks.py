@@ -20,7 +20,7 @@ from utils.tests.runners import celery_set_eager
 class GuestTaskTests(TestCase):
 
     def setUp(self):
-        self.yesterday = timezone.now().date() - datetime.timedelta(days=1)
+        self.yesterday = timezone.localtime(timezone.now()).date() - datetime.timedelta(days=1)
         self.hotel = create_hotel()
         self.guest_to_archive = mommy.make(
             Guest,

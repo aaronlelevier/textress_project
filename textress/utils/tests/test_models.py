@@ -22,7 +22,7 @@ class DatesTests(TestCase):
 
     def test_all_dates(self):
         dates = Dates()
-        now = timezone.now()
+        now = timezone.localtime(timezone.now())
 
         self.assertTrue(dates._now)
         self.assertEqual(dates._today, now.date())

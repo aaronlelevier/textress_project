@@ -14,7 +14,7 @@ class Dates(object):
 
     @property
     def _now(self):
-        return timezone.now()
+        return timezone.localtime(timezone.now())
 
     @property
     def _today(self):

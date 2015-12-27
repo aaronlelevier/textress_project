@@ -13,7 +13,7 @@ from main.models import Hotel
 
 @shared_task
 def check_twilio_messages_to_merge(guest, date=None):
-    date = date or timezone.now().date()
+    date = date or timezone.localtime(timezone.now()).date()
 
     for msg in merge_twilio_messages_to_db(guest=guest, date=date):
         convert_to_json_and_publish_to_redis(msg)

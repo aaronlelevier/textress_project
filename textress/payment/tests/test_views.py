@@ -329,7 +329,7 @@ class BillingSummaryTests(TransactionTestCase):
         self.assertFalse(response.context['acct_stmt'])
 
     def test_acct_stmts_preview_exist(self):
-        today = timezone.now().date()
+        today = timezone.localtime(timezone.now()).date()
         create_acct_stmt(self.hotel, today.year, today.month)
         response = self.client.get(reverse('payment:summary'))
         self.assertTrue(response.context['acct_stmts'])

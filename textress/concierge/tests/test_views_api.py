@@ -134,7 +134,7 @@ class GuestMessageAPIViewTests(APITestCase):
 
     def setUp(self):
         self.password = PASSWORD
-        self.today = timezone.now().date()
+        self.today = timezone.localtime(timezone.now()).date()
         # Groups
         create._get_groups_and_perms()
         # Hotel / User
@@ -218,7 +218,7 @@ class GuestAPIViewTests(APITestCase):
 
     def setUp(self):
         self.password = PASSWORD
-        self.today = timezone.now().date()
+        self.today = timezone.localtime(timezone.now()).date()
         # Groups
         create._get_groups_and_perms()
         # Hotel / User

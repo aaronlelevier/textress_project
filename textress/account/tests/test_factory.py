@@ -31,7 +31,7 @@ class FactoryTests(TestCase):
         self.assertEqual(len(TRANS_TYPES), TransType.objects.count())
 
     def test_create_acct_stmt(self):
-        now = timezone.now()
+        now = timezone.localtime(timezone.now())
         stmt = factory.create_acct_stmt(
             hotel=self.hotel,
             year=now.year,
@@ -50,7 +50,7 @@ class FactoryTests(TestCase):
         acct_trans = factory.create_acct_tran(
             hotel=self.hotel,
             trans_type=trans_types[0],
-            insert_date=timezone.now()
+            insert_date=timezone.localtime(timezone.now())
             )
 
         self.assertIsInstance(acct_trans, AcctTrans)

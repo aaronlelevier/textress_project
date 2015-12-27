@@ -37,7 +37,7 @@ class GuestManagerTests(TestCase):
             phone_number=settings.DEFAULT_TO_PH_BAD
             )
 
-        self.yesterday = timezone.now().date() - datetime.timedelta(days=1)
+        self.yesterday = timezone.localtime(timezone.now()).date() - datetime.timedelta(days=1)
 
         # checked-out Guest tests
         self.guest_to_archive = mommy.make(
@@ -160,7 +160,7 @@ class GuestTests(TestCase):
 
     def test_checkin_date_validation(self):
         with self.assertRaises(CheckOutDateException):
-            self.guest.check_out = timezone.now().date() + datetime.timedelta(days=-2)
+            self.guest.check_out = timezone.localtime(timezone.now()).date() + datetime.timedelta(days=-2)
             ci, co = self.guest.validate_check_in_out(self.guest.check_in, self.guest.check_out)
 
     def test_get_absolute_url(self):
@@ -200,7 +200,7 @@ class MessageManagerTests(TestCase):
 
     def setUp(self):
         self.password = '1234'
-        self.today = timezone.now().date()
+        self.today = timezone.localtime(timezone.now()).date()
 
         # Hotel
         self.hotel = create_hotel()
@@ -216,7 +216,7 @@ class MessageManagerTests(TestCase):
             hotel=self.hotel,
             user=self.admin,
             guest=self.guest,
-            insert_date=timezone.now().date(),
+            insert_date=timezone.localtime(timezone.now()).date(),
             number=1
             )
         self.message = self.messages[0]
@@ -319,7 +319,7 @@ class MessageTests(TestCase):
 
     def setUp(self):
         self.password = '1234'
-        self.today = timezone.now().date()
+        self.today = timezone.localtime(timezone.now()).date()
 
         # Hotel
         self.hotel = create_hotel()

@@ -38,7 +38,7 @@ class MgmtCmdTests(TestCase):
 
     def setUp(self):
         celery_set_eager()
-        self.yesterday = timezone.now().date() - datetime.timedelta(days=1)
+        self.yesterday = timezone.localtime(timezone.now()).date() - datetime.timedelta(days=1)
         self.hotel = create_hotel()
         self.guest_to_archive = mommy.make(
             Guest,

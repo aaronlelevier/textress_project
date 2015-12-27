@@ -44,7 +44,7 @@ def merge_twilio_messages_to_db(guest, date):
     return messages
 
 
-def merge_twilio_messages_to_db_all(date=timezone.now().date()):
+def merge_twilio_messages_to_db_all(date=timezone.localtime(timezone.now()).date()):
     for guest in Guest.objects.current():
         merge_twilio_messages_to_db(guest, date)
 

@@ -10,4 +10,4 @@ class TimezoneMiddleware(object):
         else:
             timezone.deactivate()
 
-        return timezone.now()
+        return timezone.localtime(timezone.now())

@@ -164,7 +164,7 @@ class AcctStmtTests(TestCase):
 
     def setUp(self):
         self.password = PASSWORD
-        self.today = timezone.now().date()
+        self.today = timezone.localtime(timezone.now()).date()
         create._get_groups_and_perms()
         self.hotel = create_hotel()
         self.admin = create_hotel_user(self.hotel, 'admin')
@@ -505,7 +505,7 @@ class AcctTransQuerySetTests(TestCase):
     def setUp(self):
         self.hotel = create_hotel()
         self.trans_types = create_trans_types()
-        self.today = timezone.now().date()
+        self.today = timezone.localtime(timezone.now()).date()
         # TransType
         self.init_amt = TransType.objects.get(name='init_amt')
         self.sms_used = TransType.objects.get(name='sms_used')
@@ -573,7 +573,7 @@ class AcctTransTests(TransactionTestCase):
         create._get_groups_and_perms()
         self.admin = create_hotel_user(hotel=self.hotel, group='hotel_admin')
         # Dates
-        self.today = timezone.now().date()
+        self.today = timezone.localtime(timezone.now()).date()
         self.yesterday = self.today - datetime.timedelta(days=1)
         # AcctCost
         self.acct_cost = mommy.make(AcctCost, hotel=self.hotel)

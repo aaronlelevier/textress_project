@@ -57,7 +57,7 @@ def _generate_name(letters=10):
 
 
 def _generate_date(date=None):
-    date = date or timezone.now().date()
+    date = date or timezone.localtime(timezone.now()).date()
     return date.strftime("%Y-%m-%d")
 
 

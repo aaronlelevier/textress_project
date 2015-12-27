@@ -47,7 +47,7 @@ class HotelTests(TestCase):
         self.guest = make_guests(hotel=self.hotel, number=1)[0] #b/c returns a list
         # Messages
         self.messages = make_messages(
-            insert_date=timezone.now().date(),
+            insert_date=timezone.localtime(timezone.now()).date(),
             hotel=self.hotel,
             user=self.admin,
             guest=self.guest
@@ -273,7 +273,7 @@ class SubaccountTests(TestCase):
 
     def setUp(self):
         self.password = '1234'
-        self.today = timezone.now().date()
+        self.today = timezone.localtime(timezone.now()).date()
         create._get_groups_and_perms()
         self.hotel = create_hotel()
         self.admin = create_hotel_user(self.hotel, username='admin', group='hotel_admin')

@@ -663,7 +663,7 @@ Amount: ${amount:.2f}".format(self=self, amount=float(self.amount)/100.0)
     def save(self, *args, **kwargs):
         # For testing only
         if not self.insert_date:
-            self.insert_date = timezone.now().date()
+            self.insert_date = timezone.localtime(timezone.now()).date()
 
         self.update_balance()
 

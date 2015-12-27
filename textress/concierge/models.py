@@ -54,7 +54,7 @@ class GuestQuerySet(BaseQuerySet):
         self.need_to_archive().update(hidden=True)
 
     def need_to_archive(self):
-        today = timezone.now().date()
+        today = timezone.localtime(timezone.now()).date()
         return self.filter(check_out__lt=today, hidden=False)
 
 
@@ -79,8 +79,8 @@ class GuestManager(BaseManager):
                 name="Unknown Guest",
                 room_number='0',
                 phone_number=phone_number,
-                check_in=timezone.now(),
-                check_out=timezone.now()
+                check_in=timezone.localtime(timezone.now()),
+                check_out=timezone.localtime(timezone.now())
                 )
     
     def get_by_phone(self, hotel, phone_number):
@@ -175,7 +175,7 @@ class Guest(BaseModel):
         for this on the `GuestForm`.
         """
         if not check_in:
-            check_in = timezone.now().date()
+            check_in = timezone.localtime(timezone.now()).date()
 
         if not check_out:
             check_out = check_in + datetime.timedelta(days=1)
@@ -368,7 +368,7 @@ class Message(BaseModel):
 
         # For testing only
         if not self.insert_date:
-            self.insert_date = timezone.now().date()
+            self.insert_date = timezone.localtime(timezone.now()).date()
 
         return super(Message, self).save(*args, **kwargs)  
 

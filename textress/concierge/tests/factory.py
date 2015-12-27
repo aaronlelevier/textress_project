@@ -12,7 +12,7 @@ from utils import create
 
 
 def make_guests(hotel, number=10):
-    today = timezone.now().date()
+    today = timezone.localtime(timezone.now()).date()
 
     for i in range(number):
         check_out = today + datetime.timedelta(days=random.randrange(1,6))
@@ -38,7 +38,7 @@ def make_messages(hotel, user, guest, insert_date=None, number=10):
     Message.save = models.Model.save
 
     if not insert_date:
-        insert_date = timezone.now().date() - datetime.timedelta(days=1)
+        insert_date = timezone.localtime(timezone.now()).date() - datetime.timedelta(days=1)
 
     for i in range(number):
 
