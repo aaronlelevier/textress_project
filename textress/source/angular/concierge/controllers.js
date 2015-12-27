@@ -379,7 +379,7 @@ conciergeControllers.controller('ReplyTriggerCtrl',
           $scope.triggers.push(response);
         });;
       }
-      $scope.trigger_type = $scope.reply = null;
+      $scope.trigger_type = $scope.reply_trigger = null;
     }
 
     $scope.deleteTrigger = function(trigger) {
