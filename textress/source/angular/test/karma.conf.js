@@ -13,7 +13,8 @@ module.exports = function(config){
       '../angular/index/*.js',
       '../angular/main/*.js',
       '../angular/config.js',
-      '../angular/test/unit/**/*.js'
+      '../angular/test/unit/**/*.js',
+      '../angular/test/unit/**/**/*.js',
     ],
 
     autoWatch : true,

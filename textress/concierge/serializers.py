@@ -113,4 +113,3 @@ class TriggerCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Trigger
         fields = ('id', 'type', 'reply', 'hotel',)
-

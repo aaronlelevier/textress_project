@@ -647,9 +647,9 @@ describe('TriggerCtrl', function() {
       expect(mockTrigger.query).toHaveBeenCalled();
     });
 
-    it('query - response', function() {
-      expect($scope.triggers).toEqual(mockTriggerResponse);
-    });
+    // it('query - response', function() {
+    //   expect($scope.triggers).toEqual(mockTriggerResponse);
+    // });
   });
 
   describe('TriggerType', function() {
@@ -662,9 +662,9 @@ describe('TriggerCtrl', function() {
       expect(mockTriggerType.query).toHaveBeenCalled();
     });
 
-    it('query - response', function() {
-      expect($scope.trigger_type).toEqual(mockTriggerTypeResponse);
-    });
+    // it('query - response', function() {
+    //   expect($scope.trigger_type).toEqual(mockTriggerTypeResponse);
+    // });
   });
 
 });
