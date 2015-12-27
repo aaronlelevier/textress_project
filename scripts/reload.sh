@@ -1,7 +1,10 @@
 #!/bin/bash -lx
 
-echo "Only for loading reloading database data, not a full deploy script."
+echo "Reload GIT changes on live server script"
 echo "MUST BE AT './manage.py' DIR LEVEL!"
+
+git pull
+wait
 
 export DJANGO_SETTINGS_MODULE='textress.settings.prod'
 

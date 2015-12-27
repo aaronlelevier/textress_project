@@ -161,7 +161,7 @@
                                 <div class="col-sm-6">
                                     <select id="form-field-select-1" class="form-control" ng-model="trigger_type" ng-change="triggerTypePicked(trigger_type)" required>
                                         <option value="">&nbsp;</option>
-                                        <option ng-repeat="trigger_type in trigger_types" value="[[ trigger_type ]]">[[ trigger_type.human_name ]]</option>
+                                        <option ng-repeat="trigger_type in trigger_types | orderBy : 'human_name'" value="[[ trigger_type ]]">[[ trigger_type.human_name ]]</option>
                                     </select>
                                 </div>
                             </div>
