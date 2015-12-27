@@ -326,7 +326,7 @@ conciergeControllers.controller('ReplyTriggerCtrl',
         }).$promise.then(function(response) {
           if (response[0]) {
             $scope.trigger = response[0];
-            $scope.reply = $scope.trigger.reply;
+            $scope.reply_trigger = $scope.trigger.reply;
           } else {
             $scope.trigger = $scope.reply = null;
           }

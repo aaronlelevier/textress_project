@@ -172,7 +172,7 @@
                                     Reply Letter <span class="symbol required"></span>
                                 </label>
                                 <div class="col-sm-6">
-                                    <select id="form-field-select-1" class="form-control" ng-model="reply" ng-options="reply as reply.letter for reply in hotel_replies | orderBy : 'letter' track by reply.id" required>
+                                    <select id="form-field-select-1" class="form-control" ng-model="reply_trigger" ng-options="reply as reply.letter for reply in hotel_replies | orderBy : 'letter' track by reply.id" required>
                                     </select>
                                 </div>
                             </div>
@@ -183,12 +183,12 @@
                                     Reply Message
                                 </label>
                                 <div class="col-sm-6" style="margin-top:7px">
-                                    <em>[[ reply.message ]]</em>
+                                    <em>[[ reply_trigger.message ]]</em>
                                 </div>
                             </div>
                         </div>
                         <div class="row margin10">
-                            <button class="btn btn-success btn-xs btn-block" type="button" id="submit" ng-click="saveTrigger(trigger_type, reply)" ng-disabled="triggerForm.$invalid">
+                            <button class="btn btn-success btn-xs btn-block" type="button" id="submit" ng-click="saveTrigger(trigger_type, reply_trigger)" ng-disabled="triggerForm.$invalid">
                                 Submit
                             </button>
                         </div>
