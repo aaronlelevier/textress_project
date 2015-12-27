@@ -17,7 +17,7 @@ conciergeControllers.controller('GuestListCtrl', ['$scope', '$timeout', 'Guest',
     };
 
     // GuestListView: Push incoming messsage onto Guest Messages array for all Guests
-    var initializing = true;
+    $scope.initializing = true;
 
     $scope.getMessage = function(message) {
 
@@ -42,9 +42,9 @@ conciergeControllers.controller('GuestListCtrl', ['$scope', '$timeout', 'Guest',
         }
       }
 
-      if (initializing) {
+      if ($scope.initializing) {
         $timeout(function() {
-          initializing = false;
+          $scope.initializing = false;
         });
       } else {
         gm(message);
@@ -498,13 +498,11 @@ conciergeControllers.controller('ReplyTriggerCtrl',
         id: reply.id
       });
 
-      // This is not working. Need to find the Trigger that uses the Reply that was just
-      //  removed and delete it.
-      // angular.forEach($scope.triggers, function(u, i) {
-      //   if (u.id === $scope.triggers[i].reply.id) {
-      //     $scope.triggers.splice(i, 1);
-      //   }
-      // })
+      angular.forEach($scope.triggers, function(key, value) {
+        if (reply.id === key.reply.id) {
+          $scope.triggers.splice(value, 1);
+        }
+      })
     }
 
     $scope.trigger_types = TriggerType.query();
