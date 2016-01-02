@@ -242,6 +242,19 @@ class BillingSummaryTests(TransactionTestCase):
         acct_cost = AcctCost.objects.get(hotel=self.hotel)
         self.assertFalse(acct_cost.auto_recharge)
 
+    def test_one_time_payment__unauthenticated_user(self):
+        """
+        An Anonymous User should be redirected to the '/login/' URL, so they 
+        can login 1st, then reach this URL, and not raise a 500.
+        """
+        self.client.logout()
+        self.assertNotIn('_auth_user_id', self.client.session)
+
+        response = self.client.get(reverse('payment:one_time_payment'), follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'),
+            reverse('payment:one_time_payment')))
+
     # acct_stmt table - current usage, starting balance, current balance
 
     def test_context_starting_balance_new_signup(self):

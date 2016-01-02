@@ -1,10 +1,31 @@
 from django.conf.urls import patterns, include, url
 from django.contrib.auth import views as auth_views
+from django.contrib.auth.decorators import login_required
 
 from account import views
 from account.forms import (AuthenticationForm, PasswordResetForm,
     SetPasswordForm, PasswordChangeForm)
+from utils.decorators import required, logout_required
 
+
+# Logout Required
+urlpatterns = required(
+    logout_required,
+    patterns('',
+        url(r'^login/$',auth_views.login,
+            {'template_name': 'cpanel/auth-forms/login.html',
+            'authentication_form': AuthenticationForm},
+            name='login'),
+    )
+)
+
+# Login Required
+urlpatterns += required(
+    login_required,
+    patterns('',
+        url(r'^account/$', views.AccountView.as_view(), name='account'),
+    )
+)
 
 register_patterns = patterns('',
     # Step 3
@@ -35,13 +56,13 @@ close_acct_patterns = patterns('',
 
 account_patterns = patterns('',
     # User Dashboard View
-    url(r'^$', views.AccountView.as_view(), name='account'),
+    # url(r'^$', views.AccountView.as_view(), name='account'),
 
     # Auth Views
-    url(r'^login/$',auth_views.login,
-        {'template_name': 'cpanel/auth-forms/login.html',
-        'authentication_form': AuthenticationForm},
-        name='login'),
+    # url(r'^login/$',auth_views.login,
+    #     {'template_name': 'cpanel/auth-forms/login.html',
+    #     'authentication_form': AuthenticationForm},
+    #     name='login'),
 
     ### 2 views for password change - when you are logged in and want to 
     ### change your password
@@ -88,7 +109,7 @@ account_patterns = patterns('',
     url(r'^login-error/$', views.login_error, name='login_error'),
 )
 
-urlpatterns = patterns('',
+urlpatterns += patterns('',
     url(r'^api/', include(api_patterns)),
     url(r'^account/', include(account_patterns)),
     url(r'^register/', include(register_patterns)),
@@ -97,4 +118,4 @@ urlpatterns = patterns('',
     url(r'^payments/', include(acct_cost_patterns)),
     url(r'^statements/', include(acct_stmt_patterns)),
     url(r'^close/', include(close_acct_patterns)),
-    )
+)
