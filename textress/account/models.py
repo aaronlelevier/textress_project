@@ -223,7 +223,7 @@ class AcctStmtManager(Dates, models.Manager):
         funds_added = AcctTrans.objects.funds_added(hotel, date)
         phone_numbers = self.get_phone_numbers(hotel, date)
         monthly_costs = self.get_monthly_costs(hotel, date)
-        balance = AcctTrans.objects.monthly_trans(hotel, date).balance()
+        balance = self.get_balance(hotel, date)
 
         values = {
             'funds_added': funds_added,
@@ -274,6 +274,11 @@ class AcctStmtManager(Dates, models.Manager):
         return (AcctTrans.objects.monthly_trans(hotel, date)
                                  .filter(trans_type__name='phone_number')
                                  .balance())
+
+    def get_balance(self, hotel, date):
+        last_month_date = self.last_month_end(date)
+        return AcctTrans.objects.monthly_trans(hotel, date).balance() + \
+            AcctTrans.objects.monthly_trans(hotel, last_month_date).balance()
 
 
 class AcctStmt(TimeStampBaseModel):

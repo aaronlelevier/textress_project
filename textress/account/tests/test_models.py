@@ -355,6 +355,31 @@ class AcctStmtTests(TestCase):
         self.assertEqual(updated_acct_stmt.monthly_costs, acct_stmt.monthly_costs+acct_tran.amount)
         self.assertEqual(updated_acct_stmt.balance, acct_stmt.balance+acct_tran.amount)
 
+    def test_get_or_create__prev_month_balance(self):
+        last_month_date = Dates().last_month_end()
+        this_month_date = self.today
+        # Two AcctTrans to be able to Sum this organically
+        create_acct_tran(hotel=self.hotel, trans_type=self.recharge_amt, insert_date=last_month_date)
+        create_acct_tran(hotel=self.hotel, trans_type=self.recharge_amt, insert_date=this_month_date)
+        # Prior AcctStmt
+        prior, _ = AcctStmt.objects.get_or_create(
+            hotel=self.hotel,
+            month=last_month_date.month,
+            year=last_month_date.year
+        )
+        # Current AcctStmt
+        current, _ = AcctStmt.objects.get_or_create(
+            hotel=self.hotel,
+            month=this_month_date.month,
+            year=this_month_date.year
+        )
+
+        # previous month incoming balance, plus the current months' balance
+        raw_balance = AcctTrans.objects.monthly_trans(self.hotel, last_month_date).balance() + \
+            AcctTrans.objects.monthly_trans(self.hotel, this_month_date).balance()
+
+        self.assertEqual(current.balance, raw_balance)
+
     # get_phone_numbers
 
     def test_get_phone_numbers(self):
