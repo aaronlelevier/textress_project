@@ -32,20 +32,44 @@ class DatesTests(TestCase):
 
     def test_first_of_month(self):
         dates = Dates()
-        first_of_month = dates.first_of_month(month=1, year=1)
+        month = 1
+        year = 2016
+
+        first_of_month = dates.first_of_month(month=month, year=year)
+
         self.assertEqual(
             first_of_month,
-            datetime.datetime(day=1, month=1,year=1, tzinfo=self.tzinfo).date()
+            datetime.datetime(day=1, month=month, year=year, tzinfo=self.tzinfo).date()
         )
 
     def test_first_of_month_default(self):
         dates = Dates()
+
         first_of_month = dates.first_of_month()
+
         self.assertEqual(
             first_of_month,
             datetime.datetime(day=1, month=dates._today.month,
                 year=dates._today.year, tzinfo=self.tzinfo).date()
         )
+
+    def test_first_of_next_month(self):
+        date = Dates()._today
+        month = date.month
+        year = date.year
+        if month == 12:
+            month = 1
+            year += 1
+        else:
+            month += 1
+        raw_datetime = datetime.datetime(day=1, year=year, month=month,
+            tzinfo=self.tzinfo)
+        raw_first_of_next_month = raw_datetime.date()
+
+        ret = Dates().first_of_next_month()
+
+        self.assertIsInstance(ret, datetime.date)
+        self.assertEqual(ret, raw_first_of_next_month)
 
     def test_last_month_end(self):
         dates = Dates()

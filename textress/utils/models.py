@@ -41,8 +41,24 @@ class Dates(object):
             month = self._today.month
             year = self._today.year
 
-        return datetime.datetime(day=1, year=year, month=month,
-            tzinfo=self.tzinfo).date()
+        raw_datetime = datetime.datetime(day=1, year=year, month=month,
+            tzinfo=self.tzinfo)
+        return raw_datetime.date()
+
+    def first_of_next_month(self):
+        date = self._today
+        month = date.month
+        year = date.year
+
+        if month == 12:
+            month = 1
+            year += 1
+        else:
+            month += 1
+
+        raw_datetime = datetime.datetime(day=1, year=year, month=month, tzinfo=self.tzinfo)
+        return raw_datetime.date()
+
 
     def last_month_end(self, date=None):
         "Return the last month's ending date as a `date`."
