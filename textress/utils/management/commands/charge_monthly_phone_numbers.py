@@ -1,7 +1,6 @@
 from django.core.management.base import BaseCommand
 
 from account.tasks import charge_hotel_monthly_for_phone_numbers_all_hotels
-from utils.models import Dates
 
 
 class Command(BaseCommand):

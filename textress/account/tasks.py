@@ -65,6 +65,45 @@ def get_or_create_acct_stmt_all_hotels(month, year):
         get_or_create_acct_stmt.delay(hotel.id, month, year)
 
 
+FIRST_OF_MONTH = Dates().first_of_month()
+
+
+@shared_task
+def acct_stmt_update_prev(hotel_id, first_of_month=FIRST_OF_MONTH):
+    hotel = Hotel.objects.get(id=hotel_id)
+
+    dates = Dates()
+    last_month = dates.last_month_end(first_of_month)
+
+    update_prev_month = False
+
+    if hotel.created.date() < first_of_month:
+        try:
+            acct_stmt = AcctStmt.objects.get(
+                hotel=hotel,
+                month=last_month.month,
+                year=last_month.year
+            )
+        except AcctStmt.DoesNotExist:
+            update_prev_month = True
+        else:
+            if acct_stmt.modified.date() < first_of_month:
+                update_prev_month = True
+
+        if update_prev_month:
+            acct_stmt, created = AcctStmt.objects.get_or_create(
+                hotel=hotel,
+                month=last_month.month,
+                year=last_month.year
+            )
+
+
+@shared_task
+def acct_stmt_update_prev_all_hotels(first_of_month=FIRST_OF_MONTH):
+    for hotel_id in Hotel.objects.values_list("id", flat=True):
+        acct_stmt_update_prev.delay(hotel_id, first_of_month=first_of_month)
+
+
 @shared_task
 def charge_hotel_monthly_for_phone_numbers(hotel_id):
     """

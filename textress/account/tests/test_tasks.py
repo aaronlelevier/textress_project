@@ -1,3 +1,4 @@
+import datetime
 from mock import patch
 
 from django.test import TestCase
@@ -94,6 +95,88 @@ class CreateInitialAcctTransAndAcctStmtTests(TestCase):
         self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel2).count(), 0)
 
         tasks.get_or_create_acct_stmt_all_hotels.delay(year=today.year, month=today.month)
+
+        self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 1)
+        self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel2).count(), 1)
+
+    # acct_stmt_update_prev
+
+    def test_first_of_month(self):
+        self.assertEqual(tasks.FIRST_OF_MONTH, Dates().first_of_month())
+
+    def test_first_of_month(self):
+        tasks.FIRST_OF_MONTH = Dates()._today
+
+        self.assertNotEqual(tasks.FIRST_OF_MONTH, Dates().first_of_month())
+
+    def test_acct_stmt_update_prev__create(self):
+        """
+        Acts as if for "next month", so the "acct stmt prev" that get's 
+        generated will be for this month. Have to do this way b/c can't 
+        create Hotel in past.
+        """
+        [x.delete() for x in AcctStmt.objects.filter(hotel=self.hotel)]
+        self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 0)
+        first_of_next_month = Dates().first_of_next_month()
+
+        tasks.acct_stmt_update_prev.delay(hotel_id=self.hotel.id, first_of_month=first_of_next_month)
+
+        self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 1)
+        acct_stmt = AcctStmt.objects.get(hotel=self.hotel)
+        self.assertEqual(acct_stmt.month, self.today.month)
+        self.assertEqual(acct_stmt.year, self.today.year)
+
+    def test_acct_stmt_update_prev__update(self):
+        [x.delete() for x in AcctStmt.objects.filter(hotel=self.hotel)]
+        self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 0)
+        first_of_next_month = Dates().first_of_next_month()
+
+        tasks.acct_stmt_update_prev.delay(hotel_id=self.hotel.id, first_of_month=first_of_next_month)
+        first_acct_stmt = AcctStmt.objects.first()
+        tasks.acct_stmt_update_prev.delay(hotel_id=self.hotel.id, first_of_month=first_of_next_month)
+        second_acct_stmt = AcctStmt.objects.first()
+
+        self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 1)
+        self.assertEqual(first_acct_stmt.month, self.today.month)
+        self.assertEqual(first_acct_stmt.year, self.today.year)
+        self.assertEqual(first_acct_stmt.created, second_acct_stmt.created)
+        self.assertTrue(first_acct_stmt.modified < second_acct_stmt.modified)
+
+    def test_acct_stmt_update_prev__dont_create(self):
+        """
+        Hotel wasn't here last month, so don't need to create a 
+        "acct stmt prev"
+        """
+        [x.delete() for x in AcctStmt.objects.filter(hotel=self.hotel)]
+        self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 0)
+        last_month_end = Dates().last_month_end()
+
+        tasks.acct_stmt_update_prev.delay(hotel_id=self.hotel.id, first_of_month=last_month_end)
+
+        self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 0)
+
+    def test_acct_stmt_update_prev__dont_update(self):
+        date = Dates().last_month_end()
+        acct_stmt, created = AcctStmt.objects.get_or_create(hotel=self.hotel,
+            month=date.month, year=date.year)
+        self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 1)
+        first_acct_stmt = AcctStmt.objects.first()
+
+        tasks.acct_stmt_update_prev.delay(hotel_id=self.hotel.id)
+        second_acct_stmt = AcctStmt.objects.first()
+
+        self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 1)
+        self.assertEqual(first_acct_stmt.created, second_acct_stmt.created)
+        self.assertEqual(first_acct_stmt.modified, second_acct_stmt.modified)
+
+    # acct_stmt_update_prev_all_hotels
+
+    def test_acct_stmt_update_prev_all_hotels(self):
+        self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 0)
+        self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel2).count(), 0)
+        first_of_next_month = Dates().first_of_next_month()
+
+        tasks.acct_stmt_update_prev_all_hotels.delay(first_of_month=first_of_next_month)
 
         self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel).count(), 1)
         self.assertEqual(AcctStmt.objects.filter(hotel=self.hotel2).count(), 1)
