@@ -629,6 +629,19 @@ class AcctTransTests(TransactionTestCase):
 
         self.assertFalse(ret)
 
+    def test_check_balance_only__extra_amount(self):
+        """
+        Return False when the ``extra_amount`` required in order for the 
+        "balance to be ok" causes it so.
+        """
+        balance = AcctTrans.objects.get_balance(self.hotel)
+        self.assertTrue(balance > self.hotel.acct_cost.balance_min)
+        extra_amount = -(balance)-(settings.PHONE_NUMBER_MONTHLY_COST)
+
+        ret = AcctTrans.objects.check_balance_only(self.hotel, extra_amount)
+
+        self.assertFalse(ret)
+
     # check_balance
 
     def test_check_balance__creates_or_updates_sms_used_record_for_today(self):
@@ -739,8 +752,7 @@ class AcctTransTests(TransactionTestCase):
         acct_tran.amount = -100000
         acct_tran.save()
 
-        with self.assertRaises(stripe.error.StripeError):
-            AcctTrans.objects.charge_hotel(self.hotel, amount)
+        AcctTrans.objects.charge_hotel(self.hotel, amount)
 
         self.assertFalse(self.hotel.active)
         self.assertEqual(Charge.objects.count(), init_charges)

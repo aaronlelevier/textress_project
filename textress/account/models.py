@@ -364,13 +364,19 @@ class AcctTransManager(Dates, models.Manager):
     def trans_types(self):
         return TransTypeCache()
 
-    def check_balance_only(self, hotel):
+    def check_balance_only(self, hotel, extra_amount=0):
         """
         Return a "Boolean" of whether or not the "balance is ok" by only 
         suppling the "hotel" as an argument.
+
+        :extra_amount:
+            Could be a PH # monthly charge trying to push through,so the "check balance"
+            also needs to account for the current charge that wee need to make.
+            Ex: 100 + (-300) = -200
         """
         balance = self.get_balance(hotel)
-        return not self.check_recharge_required(hotel, balance)
+        adjusted_balance = balance + extra_amount
+        return not self.check_recharge_required(hotel, adjusted_balance)
 
     def check_balance(self, hotel):
         """
@@ -424,9 +430,8 @@ class AcctTransManager(Dates, models.Manager):
             charge = Charge.objects.stripe_create(hotel, amount)
         except stripe.error.StripeError:
               email.send_charge_failed_email(hotel, amount)
-              if not self.check_balance_only(hotel):
+              if not self.check_balance_only(hotel, extra_amount=amount):
                   hotel.deactivate()
-              raise
         else:
             hotel.activate()
             email.send_account_charged_email(hotel, charge)
