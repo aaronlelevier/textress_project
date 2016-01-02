@@ -1,6 +1,8 @@
 from django.conf import settings
-from django.test import TestCase
 from django.core.mail import EmailMultiAlternatives
+from django.test import TestCase
+from django.template.loader import render_to_string
+from django.utils import html
 
 from model_mommy import mommy
 
@@ -29,6 +31,28 @@ class EmailTests(TestCase):
 
     def test_msg(self):
         self.assertIsInstance(self.email.msg, EmailMultiAlternatives)
+
+
+class ChargeFailedEmailTests(TestCase):
+
+    def setUp(self):
+        create._get_groups_and_perms()
+        self.hotel = create_hotel()
+        self.admin = create_hotel_user(self.hotel, group='hotel_admin')
+        self.amount = 500
+
+    def test_context(self):
+        context = {
+            'user': self.admin,
+            'amount': self.amount,
+            'SITE': settings.SITE
+        }
+
+        ret = html.strip_tags(render_to_string('email/charge_failed/email.html', context))
+
+        self.assertIn("Hello {},".format(self.admin), ret)
+        self.assertIn("Charge failed for ${:.2f}".format(self.amount/100.0), ret)
+        self.assertIn("{}/billing/manage-payment-methods/".format(settings.SITE), ret)
 
 
 class LiveEmailTests(TestCase):

@@ -100,6 +100,7 @@ def send_charge_failed_email(hotel, amount):
         extra_context={
             'user':hotel_admin,
             'hotel': hotel,
+            'amount': amount,
             'SITE': settings.SITE
             }
         )
