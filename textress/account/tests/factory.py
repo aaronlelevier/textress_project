@@ -1,6 +1,7 @@
 import random
 import datetime
 
+from django.conf import settings
 from django.db import models
 
 from model_mommy import mommy
@@ -66,15 +67,18 @@ def create_acct_tran(hotel, trans_type, insert_date, amount=None):
     # AcctTrans.save = models.Model.save
 
     # transaction
-    if trans_type.name in ('init_amt', 'recharge_amt'):
-        amount = _randint(1000, 1000)
-    else:
-        amount = _randint(-100, -10)
 
     if trans_type.name == 'sms_used':
         sms_used_count = _randint()
     else:
         sms_used_count = 0
+
+    if trans_type.name in ('init_amt', 'recharge_amt'):
+        amount = 1000
+    elif trans_type.name == 'sms_used':
+        amount = sms_used_count * settings.DEFAULT_SMS_COST
+    elif trans_type.name == 'phone_number':
+        amount = -(settings.PHONE_NUMBER_MONTHLY_COST)
 
     return AcctTrans.objects.create(
         hotel=hotel,
