@@ -8,7 +8,7 @@
 
 {% block form_title %}Sign in to your Account{% endblock %}
 
-{% block form_tag %}class="form-login" name="{{ form.form_name }}" method="post" action="{% url 'login' %}" novalidate{% endblock %}
+{% block form_tag %}class="form-login" name="{{ form.form_name }}" method="post" {% if next %} action="{% url 'login' %}?next={{ next }}" {% else %} action="{% url 'login' %}" {% endif %} novalidate{% endblock %}
 
 {% block form_submission %}
     <a href="{% url 'password_reset' %}">

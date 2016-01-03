@@ -24,3 +24,4 @@ logs/*
 !.gitkeep
 node_modules/
 tmp/
+venv/

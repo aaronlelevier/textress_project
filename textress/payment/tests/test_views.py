@@ -414,6 +414,25 @@ class CardUpdateTests(TestCase):
 
         self.assertTrue(response.context['form'].fields['add_card'].initial)
 
+    def test_card_list__auth_required(self):
+        self.client.logout()
+
+        response = self.client.get(reverse('payment:card_list'), follow=True)
+
+        self.assertRedirects(
+            response,
+            "{}?next={}".format(reverse('login'), reverse('payment:card_list'))
+        )
+
+    def test_card_list__redirects_to_next(self):
+        self.client.logout()
+        url = "{}?next={}".format(reverse('login'), reverse('payment:card_list'))
+        data = {'username': self.admin, 'password': PASSWORD}
+
+        response = self.client.post(url, data, follow=True)
+
+        self.assertRedirects(response, reverse('payment:card_list'))
+
     # set_default_card
 
     def test_set_default_card_view(self):

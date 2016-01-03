@@ -47,12 +47,26 @@ class UserOnlyMixin(HotelContextMixin):
 
         return super(UserOnlyMixin, self).dispatch(request, *args, **kwargs)
 
+from braces.views._access import AccessMixin
 
-class UsersHotelMatchesHotelMixin(HotelContextMixin, GroupRequiredMixin, View):
+class UsersHotelMatchesHotelMixin(HotelContextMixin, AccessMixin):
     '''
     The requesting Hotel must match the User's Hotel.
     '''
-    group_required = ["hotel_admin", "hotel_manager"]
+    # group_required = ["hotel_admin", "hotel_manager"]
+
+    # def dispatch(self, request, *args, **kwargs):
+    #     self.hotel = get_object_or_404(Hotel, pk=kwargs.get('pk', None))
+
+    #     try:
+    #         user_hotel = self.request.user.profile.hotel
+    #     except AttributeError:
+    #         raise PermissionDenied
+    #     else:
+    #         if self.hotel != user_hotel:
+    #             raise PermissionDenied
+
+    #     return super(UsersHotelMatchesHotelMixin, self).dispatch(request, *args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
         self.hotel = get_object_or_404(Hotel, pk=kwargs.get('pk', None))
@@ -60,12 +74,16 @@ class UsersHotelMatchesHotelMixin(HotelContextMixin, GroupRequiredMixin, View):
         try:
             user_hotel = self.request.user.profile.hotel
         except AttributeError:
-            raise PermissionDenied
+            return self.handle_no_permission(request)
         else:
             if self.hotel != user_hotel:
-                raise PermissionDenied
+                return self.handle_no_permission(request)
 
-        return super(UsersHotelMatchesHotelMixin, self).dispatch(request, *args, **kwargs)
+        # if not request.user.is_authenticated():
+        #     return self.handle_no_permission(request)
+
+        return super(UsersHotelMatchesHotelMixin, self).dispatch(
+            request, *args, **kwargs)
 
 
 class UsersHotelMatchesUsersHotelMixin(HotelContextMixin, GroupRequiredMixin, View):

@@ -147,7 +147,7 @@ LOGIN_URL = '/account/login/'
 LOGIN_REDIRECT_URL = '/account/private/'
 LOGIN_ERROR_URL = '/account/login-error/'
 VERIFY_LOGOUT_URL = '/account/verify-logout/'
-REDIRECT_FIELD_NAME = '/'
+# REDIRECT_FIELD_NAME = '/'
 LOGIN_REDIRECT = '/account/conversation/'
 LOGIN_SUCCESS_URL = '/account/'
 

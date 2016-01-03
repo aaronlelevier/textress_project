@@ -6,7 +6,7 @@ from django.views.generic import TemplateView, FormView
 from django.contrib.auth.decorators import login_required
 
 import stripe
-from braces.views import SetHeadlineMixin, FormValidMessageMixin
+from braces.views import SetHeadlineMixin, FormValidMessageMixin, LoginRequiredMixin
 
 from account.mixins import AcctCostContextMixin
 from account.models import AcctCost, AcctStmt, AcctTrans
@@ -154,7 +154,7 @@ class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
 
 ### CARD VIEWS ###
 
-class CardListView(AdminOnlyMixin, BillingSummaryContextMixin, MonthYearContextMixin,
+class CardListView(LoginRequiredMixin, AdminOnlyMixin, BillingSummaryContextMixin, MonthYearContextMixin,
     SetHeadlineMixin, FormValidMessageMixin, StripeMixin, FormView):
     '''
     Admin Only. Add a Card to an existing Customer Account View.
@@ -206,8 +206,8 @@ def delete_card_view(request, pk):
     return HttpResponseRedirect(reverse('payment:card_list'))
 
 
-class OneTimePaymentView(AdminOnlyMixin, MonthYearContextMixin, SetHeadlineMixin,
-    StripeMixin, FormView):
+class OneTimePaymentView(LoginRequiredMixin, AdminOnlyMixin, MonthYearContextMixin,
+    SetHeadlineMixin, StripeMixin, FormView):
 
     headline = "One Time Payment"
     template_name = "payment/one_time_payment.html"

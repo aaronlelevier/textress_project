@@ -19,11 +19,8 @@ payment_patterns = patterns('',
     url(r'^one-time-payment/$', views.OneTimePaymentView.as_view(), name='one_time_payment'),
 )
 
-urlpatterns = required(
-    login_required,
-    patterns('',
-        # Registration
-        url(r'^register/', include(register_patterns)),
-        url(r'^billing/', include(payment_patterns)),
-    )
+urlpatterns = patterns('',
+    # Registration
+    url(r'^register/', include(register_patterns)),
+    url(r'^billing/', include(payment_patterns)),
 )

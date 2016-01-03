@@ -162,19 +162,27 @@ class HotelViewTests(TestCase):
         other_hotel = create_hotel()
         user = create_hotel_user(other_hotel, group='hotel_manager')
         self.client.login(username=user.username, password=PASSWORD)
+        target_url = reverse('main:hotel_update', kwargs={'pk': self.hotel.pk})
 
-        response = self.client.get(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}))
+        response = self.client.get(target_url, follow=True)
 
-        self.assertEqual(response.status_code, 403)
+        self.assertRedirects(
+            response,
+            "{}?next={}".format(reverse('login'), target_url)
+        )
 
     def test_update_get_other_user__none_mgr_plus(self):
         other_hotel = create_hotel()
         user = create_hotel_user(other_hotel)
         self.client.login(username=user.username, password=PASSWORD)
+        target_url = reverse('main:hotel_update', kwargs={'pk': self.hotel.pk})
 
-        response = self.client.get(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}))
+        response = self.client.get(target_url, follow=True)
 
-        self.assertEqual(response.status_code, 403)
+        self.assertRedirects(
+            response,
+            "{}?next={}".format(reverse('login'), target_url)
+        )
 
     def test_update_get_other_manager(self):
         """
@@ -186,12 +194,10 @@ class HotelViewTests(TestCase):
         response = self.client.get(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}),
             follow=True)
 
-        self.assertRedirects(response, reverse('account'))
-        # TODO: not sure why this changed...
-        # self.assertRedirects(
-        #     response,
-        #     reverse('login') + '?next=' + '/account/hotel/update/{}/'.format(self.hotel.pk)
-        # )
+        self.assertRedirects(
+            response,
+            reverse('login') + '?next=' + '/account/hotel/update/{}/'.format(self.hotel.pk)
+        )
 
 
 class HotelViewUpdateTests(TestCase):
