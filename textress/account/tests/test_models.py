@@ -700,6 +700,26 @@ class AcctTransTests(TransactionTestCase):
             trans_type=self.recharge_amt).count()
         self.assertEqual(post_recharges, init_recharges)
 
+    def test_check_balance__extra_amount(self):
+        """
+        w/o `extra_amount` 'check_balance' is fine, but w/ it, it demands, and 
+        will cause a 'recharge'.
+        """
+        init_recharges = AcctTrans.objects.filter(hotel=self.hotel,
+            trans_type=self.recharge_amt).count() 
+        init_balance = AcctTrans.objects.balance(hotel=self.hotel)
+        balance_min = self.hotel.acct_cost.balance_min
+        # "extra_amount" is a future charge, a debit, all debits are negative
+        extra_amount = -(init_balance - balance_min + 1)
+        self.assertTrue(init_balance > balance_min)
+        self.assertTrue((init_balance + extra_amount) < balance_min)
+
+        AcctTrans.objects.check_balance(self.hotel, extra_amount=extra_amount)
+
+        post_recharges = AcctTrans.objects.filter(hotel=self.hotel,
+            trans_type=self.recharge_amt).count()
+        self.assertEqual(post_recharges, init_recharges+1)
+
     # recharge
 
     def test_recharge__auto_recharge_off(self):

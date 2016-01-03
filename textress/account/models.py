@@ -383,20 +383,27 @@ class AcctTransManager(Dates, models.Manager):
         adjusted_balance = balance + extra_amount
         return not self.check_recharge_required(hotel, adjusted_balance)
 
-    def check_balance(self, hotel):
+    def check_balance(self, hotel, extra_amount=0):
         """
         Daily, or more often if high SMS volumes, check the Funds ``balance``
         of the Hotel to see if a ``recharge`` is required.
 
         Before this method: run ``update_or_create_sms_used`` so that all charges
         are posted.
+
+        :extra_amount:
+            Can be used to include a future charge in this check.
+
+            In the example of a PH #, including a "-300" extra_amount will 
+            decrement the balance by this amount, cause a recharge if necessary 
+            to cover the future charge.
         """
         self.update_or_create_sms_used(hotel)
-        balance = self.get_balance(hotel)
-        recharge_required = self.check_recharge_required(hotel, balance)
+        required_balance = self.get_balance(hotel) + extra_amount
+        recharge_required = self.check_recharge_required(hotel, required_balance)
 
         if recharge_required:
-            recharge_amt = self.calculate_recharge_amount(hotel, balance)
+            recharge_amt = self.calculate_recharge_amount(hotel, required_balance)
             self.recharge(hotel, recharge_amt)
 
     def recharge(self, hotel, recharge_amt):
@@ -556,8 +563,8 @@ class AcctTransManager(Dates, models.Manager):
             to be used to differentiate from "monthly phone_number charges 
             vs. first time purchase charge.
         """
-        self.check_balance(hotel)
         amount = -(settings.PHONE_NUMBER_MONTHLY_COST)
+        self.check_balance(hotel, extra_amount=amount)
 
         return self.create(
             hotel=hotel,
