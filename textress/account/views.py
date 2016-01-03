@@ -4,15 +4,9 @@ from django.http import HttpResponseRedirect
 from django.conf import settings
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib import auth, messages
-from django.contrib.auth.decorators import login_required
-from django.views.generic import View, ListView
-from django.views.generic.base import TemplateView
-from django.views.generic.edit import FormView, CreateView, UpdateView
-from django.views.generic.edit import ModelFormMixin
 # Avoid shadowing the login() and logout() views below.
-from django.contrib.auth import (
-    REDIRECT_FIELD_NAME, login as auth_login,
-)
+from django.contrib.auth import REDIRECT_FIELD_NAME, login as auth_login
+from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
 from django.shortcuts import resolve_url
 from django.template.response import TemplateResponse
@@ -20,12 +14,15 @@ from django.utils.http import is_safe_url
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
-
-from rest_framework import generics
-from rest_framework.response import Response
+from django.views.generic import View, ListView
+from django.views.generic.base import TemplateView
+from django.views.generic.edit import FormView, CreateView, UpdateView, ModelFormMixin
 
 from braces.views import (LoginRequiredMixin, GroupRequiredMixin, SetHeadlineMixin,
     StaticContextMixin)
+from rest_framework import generics
+from rest_framework.response import Response
+from ws4redis.publisher import RedisPublisher
 
 from account.forms import (AuthenticationForm, CloseAccountForm,
     CloseAcctConfirmForm, AcctCostForm, AcctCostUpdateForm)
@@ -114,7 +111,6 @@ def login(request, template_name='registration/login.html',
     return TemplateResponse(request, template_name, context)
 
 
-
 ### ACCOUNT VIEWS ###
 
 class AccountView(LoginRequiredMixin, HotelUserMixin, SetHeadlineMixin,
@@ -125,6 +121,15 @@ class AccountView(LoginRequiredMixin, HotelUserMixin, SetHeadlineMixin,
     headline = 'Dashboard'
     static_context = {'headline_small': 'guest list & quick links'}
     template_name = 'cpanel/account.html'
+
+    def get(self, request, *args, **kwargs):
+        """
+        Instantiage RedisPublisher immediately, so no lag in not getting the 1st 
+        SMS Message posted to ``/api/receive/sms_url/``, and "bug" where you have 
+        to do a page-refresh before they start popping on the page.
+        """
+        RedisPublisher(facility='foobar', broadcast=True)
+        return super(AccountView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         """
