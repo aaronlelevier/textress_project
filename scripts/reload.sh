@@ -26,6 +26,10 @@ cp -R media/ /var/www/
 wait
 ./manage.py migrate
 
+echo "RELOAD SUPERVISORCTL SCRIPTS"
+wait
+supervisorctl reload
+
 wait
 echo "RELOAD SERVER SCRIPTS"
 
