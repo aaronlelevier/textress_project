@@ -183,7 +183,11 @@ class CreateInitialAcctTransAndAcctStmtTests(TestCase):
 
     # charge_hotel_monthly_for_phone_numbers
 
-    def test_charge_hotel_monthly_for_phone_numbers(self):
+    def test_charge_hotel_monthly_for_phone_numbers__indempotent(self):
+        """
+        Tests that monthly PhoneNumber charges are "indempotent", and a Hotel will 
+        only be charge for all the PhoneNumbers it holds 1x per month.
+        """
         dates = Dates()
         today = dates._today
 
@@ -250,6 +254,65 @@ class CreateInitialAcctTransAndAcctStmtTests(TestCase):
                 hotel=self.hotel,
                 trans_type__name='phone_number',
                 insert_date__day=today).count(), 0)
+
+    def test_charge_hotel_monthly_for_phone_numbers__balance_ok(self):
+        """
+        Final AcctTrans gets decremented for the cost of the PhoneNumber, but since:
+        ``balance > ph num charge + balance_min`` ... No 'recharge' or 'stripe charges'
+        """
+        dates = Dates()
+        today = dates._today
+        # initial amount that I'm funding my account with
+        create_acct_tran(self.hotel, self.init_amt, today)
+        init_balance = AcctTrans.objects.filter(hotel=self.hotel).order_by('-modified')[0]
+
+        with self.settings(PHONE_NUMBER_MONTHLY_CHARGE_DAY=today.day):
+            self.assertEqual(AcctTrans.objects.filter(
+                hotel=self.hotel,
+                trans_type__name='phone_number',
+                insert_date__day=settings.PHONE_NUMBER_MONTHLY_CHARGE_DAY).count(), 0)
+
+            ph = create_phone_number(self.hotel)
+            self.assertEqual(self.hotel.phone_numbers.count(), 1)
+
+            tasks.charge_hotel_monthly_for_phone_numbers.delay(self.hotel.id)
+
+            post_balance = AcctTrans.objects.filter(hotel=self.hotel).order_by('-modified')[0]
+            self.assertEqual(
+                post_balance.balance,
+                init_balance.balance - settings.PHONE_NUMBER_MONTHLY_COST
+            )
+
+    def test_charge_hotel_monthly_for_phone_numbers__balance_not_ok(self):
+        """
+        Balance is not enough to cover the PhoneNumber Charge, so this should 
+        trigger a 'recharge' AcctTrans and 'Stripe Charge'.
+        """
+        dates = Dates()
+        today = dates._today
+        with self.settings(PHONE_NUMBER_MONTHLY_CHARGE_DAY=today.day):
+            self.assertEqual(AcctTrans.objects.filter(
+                hotel=self.hotel,
+                trans_type__name='phone_number',
+                insert_date__day=settings.PHONE_NUMBER_MONTHLY_CHARGE_DAY).count(), 0)
+            # assign ph num
+            ph = create_phone_number(self.hotel)
+            self.assertEqual(self.hotel.phone_numbers.count(), 1)
+
+            tasks.charge_hotel_monthly_for_phone_numbers.delay(self.hotel.id)
+
+            self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel).count(), 3)
+            self.assertEqual(AcctTrans.objects.filter(
+                hotel=self.hotel,
+                trans_type__name='phone_number',
+                insert_date__day=settings.PHONE_NUMBER_MONTHLY_CHARGE_DAY).count(), 1)
+            self.assertEqual(AcctTrans.objects.filter(hotel=self.hotel, trans_type__name='recharge_amt').count(), 1)
+            # balance check
+            post_balance = AcctTrans.objects.filter(hotel=self.hotel).order_by('-modified')[0]
+            self.assertEqual(
+                post_balance.balance,
+                AcctTrans.objects.balance(self.hotel)
+            )
 
     # charge_hotel_monthly_for_phone_numbers_all_hotels
 

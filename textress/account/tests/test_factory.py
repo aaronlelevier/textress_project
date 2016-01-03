@@ -130,7 +130,3 @@ class FactoryTests(TestCase):
         self.assertEqual(acct_trans.amount, -(settings.PHONE_NUMBER_MONTHLY_COST))
         self.assertEqual(acct_trans.balance, -(settings.PHONE_NUMBER_MONTHLY_COST))
         self.assertEqual(acct_trans.insert_date, insert_date)
-
-
-
-
