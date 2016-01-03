@@ -85,22 +85,19 @@ def create_superuser():
     superuser = create_hotel_user(hotel, username='admin')
 
 
-def make_subaccount(hotel, live=False):
-    '''
-    If not "live", override Subaccount.save() so don't create a 
-    live Twilio Subaccount.
-    '''
-    if live:
-        client = TwilioRestClient(settings.TWILIO_ACCOUNT_SID,
-            settings.TWILIO_AUTH_TOKEN)
+def make_subaccount(hotel):
+    global Subaccount
+    Subaccount.save = models.Model.save
+    return mommy.make(Subaccount, hotel=hotel)
 
-        subaccount = client.accounts.list()[0]
 
-        return Subaccount.objects.create(
-            hotel=hotel,
-            sid=subaccount.sid,
-            auth_token=subaccount.auth_token)
-    else:
-        global Subaccount
-        Subaccount.save = models.Model.save
-        return mommy.make(Subaccount, hotel=hotel)
+def make_subaccount_live(hotel):
+    client = TwilioRestClient(settings.TWILIO_ACCOUNT_SID,
+        settings.TWILIO_AUTH_TOKEN)
+
+    subaccount = client.accounts.list(friendly_name='test')[0]
+
+    return Subaccount.objects.create(
+        hotel=hotel,
+        sid=subaccount.sid,
+        auth_token=subaccount.auth_token)

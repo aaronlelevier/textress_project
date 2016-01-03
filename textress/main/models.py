@@ -361,7 +361,7 @@ class SubaccountManager(TwilioClient, models.Manager):
             # Twilio
             # If no "subaccount" exists for the Hotel, first try to use
             # one of the "Test subaccounts" and rename it.
-            test_accounts = self.client.accounts.list(friendly_name="Test Hotel")
+            test_accounts = self.client.accounts.list(friendly_name="test")
             try:
                 subaccount = test_accounts[0]
                 self.client.accounts.update(subaccount.sid, friendly_name=hotel.name)

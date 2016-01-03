@@ -6,7 +6,7 @@ import stripe
 from mock import MagicMock, PropertyMock
 
 from main.models import Subaccount
-from main.tests.factory import create_hotel, create_hotel_user, make_subaccount
+from main.tests.factory import create_hotel, create_hotel_user, make_subaccount_live
 from payment.models import StripeClient, Customer, Card, Charge, Refund
 from payment.tests import factory
 from utils import create
@@ -203,7 +203,7 @@ class ChargeManagerTests(TestCase):
 
     def setUp(self):
         self.hotel = create_hotel()
-        self.subaccount = make_subaccount(self.hotel, live=True)
+        self.subaccount = make_subaccount_live(self.hotel)
         self.customer = factory.customer()
         self.card = factory.card(self.customer.id)
         self.hotel.update_customer(self.customer)

@@ -73,17 +73,19 @@ class FactoryTests(TestCase):
         hotel2 = factory.create_hotel()
         self.assertNotEqual(hotel.address_phone, hotel2.address_phone)
 
-    def test_make_subaccount_live(self):
-        hotel = factory.create_hotel()
-        sub = factory.make_subaccount(hotel, live=True)
-        self.assertIsInstance(sub, Subaccount)
-        self.assertTrue(sub.twilio_object)
-        self.assertIsInstance(sub.client, TwilioRestClient)
-
-    def test_make_subaccount_not_live(self):
+    def test_make_subaccount(self):
         hotel = factory.create_hotel()
         sub = factory.make_subaccount(hotel)
         self.assertIsInstance(sub, Subaccount)
 
         with self.assertRaises(TwilioRestException):
+            # Tryin to access the Twilio object via the Twilio API
+            # raises an Exception
             self.assertTrue(sub.twilio_object)
+
+    def test_make_subaccount_live(self):
+        hotel = factory.create_hotel()
+        sub = factory.make_subaccount_live(hotel)
+        self.assertIsInstance(sub, Subaccount)
+        self.assertTrue(sub.twilio_object)
+        self.assertIsInstance(sub.client, TwilioRestClient)

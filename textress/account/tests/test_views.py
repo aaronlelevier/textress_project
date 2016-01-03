@@ -13,7 +13,7 @@ from account.models import (AcctStmt, TransType, AcctTrans, AcctCost,
 from account.tests.factory import (create_acct_stmts, create_acct_stmt,
     create_acct_trans, CREATE_ACCTCOST_DICT)
 from main.models import Hotel
-from main.tests.factory import (create_hotel, create_hotel_user, make_subaccount,
+from main.tests.factory import (create_hotel, create_hotel_user, make_subaccount_live,
     CREATE_USER_DICT, CREATE_HOTEL_DICT, PASSWORD)
 from payment.models import Customer
 from utils import create
@@ -304,7 +304,7 @@ class AccountDeactivatedTests(TestCase):
         self.manager = create_hotel_user(self.hotel, 'manager', 'hotel_manager')
         self.user = create_hotel_user(self.hotel, 'user')
         # Subaccount
-        self.sub = make_subaccount(self.hotel, live=True)
+        self.sub = make_subaccount_live(self.hotel)
         # Login
         self.client.login(username=self.user.username, password=self.password)
 

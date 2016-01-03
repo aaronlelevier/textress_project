@@ -16,7 +16,7 @@ from account.models import AcctTrans, TransType, AcctCost
 from concierge.tests.factory import make_guests, make_messages
 from main.models import TwilioClient, Hotel, UserProfile, Subaccount
 from main.tests.factory import (create_hotel, create_hotel_user, PASSWORD,
-    make_subaccount)
+    make_subaccount, make_subaccount_live)
 from payment.models import Customer
 from utils import create
 
@@ -39,7 +39,7 @@ class HotelTests(TestCase):
         self.admin = create_hotel_user(self.hotel, group="hotel_admin")
         self.user = create_hotel_user(self.hotel)
 
-        self.sub = make_subaccount(self.hotel, live=True)
+        self.sub = make_subaccount_live(self.hotel)
 
         # AcctTrans, TransType, etc...
         self.sms_used, _ = TransType.objects.get_or_create(name='sms_used')
@@ -203,7 +203,7 @@ class HotelTests(TestCase):
         with self.assertRaises(Subaccount.DoesNotExist):
             Subaccount.objects.get(hotel=self.hotel)
 
-        make_subaccount(self.hotel, live=True)
+        make_subaccount_live(self.hotel)
 
         self.hotel.get_or_create_subaccount()
         self.assertIsInstance(self.hotel.subaccount, Subaccount)
@@ -281,7 +281,7 @@ class SubaccountTests(TestCase):
         self.client = TwilioRestClient(settings.TWILIO_ACCOUNT_SID,
             settings.TWILIO_AUTH_TOKEN)
 
-        self.sub = make_subaccount(self.hotel, live=True)
+        self.sub = make_subaccount_live(self.hotel)
 
         # Not live
         self.hotel_not_live = create_hotel()
