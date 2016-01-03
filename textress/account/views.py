@@ -176,21 +176,21 @@ class AcctCostUpdateView(AdminOnlyMixin, BillingSummaryContextMixin,
 # ACCT STMT #
 #############
 
-class AcctStmtListView(AdminOnlyMixin, SetHeadlineMixin, ListView):
-    '''AcctStmt by Month.'''
+# class AcctStmtListView(AdminOnlyMixin, SetHeadlineMixin, ListView):
+#     '''AcctStmt by Month.'''
 
-    headline = _("Account Statements")
-    template_name = 'list.html'
+#     headline = _("Account Statements")
+#     template_name = 'list.html'
 
-    def get_queryset(self):
-        return AcctStmt.objects.filter(hotel=self.hotel)
+#     def get_queryset(self):
+#         return AcctStmt.objects.filter(hotel=self.hotel)
 
-    def get(self, request, *args, **kwargs):
-        '''
-        Ensure the current month's AcctStmt is up to date.
-        '''
-        # acct_stmt = update_current_acct_stmt(hotel=self.hotel)
-        return super(AcctStmtListView, self).get(request, *args, **kwargs)
+#     def get(self, request, *args, **kwargs):
+#         '''
+#         Ensure the current month's AcctStmt is up to date.
+#         '''
+#         # acct_stmt = update_current_acct_stmt(hotel=self.hotel)
+#         return super(AcctStmtListView, self).get(request, *args, **kwargs)
 
 
 class AcctStmtDetailView(AdminOnlyMixin, SetHeadlineMixin, BillingSummaryContextMixin, TemplateView):
@@ -256,7 +256,7 @@ class CloseAcctView(AdminOnlyMixin, SetHeadlineMixin, FormView):
     '''
     headline = _("Close Account")
     form_class = CloseAccountForm
-    template_name = 'account/account_form.html'
+    template_name = 'cpanel/form.html'
 
     def get_success_url(self):
         return reverse('close_acct_confirm',

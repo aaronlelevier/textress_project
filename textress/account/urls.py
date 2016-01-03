@@ -8,8 +8,49 @@ from account.forms import (AuthenticationForm, PasswordResetForm,
 from utils.decorators import required, logout_required
 
 
+register_patterns = required(
+    login_required,
+    patterns('',
+        # Step 3
+        url(r'^step3/$', views.RegisterAcctCostCreateView.as_view(), name='register_step3'),
+        url(r'^step3/update/(?P<pk>\d+)/$', views.RegisterAcctCostUpdateView.as_view(), name='register_step3_update'),
+    )
+)
+
+# No Permissions
+api_patterns = patterns('',
+    url(r'^account/pricing/$', views.PricingListAPIView.as_view(), name='api_pricing'),
+    url(r'^account/pricing/(?P<pk>\d+)/$', views.PricingRetrieveAPIView.as_view(), name='api_pricing'),
+)
+
+acct_cost_patterns = required(
+    login_required,
+    patterns('',
+        url(r'^refill-settings/(?P<pk>\w+)/$', views.AcctCostUpdateView.as_view(), name='acct_cost_update'),
+        url(r'^history/$', views.AcctPmtHistoryView.as_view(), name='acct_pmt_history'),
+    )
+)
+
+acct_stmt_patterns = required(
+    login_required,
+    patterns('',
+        # url(r'^$', views.AcctStmtListView.as_view(), name='acct_stmt_list'),
+        url(r'^(?P<year>\d+)/(?P<month>\d+)/$', views.AcctStmtDetailView.as_view(), name='acct_stmt_detail'),
+    )
+)
+
+# TODO: These views aren't finished yet
+# close_acct_patterns = required(
+#     login_required,
+#     patterns('',
+#         url(r'^$', views.CloseAcctView.as_view(), name='close_acct'),
+#         url(r'^confirm/(?P<slug>[-_\w]+)/$', views.CloseAcctConfirmView.as_view(), name='close_acct_confirm'),
+#         url(r'^submitted/$', views.CloseAcctSuccessView.as_view(), name='close_acct_success'),
+#     )
+# )
+
 # Logout Required
-urlpatterns = required(
+account_patterns = required(
     logout_required,
     patterns('',
         url(r'^login/$',auth_views.login,
@@ -18,52 +59,15 @@ urlpatterns = required(
             name='login'),
     )
 )
-
 # Login Required
-urlpatterns += required(
+account_patterns += required(
     login_required,
     patterns('',
-        url(r'^account/$', views.AccountView.as_view(), name='account'),
+        url(r'^$', views.AccountView.as_view(), name='account'),
     )
 )
-
-register_patterns = patterns('',
-    # Step 3
-    url(r'^step3/$', views.RegisterAcctCostCreateView.as_view(), name='register_step3'),
-    url(r'^step3/update/(?P<pk>\d+)/$', views.RegisterAcctCostUpdateView.as_view(), name='register_step3_update'),
-    )
-
-api_patterns = patterns('',
-    url(r'^account/pricing/$', views.PricingListAPIView.as_view(), name='api_pricing'),
-    url(r'^account/pricing/(?P<pk>\d+)/$', views.PricingRetrieveAPIView.as_view(), name='api_pricing'),
-    )
-
-acct_cost_patterns = patterns('',
-    url(r'^refill-settings/(?P<pk>\w+)/$', views.AcctCostUpdateView.as_view(), name='acct_cost_update'),
-    url(r'^history/$', views.AcctPmtHistoryView.as_view(), name='acct_pmt_history'),
-)
-
-acct_stmt_patterns = patterns('',
-    url(r'^$', views.AcctStmtListView.as_view(), name='acct_stmt_list'),
-    url(r'^(?P<year>\d+)/(?P<month>\d+)/$', views.AcctStmtDetailView.as_view(), name='acct_stmt_detail'),
-    )
-
-close_acct_patterns = patterns('',
-    url(r'^$', views.CloseAcctView.as_view(), name='close_acct'),
-    url(r'^confirm/(?P<slug>[-_\w]+)/$', views.CloseAcctConfirmView.as_view(), name='close_acct_confirm'),
-    url(r'^submitted/$', views.CloseAcctSuccessView.as_view(), name='close_acct_success'),
-    )
-
-account_patterns = patterns('',
-    # User Dashboard View
-    # url(r'^$', views.AccountView.as_view(), name='account'),
-
-    # Auth Views
-    # url(r'^login/$',auth_views.login,
-    #     {'template_name': 'cpanel/auth-forms/login.html',
-    #     'authentication_form': AuthenticationForm},
-    #     name='login'),
-
+# No Permissions
+account_patterns += patterns('',
     ### 2 views for password change - when you are logged in and want to 
     ### change your password
     url(r'^password-change/$', auth_views.password_change,
@@ -74,7 +78,7 @@ account_patterns = patterns('',
     url(r'^password-change/done/$', auth_views.password_change_done,
         {'template_name': 'cpanel/form-success/password_change_done.html'},
         name='password_change_done'),
-
+    
     ### 4 views for password reset when you can't remember your password
     url(r'^password-reset/$', auth_views.password_reset,
         {
@@ -109,7 +113,7 @@ account_patterns = patterns('',
     url(r'^login-error/$', views.login_error, name='login_error'),
 )
 
-urlpatterns += patterns('',
+urlpatterns = patterns('',
     url(r'^api/', include(api_patterns)),
     url(r'^account/', include(account_patterns)),
     url(r'^register/', include(register_patterns)),
@@ -117,5 +121,5 @@ urlpatterns += patterns('',
     # I may want to reuse the namespace for other URLs.
     url(r'^payments/', include(acct_cost_patterns)),
     url(r'^statements/', include(acct_stmt_patterns)),
-    url(r'^close/', include(close_acct_patterns)),
+    # url(r'^close/', include(close_acct_patterns)),
 )
