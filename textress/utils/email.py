@@ -23,7 +23,8 @@ class Email(object):
         c = {'obj': obj,
             'site_name': settings.SITE_NAME,
             'textress_phone': settings.TEXTRESS_PHONE_NUMBER,
-            'textess_contact_email': from_email
+            'textess_contact_email': from_email,
+            'SITE_URL': settings.SITE_URL
         }
 
         if extra_context:
@@ -65,8 +66,7 @@ def send_account_charged_email(hotel, charge):
         extra_context={
             'user': hotel_admin,
             'charge': charge,
-            'hotel': hotel,
-            'SITE': settings.SITE
+            'hotel': hotel
             }
         )
     email.msg.send()
@@ -82,8 +82,7 @@ def send_auto_recharge_failed_email(hotel):
         html_content='email/auto_recharge_failed/email.html',
         extra_context={
             'user':hotel_admin,
-            'hotel': hotel,
-            'SITE': settings.SITE
+            'hotel': hotel
             }
         )
     email.msg.send()
@@ -100,8 +99,7 @@ def send_charge_failed_email(hotel, amount):
         extra_context={
             'user':hotel_admin,
             'hotel': hotel,
-            'amount': amount,
-            'SITE': settings.SITE
+            'amount': amount
             }
         )
     email.msg.send()

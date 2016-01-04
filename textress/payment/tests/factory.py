@@ -1,6 +1,9 @@
 import stripe
 
+from django.db import models
 from django.conf import settings
+
+from model_mommy import mommy
 
 from payment.models import StripeClient, Customer, Card, Charge, Refund
 
@@ -90,3 +93,28 @@ def refund(customer_id=None):
     else:
         refund = None
     return refund
+
+
+### FAKE MODEL CONSTRUCTORS ###
+
+def fake_customer():
+    global Customer
+    Customer.save = models.Model.save
+    return mommy.make(Customer)
+
+
+def fake_card(customer=None):
+    global Card
+    Card.save = models.Model.save
+
+    if not customer:
+        customer = fake_customer()
+
+    return mommy.make(Card, customer=customer)
+
+def fake_charge():
+    global Charge
+    Charge.save = models.Model.save
+    customer = fake_customer()
+    card = fake_card(customer)
+    return mommy.make(Charge, card=card, customer=customer)

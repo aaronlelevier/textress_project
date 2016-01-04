@@ -49,3 +49,23 @@ class RefundTests(TestCase):
             self.assertIsNotNone(sr.id)
         else:
             self.assertIsNone(sr)
+
+
+### Fakes ###
+
+class FakePaymentModelTests(TestCase):
+
+    def test_customer(self):
+        customer = factory.fake_customer()
+
+        self.assertIsInstance(customer, Customer)
+
+    def test_card(self):
+        card = factory.fake_card()
+
+        self.assertIsInstance(card, Card)
+
+    def test_charge(self):
+        charge = factory.fake_charge()
+
+        self.assertIsInstance(charge, Charge)

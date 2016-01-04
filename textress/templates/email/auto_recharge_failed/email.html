@@ -1,19 +1,12 @@
+{% extends "email/base.html" %}
 {% load stripe_tags %}
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    </head>
-    <body>
-        <div class="container">
-            <p>Hello {{ user }},</p>
-            <p>Auto-recharge is disabled.  Please activate auto-recharge, or update your payment info. <strong>Your account has been temporarily disabled in the meantime.</strong></p>
-            <p>In order to recharge your account, please go to your payment preferences using the link, and turn <em>auto-recharge</em> on.</p>
-            <p><a href="https://textress.com/payments/refill-settings/{{ hotel.acct_cost.pk }}/">{{ SITE }}{% url 'acct_cost_update' hotel.acct_cost.pk %}</a>
-        </p>
-        <br>
-        <p>Thank you</p>
-        
-    </div>
-</body>
-</html>
+
+{% block body %}
+<div class="row">
+    <p>Hello {{ user }},</p>
+    <p><strong>Your account has been temporarily disabled.</strong></p>
+    <p>We tried to auto-recharge your account, but auto-recharge is disabled.  Please activate auto-recharge, or <a href="{% url 'payment:one_time_payment' %}"> make a one-time payment to add funds</a>.</p>
+    <p>In order to recharge your account, please go to your payment preferences using the link, and turn <em>auto-recharge</em> on.</p>
+    <p><a href="{% url 'acct_cost_update' hotel.acct_cost.pk %}">{{ SITE_URL }}{% url 'acct_cost_update' hotel.acct_cost.pk %}</a></p>
+</div>
+{% endblock body %}

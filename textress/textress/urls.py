@@ -42,6 +42,10 @@ urlpatterns = patterns('',
     url(r'^terms-and-conditions/$', views.TermsNCondView.as_view(), name='terms_n_cond'),
     url(r'^404/$', views.handler404, name='404'),
     url(r'^500/$', views.handler500, name='500'),
+
+    # TODO: This is a debugging view that will need to be moved
+    url(r'^email-views/', include('utils.urls', namespace='email_views')),
+
 )
 
 handler404 = 'textress.views.handler404'
@@ -53,4 +57,4 @@ if settings.DEBUG:
         url(r'^__debug__/', include(debug_toolbar.urls)),
         (r'^media/(?P<path>.*)$', 'django.views.static.serve',
             {'document_root': settings.MEDIA_ROOT, 'show_indexes':True}),
-)
+    )

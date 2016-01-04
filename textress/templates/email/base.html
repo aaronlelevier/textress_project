@@ -1,0 +1,29 @@
+{% load stripe_tags %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    </head>
+    <body>
+        <div class="container">
+            <div class="row" style="background-color: #DCDCDC">
+                <div class="span4"></div>
+                <div class="span4" style="font-size:30px; display:block; margin:auto; text-align:center; padding:10px">
+                    TEXT<i><img style="max-width:50px;" src="{{ SITE_URL }}/static/images/textress-logo.gif" /></i>RESS
+                </div>
+                <div class="span4"></div>
+            </div>
+            <br>
+
+            {% block body %}{% endblock body %}
+            
+            <br>
+            <div class="row">
+                <p>Thank you,</p>
+                <p>Textress</p>
+                <p>E: <a href="mailto:{{ textess_contact_email }}">{{ textess_contact_email }}</a> | P: {{ textress_phone }}</p>
+            </div>
+            <br>
+        </div>
+    </body>
+</html>
