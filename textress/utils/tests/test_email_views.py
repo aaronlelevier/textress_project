@@ -6,7 +6,7 @@ from model_mommy import mommy
 
 from account.models import AcctCost
 from main.tests.factory import create_hotel, create_hotel_user
-from payment.tests.factory import fake_charge
+from payment.models import Charge
 from sms.tests.factory import create_phone_number, fake_phone_number
 
 
@@ -15,7 +15,7 @@ class EmailViewTests(TestCase):
     def setUp(self):
         self.hotel = create_hotel()
         self.user = create_hotel_user(self.hotel)
-        self.charge = fake_charge()
+        self.charge = mommy.make(Charge)
         self.acct_cost = mommy.make(AcctCost, hotel=self.hotel)
 
     def test_renders(self):
