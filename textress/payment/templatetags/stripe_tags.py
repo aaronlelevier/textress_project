@@ -12,6 +12,7 @@ def stripe_money(value):
     except TypeError:
         return '$0.00'
 
+
 @register.filter
 def format_phone(value):
     try:
