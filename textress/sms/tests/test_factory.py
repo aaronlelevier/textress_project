@@ -1,5 +1,6 @@
 from django.test import TestCase
 
+from main.models import Hotel
 from main.tests.factory import create_hotel
 from sms.models import PhoneNumber
 from sms.tests import factory
@@ -21,3 +22,12 @@ class FactoryTests(TestCase):
         ph1 = factory.create_phone_number(hotel)
         ph2 = factory.create_phone_number(hotel)
         self.assertEqual(PhoneNumber.objects.filter(hotel=hotel).count(), 2)
+
+
+class FactoryFakeObjectTests(TestCase):
+
+    def test_fake_phone_number(self):
+        ph = factory.fake_phone_number()
+
+        self.assertIsInstance(ph, PhoneNumber)
+        self.assertIsInstance(ph.hotel, Hotel)

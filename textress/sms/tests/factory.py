@@ -1,5 +1,6 @@
 from django.conf import settings
 
+from model_mommy import mommy
 from twilio.rest import TwilioRestClient
 
 from main.tests.factory import create_hotel
@@ -35,3 +36,9 @@ def create_phone_number(hotel=None):
         default=True
     )
     return ph_num
+
+
+def fake_phone_number(hotel=None):
+    if not hotel:
+        hotel = create_hotel()
+    return mommy.make(PhoneNumber, hotel=hotel)
