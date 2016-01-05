@@ -1,20 +1,12 @@
+{% extends "email/base.html" %}
 {% load stripe_tags %}
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    </head>
-    <body>
-        <div class="container">
-            <p>Hello {{ user }},</p>
-            <p>Charge failed for {{ amount|stripe_money }}.</p>
-            <p>Please confirm that your method of payment is valid in order to continue using Textress.</p>
-            <p><strong>Your account has been temporarily disabled. Please follow the link below, in order to reactivate your account.</strong></p>
-            <p><a href="https://textress.com/billing/manage-payment-methods/">{{ SITE }}/billing/manage-payment-methods/</a>
-        </p>
-        <br>
-        <p>Thank you</p>
-        
+
+{% block body %}
+    <div class="row">
+        <p>Hello {{ user }},</p>
+        <p>Charge failed for {{ amount|stripe_money }}.</p>
+        <p>Please confirm that your method of payment is valid in order to continue using Textress.</p>
+        <p><strong>Your account has been temporarily disabled. Please follow the link below, in order to reactivate your account.</strong></p>
+        <p><a href="{% url 'payment:one_time_payment' %}">{{ SITE_URL }}{% url 'payment:one_time_payment' %}</a></p>
     </div>
-</body>
-</html>
+{% endblock body %}

@@ -98,7 +98,6 @@ def send_charge_failed_email(hotel, amount):
         html_content='email/charge_failed/email.html',
         extra_context={
             'user':hotel_admin,
-            'hotel': hotel,
             'amount': amount
             }
         )
@@ -107,9 +106,11 @@ def send_charge_failed_email(hotel, amount):
 
 @shared_task
 def send_delete_unknown_number_failed_email(ph_num):
-    """Email myself that a Twilio PH that wasn't registered to a 
+    """
+    Email myself that a Twilio PH that wasn't registered to a 
     Hotel received an SMS, but I wasn't able to delete it, so I 
-    need to delete it manually."""
+    need to delete it manually.
+    """
     email = Email(
         to=settings.DEFAULT_EMAIL_AARON,
         from_email=settings.DEFAULT_EMAIL_BILLING,

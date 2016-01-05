@@ -1,12 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    </head>
-    <body>
-        <div class="container">
-            <p>Aaron,</p>
-            <p>You need to manually delete the phone number: {{ ph_num }}</p>
-        </div>
-    </body>
-</html>
+{% extends "email/base.html" %}
+{% load stripe_tags %}
+
+{% block body %}
+    <div class="row">
+        <p>Aaron,</p>
+        <p>You need to manually delete the phone number: {{ ph_num }}.</p>
+        <p><strong>An SMS came through to this phone number, and it isn't registered to any Hotels.</strong></p>
+    </div>
+{% endblock body %}
