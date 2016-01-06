@@ -9,13 +9,15 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 
 from .forms import EmptyForm
 from .helpers import salt
-from .messages import dj_messages, login_messages
+from .messages import alert_messages, dj_messages, login_messages, sms_messages
 from .mixins import DeleteButtonMixin
 
 __all__ = [
     'DeleteButtonMixin',
+    'alert_messages',
     'dj_messages',
     'login_messages',
+    'sms_messages',
     'EmptyForm',
     'salt'
 ]

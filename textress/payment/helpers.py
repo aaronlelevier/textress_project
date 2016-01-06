@@ -3,8 +3,9 @@ import stripe
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
-from payment.models import Customer, Card, Charge
 from account.models import TransType, AcctTrans
+from payment.models import Customer, Card, Charge
+from utils import alert_messages
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -37,8 +38,7 @@ def no_funds_alert():
         'type': 'danger',
         'link': reverse('payment:one_time_payment'),
         'strong_message': 'Alert!',
-        'message': "SMS sending and receiving has been deactivated. Please \
-contact your system admin to reactivate the account. This is most likely due to insufficient funds."
+        'message': alert_messages['no_funds_alert']
     }
 
 
@@ -47,5 +47,5 @@ def no_customer_alert():
         'type': 'danger',
         'link': reverse('payment:one_time_payment'),
         'strong_message': 'Alert!',
-        'message': "No account funds. Click the link to add initial funds and avoid the account being deactivated."
+        'message': alert_messages['no_customer_alert']
     }

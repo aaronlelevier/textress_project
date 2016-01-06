@@ -13,13 +13,261 @@ from account.models import (AcctStmt, TransType, AcctTrans, AcctCost,
 from account.tests.factory import (create_acct_stmts, create_acct_stmt,
     create_acct_trans, CREATE_ACCTCOST_DICT)
 from main.models import Hotel
-from main.tests.factory import (create_hotel, create_hotel_user, make_subaccount_live,
-    CREATE_USER_DICT, CREATE_HOTEL_DICT, PASSWORD)
+from main.tests.factory import (create_hotel, create_hotel_user, make_subaccount,
+    make_subaccount_live, CREATE_USER_DICT, CREATE_HOTEL_DICT, PASSWORD)
 from payment.models import Customer
-from utils import create
+from utils import create, login_messages, alert_messages
 
 
-class AcctStmtViewTests(TestCase):
+class AccountTests(TestCase):
+    # Test Rending of view, template path is correct, url
+    # User of each permission type needed
+
+    def setUp(self):
+        create._get_groups_and_perms()
+        self.password = PASSWORD
+
+        self.hotel = create_hotel()
+        self.admin = create_hotel_user(self.hotel, 'admin', 'hotel_admin')
+        self.manager = create_hotel_user(self.hotel, 'manager', 'hotel_manager')
+        self.user = create_hotel_user(self.hotel, 'user')
+
+    # private
+
+    def test_private(self):
+        self.client.login(username=self.user.username, password=self.password)
+
+        response = self.client.get(reverse('private'), follow=True)
+
+        self.assertRedirects(response, reverse('account'))
+        m = list(response.context['messages'])
+        self.assertEqual(len(m), 1)
+        self.assertEqual(str(m[0]), login_messages['now_logged_in'])
+
+    def test_private__logged_out(self):
+        response = self.client.get(reverse('private'), follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'), reverse('private')))
+
+    # logout
+
+    def test_logout(self):
+        self.client.login(username=self.user.username, password=self.password)
+
+        response = self.client.get(reverse('logout'), follow=True)
+
+        self.assertRedirects(response, reverse('login'))
+        m = list(response.context['messages'])
+        self.assertEqual(len(m), 1)
+        self.assertEqual(str(m[0]), login_messages['now_logged_out'])
+
+    def test_logout__while_logged_out(self):
+        response = self.client.get(reverse('logout'), follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'), reverse('logout')))
+
+    def test_login_get(self):
+        response = self.client.get(reverse('login'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['form'])
+
+    def test_login_post(self):
+        data = {'username': self.user.username, 'password': PASSWORD}
+
+        response = self.client.post(reverse('login'), data, follow=True)
+
+        self.assertRedirects(response, reverse('account'))
+        m = list(response.context['messages'])
+        self.assertEqual(len(m), 1)
+        self.assertEqual(str(m[0]), login_messages['now_logged_in'])
+
+    def test_account__logged_in(self):
+        self.client.login(username=self.user.username, password=self.password)
+
+        response = self.client.get(reverse('account'))
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_account__logged_out(self):
+        response = self.client.get(reverse('account'), follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'), reverse('account')))
+
+    def test_account__headline_context(self):
+        self.client.login(username=self.user.username, password=self.password)
+
+        response = self.client.get(reverse('account'))
+
+        self.assertTrue(response.context['headline_small'])
+
+    def test_account__no_funds_alert(self):
+        self.client.login(username=self.user.username, password=self.password)
+        subaccount = make_subaccount(self.hotel)
+        subaccount.active = False
+        subaccount.save()
+        self.assertFalse(self.hotel.subaccount.active)
+
+        response = self.client.get(reverse('account'))
+
+        self.assertTrue(response.context['alerts'])
+        self.assertIn(
+            alert_messages['no_funds_alert'],
+            response.content
+        )
+
+    def test_account__no_customer_alert(self):
+        self.client.login(username=self.user.username, password=self.password)
+        self.assertIsNone(self.hotel.customer)
+
+        response = self.client.get(reverse('account'))
+
+        self.assertTrue(response.context['alerts'])
+        self.assertIn(
+            alert_messages['no_customer_alert'],
+            response.content
+        )
+
+    def test_account__no_twilio_phone_number_alert(self):
+        self.client.login(username=self.user.username, password=self.password)
+        self.assertIsNone(self.hotel.twilio_ph_sid)
+
+        response = self.client.get(reverse('account'))
+
+        self.assertTrue(response.context['alerts'])
+        self.assertIn(
+            alert_messages['no_twilio_phone_number_alert'],
+            response.content
+        )
+
+    ### inherit from - django.contrib.auth.forms
+
+    ### 2 views for password change
+
+    def test_password_change(self):
+        # login required view
+        response = self.client.get(reverse('password_change'))
+        self.assertEqual(response.status_code, 302)
+
+        # login
+        self.client.login(username=self.user.username, password=self.password)
+        response = self.client.get(reverse('password_change'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['form'])
+
+    def test_password_change_done(self):
+        self.client.login(username=self.user.username, password=self.password)
+
+        response = self.client.get(reverse('password_change_done'))
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_password_change_done__logged_out(self):
+        # login required view
+        response = self.client.get(reverse('password_change_done'), follow=True)
+        
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'),
+            reverse('password_change_done')))
+
+    ### 4 views for password reset
+
+    def test_password_reset(self):
+        response = self.client.get(reverse('password_reset'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['form'])
+        self.assertTrue(response.context['headline'])
+
+    def test_password_reset_done(self):
+        response = self.client.get(reverse('password_reset_done'))
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_password_reset_confirm(self):
+        # TODO: write an integration for Form test for this
+        pass
+
+    def test_password_reset_complete(self):
+        response = self.client.get(reverse('password_reset_complete'))
+
+        self.assertEqual(response.status_code, 200)
+
+
+class RegistrationTests(TestCase):
+
+    def setUp(self):
+        create._get_groups_and_perms()
+        self.hotel = create_hotel()
+        self.user = create_hotel_user(self.hotel, group="hotel_admin")
+        # Login
+        self.client.login(username=self.user.username, password=PASSWORD)
+
+    # register_step3
+
+    def test_get(self):
+        response = self.client.get(reverse('register_step3'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.context['form'], AcctCostForm)
+
+    def test_get__logged_out(self):
+        self.client.logout()
+
+        response = self.client.get(reverse('register_step3'), follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'), reverse('register_step3')))
+
+    def test_create(self):
+        # Step 3
+        response = self.client.post(reverse('register_step3'),
+            CREATE_ACCTCOST_DICT, follow=True)
+        self.assertRedirects(response, reverse('payment:register_step4'))
+        # created n linked to Hotel
+        acct_cost = AcctCost.objects.get(hotel=self.hotel)
+        self.assertIsInstance(acct_cost, AcctCost)
+
+        # Dave tries to view the page again and is redirected to the UpdateView
+        response = self.client.get(reverse('register_step3'), follow=True)
+        self.assertRedirects(response, reverse('register_step3_update', kwargs={'pk': acct_cost.pk}))
+
+    def test_update(self):
+        # Step 3 UpdateView
+        # Dave wants to update his choice
+        acct_cost = mommy.make(AcctCost, hotel=self.hotel)
+        response = self.client.get(reverse('register_step3_update', kwargs={'pk': acct_cost.pk}))
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.context['form'], AcctCostForm)
+
+    def test_update__logged_out(self):
+        # Step 3 UpdateView
+        # Dave wants to update his choice
+        self.client.logout()
+        acct_cost = mommy.make(AcctCost, hotel=self.hotel)
+
+        response = self.client.get(reverse('register_step3_update', kwargs={'pk': acct_cost.pk}),
+            follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'), reverse('register_step3')))
+
+    def test_update__no_account_cost(self):
+        # Dave doesn't have an AcctCost yet, and tries to go to another Hotel's AcctCost page
+        other_hotel = create_hotel()
+        other_acct_cost = mommy.make(AcctCost, hotel=other_hotel)
+        response = self.client.get(reverse('register_step3_update',
+            kwargs={'pk': other_acct_cost.pk}), follow=True)
+        self.assertRedirects(response, reverse('register_step3'))
+
+    def test_update__other_hotel_account_cost(self):
+        # Dave has an AcctCost, and tries to go to another Hotel's AcctCost page
+        acct_cost = mommy.make(AcctCost, hotel=self.hotel)
+        other_hotel = create_hotel()
+        other_acct_cost = mommy.make(AcctCost, hotel=other_hotel)
+        response = self.client.get(reverse('register_step3_update',
+            kwargs={'pk': other_acct_cost.pk}), follow=True)
+        self.assertRedirects(response, reverse('register_step3_update',
+            kwargs={'pk': acct_cost.pk}))
+
+
+class AcctStmtAndOtherAccountViewTests(TestCase):
 
     fixtures = ['trans_type.json']
 
@@ -47,16 +295,64 @@ class AcctStmtViewTests(TestCase):
     def tearDown(self):
         self.client.logout()
 
+    ### ACCT COST
+
+    def test_acct_cost_update__get(self):
+        acct_cost, created = AcctCost.objects.get_or_create(self.hotel)
+
+        response = self.client.get(reverse('acct_cost_update', kwargs={'pk':acct_cost.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['form'])
+        self.assertTrue(response.context['breadcrumbs'])
+
+    def test_acct_cost_update__get__logged_out(self):
+        self.client.logout()
+        acct_cost, created = AcctCost.objects.get_or_create(self.hotel)
+
+        response = self.client.get(reverse('acct_cost_update', kwargs={'pk':acct_cost.pk}),
+            follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'),
+            reverse('acct_cost_update', kwargs={'pk':acct_cost.pk})))
+
+    def test_acct_cost_update_post(self):
+        data = {
+            'balance_min': BALANCE_AMOUNTS[0][0],
+            'recharge_amt': CHARGE_AMOUNTS[0][0],
+            'auto_recharge': True
+        }
+        acct_cost, created = AcctCost.objects.get_or_create(self.hotel)
+
+        response = self.client.post(reverse('acct_cost_update', kwargs={'pk':acct_cost.pk}),
+            data, follow=True)
+
+        self.assertRedirects(response, reverse('payment:summary'))
+        # success message from ``FormUpdateMessageMixin``
+        m = list(response.context['messages'])
+        self.assertEqual(len(m), 1)
+
     ### ACCT STMT DETAIL
 
-    def test_acct_stmt_detail_response(self):
+    def test_acct_stmt_detail__response(self):
         response = self.client.get(reverse('acct_stmt_detail',
             kwargs={'year': self.year, 'month': self.month}))
+
         self.assertEqual(response.status_code, 200)
 
-    def test_acct_stmt_detail_context(self):
+    def test_acct_stmt_detail__logged_out(self):
+        self.client.logout()
+
+        response = self.client.get(reverse('acct_stmt_detail',
+            kwargs={'year': self.year, 'month': self.month}), follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'),
+            reverse('acct_stmt_detail', kwargs={'year': self.year, 'month': self.month})))
+
+    def test_acct_stmt_detail__context(self):
         response = self.client.get(reverse('acct_stmt_detail',
             kwargs={'year': self.year, 'month': self.month}))
+
         self.assertTrue(response.context['acct_stmt'])
         self.assertTrue(response.context['acct_stmts'])
         for ea in ['sms_used', 'phone_number']:
@@ -65,6 +361,7 @@ class AcctStmtViewTests(TestCase):
     def test_acct_stmt_detail_breadcrumbs(self):
         response = self.client.get(reverse('acct_stmt_detail',
             kwargs={'year': self.year, 'month': self.month}))
+
         self.assertTrue(response.context['breadcrumbs'])
 
     def test_context_acct_trans(self):
@@ -84,19 +381,30 @@ class AcctStmtViewTests(TestCase):
 
     ### ACCT PMT HISTORY
 
-    def test_acct_pmt_history_response(self):
+    def test_acct_pmt_history__response(self):
         response = self.client.get(reverse('acct_pmt_history'))
+
         self.assertEqual(response.status_code, 200)
 
-    def test_acct_pmt_history_context(self):
+    def test_acct_pmt_history__logged_out(self):
+        self.client.logout()
+
+        response = self.client.get(reverse('acct_pmt_history'), follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'),
+            reverse('acct_pmt_history')))
+
+    def test_acct_pmt_history__context(self):
         response = self.client.get(reverse('acct_pmt_history'))
+
         self.assertTrue(response.context['object_list'])
 
-    def test_acct_pmt_history_breadcrumbs(self):
+    def test_acct_pmt_history__breadcrumbs(self):
         response = self.client.get(reverse('acct_pmt_history'))
+
         self.assertTrue(response.context['breadcrumbs'])
 
-    def test_acct_pmt_history_context(self):
+    def test_acct_pmt_history__context_record(self):
         acct_tran = AcctTrans.objects.filter(hotel=self.hotel, trans_type__name='init_amt').first()
         self.assertTrue(acct_tran)
 
@@ -105,31 +413,7 @@ class AcctStmtViewTests(TestCase):
         self.assertIn(acct_tran.insert_date.strftime("%b. %-d, %Y"), response.content)
         self.assertIn("init amt", response.content)
         self.assertIn('${:.2f}'.format(acct_tran.amount/100.0), response.content)
-        
-    ### ACCT COST
 
-    def test_acct_cost_update_get(self):
-        acct_cost, created = AcctCost.objects.get_or_create(self.hotel)
-        response = self.client.get(reverse('acct_cost_update', kwargs={'pk':acct_cost.pk}))
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.context['form'])
-        self.assertTrue(response.context['breadcrumbs'])
-
-    def test_acct_cost_update_post(self):
-        data = {
-            'balance_min': BALANCE_AMOUNTS[0][0],
-            'recharge_amt': CHARGE_AMOUNTS[0][0],
-            'auto_recharge': True
-        }
-        acct_cost, created = AcctCost.objects.get_or_create(self.hotel)
-        response = self.client.post(reverse('acct_cost_update', kwargs={'pk':acct_cost.pk}),
-            data, follow=True)
-        self.assertRedirects(response, reverse('payment:summary'))
-
-        # success message from ``FormUpdateMessageMixin``
-        m = list(response.context['messages'])
-        self.assertEqual(len(m), 1)
-        
 
 class APITests(TestCase):
 
@@ -145,150 +429,6 @@ class APITests(TestCase):
         price = Pricing.objects.first()
         response = self.client.get(reverse('api_pricing', kwargs={'pk': price.pk}))
         self.assertEqual(response.status_code, 200)
-
-
-class RegistrationTests(TestCase):
-
-    def setUp(self):
-        create._get_groups_and_perms()
-        self.hotel = create_hotel()
-        self.user = create_hotel_user(self.hotel, group="hotel_admin")
-        # Login
-        self.client.login(username=self.user.username, password=PASSWORD)
-
-    # register_step3
-
-    def test_get(self):
-        response = self.client.get(reverse('register_step3'))
-        self.assertEqual(response.status_code, 200)
-        self.assertIsInstance(response.context['form'], AcctCostForm)
-
-    def test_create(self):
-        # Step 3
-        response = self.client.post(reverse('register_step3'),
-            CREATE_ACCTCOST_DICT, follow=True)
-        self.assertRedirects(response, reverse('payment:register_step4'))
-        # created n linked to Hotel
-        acct_cost = AcctCost.objects.get(hotel=self.hotel)
-        self.assertIsInstance(acct_cost, AcctCost)
-
-        # Dave tries to view the page again and is redirected to the UpdateView
-        response = self.client.get(reverse('register_step3'), follow=True)
-        self.assertRedirects(response, reverse('register_step3_update', kwargs={'pk': acct_cost.pk}))
-
-    def test_update(self):
-        # Step 3 UpdateView
-        # Dave wants to update his choice
-        acct_cost = mommy.make(AcctCost, hotel=self.hotel)
-        response = self.client.get(reverse('register_step3_update', kwargs={'pk': acct_cost.pk}))
-        self.assertEqual(response.status_code, 200)
-        self.assertIsInstance(response.context['form'], AcctCostForm)
-
-    def test_update_no_account_cost(self):
-        # Dave doesn't have an AcctCost yet, and tries to go to another Hotel's AcctCost page
-        other_hotel = create_hotel()
-        other_acct_cost = mommy.make(AcctCost, hotel=other_hotel)
-        response = self.client.get(reverse('register_step3_update',
-            kwargs={'pk': other_acct_cost.pk}), follow=True)
-        self.assertRedirects(response, reverse('register_step3'))
-
-    def test_update_other_hotel_account_cost(self):
-        # Dave has an AcctCost, and tries to go to another Hotel's AcctCost page
-        acct_cost = mommy.make(AcctCost, hotel=self.hotel)
-        other_hotel = create_hotel()
-        other_acct_cost = mommy.make(AcctCost, hotel=other_hotel)
-        response = self.client.get(reverse('register_step3_update',
-            kwargs={'pk': other_acct_cost.pk}), follow=True)
-        self.assertRedirects(response, reverse('register_step3_update',
-            kwargs={'pk': acct_cost.pk}))
-
-
-class AccountTests(TestCase):
-    # Test Rending of view, template path is correct, url
-    # User of each permission type needed
-
-    def setUp(self):
-        create._get_groups_and_perms()
-        self.password = PASSWORD
-
-        self.hotel = create_hotel()
-        self.admin = create_hotel_user(self.hotel, 'admin', 'hotel_admin')
-        self.manager = create_hotel_user(self.hotel, 'manager', 'hotel_manager')
-        self.user = create_hotel_user(self.hotel, 'user')
-
-    ### inherit from - django.contrib.auth.forms
-
-    def test_account_logged_in(self):
-        # Dave as a logged in User can access his account (profile) view
-        self.client.login(username=self.user.username, password=self.password)
-        response = self.client.get(reverse('account'))
-        self.assertEqual(response.status_code, 200)
-
-    def test_account_logged_out(self):
-        # logged out Dave cannot access it
-        response = self.client.get(reverse('account'))
-        self.assertEqual(response.status_code, 302)
-
-    def test_headline_context(self):
-        self.client.login(username=self.user.username, password=self.password)
-        response = self.client.get(reverse('account'))
-        self.assertTrue(response.context['headline_small'])
-
-    def test_login(self):
-        response = self.client.get(reverse('login'))
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.context['form'])
-
-    ### 2 views for password change
-
-    def test_password_change(self):
-        # login required view
-        response = self.client.get(reverse('password_change'))
-        self.assertEqual(response.status_code, 302)
-
-        # login
-        self.client.login(username=self.user.username, password=self.password)
-        response = self.client.get(reverse('password_change'))
-        self.assertEqual(response.status_code, 200)
-        assert response.context['form']
-
-    def test_password_change_done(self):
-        # login required view
-        response = self.client.get(reverse('password_change_done'))
-        self.assertEqual(response.status_code, 302)
-
-        # login
-        self.client.login(username=self.user.username, password=self.password)
-        response = self.client.get(reverse('password_change_done'))
-        self.assertEqual(response.status_code, 200)
-
-    ### 4 views for password reset
-
-    def test_password_reset(self):
-        response = self.client.get(reverse('password_reset'))
-        self.assertEqual(response.status_code, 200)
-        assert response.context['form']
-        assert response.context['headline']
-
-    def test_password_reset_done(self):
-        response = self.client.get(reverse('password_reset_done'))
-        self.assertEqual(response.status_code, 200)
-
-    def test_password_reset_confirm(self):
-        # TODO: write an integration for Form test for this
-        pass
-
-    def test_password_reset_complete(self):
-        response = self.client.get(reverse('password_reset_complete'))
-        self.assertEqual(response.status_code, 200)
-
-    def test_alert_phone_number(self):
-        self.client.login(username=self.user.username, password=self.password)
-        self.assertIsNone(self.hotel.twilio_ph_sid)
-
-        response = self.client.get(reverse('account'))
-
-        self.assertTrue(response.context['alerts'])
 
 
 class AccountDeactivatedTests(TestCase):
@@ -418,36 +558,3 @@ class PasswordResetTests(TestCase):
         self.client.login(username=self.user.username, password=self.password)
         response = self.client.get(reverse('password_reset_complete'))
         assert response.status_code == 200
-
-
-class RoutingViewTests(TestCase):
-
-    def setUp(self):
-        self.password = PASSWORD
-        self.hotel = create_hotel()
-        self.user = create_hotel_user(self.hotel)
-
-    def test_private(self):
-        # Not logged in get()
-        response = self.client.get(reverse('private'))
-        assert response.status_code == 302
-
-        # Logged in
-        self.client.login(username=self.user.username, password=self.password)
-        response = self.client.get(reverse('private'), follow=True)
-        self.assertRedirects(response, reverse('account'))
-
-    def test_login_error(self):
-        response = self.client.get(reverse('login_error'), follow=True)
-        self.assertRedirects(response, reverse('login'))
-
-    def test_logout(self):
-        self.client.login(username=self.user.username, password=self.password)
-        response = self.client.get(reverse('logout'), follow=True)
-        self.assertRedirects(response, reverse('login'))
-
-    def test_verify_logout(self):
-        self.client.login(username=self.user.username, password=self.password)
-        response = self.client.get(reverse('verify_logout'))
-        assert response.status_code == 200
-        

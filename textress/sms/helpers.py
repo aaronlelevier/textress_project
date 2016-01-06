@@ -12,13 +12,7 @@ from django.core.urlresolvers import reverse
 import twilio
 from twilio.rest import TwilioRestClient
 
-
-sms_messages = {
-    "limit_reached": "Daily text message limit reached. Please try again tomorrow.",
-    "sent": "SMS message successfully sent.",
-    "send_failed": "SMS failed to send. Please check that is a valid U.S. phone number.",
-    "enter_valid_ph": "Please enter a valid phone number."
-}
+from utils import alert_messages, sms_messages
 
 
 def _to(text):
@@ -131,5 +125,5 @@ def no_twilio_phone_number_alert():
         'type': 'warning',
         'link': reverse('sms:ph_num_add'),
         'strong_message': 'Alert!',
-        'message': 'Click here to purchase a phone number in order to send SMS.'
+        'message': alert_messages['no_twilio_phone_number_alert']
     }

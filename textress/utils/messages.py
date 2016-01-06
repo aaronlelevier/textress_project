@@ -1,3 +1,11 @@
+alert_messages = {
+    'no_twilio_phone_number_alert': "Click here to purchase a phone number in order to send SMS",
+    'no_funds_alert': "SMS sending and receiving has been deactivated. Please \
+contact your system admin to reactivate the account. This is most likely due to insufficient funds.",
+    'no_customer_alert': "No account funds. Click the link to add initial funds and avoid the \
+account being deactivated."
+}
+
 dj_messages = {
     # Admin
     'delete_admin_fail': "Cannot delete Hotel Admin record.",
@@ -20,6 +28,7 @@ confirmation sent to {email}",
 
 login_messages = {
     'now_logged_in': 'You are now logged in',
+    'now_logged_out': 'You are now logged out',
     'no_match': 'Please check username and password',
     'no_register': 'Please use a valid username, email, and password',
     'not_active': "Your account hasn't been activated. Please check your email in order \
@@ -38,3 +47,10 @@ to activate your account.",
     'hotel_not_found': "The Hotel that you were trying to reach could not be found. \
 Please contact their main phone number. Thank you."
     }
+
+sms_messages = {
+    "limit_reached": "Daily text message limit reached. Please try again tomorrow.",
+    "sent": "SMS message successfully sent.",
+    "send_failed": "SMS failed to send. Please check that is a valid U.S. phone number.",
+    "enter_valid_ph": "Please enter a valid phone number."
+}

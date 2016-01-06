@@ -76,10 +76,10 @@ account_patterns = patterns('',
         name='password_reset_complete'),
 
     ### Textress Auth Views
-    url(r'^verify-logout/$', views.verify_logout, name='verify_logout'),
+    # url(r'^verify-logout/$', views.verify_logout, name='verify_logout'),
     url(r'^logout/$', views.logout, name='logout'),
     url(r'^private/$', views.private, name='private'),
-    url(r'^login-error/$', views.login_error, name='login_error'),
+    # url(r'^login-error/$', views.login_error, name='login_error'),
 )
 
 urlpatterns = patterns('',

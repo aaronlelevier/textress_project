@@ -45,21 +45,23 @@ def private(request):
     return HttpResponseRedirect(reverse('account'))
 
 
-def login_error(request):
-    messages.warning(request, login_messages['login_error'])
-    return HttpResponseRedirect(reverse('login'))
-
-
 @login_required(login_url=reverse_lazy('login'))
 def logout(request):
     auth.logout(request)
-    messages.warning(request, 'You are now logged out')
+    messages.warning(request, login_messages['now_logged_out'])
     return HttpResponseRedirect(reverse('login'))
 
 
-@login_required(login_url=reverse_lazy('login'))
-def verify_logout(request):
-    return render(request, 'cpanel/form-success/verify_logout.html')
+# # TODO: I don't think that I ever hit this URL (No tests for this URL for now...)
+# def login_error(request):
+#     messages.warning(request, login_messages['login_error'])
+#     return HttpResponseRedirect(reverse('login'))
+
+
+# # TODO: I don't think that I ever hit this URL (No tests for this URL for now...)
+# @login_required(login_url=reverse_lazy('login'))
+# def verify_logout(request):
+#     return render(request, 'cpanel/form-success/verify_logout.html')
 
 
 @sensitive_post_parameters()
@@ -150,8 +152,8 @@ class AccountView(LoginRequiredMixin, HotelUserMixin, SetHeadlineMixin,
 
         subaccount = self.hotel.get_subaccount()
         if subaccount and not subaccount.active:
-            messages.append(no_funds_alert())
-
+            messages.append(no_funds_alert()) # 'subaccount' gets deactivated when there's
+                                              # isufficient funds
         if not self.hotel.customer:
             messages.append(no_customer_alert())
 
@@ -227,7 +229,7 @@ class RegisterAcctCostUpdateView(RegisterAcctCostBaseView, UpdateView):
 # ACCT COST #
 #############
 
-class AcctCostUpdateView(AdminOnlyMixin, BillingSummaryContextMixin,
+class AcctCostUpdateView(LoginRequiredMixin, AdminOnlyMixin, BillingSummaryContextMixin,
     SetHeadlineMixin, FormUpdateMessageMixin, UpdateView):
 
     headline = "Payment Refill Settings"
@@ -241,24 +243,8 @@ class AcctCostUpdateView(AdminOnlyMixin, BillingSummaryContextMixin,
 # ACCT STMT #
 #############
 
-# class AcctStmtListView(AdminOnlyMixin, SetHeadlineMixin, ListView):
-#     '''AcctStmt by Month.'''
-
-#     headline = _("Account Statements")
-#     template_name = 'list.html'
-
-#     def get_queryset(self):
-#         return AcctStmt.objects.filter(hotel=self.hotel)
-
-#     def get(self, request, *args, **kwargs):
-#         '''
-#         Ensure the current month's AcctStmt is up to date.
-#         '''
-#         # acct_stmt = update_current_acct_stmt(hotel=self.hotel)
-#         return super(AcctStmtListView, self).get(request, *args, **kwargs)
-
-
-class AcctStmtDetailView(AdminOnlyMixin, SetHeadlineMixin, BillingSummaryContextMixin, TemplateView):
+class AcctStmtDetailView(LoginRequiredMixin, AdminOnlyMixin, SetHeadlineMixin,
+    BillingSummaryContextMixin, TemplateView):
     '''
     All AcctTrans for a single Month.
     '''
@@ -279,7 +265,8 @@ class AcctStmtDetailView(AdminOnlyMixin, SetHeadlineMixin, BillingSummaryContext
         return context
 
 
-class AcctPmtHistoryView(AdminOnlyMixin, SetHeadlineMixin, BillingSummaryContextMixin, ListView):
+class AcctPmtHistoryView(LoginRequiredMixin, AdminOnlyMixin, SetHeadlineMixin,
+    BillingSummaryContextMixin, ListView):
     '''
     Simple table view of payments that uses pagination.
     '''
