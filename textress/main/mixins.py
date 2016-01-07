@@ -86,7 +86,7 @@ class UsersHotelMatchesHotelMixin(HotelContextMixin, AccessMixin):
             request, *args, **kwargs)
 
 
-class UsersHotelMatchesUsersHotelMixin(HotelContextMixin, GroupRequiredMixin, View):
+class UsersHotelMatchesUsersHotelMixin(GroupRequiredMixin, HotelContextMixin, View):
     '''
     The requested User's Hotel must match the User's Hotel.
     '''

@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib import auth, messages
 from django.contrib.auth.models import User, Group
 from django.views.generic import CreateView, DetailView, UpdateView
-from django.views.generic.base import View, TemplateView
+from django.views.generic.base import View, TemplateView, ContextMixin
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseRedirect
@@ -119,7 +119,7 @@ class RegisterAdminUpdateView(GroupRequiredMixin, RegisterAdminBaseView,
     form_class = UserUpdateForm
 
 
-class RegisterHotelBaseView(GroupRequiredMixin, RegistrationContextMixin, View):
+class RegisterHotelBaseView(LoginRequiredMixin, GroupRequiredMixin, RegistrationContextMixin, View):
     '''
     BaseView to support Hotel Create / Update Views for Registration.
     '''
@@ -171,61 +171,15 @@ class RegisterHotelCreateView(RegisterHotelBaseView, CreateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-class RegisterHotelUpdateView(MyHotelOnlyMixin, RegisterHotelBaseView, UpdateView):
+class RegisterHotelUpdateView(RegisterHotelBaseView, MyHotelOnlyMixin, UpdateView):
     pass
-
-
-##############
-# MY PROFILE #
-##############
-
-class UserDetailView(LoginRequiredMixin, SetHeadlineMixin, UserOnlyMixin, DetailView):
-    '''User's DetailView of themself.'''
-
-    headline = "My Profile"
-    model = User
-    template_name = 'main/user_detail.html'
-
-    def get_context_data(self, **kwargs):
-        context = super(UserDetailView, self).get_context_data(**kwargs)
-        context['user_dict'] = viewable_user_fields_dict(self.request.user)
-        context['hotel'] = self.hotel
-        return context
-
-
-class UserUpdateView(SetHeadlineMixin, FormValidMessageMixin, LoginRequiredMixin,
-    UserOnlyMixin, UpdateView):
-    '''User's UpdateView of themself.'''
-
-    headline = "Update Profile"
-    model = User
-    form_class = UserUpdateForm
-    template_name = 'cpanel/form.html'
-    form_valid_message = dj_messages['profile_updated']
-
-    def get_success_url(self):
-        return reverse('main:user_detail', kwargs={'pk': self.request.user.pk})
 
 
 ################
 # MANAGE USERS #
 ################
 
-class MgrUserListView(SetHeadlineMixin, GroupRequiredMixin, HotelUserMixin, TemplateView):
-    '''
-    :Angular View:
-        So can be a TemplateView since the Object List is 
-        generated from a REST Endpoint.
-
-    List all Users for a Hotel, except for the Admin, for the 
-    Admin or Managers to `view/add/edit/delete.
-    '''
-    headline = 'User List'
-    group_required = ["hotel_admin", "hotel_manager"]
-    template_name = 'main/user_list.html'
-
-
-class UserCreateView(SetHeadlineMixin, HotelUserMixin, LoginRequiredMixin, GroupRequiredMixin,
+class UserCreateView(LoginRequiredMixin, GroupRequiredMixin, SetHeadlineMixin, HotelUserMixin,
     UserListContextMixin, CreateView):
     """
     Create a Normal Hotel User w/ no permissions.
@@ -265,9 +219,27 @@ class ManagerCreateView(UserCreateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-class MgrUserDetailView(LoginRequiredMixin, SetHeadlineMixin, UsersHotelMatchesUsersHotelMixin,
-    UserListContextMixin, DetailView):
-    '''User's DetailView of themself.'''
+class MgrUserListView(GroupRequiredMixin, SetHeadlineMixin, HotelUserMixin, TemplateView):
+    '''
+    :Angular View:
+        So can be a TemplateView since the Object List is 
+        generated from a REST Endpoint.
+
+    List all Users for a Hotel, except for the Admin, for the 
+    Admin or Managers to `view/add/edit/delete.
+    '''
+    headline = 'User List'
+    group_required = ["hotel_admin", "hotel_manager"]
+    template_name = 'main/user_list.html'
+
+
+class MgrUserDetailBaseView(LoginRequiredMixin, UsersHotelMatchesUsersHotelMixin, SetHeadlineMixin,
+    UserListContextMixin, ContextMixin, View):
+    pass
+
+
+class MgrUserDetailView(MgrUserDetailBaseView, DetailView):
+    '''DetailView of another Hotel User.'''
 
     headline = "User Profile"
     model = User
@@ -280,8 +252,7 @@ class MgrUserDetailView(LoginRequiredMixin, SetHeadlineMixin, UsersHotelMatchesU
         return context
 
 
-class MgrUserUpdateView(UsersHotelMatchesUsersHotelMixin, SetHeadlineMixin,
-    UserListContextMixin, UpdateView):
+class MgrUserUpdateView(MgrUserDetailBaseView, UpdateView):
     '''
     Manager/Admin view of Users.
     '''
@@ -294,8 +265,7 @@ class MgrUserUpdateView(UsersHotelMatchesUsersHotelMixin, SetHeadlineMixin,
         return reverse('main:manage_user_list')
 
 
-class MgrUserDeleteView(SetHeadlineMixin, DeleteButtonMixin, UsersHotelMatchesUsersHotelMixin,
-    GroupRequiredMixin, UserListContextMixin, FormInvalidMessageMixin, UpdateView):
+class MgrUserDeleteView(MgrUserDetailBaseView, DeleteButtonMixin, FormInvalidMessageMixin, UpdateView):
     '''
     A Mgr+ can delete any User for their Hotel except the AdminUser.
     '''
@@ -322,6 +292,38 @@ class MgrUserDeleteView(SetHeadlineMixin, DeleteButtonMixin, UsersHotelMatchesUs
             <h4>Are you sure that you want to delete <strong>{}</strong>?</h4>
             '''.format(self.object.user.username)
         return context
+
+
+##############
+# MY PROFILE #
+##############
+
+class UserDetailView(LoginRequiredMixin, SetHeadlineMixin, UserOnlyMixin, DetailView):
+    '''User's DetailView of themself.'''
+
+    headline = "My Profile"
+    model = User
+    template_name = 'main/user_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(UserDetailView, self).get_context_data(**kwargs)
+        context['user_dict'] = viewable_user_fields_dict(self.request.user)
+        context['hotel'] = self.hotel
+        return context
+
+
+class UserUpdateView(LoginRequiredMixin, SetHeadlineMixin, FormValidMessageMixin,
+    UserOnlyMixin, UpdateView):
+    '''User's UpdateView of themself.'''
+
+    headline = "Update Profile"
+    model = User
+    form_class = UserUpdateForm
+    template_name = 'cpanel/form.html'
+    form_valid_message = dj_messages['profile_updated']
+
+    def get_success_url(self):
+        return reverse('main:user_detail', kwargs={'pk': self.request.user.pk})
 
 
 ##################

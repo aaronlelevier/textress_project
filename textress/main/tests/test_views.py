@@ -114,7 +114,15 @@ class RegistrationTests(TransactionTestCase):
         self.assertEqual(hotel.admin_id, updated_user.id)
         self.assertEqual(updated_user.profile.hotel, hotel)
 
-    def test_register_step2_update_info(self):
+    def test_register_step2__logged_out(self):
+        self.client.logout()
+
+        response = self.client.get(reverse('main:register_step2'), follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'),
+            reverse('main:register_step2')))
+
+    def test_register_step2_update__info(self):
         # Dave tries to go back and Edit the Hotel and it takes him to the UpdateView
         hotel = create_hotel()
         user = create_hotel_user(hotel, group="hotel_admin")
@@ -124,7 +132,7 @@ class RegistrationTests(TransactionTestCase):
         self.assertRedirects(response, reverse('main:register_step2_update', kwargs={'pk': hotel.pk}))
         self.assertIsInstance(response.context['form'], HotelCreateForm)
 
-    def test_register_step2_validate_phone_in_use(self):
+    def test_register_step2_update__validate_phone_in_use(self):
         other_hotel = create_hotel()
         hotel = create_hotel()
         user = create_hotel_user(hotel, group="hotel_admin")
@@ -136,6 +144,40 @@ class RegistrationTests(TransactionTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFormError(response, 'form', 'address_phone',
             HotelCreateForm.error_messages['duplicate_address_phone'])
+
+    def test_register_step2_update__logged_out(self):
+        hotel = create_hotel()
+        user = create_hotel_user(hotel, group="hotel_admin")
+        self.client.logout()
+
+        response = self.client.get(reverse('main:register_step2_update', kwargs={'pk': hotel.pk}),
+            follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'),
+            reverse('main:register_step2_update', kwargs={'pk': hotel.pk})))
+
+    def test_register_step2_update__non_admin_user(self):
+        # all non-admin Users should not be permitted to hit this View.
+        hotel = create_hotel()
+        user = create_hotel_user(hotel, group="hotel_manager")
+        self.client.login(username=user.username, password=PASSWORD)
+
+        response = self.client.get(reverse('main:register_step2_update', kwargs={'pk': hotel.pk}),
+            follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'),
+            reverse('main:register_step2_update', kwargs={'pk': hotel.pk})))
+
+    def test_register_step2_update__other_admin_user(self):
+        # if a diff hotel_admin tries to visit this view, they should get a 403
+        hotel = create_hotel()
+        other_hotel = create_hotel()
+        user = create_hotel_user(hotel, group="hotel_admin")
+        self.client.login(username=user.username, password=PASSWORD)
+
+        response = self.client.get(reverse('main:register_step2_update', kwargs={'pk': other_hotel.pk}))
+
+        self.assertEqual(response.status_code, 403)
 
 
 class HotelViewTests(TestCase):
@@ -350,10 +392,17 @@ class ManageUsersTests(TestCase):
         response = self.client.get(reverse('main:manage_user_list'))
         self.assertEqual(response.status_code, 200)
 
-        # normal user cannot
+    def test_list__as_normal_user(self):
         self.client.logout()
         self.client.login(username=self.user.username, password=self.password)
         response = self.client.get(reverse('main:manage_user_list'))
+        self.assertEqual(response.status_code, 302)
+
+    def test_list__logged_out(self):
+        self.client.logout()
+
+        response = self.client.get(reverse('main:manage_user_list'))
+
         self.assertEqual(response.status_code, 302)
 
     def test_detail(self):
@@ -366,11 +415,18 @@ class ManageUsersTests(TestCase):
         # can't view "edit" link b/c not admin
         self.assertNotIn(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}), response.content)
 
-    def test_detail_admin(self):
+    def test_detail__admin(self):
         # can view "edit" link b/c is an admin
         self.client.login(username=self.admin.username, password=self.password)
         response = self.client.get(reverse('main:manage_user_detail', kwargs={'pk':self.user.pk}))
         self.assertIn(reverse('main:hotel_update', kwargs={'pk': self.hotel.pk}), response.content)
+
+    def test_detail__logged_out(self):
+        self.client.logout()
+
+        response = self.client.get(reverse('main:manage_user_detail', kwargs={'pk':self.user.pk}))
+
+        self.assertEqual(response.status_code, 302)
 
     ### CREATE USER ###
 
@@ -442,18 +498,15 @@ class ManageUsersTests(TestCase):
         self.assertTrue(response.context['breadcrumbs'])
 
 
-    # NEXT: Add tests for "Update" from Mgr point of view
+    # manage_user_update
 
-    def test_update(self):
-        # User can update
-        fname = self.user.first_name
-
-        # User can't Access
+    def test_update__user_cant_access(self):
         self.client.login(username=self.user.username, password=self.password)
         response = self.client.get(reverse('main:manage_user_update', kwargs={'pk': self.user.pk}))
         self.assertEqual(response.status_code, 302)
 
-        # Mgr Only can Access
+    def test_update__manager_can_access(self):
+        fname = self.user.first_name
         self.client.logout()
         self.client.login(username=self.mgr.username, password=self.password)
         response = self.client.get(reverse('main:manage_user_update', kwargs={'pk': self.user.pk}))
@@ -463,15 +516,24 @@ class ManageUsersTests(TestCase):
         response = self.client.post(reverse('main:manage_user_update', kwargs={'pk': self.user.pk}),
             {'first_name': 'mgr new name', 'last_name': self.user.last_name, 'email': self.user.email},
             follow=True)
-        # User updated n redirects
-        updated_user = User.objects.get(username=self.user.username)
-        assert fname != updated_user.first_name
-        self.assertRedirects(response, reverse('main:manage_user_list'))
 
-    def test_update_breadcrumbs(self):
+        self.assertRedirects(response, reverse('main:manage_user_list'))
+        updated_user = User.objects.get(username=self.user.username)
+        self.assertNotEqual(fname, updated_user.first_name)
+
+    def test_update__breadcrumbs(self):
         self.client.login(username=self.mgr.username, password=self.password)
         response = self.client.get(reverse('main:manage_user_update', kwargs={'pk': self.user.pk}))
         self.assertTrue(response.context['breadcrumbs'])
+
+    def test_update__logged_out(self):
+        self.client.logout()
+
+        response = self.client.get(reverse('main:manage_user_update', kwargs={'pk': self.user.pk}),
+            follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'),
+            reverse('main:manage_user_update', kwargs={'pk': self.user.pk})))
 
     def test_delete(self):
         # get
@@ -486,7 +548,7 @@ class ManageUsersTests(TestCase):
         self.user = User.objects.get(pk=self.user.pk)
         self.assertTrue(self.user.profile.hidden)
 
-    def test_delete_admin(self):
+    def test_delete__admin(self):
         self.client.login(username=self.mgr.username, password=self.password)
 
         response = self.client.post(reverse('main:manage_user_delete',
@@ -498,7 +560,16 @@ class ManageUsersTests(TestCase):
         self.assertEqual(len(m), 1)
         self.assertEqual(str(m[0]), dj_messages['delete_admin_fail'])
 
-    def test_delete_breadcrumbs(self):
+    def test_delete__breadcrumbs(self):
         self.client.login(username=self.mgr.username, password=self.password)
         response = self.client.get(reverse('main:manage_user_delete', kwargs={'pk': self.user.pk}))
         self.assertTrue(response.context['breadcrumbs'])
+
+    def test_delete__logged_out(self):
+        self.client.logout()
+
+        response = self.client.get(reverse('main:manage_user_delete', kwargs={'pk': self.user.pk}),
+            follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'),
+            reverse('main:manage_user_delete', kwargs={'pk': self.user.pk})))
