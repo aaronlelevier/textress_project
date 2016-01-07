@@ -281,6 +281,31 @@ class AcctPmtHistoryView(LoginRequiredMixin, AdminOnlyMixin, SetHeadlineMixin,
         return queryset
 
 
+########
+# REST #
+########
+
+class PricingListAPIView(generics.ListAPIView):
+    '''No permissions needed b/c read only list view, and will be used 
+    on the Biz Site.'''
+
+    queryset = Pricing.objects.all()
+    serializer_class = PricingSerializer
+
+    def list(self, request):
+        queryset = self.get_queryset()
+        serializer = self.serializer_class(queryset, many=True)
+        return Response(serializer.data)
+
+
+class PricingRetrieveAPIView(generics.RetrieveAPIView):
+
+    queryset = Pricing.objects.all()
+    serializer_class = PricingSerializer
+
+
+### NOT IN USE ###########################################################################
+
 ##############
 # CLOSE ACCT #
 ##############
@@ -364,8 +389,6 @@ class CloseAcctSuccessView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
         return context
 
 
-### REINSTATE ACCT: Not in use ###
-
 class ReinstateAcctView(View):
     '''
     Steps
@@ -384,26 +407,3 @@ class ReinstateAcctView(View):
 
     '''
     pass
-
-
-########
-# REST #
-########
-
-class PricingListAPIView(generics.ListAPIView):
-    '''No permissions needed b/c read only list view, and will be used 
-    on the Biz Site.'''
-
-    queryset = Pricing.objects.all()
-    serializer_class = PricingSerializer
-
-    def list(self, request):
-        queryset = self.get_queryset()
-        serializer = self.serializer_class(queryset, many=True)
-        return Response(serializer.data)
-
-
-class PricingRetrieveAPIView(generics.RetrieveAPIView):
-
-    queryset = Pricing.objects.all()
-    serializer_class = PricingSerializer
