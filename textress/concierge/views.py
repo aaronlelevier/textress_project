@@ -57,7 +57,7 @@ class ReceiveSMSView(CsrfExemptMixin, TemplateView):
 # GUEST VIEWS #
 ###############
 
-class GuestBaseView(SetHeadlineMixin, LoginRequiredMixin, HotelUserMixin, View):
+class GuestBaseView(LoginRequiredMixin, SetHeadlineMixin, HotelUserMixin, View):
     headline = "Guest View"
     model = Guest
 
@@ -152,7 +152,7 @@ class GuestDeleteView(GuestBaseView, DeleteButtonMixin, TemplateView):
         return HttpResponseRedirect(reverse('concierge:guest_list'))
 
 
-class ReplyView(IsManagerOrAdmin, SetHeadlineMixin, StaticContextMixin,
+class ReplyView(LoginRequiredMixin, IsManagerOrAdmin, SetHeadlineMixin, StaticContextMixin,
     HotelUserMixin, TemplateView):
     """
     :Angular View: Handle all Reply create/edit/delete UI.

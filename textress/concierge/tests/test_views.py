@@ -44,8 +44,10 @@ class GuestViewTests(TestCase):
     def test_list(self):
         self.client.logout()
         # Dave is not logged in, so get's a 403 response
-        response = self.client.get(reverse('concierge:guest_list'))
-        self.assertEqual(response.status_code, 302) #login
+        response = self.client.get(reverse('concierge:guest_list'), follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'),
+            reverse('concierge:guest_list')))
 
     def test_list_ok(self):
         # Dave now tries Logged-In        
@@ -205,7 +207,19 @@ class GuestViewTests(TestCase):
 
     def test_replies(self):
         response = self.client.get(reverse('concierge:replies'))
+
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['headline'], "Auto Replies")
+        self.assertEqual(response.context['headline_small'], "& Automatic Messaging")
+
+
+    def test_replies__logged_out(self):
+        self.client.logout()
+
+        response = self.client.get(reverse('concierge:replies'), follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'),
+            reverse('concierge:replies')))
 
 
 class GuestViewTriggerReplyTests(TestCase):
