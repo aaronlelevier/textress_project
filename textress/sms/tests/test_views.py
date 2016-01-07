@@ -47,6 +47,14 @@ class PhoneNumberTests(TestCase):
         response = self.client.get(reverse('sms:ph_num_list'))
         self.assertEqual(response.status_code, 200)
 
+    def test_list__logged_out(self):
+        self.client.logout()
+
+        response = self.client.get(reverse('sms:ph_num_list'), follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'),
+            reverse('sms:ph_num_list')))
+
     def test_list_context(self):
         response = self.client.get(reverse('sms:ph_num_list'))
         self.assertTrue(response.context['headline'])

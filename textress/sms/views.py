@@ -8,7 +8,7 @@ from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
-from braces.views import (SetHeadlineMixin, FormValidMessageMixin,
+from braces.views import (LoginRequiredMixin, SetHeadlineMixin, FormValidMessageMixin,
     FormInvalidMessageMixin)
 
 from account.mixins import alert_messages
@@ -20,7 +20,8 @@ from utils.exceptions import PhoneNumberNotDeletedExcp
 from utils.forms import EmptyForm
 
 
-class PhoneNumberBaseView(AdminOnlyMixin, SetHeadlineMixin, FormValidMessageMixin, FormView):
+class PhoneNumberBaseView(LoginRequiredMixin, AdminOnlyMixin, SetHeadlineMixin,
+    FormValidMessageMixin, FormView):
     '''All phone number views require the same permissions, and context mixins. 
     Just the attrs are different.'''
     pass
