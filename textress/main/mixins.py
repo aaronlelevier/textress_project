@@ -53,20 +53,6 @@ class UsersHotelMatchesHotelMixin(HotelContextMixin, AccessMixin):
     '''
     The requesting Hotel must match the User's Hotel.
     '''
-    # group_required = ["hotel_admin", "hotel_manager"]
-
-    # def dispatch(self, request, *args, **kwargs):
-    #     self.hotel = get_object_or_404(Hotel, pk=kwargs.get('pk', None))
-
-    #     try:
-    #         user_hotel = self.request.user.profile.hotel
-    #     except AttributeError:
-    #         raise PermissionDenied
-    #     else:
-    #         if self.hotel != user_hotel:
-    #             raise PermissionDenied
-
-    #     return super(UsersHotelMatchesHotelMixin, self).dispatch(request, *args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
         self.hotel = get_object_or_404(Hotel, pk=kwargs.get('pk', None))
@@ -179,12 +165,18 @@ class AdminOnlyMixin(GroupRequiredMixin, HotelContextMixin, View):
     '''
     group_required = "hotel_admin"
 
-    def dispatch(self, *args, **kwargs):
-        self.hotel = self.request.user.profile.hotel
-        admin_hotel = get_object_or_404(Hotel, admin_id=self.request.user.id)
-        if admin_hotel != self.hotel:
-            raise Http404
-        return super(AdminOnlyMixin, self).dispatch(*args, **kwargs)
+    def dispatch(self, request, *args, **kwargs):
+        self.hotel = request.user.profile.hotel
+
+        try:
+            admin_hotel = Hotel.objects.get(admin_id=request.user.id)
+        except Hotel.DoesNotExist:
+            admin_hotel = None
+
+        if not admin_hotel or admin_hotel != self.hotel:
+            return self.handle_no_permission(request)
+
+        return super(AdminOnlyMixin, self).dispatch(request, *args, **kwargs)
 
 
 ### REGISTRATION MIXINS ###

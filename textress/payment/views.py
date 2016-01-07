@@ -26,8 +26,8 @@ from utils import dj_messages
 
 ### REGISTRATION
 
-class RegisterPmtView(AdminOnlyMixin, RegistrationContextMixin, MonthYearContextMixin,
-    AcctCostContextMixin, StripeMixin, FormView):
+class RegisterPmtView(LoginRequiredMixin, AdminOnlyMixin, RegistrationContextMixin,
+    MonthYearContextMixin, AcctCostContextMixin, StripeMixin, FormView):
     """
     Step #4 of Registration
 
@@ -79,7 +79,7 @@ class RegisterPmtView(AdminOnlyMixin, RegistrationContextMixin, MonthYearContext
             return HttpResponseRedirect(self.success_url)
 
 
-class RegisterSuccessView(RegistrationContextMixin, AdminOnlyMixin, TemplateView):
+class RegisterSuccessView(LoginRequiredMixin, AdminOnlyMixin, RegistrationContextMixin, TemplateView):
     """
     Step #5 of Registration - Payment Success
 
@@ -106,7 +106,7 @@ class RegisterSuccessView(RegistrationContextMixin, AdminOnlyMixin, TemplateView
 
 ### BILLING
 
-class SummaryView(AdminOnlyMixin, SetHeadlineMixin, TemplateView):
+class SummaryView(LoginRequiredMixin, AdminOnlyMixin, SetHeadlineMixin, TemplateView):
     '''
     Main Billing Summary View with links to view more detail of 
     payment transactions, and manage account payment settings.

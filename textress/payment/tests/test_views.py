@@ -33,14 +33,22 @@ class RegistrationTests(TestCase):
         # Login
         self.client.login(username=self.user.username, password=PASSWORD)
 
-    def test_register_step4_get(self):
-        # Step 4
+    def test_register_step4__get(self):
         response = self.client.get(reverse('payment:register_step4'))
+
         self.assertEqual(response.status_code, 200)
+
+    def test_register_step4__logged_out(self):
+        self.client.logout()
+
+        response = self.client.get(reverse('payment:register_step4'), follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'),
+            reverse('payment:register_step4')))
         
-    def test_register_step4_context(self):
-        # Step 4
+    def test_register_step4__context(self):
         response = self.client.get(reverse('payment:register_step4'))
+
         self.assertIsInstance(response.context['form'], StripeForm)
         self.assertIsInstance(response.context['hotel'], Hotel)
         self.assertIsInstance(response.context['acct_cost'], AcctCost)
@@ -60,7 +68,7 @@ class RegistrationTests(TestCase):
         self.assertContains(response, response.context['step'])
         self.assertContains(response, response.context['step_number'])
 
-    def test_register_success_fail(self):
+    def test_register_success__fail(self):
         self.client.logout()
         # random Admin User who hasn't paid gets redirected
         # Users
@@ -72,35 +80,13 @@ class RegistrationTests(TestCase):
         response = self.client.get(reverse('payment:register_success'))
         self.assertRedirects(response, reverse('payment:register_step4'))
 
+    def test_register_step4__logged_out(self):
+        self.client.logout()
 
-class PaymentEmailTests(TestCase):
-    
-    def setUp(self):
-        create._get_groups_and_perms()
-        self.username = CREATE_USER_DICT['username']
-        self.password = PASSWORD
+        response = self.client.get(reverse('payment:register_success'), follow=True)
 
-        self.hotel = create_hotel()
-        self.user = create_hotel_user(self.hotel)
-        self.client.login(username=self.username, password=self.password)
-
-    def test_email(self):
-        user = User.objects.first()
-        customer = factory.customer()
-        charge = factory.charge(customer.id)
-
-        email = Email(
-            to=user.email,
-            from_email=settings.DEFAULT_EMAIL_BILLING,
-            extra_context={
-                'user': user,
-                'customer': customer,
-                'charge': charge
-            },
-            subject='email/payment_subject.txt',
-            html_content='email/payment_email.html'
-        )
-        email.msg.send()
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'),
+            reverse('payment:register_success')))
 
 
 class BillingSummaryTests(TransactionTestCase):
@@ -137,6 +123,34 @@ class BillingSummaryTests(TransactionTestCase):
         response = self.client.get(reverse('payment:summary'))
         self.assertEqual(response.status_code, 200)
 
+    def test_logged_out(self):
+        self.client.logout()
+
+        response = self.client.get(reverse('payment:summary'), follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'),
+            reverse('payment:summary')))
+
+    def test_manager(self):
+        self.client.logout()
+        user = create_hotel_user(self.hotel, group='hotel_manager')
+        self.client.login(username=user.username, password=PASSWORD)
+
+        response = self.client.get(reverse('payment:summary'), follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'),
+            reverse('payment:summary')))
+
+    def test_user(self):
+        self.client.logout()
+        user = create_hotel_user(self.hotel)
+        self.client.login(username=user.username, password=PASSWORD)
+
+        response = self.client.get(reverse('payment:summary'), follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'),
+            reverse('payment:summary')))
+
     def test_context(self):
         response = self.client.get(reverse('payment:summary'))
         self.assertIsInstance(response.context['acct_stmt'], AcctStmt)
@@ -165,10 +179,22 @@ class BillingSummaryTests(TransactionTestCase):
 
     # one_time_payment
 
-    def test_one_time_payment__initial_form_values(self):
+    def test_one_time_payment__response(self):
         response = self.client.get(reverse('payment:one_time_payment'))
 
         self.assertEqual(response.status_code, 200)
+
+    def test_one_time_payment__logged_out(self):
+        self.client.logout()
+
+        response = self.client.get(reverse('payment:one_time_payment'), follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'),
+            reverse('payment:one_time_payment')))
+
+    def test_one_time_payment__initial_form_values(self):
+        response = self.client.get(reverse('payment:one_time_payment'))
+
         self.assertIsInstance(response.context['form'], OneTimePaymentForm)
         self.assertEqual(
             response.context['form']['amount'].value(),
@@ -381,6 +407,14 @@ class CardUpdateTests(TestCase):
     def test_card_list_response(self):
         response = self.client.get(reverse('payment:card_list'))
         self.assertEqual(response.status_code, 200)
+
+    def test_card_list__logged_out(self):
+        self.client.logout()
+
+        response = self.client.get(reverse('payment:card_list'), follow=True)
+
+        self.assertRedirects(response, "{}?next={}".format(reverse('login'),
+            reverse('payment:card_list')))
 
     def test_card_list_context(self):
         response = self.client.get(reverse('payment:card_list'))
