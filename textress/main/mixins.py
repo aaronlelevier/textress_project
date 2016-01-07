@@ -65,9 +65,6 @@ class UsersHotelMatchesHotelMixin(HotelContextMixin, AccessMixin):
             if self.hotel != user_hotel:
                 return self.handle_no_permission(request)
 
-        # if not request.user.is_authenticated():
-        #     return self.handle_no_permission(request)
-
         return super(UsersHotelMatchesHotelMixin, self).dispatch(
             request, *args, **kwargs)
 
