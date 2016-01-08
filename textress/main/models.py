@@ -142,6 +142,13 @@ class Hotel(TwilioClient, BaseModel):
 
         return super(Hotel, self).save(*args, **kwargs)
 
+    @classmethod
+    def group_names_dict(cls):
+        return {
+            'hotel_admin': 'Hotel Admin',
+            'hotel_manager': 'Hotel Manager'
+        }
+
     @property
     def area_code(self):
         return self.address_phone[2:5]
@@ -339,6 +346,16 @@ class UserProfile(BaseModel):
         if self.is_admin:
             raise ValidationError(dj_messages['delete_admin_fail'])
         return super(UserProfile, self).hide()
+
+    def hotel_group(self):
+        hotel_group_names = Hotel.group_names_dict()
+        # should be a count of either 1 or 0
+        groups = self.user.groups.filter(name__in=['hotel_admin', 'hotel_manager'])
+
+        try:
+            return Hotel.group_names_dict()[groups[0].name]
+        except IndexError:
+            return ''
 
 
 ##############

@@ -238,19 +238,19 @@ class UserProfileTests(TestCase):
     def test_create(self):
         user = mommy.make(User, first_name='Test', last_name='Test')
         user_profile = user.profile
-        assert isinstance(user_profile, UserProfile)
-        assert str(user_profile) == user_profile.user.username
+        self.assertIsInstance(user_profile, UserProfile)
+        self.assertEqual(str(user_profile), user_profile.user.username)
 
     def test_delete(self):
         user = mommy.make(User, first_name='Test', last_name='Test')
         user_profiles = UserProfile.objects.all()
-        assert len(user_profiles) == 1
+        self.assertEqual(len(user_profiles), 1)
 
         user.delete()
         users = User.objects.all()
         user_profiles = UserProfile.objects.all()
-        assert not users
-        assert not user_profiles
+        self.assertFalse(users)
+        self.assertFalse(user_profiles)
 
     def test_manager(self):
         user = mommy.make(User, first_name='Test', last_name='Test')
@@ -267,6 +267,31 @@ class UserProfileTests(TestCase):
     def test_is_manager(self):
         mgr = create_hotel_user(self.hotel, group='hotel_manager')
         self.assertTrue(mgr.profile.is_manager)
+
+    # hotel_group
+
+    def test_hotel_group__admin(self):
+        group_name = 'hotel_admin'
+        admin = create_hotel_user(self.hotel, group=group_name)
+
+        ret = admin.profile.hotel_group()
+
+        self.assertEqual(ret, Hotel.group_names_dict()[group_name])
+
+    def test_hotel_group__manager(self):
+        group_name = 'hotel_manager'
+        manager = create_hotel_user(self.hotel, group=group_name)
+
+        ret = manager.profile.hotel_group()
+
+        self.assertEqual(ret, Hotel.group_names_dict()[group_name])
+
+    def test_hotel_group__user(self):
+        user = create_hotel_user(self.hotel)
+
+        ret = user.profile.hotel_group()
+
+        self.assertEqual(ret, '')
 
 
 class SubaccountTests(TestCase):

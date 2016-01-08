@@ -20,7 +20,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = UserProfile
-        fields = ('icon',)
+        fields = ('icon', 'hotel_group')
 
 
 class UserSerializer(serializers.ModelSerializer):
