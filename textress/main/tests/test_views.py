@@ -445,17 +445,24 @@ class ManageUsersTests(TestCase):
 
     def test_create_user_post(self):
         # mgr can access
+        new_user_username = 'test_create'
         self.client.login(username=self.mgr.username, password=self.password)
+
         response = self.client.post(reverse('main:create_user'),
             {'first_name': 'fname', 'last_name': 'lname',
-            'email': settings.DEFAULT_FROM_EMAIL, 'username': 'test_create',
+            'email': settings.DEFAULT_FROM_EMAIL, 'username': new_user_username,
             'password1': self.password, 'password2': self.password},
             follow=True)
 
-        # new User created, redirects to "Manage Users List"
-        new_user = User.objects.get(username='test_create')
-        assert isinstance(new_user, User)
         self.assertRedirects(response, reverse('main:manage_user_list'))
+        # new User created, redirects to "Manage Users List"
+        new_user = User.objects.get(username=new_user_username)
+        self.assertIsInstance(new_user, User)
+        self.assertEqual(new_user.profile.hotel, self.mgr.profile.hotel)
+        # django message
+        m = list(response.context['messages'])
+        self.assertEqual(len(m), 1)
+        self.assertEqual(str(m[0]), dj_messages['user_created'])
 
     def test_create_user_breadcrumbs(self):
         self.client.login(username=self.mgr.username, password=self.password)
@@ -479,18 +486,25 @@ class ManageUsersTests(TestCase):
 
     def test_create_mgr_post(self):
         # mgr can access
+        new_user_username = 'test_create_mgr'
         self.client.login(username=self.mgr.username, password=self.password)
+
         response = self.client.post(reverse('main:create_manager'),
             {'first_name': 'fname', 'last_name': 'lname',
-            'email': settings.DEFAULT_FROM_EMAIL, 'username': 'test_create_mgr',
+            'email': settings.DEFAULT_FROM_EMAIL, 'username': new_user_username,
             'password1': self.password, 'password2': self.password},
             follow=True)
 
         # new MGR created, is part of Mgr Group, redirects to "Manage Users List"
-        new_user = User.objects.get(username='test_create_mgr')
-        assert isinstance(new_user, User)
-        assert Group.objects.get(name="hotel_manager") in new_user.groups.all()
         self.assertRedirects(response, reverse('main:manage_user_list'))
+        # manager
+        new_user = User.objects.get(username=new_user_username)
+        self.assertIsInstance(new_user, User)
+        self.assertIn(Group.objects.get(name="hotel_manager"), new_user.groups.all())
+        # django message
+        m = list(response.context['messages'])
+        self.assertEqual(len(m), 1)
+        self.assertEqual(str(m[0]), dj_messages['manager_created'])
 
     def test_create_mgr_breadcrumbs(self):
         self.client.login(username=self.mgr.username, password=self.password)

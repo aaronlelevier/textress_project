@@ -23,7 +23,9 @@ dj_messages = {
 confirmation sent to {email}",
     'payment_fail': "Payment failure, please check your payment method or contact \
 {support_email} for further assistance.",
-    'complete_registration': "Please complete registration in order to active your account"
+    'complete_registration': "Please complete registration in order to active your account",
+    'manager_created': "New Manager created",
+    'user_created': "New User created"
     }
 
 login_messages = {

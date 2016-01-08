@@ -179,8 +179,8 @@ class RegisterHotelUpdateView(RegisterHotelBaseView, MyHotelOnlyMixin, UpdateVie
 # MANAGE USERS #
 ################
 
-class UserCreateView(LoginRequiredMixin, GroupRequiredMixin, SetHeadlineMixin, HotelUserMixin,
-    UserListContextMixin, CreateView):
+class UserCreateView(LoginRequiredMixin, GroupRequiredMixin, SetHeadlineMixin,
+    FormValidMessageMixin, HotelUserMixin, UserListContextMixin, CreateView):
     """
     Create a Normal Hotel User w/ no permissions.
     Auto-add all created Users to the Group of the Hotel
@@ -192,6 +192,7 @@ class UserCreateView(LoginRequiredMixin, GroupRequiredMixin, SetHeadlineMixin, H
     form_class = UserCreateForm
     template_name = 'cpanel/form.html'
     success_url = reverse_lazy('main:manage_user_list')
+    form_valid_message = dj_messages['user_created']
 
     def form_valid(self, form):
         super(UserCreateView, self).form_valid(form)
@@ -199,7 +200,6 @@ class UserCreateView(LoginRequiredMixin, GroupRequiredMixin, SetHeadlineMixin, H
         cd = form.cleaned_data
         self.newuser = User.objects.get(username=cd['username'])
         self.newuser.profile.update_hotel(hotel=self.request.user.profile.hotel)
-        messages.info(self.request, 'User created')
 
         return HttpResponseRedirect(self.get_success_url())
 
@@ -208,6 +208,7 @@ class ManagerCreateView(UserCreateView):
     "Create Manager Hotel User w/ Manager Permissions"
 
     headline = "Add a Manager"
+    form_valid_message = dj_messages['manager_created']
 
     def form_valid(self, form):
         super(ManagerCreateView, self).form_valid(form)
