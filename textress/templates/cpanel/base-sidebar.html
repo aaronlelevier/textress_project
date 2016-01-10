@@ -130,6 +130,7 @@
                             </ul>
                         </li>
 
+                        {% if user_groups|user_has_group:"hotel_admin" or user_groups|user_has_group:"hotel_manager" %}
                         <li>
                             <a href="javascript:void(0)"><i class="clip-users-2"></i>
                                 <span class="title"> Manage Users </span><i class="icon-arrow"></i>
@@ -155,6 +156,7 @@
                                 {% endif %}
                             </ul>
                         </li>
+                        {% endif %}
 
                         {% if user_groups|user_has_group:"hotel_admin" %}
                         <li>
