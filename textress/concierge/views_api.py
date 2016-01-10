@@ -2,7 +2,7 @@ from django.conf import settings
 from django.http import Http404
 from django.db.models import Q
 
-from rest_framework import permissions, viewsets
+from rest_framework import mixins, permissions, viewsets
 from rest_framework.decorators import list_route
 from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
 from rest_framework.response import Response
@@ -16,7 +16,9 @@ from concierge.serializers import (MessageListCreateSerializer, GuestMessageSeri
 from utils.views import BaseModelViewSet
 
 
-DEFAULT_PERMISSIONS = (permissions.IsAuthenticated, IsManagerOrAdmin, IsHotelObject,)
+DEFAULT_PERMISSIONS = (permissions.IsAuthenticated, IsHotelObject,)
+
+MANAGER_PERMISSIONS = DEFAULT_PERMISSIONS + (IsManagerOrAdmin,)
 
 
 class MessageAPIView(viewsets.ModelViewSet):
@@ -86,7 +88,7 @@ class ReplyAPIView(BaseModelViewSet):
 
     queryset = Reply.objects.all()
     serializer_class = ReplySerializer
-    permission_classes = DEFAULT_PERMISSIONS
+    permission_classes = MANAGER_PERMISSIONS
     model = Reply
     filter_fields = [f.name for f in model._meta.get_fields()]
 
@@ -106,7 +108,9 @@ class ReplyAPIView(BaseModelViewSet):
                            if x[0] not in settings.RESERVED_REPLY_LETTERS])
 
 
-class TriggerTypeAPIView(BaseModelViewSet):
+class TriggerTypeAPIView(mixins.RetrieveModelMixin,
+                         mixins.ListModelMixin,
+                         viewsets.GenericViewSet):
 
     queryset = TriggerType.objects.all()
     serializer_class = TriggerTypeSerializer
@@ -117,7 +121,7 @@ class TriggerAPIView(BaseModelViewSet):
 
     queryset = Trigger.objects.all()
     serializer_class = TriggerSerializer
-    permission_classes = DEFAULT_PERMISSIONS
+    permission_classes = MANAGER_PERMISSIONS
     model = Trigger
     filter_fields = [f.name for f in model._meta.get_fields()]
 

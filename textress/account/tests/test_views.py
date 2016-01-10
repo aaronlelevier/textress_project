@@ -271,8 +271,8 @@ class AccountTests(TestCase):
         self.assertNotIn(reverse('main:create_manager'), response.content)
 
         # Auto-Replies
-        self.assertNotIn("Auto Replies", response.content)
-        self.assertNotIn(reverse('concierge:replies'), response.content)
+        self.assertIn("Auto Replies", response.content)
+        self.assertIn(reverse('concierge:replies'), response.content)
 
         # PhoneNumbers
         self.assertNotIn("Phone Numbers List", response.content)

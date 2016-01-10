@@ -351,26 +351,6 @@ class UserViewTests(TestCase):
         response = self.client.get(reverse('main:user_update', kwargs={'pk': self.user.pk}))
         self.assertEqual(response.status_code, 403)
 
-    # test ``main.templatetags.user_tags.user_has_group``
-
-    def test_user_has_group__can_view(self):
-        self.client.login(username=self.admin.username, password=self.password)
-        response = self.client.get(reverse('account'))
-        self.assertIn('Hotel Info', response.content)
-        self.assertIn('Add a Manager', response.content)
-        self.assertIn('Auto Replies', response.content)
-        self.assertIn('Phone Numbers', response.content)
-        self.assertIn('Billing', response.content)
-
-    def test_user_has_group__cannot_view(self):
-        self.client.login(username=self.mgr.username, password=self.password)
-        response = self.client.get(reverse('account'))
-        self.assertNotIn('Hotel Info', response.content)
-        self.assertNotIn('Add a Manager', response.content)
-        self.assertNotIn('Auto Replies', response.content)
-        self.assertNotIn('Phone Numbers', response.content)
-        self.assertNotIn('Billing', response.content)
-
 
 class ManageUsersTests(TestCase):
 

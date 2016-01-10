@@ -158,12 +158,15 @@
                         </li>
                         {% endif %}
 
-                        {% if user_groups|user_has_group:"hotel_admin" %}
+                        {% if user_groups|user_has_group:"hotel_admin" or user_groups|user_has_group:"hotel_manager" %}
                         <li>
                             <a href="{% url 'concierge:replies' %}"><i class="clip-quotes-right"></i>
                                 <span class="title"> Auto Replies </span><span class="selected"></span>
                             </a>
                         </li>
+                        {% endif %}
+
+                        {% if user_groups|user_has_group:"hotel_admin" %}
                         <li>
                             <a href="javascript:void(0)"><i class="clip-phone"></i>
                                 <span class="title"> Phone Numbers </span><i class="icon-arrow"></i>

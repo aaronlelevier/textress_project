@@ -21,10 +21,11 @@ class MessagAPIViewTests(APITestCase):
     def setUp(self):
         # Groups
         create._get_groups_and_perms()
-        self.password = PASSWORD
         # User
         self.hotel = create_hotel()
         self.admin = create_hotel_user(self.hotel, group='hotel_admin')
+        self.manager = create_hotel_user(self.hotel, group='hotel_manager')
+        self.user = create_hotel_user(self.hotel)
         # Guest
         self.guest = make_guests(hotel=self.hotel, number=1)[0] #b/c returns a list
         # Messages
@@ -49,7 +50,7 @@ class MessagAPIViewTests(APITestCase):
             )
 
         # Login
-        self.client.login(username=self.admin.username, password=self.password)
+        self.client.login(username=self.admin.username, password=PASSWORD)
 
     def tearDown(self):
         self.client.logout()
@@ -57,6 +58,20 @@ class MessagAPIViewTests(APITestCase):
     def test_setup_data(self):
         self.assertEqual(Message.objects.count(), 20)
         self.assertEqual(Message.objects.filter(hotel=self.hotel).count(), 10)
+
+    # permissions - by User Type
+
+    def test_manager_access(self):
+        self.client.logout()
+        self.client.login(username=self.manager.username, password=PASSWORD)
+        response = self.client.get('/api/messages/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_user_access(self):
+        self.client.logout()
+        self.client.login(username=self.user.username, password=PASSWORD)
+        response = self.client.get('/api/messages/')
+        self.assertEqual(response.status_code, 200)
 
     ### MessageListCreateAPIView
 
@@ -88,6 +103,8 @@ class MessagAPIViewTests(APITestCase):
             message.id,
             [x['id'] for x in data]
         )
+
+    # create
 
     def test_create(self):
         data = {
@@ -133,17 +150,14 @@ class MessagAPIViewTests(APITestCase):
 class GuestMessageAPIViewTests(APITestCase):
 
     def setUp(self):
-        self.password = PASSWORD
         self.today = timezone.localtime(timezone.now()).date()
         # Groups
         create._get_groups_and_perms()
         # Hotel / User
         self.hotel = create_hotel()
-        self.admin = create_hotel_user(
-            hotel=self.hotel,
-            username='admin',
-            group='hotel_admin'
-        )
+        self.admin = create_hotel_user(self.hotel, group='hotel_admin')
+        self.manager = create_hotel_user(self.hotel, group='hotel_manager')
+        self.user = create_hotel_user(self.hotel)
         # Guest
         self.guests = make_guests(hotel=self.hotel)
         self.guest = self.guests[0] #b/c returns a list
@@ -166,7 +180,7 @@ class GuestMessageAPIViewTests(APITestCase):
             )
 
         # Login
-        self.client.login(username=self.admin.username, password=self.password)
+        self.client.login(username=self.admin.username, password=PASSWORD)
 
     def tearDown(self):
         self.client.logout()
@@ -174,6 +188,20 @@ class GuestMessageAPIViewTests(APITestCase):
     def test_setup_data(self):
         self.assertEqual(Guest.objects.count(), 20)
         self.assertEqual(Guest.objects.filter(hotel=self.hotel).count(), 10)
+
+    # permissions - by User Type
+
+    def test_manager_access(self):
+        self.client.logout()
+        self.client.login(username=self.manager.username, password=PASSWORD)
+        response = self.client.get('/api/guest-messages/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_user_access(self):
+        self.client.logout()
+        self.client.login(username=self.user.username, password=PASSWORD)
+        response = self.client.get('/api/guest-messages/')
+        self.assertEqual(response.status_code, 200)
 
     ### GuestMessageListAPIView
 
@@ -217,17 +245,14 @@ class GuestMessageAPIViewTests(APITestCase):
 class GuestAPIViewTests(APITestCase):
 
     def setUp(self):
-        self.password = PASSWORD
         self.today = timezone.localtime(timezone.now()).date()
         # Groups
         create._get_groups_and_perms()
         # Hotel / User
         self.hotel = create_hotel()
-        self.admin = create_hotel_user(
-            hotel=self.hotel,
-            username='admin',
-            group='hotel_admin'
-        )
+        self.admin = create_hotel_user(self.hotel, group='hotel_admin')
+        self.manager = create_hotel_user(self.hotel, group='hotel_manager')
+        self.user = create_hotel_user(self.hotel)
         # Guest
         self.guests = make_guests(hotel=self.hotel)
         self.guest = self.guests[0] #b/c returns a list
@@ -257,10 +282,24 @@ class GuestAPIViewTests(APITestCase):
         }
 
         # Login
-        self.client.login(username=self.admin.username, password=self.password)
+        self.client.login(username=self.admin.username, password=PASSWORD)
 
     def tearDown(self):
         self.client.logout()
+
+    # permissions - by User Type
+
+    def test_manager_access(self):
+        self.client.logout()
+        self.client.login(username=self.manager.username, password=PASSWORD)
+        response = self.client.get('/api/guests/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_user_access(self):
+        self.client.logout()
+        self.client.login(username=self.user.username, password=PASSWORD)
+        response = self.client.get('/api/guests/')
+        self.assertEqual(response.status_code, 200)
 
     ### GuestListCreateAPIView
 
@@ -299,9 +338,11 @@ class ReplyAPIViewTests(APITestCase):
     fixtures = ['reply.json']
 
     def setUp(self):
-        self.hotel = create_hotel()
         create._get_groups_and_perms()
-        self.admin = create_hotel_user(hotel=self.hotel, username='admin', group='hotel_admin')
+        self.hotel = create_hotel()
+        self.admin = create_hotel_user(self.hotel, group='hotel_admin')
+        self.manager = create_hotel_user(self.hotel, group='hotel_manager')
+        self.user = create_hotel_user(self.hotel)
         # Hotel Reply
         self.reply = mommy.make(Reply, hotel=self.hotel, letter="A")
         # Hotel Reply Serialized
@@ -317,6 +358,20 @@ class ReplyAPIViewTests(APITestCase):
 
     def tearDown(self):
         self.client.logout()
+
+    # permissions - by User Type
+
+    def test_manager_access(self):
+        self.client.logout()
+        self.client.login(username=self.manager.username, password=PASSWORD)
+        response = self.client.get("/api/reply/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_user_access(self):
+        self.client.logout()
+        self.client.login(username=self.user.username, password=PASSWORD)
+        response = self.client.get("/api/reply/")
+        self.assertEqual(response.status_code, 403)
 
     def test_list(self):
         response = self.client.get("/api/reply/")
@@ -426,10 +481,45 @@ class TriggerTypeAPIViewTests(APITestCase):
     def tearDown(self):
         self.client.logout()
 
+    def test_list(self):
+        response = self.client.get('/api/trigger-type/', format='json')
+        
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        data = data['results']
+        trigger_type = TriggerType.objects.get(id=data[0]['id'])
+        
+        self.assertEqual(data[0]['name'], trigger_type.name)
+        self.assertEqual(data[0]['human_name'], trigger_type.human_name)
+        self.assertEqual(data[0]['desc'], trigger_type.desc)
+
     def test_detail(self):
         response = self.client.get('/api/trigger-type/{}/'.format(self.trigger_type.id))
-        data = json.loads(response.content)
+
         self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        
+        self.assertEqual(data['id'], self.trigger_type.id)
+        self.assertEqual(data['name'], self.trigger_type.name)
+        self.assertEqual(data['human_name'], self.trigger_type.human_name)
+        self.assertEqual(data['desc'], self.trigger_type.desc)
+
+
+    def test_create(self):
+        response = self.client.post('/api/trigger-type/', {'foo':'bar'}, format='json')
+        self.assertEqual(response.status_code, 405)
+
+    def test_update(self):
+        response = self.client.put('/api/trigger-type/{}/'.format(self.trigger_type.id),
+            {'foo':'bar'}, format='json')
+        self.assertEqual(response.status_code, 405)
+
+    def test_delete(self):
+        response = self.client.delete('/api/trigger-type/{}/'.format(self.trigger_type.id))
+        
+        self.assertEqual(response.status_code, 405)
+
+        self.assertIsNotNone(TriggerType.objects.get(id=self.trigger_type.id))
 
 
 class TriggerAPIViewTests(APITestCase):
@@ -437,7 +527,9 @@ class TriggerAPIViewTests(APITestCase):
     def setUp(self):
         self.hotel = create_hotel()
         create._get_groups_and_perms()
-        self.admin = create_hotel_user(hotel=self.hotel, username='admin', group='hotel_admin')
+        self.admin = create_hotel_user(self.hotel, group='hotel_admin')
+        self.manager = create_hotel_user(self.hotel, group='hotel_manager')
+        self.user = create_hotel_user(self.hotel)
         # Trigger
         self.trigger_type = mommy.make(TriggerType)
         self.trigger = mommy.make(Trigger, type=self.trigger_type, hotel=self.hotel)
@@ -446,6 +538,22 @@ class TriggerAPIViewTests(APITestCase):
 
     def tearDown(self):
         self.client.logout()
+
+    # permissions - by User Type
+
+    def test_manager_access(self):
+        self.client.logout()
+        self.client.login(username=self.manager.username, password=PASSWORD)
+        response = self.client.get("/api/reply/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_user_access(self):
+        self.client.logout()
+        self.client.login(username=self.user.username, password=PASSWORD)
+        response = self.client.get("/api/reply/")
+        self.assertEqual(response.status_code, 403)
+
+    # list
 
     def test_list(self):
         response = self.client.get('/api/trigger/')
