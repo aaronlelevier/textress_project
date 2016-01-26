@@ -274,7 +274,10 @@
                                         {{ headline }} 
                                         {% if headline_small %}<small>{{ headline_small }}</small>{% endif %}
                                         {% block headline_quicklink %}{% endblock headline_quicklink %}
-                                    </h1> 
+
+                                        {% block headline_addit %}
+                                        {% endblock headline_addit %}
+                                    </h1>
                                 </div>
                                 <!-- end: PAGE TITLE & BREADCRUMB -->
                             </div>

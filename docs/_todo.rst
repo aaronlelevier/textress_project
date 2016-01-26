@@ -2,8 +2,6 @@ Final Beta todo's
 -----------------
 :Signup form wizard:
 
-    review tests
-
     reCaptcha - signup online
 
 :Helper messages:
@@ -11,18 +9,6 @@ Final Beta todo's
     for things that need configuring
 
 :Angular Tests:
-
-:Celery:
-
-    all emails sent via 
-
-    All SMS
-
-    Other non-pertinent tasks??
-
-:Review TODOs: 
-
-    scattered throughout code
 
 :Close account views:
 

@@ -2,13 +2,14 @@ from django.contrib.auth.models import Group
 from django.shortcuts import render
 from django.views.generic import View, DetailView, ListView, TemplateView
 from django.views.generic.edit import CreateView, UpdateView
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from braces.views import (LoginRequiredMixin, SetHeadlineMixin, CsrfExemptMixin,
     StaticContextMixin)
 from twilio import twiml
+from ws4redis.publisher import RedisPublisher
 
 from concierge.models import Message, Guest, Trigger
 from concierge.helpers import process_incoming_message, convert_to_json_and_publish_to_redis
@@ -80,10 +81,11 @@ class GuestDetailView(GuestBaseView, GuestListContextMixin, DetailView):
     def get(self, request, *args, **kwargs):
         """All Messages should be marked as 'read=True' when the User 
         goes to the Guests' DetailView."""
+        # initialize chat connection
+        RedisPublisher(facility='foobar', broadcast=True)
+        # mark all messages as 'read'
         self.object = self.get_object()
         Message.objects.filter(guest=self.object, read=False).update(read=True)
-
-        # test block
         check_twilio_messages_to_merge(self.object)
 
         return super(GuestDetailView, self).get(request, *args, **kwargs)
@@ -107,6 +109,7 @@ class GuestCreateView(GuestBaseView, GuestListContextMixin, CreateView):
     template_name = 'cpanel/form.html'
     model = Guest
     form_class = GuestForm
+    success_url = reverse_lazy('concierge:guest_list')
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
