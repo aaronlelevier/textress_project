@@ -53,7 +53,16 @@ class GuestViewTests(TestCase):
         # Dave now tries Logged-In        
         response = self.client.get(reverse('concierge:guest_list'))
         self.assertEqual(response.status_code, 200)
-        assert response.context['object_list']
+        self.assertTrue(response.context['object_list'])
+
+    def test_list_content(self):
+        response = self.client.get(reverse('concierge:guest_list'))
+
+        self.assertEqual( "Guest List", response.context['headline'])
+        self.assertIn(
+            '<i class="clip-plus-circle"> <strong>Add a Guest</strong></i>',
+            response.content
+        )
 
     # detail
 
@@ -94,7 +103,7 @@ class GuestViewTests(TestCase):
         guest = Guest.objects.first()
         self.assertIsInstance(guest, Guest)
         self.assertEqual(guest.hotel, self.hotel)
-        self.assertRedirects(response, reverse('concierge:guest_detail', kwargs={'pk':guest.pk}))
+        self.assertRedirects(response, reverse('concierge:guest_list'))
 
     def test_create__past_date_check_in(self):
         dates = Dates()
@@ -119,7 +128,7 @@ class GuestViewTests(TestCase):
         # Now 1 guest
         guest = Guest.objects.first()
         self.assertIsInstance(guest, Guest)
-        self.assertRedirects(response, reverse('concierge:guest_detail', kwargs={'pk':guest.pk}))
+        self.assertRedirects(response, reverse('concierge:guest_list'))
 
         # Trying to creat a Guest w/ the same Phone Number will fail
         response = self.client.post(reverse('concierge:guest_create'),
@@ -136,7 +145,7 @@ class GuestViewTests(TestCase):
             self.guest_create_data, follow=True)
         guest = Guest.objects.first()
         self.assertIsInstance(guest, Guest)
-        self.assertRedirects(response, reverse('concierge:guest_detail', kwargs={'pk':guest.pk}))
+        self.assertRedirects(response, reverse('concierge:guest_list'))
 
         guest.delete()
         self.assertTrue(guest.hidden)

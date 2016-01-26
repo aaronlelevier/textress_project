@@ -26,6 +26,11 @@
 {% endblock %}
 
 
+{% block headline_addit %}
+    <span class="pull-right"><a href="{% url 'concierge:guest_create' %}"><button type="button" class="btn btn-success"><i class="clip-plus-circle"> <strong>Add a Guest</strong></i></button></a></span>
+{% endblock headline_addit %}
+
+
 {% block content %}
 
         <div class="row">

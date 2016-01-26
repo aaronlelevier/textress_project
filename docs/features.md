@@ -6,6 +6,13 @@ I will be removing the inital notes from "todo's / bugs" and adding the
 new features here.
 
 
+## Database
+
+Change all IDs to UUIDs
+
+Refactor Model inheritance
+
+
 ## UI
 
 #### Forms
