@@ -12,17 +12,8 @@ from twilio.rest import TwilioRestClient
 from twilio.rest.resources.messages import Message as TwilioMessage
 from concierge.models import Message
 from main.tests.test_models import create_hotel
-from sms.helpers import send_text, get_weather, sms_messages, send_message
+from sms.helpers import send_text, send_message
 from utils import create
-
-
-class GeneralTests(TestCase):
-
-    def test_get_weather(self):
-        assert "Yahoo!" in get_weather()
-
-    def test_sms_messages(self):
-        assert sms_messages
 
 
 class SendMessageTests(TestCase):

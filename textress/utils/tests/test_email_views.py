@@ -42,7 +42,7 @@ class EmailViewTests(TestCase):
         # charge
         self.assertEqual(response.context['charge'], self.charge)
         self.assertIn(self.charge.short_pk, response.content)
-        self.assertIn(self.charge.created.strftime("%b. %-d, %Y"), response.content)
+        self.assertIn(self.charge.created.strftime("%B %-d, %Y"), response.content)
         self.assertIn("${:.2f}".format(self.charge.amount/100.0), response.content)
 
     def test_auto_recharge_failed(self):

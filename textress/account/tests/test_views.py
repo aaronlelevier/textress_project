@@ -592,7 +592,7 @@ class AcctStmtAndOtherAccountViewTests(TestCase):
 
         self.assertTrue(response.context['monthly_trans'])
         # the "sms_used" AcctTrans is populating the table how we expect
-        self.assertIn(acct_tran.insert_date.strftime("%b. %-d, %Y"), response.content)
+        self.assertIn(acct_tran.insert_date.strftime("%B %-d, %Y"), response.content)
         self.assertIn("sms used", response.content)
         self.assertIn(str(acct_tran.sms_used), response.content)
         self.assertIn('${:.2f}'.format(acct_tran.amount/100.0), response.content)
@@ -629,7 +629,7 @@ class AcctStmtAndOtherAccountViewTests(TestCase):
 
         response = self.client.get(reverse('acct_pmt_history'))
 
-        self.assertIn(acct_tran.insert_date.strftime("%b. %-d, %Y"), response.content)
+        self.assertIn(acct_tran.insert_date.strftime("%B %-d, %Y"), response.content)
         self.assertIn("init amt", response.content)
         self.assertIn('${:.2f}'.format(acct_tran.amount/100.0), response.content)
 
