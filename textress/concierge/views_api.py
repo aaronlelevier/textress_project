@@ -2,7 +2,7 @@ from django.conf import settings
 from django.http import Http404
 from django.db.models import Q
 
-from rest_framework import mixins, permissions, viewsets
+from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import list_route
 from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
 from rest_framework.response import Response
@@ -39,6 +39,13 @@ class MessageAPIView(viewsets.ModelViewSet):
         messages = Message.objects.current().filter(guest__hotel=request.user.profile.hotel)
         serializer = MessageListCreateSerializer(messages, many=True)
         return Response(serializer.data)
+
+    @list_route(methods=['post'], url_path=r"bulk-send-welcome")
+    def bulk_send_welcome(self, request):
+        for ph in request.data:
+            # TODO: replace `body='foo'` w/ a TriggerType == 'w', and Welcome Msg
+            Message.objects.create(hotel=request.user.profile.hotel, to_ph=ph, body='foo')
+        return Response(status=status.HTTP_200_OK)
 
 
 class GuestMessagesAPIView(viewsets.ModelViewSet):

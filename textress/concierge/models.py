@@ -316,7 +316,7 @@ class Message(BaseModel):
     Required Fields: guest, body
     """
     # Keys
-    guest = models.ForeignKey(Guest)
+    guest = models.ForeignKey(Guest, null=True)
     user = models.ForeignKey(User, blank=True, null=True,
         help_text="NULL unless sent from a Hotel User.")
     hotel = models.ForeignKey(Hotel, related_name='messages', blank=True, null=True)
@@ -364,13 +364,21 @@ class Message(BaseModel):
             except TwilioRestException as e:
                 self.reason = e.__dict__['msg']
 
-        self.hotel = self.guest.hotel or self.user.profile.hotel
+        self.hotel = self.resolve_hotel()
 
         # For testing only
         if not self.insert_date:
             self.insert_date = timezone.localtime(timezone.now()).date()
 
-        return super(Message, self).save(*args, **kwargs)  
+        return super(Message, self).save(*args, **kwargs)
+
+    def resolve_hotel(self):
+        # Guest related record exists because it is a 1-to-1 Guest-User communication
+        if self.guest:
+            return self.guest.hotel
+        # No Guest, because part of a bulk send, in which case is initiated by a User
+        # that has a Hotel.
+        return self.user.profile.hotel
 
     def msg_short(self):
         return "{}...".format(' '.join(self.body.split()[:5]))

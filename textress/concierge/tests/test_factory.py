@@ -29,3 +29,5 @@ class FactoryTests(TestCase):
             guest=guest
         )
         self.assertEqual(Message.objects.filter(hotel=self.hotel).count(), 10)
+
+    # TODO: missing test coverage for `make_messages`

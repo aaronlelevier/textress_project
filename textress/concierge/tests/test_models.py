@@ -347,19 +347,38 @@ class MessageTests(TestCase):
             guest=self.guest
             )
 
-    def test_create(self):
-        for message in self.messages:
-            assert isinstance(message, Message)
-            assert (message.guest or message.user)
+    def test_guest_optional(self):
+        # 10 SMS bulk send won't need Guest(s) to do so
+        init_count = Message.objects.filter(guest__isnull=True).count()
 
-        assert len(self.messages) == 10
+        make_messages(hotel=self.hotel, user=self.admin, guest=None, number=1)
 
-    def test_guest_hotel(self):
-        assert self.guest.hotel
+        self.assertEqual(Message.objects.filter(guest__isnull=True).count(), init_count+1)
+
+    def test_resolve_hotel__no_guest_yes_user(self):
+        # bulk send scenario w/ no related Guest(s), ph # only
+        make_messages(hotel=self.hotel, user=self.admin, guest=None)
+        msg = Message.objects.filter(guest__isnull=True).exclude(user__isnull=True).first()
+        self.assertIsNone(msg.guest)
+        self.assertIsInstance(msg.user, User)
+
+        hotel = msg.resolve_hotel()
+
+        self.assertEqual(hotel, self.admin.profile.hotel)
+
+    def test_resolve_hotel__yes_guest_yes_user(self):
+        # normal 1-to-1 scenario
+        msg = Message.objects.exclude(guest__isnull=True).exclude(user__isnull=True).first()
+        self.assertIsInstance(msg.guest, Guest)
+        self.assertIsInstance(msg.user, User)
+
+        hotel = msg.resolve_hotel()
+
+        self.assertEqual(hotel, msg.guest.hotel)
 
     def test_msg_short(self):
         message = self.messages[0]
-        assert message.msg_short() == "{}...".format(' '.join(message.body.split()[:5]))
+        self.assertEqual(message.msg_short(), "{}...".format(' '.join(message.body.split()[:5])))
 
 
 class MessageSendTests(TestCase):

@@ -146,6 +146,21 @@ class MessagAPIViewTests(APITestCase):
             {'override': True}, format='json')
         self.assertEqual(response.status_code, 405)
 
+    # detail endpoint - /api/messages/bulk-send-welcome/
+
+    def test_bulk_send_welcome__post(self):
+        init_msg_count = Message.objects.count()
+        data = [settings.DEFAULT_TO_PH, settings.DEFAULT_TO_PH_2]
+
+        response = self.client.post('/api/messages/bulk-send-welcome/', data, format='json')
+
+        self.assertEqual(response.status_code, 200)
+        post_msg_count = Message.objects.count()
+        self.assertEqual(init_msg_count+2, post_msg_count)
+        msg = Message.objects.order_by('created').last()
+        self.assertEqual(msg.to_ph, settings.DEFAULT_TO_PH_2)
+        self.assertEqual(msg.body, 'foo')
+
 
 class GuestMessageAPIViewTests(APITestCase):
 

@@ -13,7 +13,7 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 NOSE_ARGS = [
     '--nologcapture',
-    '--with-coverage',
+    # '--with-coverage', # enable only when specifically evaluating "coverage"
     '--cover-package=account,concierge,contact,main,payment,sms,textress,utils',
 ]
 

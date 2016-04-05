@@ -25,6 +25,8 @@ def make_guests(hotel, number=10):
     return Guest.objects.filter(hotel=hotel)
 
 
+# TODO: refactor - shouldn't have to pass `hotel` and `user` because users have a related
+#   hotel, so change to just passing the user, and access their related hotel.
 def make_messages(hotel, user, guest, insert_date=None, number=10):
     '''
     Randomly choose if the Guest or User is sending the Message.
