@@ -1,9 +1,7 @@
 import os
 
 from django.test import TestCase
-from django.conf import settings
 
-from model_mommy import mommy
 from twilio.rest.client import TwilioRestClient
 
 from account.models import Dates

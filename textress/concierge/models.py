@@ -9,18 +9,16 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 
-from celery import shared_task
 from twilio import TwilioRestException
 
-from main.models import Hotel, UserProfile, profile_image, Icon
+from main.models import Hotel, Icon
 from sms.helpers import send_message
 from utils import validate_phone
 from utils.models import BaseModel, BaseQuerySet, BaseManager, TimeStampBaseModel
-from utils.exceptions import (CheckOutDateException, ValidSenderException,
-    PhoneNumberInUse, ReplyNotFound)
+from utils.exceptions import CheckOutDateException, PhoneNumberInUse, ReplyNotFound
 
 import logging
 
@@ -501,6 +499,12 @@ class Reply(TimeStampBaseModel):
             )
 
 
+TRIGGER_TYPES = [
+    "check_in",
+    "check_out",
+    "bulk_send_welcome"
+]
+
 class TriggerType(TimeStampBaseModel):
     """
     Static table to hold "Trigger Types"
@@ -509,6 +513,7 @@ class TriggerType(TimeStampBaseModel):
 
     - "check_in"
     - "check_out"
+    - "bulk_send_welcome"
     """
     name = models.CharField(max_length=100, unique=True,
         help_text="name to be referenced in the application code.")
@@ -556,8 +561,8 @@ class Trigger(TimeStampBaseModel):
 
     :Reply FK: b/c Hotel's can configure the Reply letter they want.
     """
-    type = models.ForeignKey(TriggerType)
     hotel = models.ForeignKey(Hotel)
+    type = models.ForeignKey(TriggerType)
     reply = models.ForeignKey(Reply)
     active = models.BooleanField(blank=True, default=False)
 

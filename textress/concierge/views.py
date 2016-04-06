@@ -11,7 +11,7 @@ from braces.views import (LoginRequiredMixin, SetHeadlineMixin, CsrfExemptMixin,
 from twilio import twiml
 from ws4redis.publisher import RedisPublisher
 
-from concierge.models import Message, Guest, Trigger
+from concierge.models import Message, Guest
 from concierge.helpers import process_incoming_message, convert_to_json_and_publish_to_redis
 from concierge.forms import GuestForm
 from concierge.mixins import GuestListContextMixin

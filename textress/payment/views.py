@@ -11,7 +11,7 @@ from braces.views import SetHeadlineMixin, FormValidMessageMixin, LoginRequiredM
 from account.mixins import AcctCostContextMixin
 from account.models import AcctCost, AcctStmt, AcctTrans
 from account.tasks import create_initial_acct_trans_and_stmt
-from concierge.tasks import create_hotel_default_help_reply
+from concierge.tasks import create_hotel_default_help_reply, create_hotel_default_buld_send_welcome
 from main.mixins import (RegistrationContextMixin, HotelContextMixin, HotelUserMixin,
     AdminOnlyMixin)
 from payment.models import Card
@@ -75,6 +75,7 @@ class RegisterPmtView(LoginRequiredMixin, AdminOnlyMixin, RegistrationContextMix
 
             create_initial_acct_trans_and_stmt.delay(self.hotel.id)
             create_hotel_default_help_reply.delay(self.hotel.id)
+            create_hotel_default_buld_send_welcome.delay(self.hotel.id)
 
             return HttpResponseRedirect(self.success_url)
 

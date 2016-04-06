@@ -8,7 +8,6 @@ from concierge.models import Guest, Message, Trigger, TriggerType, Reply
 from concierge.tests.factory import make_guests, make_messages
 from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
 from utils import create
-from utils.exceptions import CheckOutDateException
 from utils.models import Dates
 
 

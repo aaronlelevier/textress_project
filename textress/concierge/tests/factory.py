@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from model_mommy import mommy
 
-from concierge.models import Message, Guest
+from concierge.models import Message, Guest, TriggerType, TRIGGER_TYPES
 from utils import create
 
 
@@ -73,4 +73,8 @@ def make_messages(hotel, user, guest, insert_date=None, number=10):
                 )
 
     return Message.objects.filter(hotel=hotel)
-    
+
+
+def make_trigger_types():
+    for tt in TRIGGER_TYPES:
+        TriggerType.objects.get_or_create(name=tt)

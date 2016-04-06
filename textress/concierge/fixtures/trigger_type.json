@@ -20,5 +20,16 @@
   },
   "model": "concierge.triggertype",
   "pk": 2
+},
+{
+  "fields": {
+    "human_name": "bulk send welcome",
+    "desc": "",
+    "modified": "2016-04-05T14:21:07.096Z",
+    "name": "bulk_send_welcome",
+    "created": "2016-04-05T14:21:07.096Z"
+  },
+  "model": "concierge.triggertype",
+  "pk": 3
 }
 ]

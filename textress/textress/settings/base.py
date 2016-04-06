@@ -211,10 +211,18 @@ DEFAULT_FROM_PH = os.environ['TWILIO_PHONE_NUMBER'] # +17024302691
 DEFAULT_FROM_PH_BAD = "+1234567890"
 
 RESERVED_REPLY_LETTERS = ['Y', 'S'] # 'H' for HELP will be added to each Hotel upon signup
+# Default Help
 DEFAULT_REPLY_HELP_LETTER = "H"
 DEFAULT_REPLY_HELP_MSG = "Reply 'S' to STOP, 'Y' to 'reactive SMS messaging'."
 DEFAULT_REPLY_HELP_DESC = "Default Help Reply"
+# Default Bulk send welcome
+DEFAULT_REPLY_BULK_SEND_WELCOME_LETTER = "W"
+DEFAULT_REPLY_BULK_SEND_WELCOME_MSG = "Your room is now ready for check-in. Thank you for your patience."
+DEFAULT_REPLY_BULK_SEND_WELCOME_DESC = "Approved room is ready message"
 
+CHECK_IN_TRIGGER = 'check_in'
+CHECK_OUT_TRIGGER = 'check_out'
+BULK_SEND_WELCOME_TRIGGER = 'bulk_send_welcome'
 
 ### 3RD PARTY APPS CONFIG ###
 

@@ -4,10 +4,9 @@ from django.conf import settings
 from django.utils import timezone
 
 from celery import shared_task
-from model_mommy import mommy 
 
 from concierge.helpers import merge_twilio_messages_to_db, convert_to_json_and_publish_to_redis
-from concierge.models import Guest, Trigger, Reply
+from concierge.models import Guest, Reply, TriggerType, Trigger
 from main.models import Hotel
 
 
@@ -29,6 +28,15 @@ def create_hotel_default_help_reply(hotel_id):
     hotel = Hotel.objects.get(id=hotel_id)
     Reply.objects.get_or_create(hotel=hotel, letter=settings.DEFAULT_REPLY_HELP_LETTER,
         message=settings.DEFAULT_REPLY_HELP_MSG, desc=settings.DEFAULT_REPLY_HELP_DESC)
+
+
+@shared_task
+def create_hotel_default_buld_send_welcome(hotel_id):
+    hotel = Hotel.objects.get(id=hotel_id)
+    reply, _ = Reply.objects.get_or_create(hotel=hotel, letter=settings.DEFAULT_REPLY_BULK_SEND_WELCOME_LETTER,
+        message=settings.DEFAULT_REPLY_BULK_SEND_WELCOME_MSG, desc=settings.DEFAULT_REPLY_BULK_SEND_WELCOME_DESC)
+    trigger_type, _ = TriggerType.objects.get_or_create(name=settings.BULK_SEND_WELCOME_TRIGGER)
+    Trigger.objects.get_or_create(hotel=hotel, type=trigger_type, reply=reply, active=True)
 
 
 @shared_task

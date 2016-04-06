@@ -4,7 +4,7 @@ from django.db.models import Q
 
 from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import list_route
-from rest_framework.exceptions import MethodNotAllowed, PermissionDenied
+from rest_framework.exceptions import MethodNotAllowed, PermissionDenied, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -42,10 +42,25 @@ class MessageAPIView(viewsets.ModelViewSet):
 
     @list_route(methods=['post'], url_path=r"bulk-send-welcome")
     def bulk_send_welcome(self, request):
+        hotel = request.user.profile.hotel
+        trigger = self._get_trigger(hotel)
+        body = trigger.reply.message
         for ph in request.data:
-            # TODO: replace `body='foo'` w/ a TriggerType == 'w', and Welcome Msg
-            Message.objects.create(hotel=request.user.profile.hotel, to_ph=ph, body='foo')
+            # NEXT: Message - has a `received` attr if send is successful, if `received=False`
+            #   then their is a `reason` attr as to why.
+            #  - Collect any fails and key:value map to the phone number, then return in an error dict,
+            #    successfully sent Messages will have a key which is the ph#, but no value. Values are errors.
+            Message.objects.create(hotel=request.user.profile.hotel, to_ph=ph, body=body)
         return Response(status=status.HTTP_200_OK)
+
+    def _get_trigger(self, hotel):
+        try:
+            trigger = Trigger.objects.get(hotel=hotel, type__name=settings.BULK_SEND_WELCOME_TRIGGER)
+        except Trigger.DoesNotExist:
+            trigger_type = TriggerType.objects.get(name=settings.BULK_SEND_WELCOME_TRIGGER)
+            raise ValidationError("Trigger not configured, need to configure: {}"
+                                  .format(trigger_type.human_name))
+        return trigger
 
 
 class GuestMessagesAPIView(viewsets.ModelViewSet):

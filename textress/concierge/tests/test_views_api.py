@@ -1,8 +1,6 @@
 import json
 
 from django.conf import settings
-from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
 from django.utils import timezone
 
 from model_mommy import mommy
@@ -10,8 +8,8 @@ from rest_framework.test import APITestCase
 
 from concierge import serializers
 from concierge.models import Reply, REPLY_LETTERS, TriggerType, Trigger, Guest, Message
-from concierge.tests.factory import make_guests, make_messages
-from main.models import Hotel
+from concierge.tasks import create_hotel_default_buld_send_welcome
+from concierge.tests.factory import make_guests, make_messages, make_trigger_types
 from main.tests.factory import create_hotel, create_user, create_hotel_user, PASSWORD
 from utils import create
 
@@ -48,6 +46,9 @@ class MessagAPIViewTests(APITestCase):
             user=self.admin2,
             guest=self.guest2
             )
+
+        # Triggers, etc
+        make_trigger_types()
 
         # Login
         self.client.login(username=self.admin.username, password=PASSWORD)
@@ -149,6 +150,8 @@ class MessagAPIViewTests(APITestCase):
     # detail endpoint - /api/messages/bulk-send-welcome/
 
     def test_bulk_send_welcome__post(self):
+        create_hotel_default_buld_send_welcome(self.hotel.id)
+        create_hotel_default_buld_send_welcome(self.hotel2.id)
         init_msg_count = Message.objects.count()
         data = [settings.DEFAULT_TO_PH, settings.DEFAULT_TO_PH_2]
 
@@ -159,7 +162,20 @@ class MessagAPIViewTests(APITestCase):
         self.assertEqual(init_msg_count+2, post_msg_count)
         msg = Message.objects.order_by('created').last()
         self.assertEqual(msg.to_ph, settings.DEFAULT_TO_PH_2)
-        self.assertEqual(msg.body, 'foo')
+        # bulk send welcome message
+        trigger = Trigger.objects.get(hotel=self.hotel, type__name=settings.BULK_SEND_WELCOME_TRIGGER)
+        self.assertEqual(msg.body, trigger.reply.message)
+
+    def test_bulk_send_welcome__bulk_send_welcome_msg_not_configured(self):
+        init_msg_count = Message.objects.count()
+        data = [settings.DEFAULT_TO_PH, settings.DEFAULT_TO_PH_2]
+
+        response = self.client.post('/api/messages/bulk-send-welcome/', data, format='json')
+
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.content)
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0], u"Trigger not configured, need to configure: bulk send welcome")
 
 
 class GuestMessageAPIViewTests(APITestCase):
