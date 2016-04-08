@@ -33,10 +33,6 @@
         <div class="{% block box_div_class %}box-login{% endblock %}">
             <h3>{% block form_title %}{% endblock %}</h3>
             <p>{% block form_subtitle %}{% endblock %}</p>
-            <!-- test -->
-            <p>{{ next }}</p>
-            <p>{% if next %} next {% else %} no next {% endif %}</p>
-            <!-- test:end -->
             <form {% block form_tag %}class="form-login" name="{{ form.form_name }}" method="post" {% if next %} action="{{ next }}" {% else %} action="{% url 'login' %}" {% endif %} novalidate{% endblock %}>
                 {% csrf_token %}
                 <div class="row">
