@@ -26,7 +26,7 @@ django-websocket-redis==0.4.4
 djangorestframework==3.2.4
 djrill==1.4.0
 docopt==0.6.2
-funcsigs==0.4
+funcsigs==1.0.0
 functools32==3.2.3-2
 gevent==1.0.2
 gnureadline==6.3.3
@@ -43,8 +43,9 @@ model-mommy==1.2.5
 nbconvert==4.0.0
 nbformat==4.0.0
 notebook==4.0.4
+ordereddict==1.1
 path.py==8.1
-pbr==1.8.0
+pbr==1.8.1
 pexpect==3.3
 pickleshare==0.5
 psycopg2==2.6.1
@@ -57,7 +58,7 @@ redis==2.10.5
 requests==2.7.0
 selenium==2.47.3
 simplegeneric==0.8.1
-six==1.9.0
+six==1.10.0
 stripe==1.27.0
 terminado==0.5
 tornado==4.2.1

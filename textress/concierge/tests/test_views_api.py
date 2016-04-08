@@ -1,4 +1,5 @@
 import json
+import mock
 
 from django.conf import settings
 from django.utils import timezone
@@ -167,7 +168,6 @@ class MessagAPIViewTests(APITestCase):
         self.assertEqual(msg.body, trigger.reply.message)
 
     def test_bulk_send_welcome__bulk_send_welcome_msg_not_configured(self):
-        init_msg_count = Message.objects.count()
         data = [settings.DEFAULT_TO_PH, settings.DEFAULT_TO_PH_2]
 
         response = self.client.post('/api/messages/bulk-send-welcome/', data, format='json')

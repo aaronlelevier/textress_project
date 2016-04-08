@@ -45,12 +45,7 @@ class MessageAPIView(viewsets.ModelViewSet):
         hotel = request.user.profile.hotel
         trigger = self._get_trigger(hotel)
         body = trigger.reply.message
-        for ph in request.data:
-            # NEXT: Message - has a `received` attr if send is successful, if `received=False`
-            #   then their is a `reason` attr as to why.
-            #  - Collect any fails and key:value map to the phone number, then return in an error dict,
-            #    successfully sent Messages will have a key which is the ph#, but no value. Values are errors.
-            Message.objects.create(hotel=request.user.profile.hotel, to_ph=ph, body=body)
+        self._bulk_send(request, body)
         return Response(status=status.HTTP_200_OK)
 
     def _get_trigger(self, hotel):
@@ -61,6 +56,16 @@ class MessageAPIView(viewsets.ModelViewSet):
             raise ValidationError("Trigger not configured, need to configure: {}"
                                   .format(trigger_type.human_name))
         return trigger
+
+    def _bulk_send(self, request, body):
+        errors = {}
+        for ph in request.data:
+            msg = Message.objects.create(hotel=request.user.profile.hotel, to_ph=ph, body=body)
+            if msg.reason:
+                errors[ph] = msg.reason
+
+        if errors:
+            raise ValidationError(errors)
 
 
 class GuestMessagesAPIView(viewsets.ModelViewSet):
