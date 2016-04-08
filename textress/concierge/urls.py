@@ -20,6 +20,6 @@ urlpatterns = patterns('',
     url(r'^api/', include(api_patterns)),
     url(r'^guests/', include(guest_patterns)),
     # No Prefix
+    url(r'^send-welcome/$', views.SendWelcomeView.as_view(), name='send_welcome'),
     url(r'^auto-replies/$', views.ReplyView.as_view(), name='replies'),
-
     )

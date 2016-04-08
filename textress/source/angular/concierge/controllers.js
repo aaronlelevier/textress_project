@@ -1,5 +1,41 @@
 var conciergeControllers = angular.module('conciergeApp.controllers', ['conciergeApp.services']);
 
+conciergeControllers.controller('SendWelcomeCtrl', ['$scope', 'MessageSendWelcome',
+  function($scope, MessageSendWelcome) {  
+    $scope.input = {};
+    $scope.errors = {};
+    $scope.range = function(min, max, step) {
+      step = step || 1;
+      for (var i = min; i <= max; i += step) {
+          $scope.input['input'+i] = "";
+          $scope.errors['error'+i] = "";
+      }
+      return $scope.input;
+    };
+
+    $scope.send = function() {
+      var values = [];
+      for (var i in $scope.input) {
+        values.push($scope.input[i]);
+      }
+      var messages = new MessageSendWelcome(values);
+
+      messages.$save(function() {
+      }).then(function(response) {
+        $scope.input = {};
+      }, function(error) {
+        // handle error here by updating errors on page
+        // should return a dict of ph:error msg
+      });
+    }
+
+    $scope.clear = function() {
+      $scope.input = {};
+      $scope.errors = {};
+    }
+  }
+]);
+
 conciergeControllers.controller('GuestListCtrl', ['$scope', '$timeout', 'Guest', 'Message',
   function($scope, $timeout, Guest, Message) {
 

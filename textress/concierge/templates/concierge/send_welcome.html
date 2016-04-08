@@ -1,0 +1,52 @@
+{% extends "cpanel/base-sidebar.html" %}
+{% load staticfiles %}
+
+
+{% block head_js %}
+    {{ block.super }}
+    {% include "include/angular/concierge.html" %}
+{% endblock head_js %}
+
+
+{% block angular_app %}
+    ng-app="conciergeApp" ng-controller="SendWelcomeCtrl" ng-cloak
+{% endblock %}
+
+
+{% block content %}
+        <div class="row">
+
+            <div class="row">
+                <div class="col-md-6">
+                    
+                    <form name="triggerForm" role="form" class="form-horizontal">
+                        
+                        <div class="row margin10">
+                            <div class="col-md-6">
+                                <button class="btn btn-primary btn-xs btn-block" type="button" id="submit" ng-click="send()">Send</button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-default btn-xs btn-block" type="button" id="submit" ng-click="clear()">Clear</button>
+                            </div>
+                        </div>
+
+                        <div class="row margin10">
+                            <div class="form-group" ng-repeat="n in range(1,10)">
+                                <label class="col-sm-3 control-label">
+                                    [[ $index + 1 ]]:
+                                </label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="id_phone_number" ng-model="input[[$index]]"></input>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock content %}

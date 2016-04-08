@@ -11,6 +11,22 @@ from utils import create
 from utils.models import Dates
 
 
+class SendWelcomeTests(TestCase):
+
+    def setUp(self):
+        create._get_groups_and_perms()
+        self.hotel = create_hotel()
+        self.user = create_hotel_user(self.hotel, group='hotel_admin')
+        self.guests = make_guests(self.hotel)
+        self.guest = self.guests.first()
+        # Login
+        self.client.login(username=self.user.username, password=PASSWORD)
+
+    def test_get(self):
+        response = self.client.get(reverse('concierge:send_welcome'))
+        self.assertEqual(response.status_code, 200)
+
+
 class GuestViewTests(TestCase):
 
     def setUp(self):

@@ -54,6 +54,16 @@ class ReceiveSMSView(CsrfExemptMixin, TemplateView):
         return HttpResponse(str(resp), content_type='text/xml')
 
 
+class SendWelcomeView(LoginRequiredMixin, SetHeadlineMixin, HotelUserMixin, TemplateView):
+    '''
+    Angular View
+    ------------
+    Bulk send welcome messages.
+    '''
+    headline = "Send Welcome"
+    template_name = "concierge/send_welcome.html"
+
+
 ###############
 # GUEST VIEWS #
 ###############

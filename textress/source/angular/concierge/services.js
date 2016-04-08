@@ -9,6 +9,9 @@ angular.module('conciergeApp.services', ['ngResource'])
       }
     });
   })
+  .factory('MessageSendWelcome', function($resource) {
+    return $resource('/api/messages/bulk-send-welcome/:id/');
+  })
   .factory('GuestMessages', function($resource) {
     return $resource('/api/guest-messages/:id/');
   })
