@@ -219,6 +219,7 @@ DEFAULT_REPLY_HELP_DESC = "Default Help Reply"
 DEFAULT_REPLY_BULK_SEND_WELCOME_LETTER = "W"
 DEFAULT_REPLY_BULK_SEND_WELCOME_MSG = "Your room is now ready for check-in. Thank you for your patience."
 DEFAULT_REPLY_BULK_SEND_WELCOME_DESC = "Approved room is ready message"
+WELCOME_MSG_NOT_CONFIGURED = "Welcome message not configured"
 
 CHECK_IN_TRIGGER = 'check_in'
 CHECK_OUT_TRIGGER = 'check_out'

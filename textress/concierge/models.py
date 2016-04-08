@@ -546,6 +546,15 @@ class TriggerManager(models.Manager):
                 return Message.objects.create(to_ph=guest.phone_number, guest=guest,
                     user=guest.hotel.get_admin(), body=trigger.reply.message)
 
+    def get_welcome_message(self, hotel):
+        try:
+            trigger = Trigger.objects.get(hotel=hotel,
+                                          type__name=settings.BULK_SEND_WELCOME_TRIGGER)
+            welcome_message = trigger.reply.message
+        except Trigger.DoesNotExist:
+            welcome_message = settings.WELCOME_MSG_NOT_CONFIGURED
+        return welcome_message
+
 
 class Trigger(TimeStampBaseModel):
     """

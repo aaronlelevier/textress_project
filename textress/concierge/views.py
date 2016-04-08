@@ -1,17 +1,18 @@
+from django.conf import settings
 from django.contrib.auth.models import Group
-from django.shortcuts import render
-from django.views.generic import View, DetailView, ListView, TemplateView
-from django.views.generic.edit import CreateView, UpdateView
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, HttpResponse
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import View, DetailView, ListView, TemplateView
+from django.views.generic.edit import CreateView, UpdateView
 
 from braces.views import (LoginRequiredMixin, SetHeadlineMixin, CsrfExemptMixin,
     StaticContextMixin)
 from twilio import twiml
 from ws4redis.publisher import RedisPublisher
 
-from concierge.models import Message, Guest
+from concierge.models import Message, Guest, Trigger
 from concierge.helpers import process_incoming_message, convert_to_json_and_publish_to_redis
 from concierge.forms import GuestForm
 from concierge.mixins import GuestListContextMixin
@@ -54,7 +55,8 @@ class ReceiveSMSView(CsrfExemptMixin, TemplateView):
         return HttpResponse(str(resp), content_type='text/xml')
 
 
-class SendWelcomeView(LoginRequiredMixin, SetHeadlineMixin, HotelUserMixin, TemplateView):
+class SendWelcomeView(LoginRequiredMixin, SetHeadlineMixin, StaticContextMixin,
+    HotelUserMixin, TemplateView):
     '''
     Angular View
     ------------
@@ -62,6 +64,12 @@ class SendWelcomeView(LoginRequiredMixin, SetHeadlineMixin, HotelUserMixin, Temp
     '''
     headline = "Send Welcome"
     template_name = "concierge/send_welcome.html"
+    static_context = {'headline_small': 'Send to up to 10 guests.'}
+
+    def get_context_data(self, **kwargs):
+        context = super(SendWelcomeView, self).get_context_data(**kwargs)
+        context['welcome_message'] = Trigger.objects.get_welcome_message(hotel=self.hotel)
+        return context
 
 
 ###############

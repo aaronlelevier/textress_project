@@ -12,6 +12,7 @@ from django.utils import timezone
 from model_mommy import mommy
 
 from concierge.models import Message, Guest, Hotel, Reply, TriggerType, Trigger
+from concierge.tasks import create_hotel_default_buld_send_welcome
 from concierge.tests.factory import make_guests, make_messages
 from main.tests.factory import create_hotel, create_hotel_user
 from utils import create
@@ -617,3 +618,21 @@ class TriggerTests(TestCase):
         self.guest.save()
 
         self.assertIsNone(Trigger.objects.send_message(self.guest.id, self.trigger.type.name))
+
+    def test_get_welcome_message(self):
+        create_hotel_default_buld_send_welcome(self.hotel.id)
+        self.assertTrue(Trigger.objects.filter(hotel=self.hotel,
+                                               type__name=settings.BULK_SEND_WELCOME_TRIGGER).exists())
+
+        ret = Trigger.objects.get_welcome_message(hotel=self.hotel)
+
+        self.assertIn(ret, settings.DEFAULT_REPLY_BULK_SEND_WELCOME_MSG)
+
+    def test_get_welcome_message__not_configured(self):
+        self.assertFalse(Trigger.objects.filter(hotel=self.hotel,
+                                                type__name=settings.BULK_SEND_WELCOME_TRIGGER).exists())
+
+        ret = Trigger.objects.get_welcome_message(hotel=self.hotel)
+
+        self.assertIn(ret, settings.WELCOME_MSG_NOT_CONFIGURED)
+
