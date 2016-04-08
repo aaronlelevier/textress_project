@@ -120,6 +120,10 @@ def clean_to(obj, cleaned_data):
     return obj, cleaned_data
 
 
+def clean_ph_num_mask(ph):
+    return "+1{}".format(ph.replace("(", "").replace(") ", "").replace("-", ""))
+
+
 def no_twilio_phone_number_alert():
     return {
         'type': 'warning',

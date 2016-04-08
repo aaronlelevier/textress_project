@@ -13,7 +13,8 @@ from concierge.permissions import IsHotelObject, IsManagerOrAdmin
 from concierge.serializers import (MessageListCreateSerializer, GuestMessageSerializer,
     GuestListSerializer, MessageRetrieveSerializer, ReplySerializer,
     TriggerTypeSerializer, TriggerSerializer, TriggerCreateSerializer)
-from utils.views import BaseModelViewSet
+from sms.helpers import clean_ph_num_mask
+from utils.views import ListDataMixin, BaseModelViewSet
 
 
 DEFAULT_PERMISSIONS = (permissions.IsAuthenticated, IsHotelObject,)
@@ -59,7 +60,8 @@ class MessageAPIView(viewsets.ModelViewSet):
 
     def _bulk_send(self, request, body):
         errors = {}
-        for ph in request.data:
+        for k,v in request.data.iteritems():
+            ph = clean_ph_num_mask(v)
             msg = Message.objects.create(hotel=request.user.profile.hotel, to_ph=ph, body=body)
             if msg.reason:
                 errors[ph] = msg.reason
@@ -135,7 +137,8 @@ class ReplyAPIView(BaseModelViewSet):
                            if x[0] not in settings.RESERVED_REPLY_LETTERS])
 
 
-class TriggerTypeAPIView(mixins.RetrieveModelMixin,
+class TriggerTypeAPIView(ListDataMixin,
+                         mixins.RetrieveModelMixin,
                          mixins.ListModelMixin,
                          viewsets.GenericViewSet):
 

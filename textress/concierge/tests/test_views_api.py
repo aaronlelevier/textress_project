@@ -154,7 +154,7 @@ class MessagAPIViewTests(APITestCase):
         create_hotel_default_send_welcome(self.hotel.id)
         create_hotel_default_send_welcome(self.hotel2.id)
         init_msg_count = Message.objects.count()
-        data = [settings.DEFAULT_TO_PH, settings.DEFAULT_TO_PH_2]
+        data = {"0": "7754194000", "1": "7023012823"}
 
         response = self.client.post('/api/messages/send-welcome/', data, format='json')
 
@@ -162,13 +162,13 @@ class MessagAPIViewTests(APITestCase):
         post_msg_count = Message.objects.count()
         self.assertEqual(init_msg_count+2, post_msg_count)
         msg = Message.objects.order_by('created').last()
-        self.assertEqual(msg.to_ph, settings.DEFAULT_TO_PH_2)
+        self.assertIn(msg.to_ph, ["+1{}".format(v) for v in data.values()])
         # bulk send welcome message
         trigger = Trigger.objects.get(hotel=self.hotel, type__name=settings.BULK_SEND_WELCOME_TRIGGER)
         self.assertEqual(msg.body, trigger.reply.message)
 
     def test_bulk_send_welcome__bulk_send_welcome_msg_not_configured(self):
-        data = [settings.DEFAULT_TO_PH, settings.DEFAULT_TO_PH_2]
+        data = {'foo':'bar'}
 
         response = self.client.post('/api/messages/send-welcome/', data, format='json')
 
@@ -517,7 +517,6 @@ class TriggerTypeAPIViewTests(APITestCase):
         
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
-        data = data['results']
         trigger_type = TriggerType.objects.get(id=data[0]['id'])
         
         self.assertEqual(data[0]['name'], trigger_type.name)

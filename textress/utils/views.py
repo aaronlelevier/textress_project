@@ -2,7 +2,19 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 
 
-class BaseModelViewSet(viewsets.ModelViewSet):
+class ListDataMixin(object):
+
+    def list(self, request):
+        """
+        Changes the structure of the List API data, so no more 'results', 'count',
+        'next', 'prev'.  Only An array of objects.
+        """
+        queryset = self.get_queryset()
+        serializer = self.serializer_class(queryset, many=True)
+        return Response(serializer.data)
+
+
+class BaseModelViewSet(ListDataMixin, viewsets.ModelViewSet):
     
     queryset = None
     serializer_class = None
@@ -33,12 +45,3 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(**kwargs)
 
         return queryset
-
-    def list(self, request):
-        """
-        Changes the structure of the List API data, so no more 'results', 'count', 
-        'next', 'prev'.  Only An array of objects.
-        """
-        queryset = self.get_queryset()
-        serializer = self.serializer_class(queryset, many=True)
-        return Response(serializer.data)

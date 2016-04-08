@@ -68,6 +68,7 @@ class SendWelcomeView(LoginRequiredMixin, SetHeadlineMixin, StaticContextMixin,
 
     def get_context_data(self, **kwargs):
         context = super(SendWelcomeView, self).get_context_data(**kwargs)
+        context['welcome_message_configured'] = Trigger.objects.welcome_message_configured(self.hotel)
         context['welcome_message'] = Trigger.objects.get_welcome_message(hotel=self.hotel)
         return context
 

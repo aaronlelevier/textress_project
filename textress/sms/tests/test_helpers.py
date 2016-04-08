@@ -10,9 +10,10 @@ cache = get_cache('default')
 from model_mommy import mommy
 from twilio.rest import TwilioRestClient
 from twilio.rest.resources.messages import Message as TwilioMessage
+
 from concierge.models import Message
 from main.tests.test_models import create_hotel
-from sms.helpers import send_text, send_message
+from sms.helpers import send_text, send_message, clean_ph_num_mask
 from utils import create
 
 
@@ -38,3 +39,10 @@ class SendMessageTests(TestCase):
             body='sms.test.test_helpers msg')
 
         self.assertEqual(cache.get(self.hotel.redis_key), 1)
+
+    def test_clean_ph_num_mask(self):
+        ph = u'(775) 419-4000'
+
+        ret = clean_ph_num_mask(ph)
+
+        self.assertEqual(ret, '+17754194000')

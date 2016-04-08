@@ -1,36 +1,30 @@
 var conciergeControllers = angular.module('conciergeApp.controllers', ['conciergeApp.services']);
 
 conciergeControllers.controller('SendWelcomeCtrl', ['$scope', 'MessageSendWelcome',
-  function($scope, MessageSendWelcome) {  
-    $scope.input = {};
+  function($scope, MessageSendWelcome) {
+    $scope.phNums = [null, null, null, null, null, null, null, null, null, null];
     $scope.errors = {};
-    $scope.range = function(min, max, step) {
-      step = step || 1;
-      for (var i = min; i <= max; i += step) {
-          $scope.input['input'+i] = "";
-          $scope.errors['error'+i] = "";
-      }
-      return $scope.input;
-    };
 
-    $scope.send = function() {
-      var values = [];
-      for (var i in $scope.input) {
-        values.push($scope.input[i]);
+    $scope.send = function(){
+      for(var ph in $scope.phNums){
+        if(!$scope.phNums[ph]){
+          $scope.phNums[ph] = undefined;
+        }
       }
-      var messages = new MessageSendWelcome(values);
+      var messages = new MessageSendWelcome($scope.phNums);
 
       messages.$save(function() {
       }).then(function(response) {
-        $scope.input = {};
+        $scope.clear();
       }, function(error) {
         // handle error here by updating errors on page
         // should return a dict of ph:error msg
+        $scope.errors = error;
       });
     }
 
     $scope.clear = function() {
-      $scope.input = {};
+      $scope.phNums = [null, null, null, null, null, null, null, null, null, null];
       $scope.errors = {};
     }
   }
@@ -259,11 +253,11 @@ conciergeControllers.controller('ReplyTriggerCtrl',
       hotel__isnull: true
     }).$promise.then(function(response) {
       $scope.system_replies = response;
-    })
+    });
 
     ReplyHotelLetters.query().$promise.then(function(response) {
       $scope.hotel_letters = response;
-    })
+    });
 
     $scope.$watch(function() {
         return $scope.letter;

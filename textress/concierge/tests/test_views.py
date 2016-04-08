@@ -35,6 +35,7 @@ class SendWelcomeTests(TestCase):
 
         response = self.client.get(reverse('concierge:send_welcome'))
 
+        self.assertTrue(response.context['welcome_message_configured'])
         self.assertEqual(response.context['welcome_message'], msg)
         self.assertIn(msg, response.content)
 
@@ -44,6 +45,7 @@ class SendWelcomeTests(TestCase):
 
         response = self.client.get(reverse('concierge:send_welcome'))
 
+        self.assertFalse(response.context['welcome_message_configured'])
         self.assertEqual(response.context['welcome_message'], msg)
         self.assertIn(msg, response.content)
 

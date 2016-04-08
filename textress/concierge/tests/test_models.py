@@ -619,6 +619,23 @@ class TriggerTests(TestCase):
 
         self.assertIsNone(Trigger.objects.send_message(self.guest.id, self.trigger.type.name))
 
+    def test_welcome_message_configured__true(self):
+        create_hotel_default_send_welcome(self.hotel.id)
+        raw_ret = Trigger.objects.filter(hotel=self.hotel, type__name=settings.BULK_SEND_WELCOME_TRIGGER).exists()
+        self.assertTrue(raw_ret)
+
+        ret = Trigger.objects.welcome_message_configured(self.hotel)
+
+        self.assertEqual(ret, raw_ret)
+
+    def test_welcome_message_configured__false(self):
+        raw_ret = Trigger.objects.filter(hotel=self.hotel, type__name=settings.BULK_SEND_WELCOME_TRIGGER).exists()
+        self.assertFalse(raw_ret)
+
+        ret = Trigger.objects.welcome_message_configured(self.hotel)
+
+        self.assertEqual(ret, raw_ret)
+
     def test_get_welcome_message(self):
         create_hotel_default_send_welcome(self.hotel.id)
         self.assertTrue(Trigger.objects.filter(hotel=self.hotel,

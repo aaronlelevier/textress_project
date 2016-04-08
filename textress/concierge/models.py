@@ -348,9 +348,11 @@ class Message(BaseModel):
         '''
         Validate Sender. If Guest, send_message()
         '''
+        self.hotel = self.hotel or self.resolve_hotel()
+
         if not self.sid:
             try:
-                msg = send_message(hotel=self.guest.hotel, to=self.to_ph, body=self.body)
+                msg = send_message(hotel=self.hotel, to=self.to_ph, body=self.body)
                 msg = msg.__dict__
                 self.sid = msg['sid']
                 self.cost = msg['price']
@@ -361,8 +363,6 @@ class Message(BaseModel):
                 self.read = True
             except TwilioRestException as e:
                 self.reason = e.__dict__['msg']
-
-        self.hotel = self.resolve_hotel()
 
         # For testing only
         if not self.insert_date:
@@ -545,6 +545,10 @@ class TriggerManager(models.Manager):
             if not guest.stop:
                 return Message.objects.create(to_ph=guest.phone_number, guest=guest,
                     user=guest.hotel.get_admin(), body=trigger.reply.message)
+
+    def welcome_message_configured(self, hotel):
+        return Trigger.objects.filter(hotel=hotel,
+                                      type__name=settings.BULK_SEND_WELCOME_TRIGGER).exists()
 
     def get_welcome_message(self, hotel):
         try:
