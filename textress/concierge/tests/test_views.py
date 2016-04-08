@@ -6,7 +6,7 @@ from model_mommy import mommy
 
 from concierge.forms import GuestForm
 from concierge.models import Guest, Message, Trigger, TriggerType, Reply
-from concierge.tasks import create_hotel_default_buld_send_welcome
+from concierge.tasks import create_hotel_default_send_welcome
 from concierge.tests.factory import make_guests, make_messages
 from main.tests.factory import create_hotel, create_hotel_user, PASSWORD
 from utils import create
@@ -29,9 +29,9 @@ class SendWelcomeTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_context_welcome_message__configured(self):
-        create_hotel_default_buld_send_welcome(self.hotel.id)
+        create_hotel_default_send_welcome(self.hotel.id)
         msg = Trigger.objects.get_welcome_message(hotel=self.hotel)
-        self.assertEqual(msg, settings.DEFAULT_REPLY_BULK_SEND_WELCOME_MSG)
+        self.assertEqual(msg, settings.DEFAULT_REPLY_SEND_WELCOME_MSG)
 
         response = self.client.get(reverse('concierge:send_welcome'))
 

@@ -9,7 +9,7 @@ from model_mommy import mommy
 
 from concierge.models import Guest, Reply, Trigger, TriggerType
 from concierge.tasks import (archive_guests, trigger_send_message,
-    create_hotel_default_help_reply, create_hotel_default_buld_send_welcome)
+    create_hotel_default_help_reply, create_hotel_default_send_welcome)
 from concierge.tests.factory import make_guests
 from main.tests.factory import create_hotel
 from utils import create
@@ -45,7 +45,7 @@ class ReplyTaskTests(TestCase):
     def setUp(self):
         self.hotel = create_hotel()
         self.help_letter = settings.DEFAULT_REPLY_HELP_LETTER
-        self.welcome_letter = settings.DEFAULT_REPLY_BULK_SEND_WELCOME_LETTER
+        self.welcome_letter = settings.DEFAULT_REPLY_SEND_WELCOME_LETTER
 
         celery_set_eager()
 
@@ -60,19 +60,19 @@ class ReplyTaskTests(TestCase):
         self.assertEqual(reply.message, settings.DEFAULT_REPLY_HELP_MSG)
         self.assertEqual(reply.desc, settings.DEFAULT_REPLY_HELP_DESC)
 
-    def test_create_hotel_default_buld_send_welcome(self):
+    def test_create_hotel_default_send_welcome(self):
         self.assertFalse(Reply.objects.filter(hotel=self.hotel, letter=self.welcome_letter))
         self.assertFalse(TriggerType.objects.filter(name=settings.BULK_SEND_WELCOME_TRIGGER))
         self.assertFalse(Trigger.objects.filter(type__name=settings.BULK_SEND_WELCOME_TRIGGER,
                                                 reply__letter=self.welcome_letter))
 
-        create_hotel_default_buld_send_welcome(self.hotel.id)
+        create_hotel_default_send_welcome(self.hotel.id)
 
         reply = Reply.objects.get(hotel=self.hotel, letter=self.welcome_letter)
         self.assertEqual(reply.hotel, self.hotel)
         self.assertEqual(reply.letter, self.welcome_letter)
-        self.assertEqual(reply.message, settings.DEFAULT_REPLY_BULK_SEND_WELCOME_MSG)
-        self.assertEqual(reply.desc, settings.DEFAULT_REPLY_BULK_SEND_WELCOME_DESC)
+        self.assertEqual(reply.message, settings.DEFAULT_REPLY_SEND_WELCOME_MSG)
+        self.assertEqual(reply.desc, settings.DEFAULT_REPLY_SEND_WELCOME_DESC)
         trigger_type = TriggerType.objects.get(name=settings.BULK_SEND_WELCOME_TRIGGER)
         trigger = Trigger.objects.get(type=trigger_type, reply=reply)
         self.assertEqual(trigger.hotel, self.hotel)

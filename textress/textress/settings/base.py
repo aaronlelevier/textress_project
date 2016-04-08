@@ -216,9 +216,9 @@ DEFAULT_REPLY_HELP_LETTER = "H"
 DEFAULT_REPLY_HELP_MSG = "Reply 'S' to STOP, 'Y' to 'reactive SMS messaging'."
 DEFAULT_REPLY_HELP_DESC = "Default Help Reply"
 # Default Bulk send welcome
-DEFAULT_REPLY_BULK_SEND_WELCOME_LETTER = "W"
-DEFAULT_REPLY_BULK_SEND_WELCOME_MSG = "Your room is now ready for check-in. Thank you for your patience."
-DEFAULT_REPLY_BULK_SEND_WELCOME_DESC = "Approved room is ready message"
+DEFAULT_REPLY_SEND_WELCOME_LETTER = "W"
+DEFAULT_REPLY_SEND_WELCOME_MSG = "Your room is now ready for check-in. Thank you for your patience."
+DEFAULT_REPLY_SEND_WELCOME_DESC = "Approved room is ready message"
 WELCOME_MSG_NOT_CONFIGURED = "Welcome message not configured"
 
 CHECK_IN_TRIGGER = 'check_in'

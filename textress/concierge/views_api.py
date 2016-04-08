@@ -40,7 +40,7 @@ class MessageAPIView(viewsets.ModelViewSet):
         serializer = MessageListCreateSerializer(messages, many=True)
         return Response(serializer.data)
 
-    @list_route(methods=['post'], url_path=r"bulk-send-welcome")
+    @list_route(methods=['post'], url_path=r"send-welcome")
     def bulk_send_welcome(self, request):
         hotel = request.user.profile.hotel
         trigger = self._get_trigger(hotel)

@@ -9,7 +9,7 @@ from rest_framework.test import APITestCase
 
 from concierge import serializers
 from concierge.models import Reply, REPLY_LETTERS, TriggerType, Trigger, Guest, Message
-from concierge.tasks import create_hotel_default_buld_send_welcome
+from concierge.tasks import create_hotel_default_send_welcome
 from concierge.tests.factory import make_guests, make_messages, make_trigger_types
 from main.tests.factory import create_hotel, create_user, create_hotel_user, PASSWORD
 from utils import create
@@ -148,15 +148,15 @@ class MessagAPIViewTests(APITestCase):
             {'override': True}, format='json')
         self.assertEqual(response.status_code, 405)
 
-    # detail endpoint - /api/messages/bulk-send-welcome/
+    # detail endpoint - /api/messages/send-welcome/
 
     def test_bulk_send_welcome__post(self):
-        create_hotel_default_buld_send_welcome(self.hotel.id)
-        create_hotel_default_buld_send_welcome(self.hotel2.id)
+        create_hotel_default_send_welcome(self.hotel.id)
+        create_hotel_default_send_welcome(self.hotel2.id)
         init_msg_count = Message.objects.count()
         data = [settings.DEFAULT_TO_PH, settings.DEFAULT_TO_PH_2]
 
-        response = self.client.post('/api/messages/bulk-send-welcome/', data, format='json')
+        response = self.client.post('/api/messages/send-welcome/', data, format='json')
 
         self.assertEqual(response.status_code, 200)
         post_msg_count = Message.objects.count()
@@ -170,7 +170,7 @@ class MessagAPIViewTests(APITestCase):
     def test_bulk_send_welcome__bulk_send_welcome_msg_not_configured(self):
         data = [settings.DEFAULT_TO_PH, settings.DEFAULT_TO_PH_2]
 
-        response = self.client.post('/api/messages/bulk-send-welcome/', data, format='json')
+        response = self.client.post('/api/messages/send-welcome/', data, format='json')
 
         self.assertEqual(response.status_code, 400)
         data = json.loads(response.content)

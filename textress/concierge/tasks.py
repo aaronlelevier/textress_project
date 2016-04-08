@@ -31,10 +31,10 @@ def create_hotel_default_help_reply(hotel_id):
 
 
 @shared_task
-def create_hotel_default_buld_send_welcome(hotel_id):
+def create_hotel_default_send_welcome(hotel_id):
     hotel = Hotel.objects.get(id=hotel_id)
-    reply, _ = Reply.objects.get_or_create(hotel=hotel, letter=settings.DEFAULT_REPLY_BULK_SEND_WELCOME_LETTER,
-        message=settings.DEFAULT_REPLY_BULK_SEND_WELCOME_MSG, desc=settings.DEFAULT_REPLY_BULK_SEND_WELCOME_DESC)
+    reply, _ = Reply.objects.get_or_create(hotel=hotel, letter=settings.DEFAULT_REPLY_SEND_WELCOME_LETTER,
+        message=settings.DEFAULT_REPLY_SEND_WELCOME_MSG, desc=settings.DEFAULT_REPLY_SEND_WELCOME_DESC)
     trigger_type, _ = TriggerType.objects.get_or_create(name=settings.BULK_SEND_WELCOME_TRIGGER)
     Trigger.objects.get_or_create(hotel=hotel, type=trigger_type, reply=reply, active=True)
 
