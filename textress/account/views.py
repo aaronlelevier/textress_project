@@ -52,18 +52,6 @@ def logout(request):
     return HttpResponseRedirect(reverse('login'))
 
 
-# # TODO: I don't think that I ever hit this URL (No tests for this URL for now...)
-# def login_error(request):
-#     messages.warning(request, login_messages['login_error'])
-#     return HttpResponseRedirect(reverse('login'))
-
-
-# # TODO: I don't think that I ever hit this URL (No tests for this URL for now...)
-# @login_required(login_url=reverse_lazy('login'))
-# def verify_logout(request):
-#     return render(request, 'cpanel/form-success/verify_logout.html')
-
-
 @sensitive_post_parameters()
 @csrf_protect
 @never_cache
