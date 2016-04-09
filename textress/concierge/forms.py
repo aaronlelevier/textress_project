@@ -25,10 +25,9 @@ class GuestForm(NgFormValidationMixin, Bootstrap3ModelForm):
         label='Phone number',
         error_messages={'invalid': 'Phone number have 10 digits'},
         help_text='Allowed phone number format: (702) 510-5555')
-    check_in = forms.DateField(label='Check-in Date', initial=timezone.localtime(timezone.now()).date(),
+    check_in = forms.DateField(label='Check-in Date',
         help_text='Allowed date format: yyyy-mm-dd')
     check_out = forms.DateField(label='Check-out Date',
-        initial=timezone.localtime(timezone.now()).date()+datetime.timedelta(days=1),
         help_text='Allowed date format: yyyy-mm-dd')
     
     class Meta:
@@ -46,6 +45,9 @@ class GuestForm(NgFormValidationMixin, Bootstrap3ModelForm):
         else:
             self.initial['phone_number'] = ph_formatter(
                 getattr(guest, 'phone_number', None))
+
+        self.initial['check_in'] = timezone.localtime(timezone.now()).date()
+        self.initial['check_out'] = timezone.localtime(timezone.now()).date()+datetime.timedelta(days=1)
 
     def clean_phone_number(self):
         """

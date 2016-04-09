@@ -425,29 +425,6 @@ class CardUpdateTests(TestCase):
         response = self.client.get(reverse('payment:card_list'))
         self.assertTrue(response.context['breadcrumbs'])
 
-    def test_card_list__no_current_cards(self):
-        """
-        The "Add a card" checkbox should default to 'True' for a better User UX.
-        """
-        self.hotel.customer.cards.all().delete()
-        self.assertFalse(self.customer.cards.all())
-
-        response = self.client.get(reverse('payment:card_list'))
-
-        self.assertTrue(response.context['form'].fields['add_card'].initial)
-
-    def test_card_list__no_customer(self):
-        """
-        The "Add a card" checkbox should default to 'True' if no 'Customer'
-        """
-        self.hotel.customer = None
-        self.hotel.save()
-        self.assertIsNone(self.hotel.customer)
-
-        response = self.client.get(reverse('payment:card_list'))
-
-        self.assertTrue(response.context['form'].fields['add_card'].initial)
-
     def test_card_list__auth_required(self):
         self.client.logout()
 

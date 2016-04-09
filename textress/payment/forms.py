@@ -16,10 +16,11 @@ class CardListForm(StripeForm):
         super(CardListForm, self).__init__(*args, **kwargs)
 
         if not hotel.customer or not hotel.customer.cards.all():
-            self.fields['add_card'].initial = True
+            self.initial['add_card'] = True
+        else:
+            self.initial['add_card'] = False
 
-    add_card = forms.BooleanField(label='Add a Card',
-        initial=False, required=False)
+    add_card = forms.BooleanField(label='Add a Card')
 
 
 class OneTimePaymentForm(Bootstrap3Form):
