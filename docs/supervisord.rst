@@ -28,6 +28,8 @@ Installation
 GENERAL COMMANDS
 ----------------
 
+**Ubuntu**
+
 .. code-block::
 
     apt-get install supervisor
@@ -43,14 +45,25 @@ GENERAL COMMANDS
 
     # log file location
     /var/log/supervisor/
+    
+**Centos**
+
+.. code-block::
+
+    /etc/supervisor.d/
+    
+    # individual named supervisor files
+    /etc/supervisor.d/celery.conf
 
 
 Reload and Update
 
 .. code-block::
 
+    # checks for any changes in config
     supervisorctl reread
 
+    # updates config
     supervisorctl update
 
 
