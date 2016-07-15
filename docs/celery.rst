@@ -31,6 +31,23 @@ Start all process for Celery
     # start Celery
     celery -A textress worker -l info
 
+
+For a Queue
+-----------
+
+Command Line
+
+.. code-block::
+
+    celery -A textress worker -l info -Q <queue_name>
+    
+In the Python code
+
+.. code-block::
+
+    my_task.apply_async(queue=<queue_name>)
+
+
 Cron
 ----
 
