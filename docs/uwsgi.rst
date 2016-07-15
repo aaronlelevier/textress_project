@@ -1,6 +1,31 @@
 uWSGI
 =====
 
+INSTALLATION
+-----
+.. code-block::
+
+    # python 3 req
+    sudo apt-get install libpcre3 libpcre3-dev
+
+    # in virtualenv
+    pip uninstall uwsgi
+    sudo apt-get remove uwsgi
+
+    # download and unwrap
+    wget http://projects.unbit.it/downloads/uwsgi-2.0.3.tar.gz
+    tar -xvf uwsgi-2.0.3.tar.gz
+    cd uwsgi-2.0.3
+
+    # build
+    python uwsgiconfig.py --build
+
+    # start
+    /usr/local/lib/uwsgi/uwsgi --ini uwsgi.ini
+
+
+TEST RUN
+
 .. code-block::
 
     # test app runs

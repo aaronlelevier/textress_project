@@ -171,8 +171,8 @@ class CardListView(LoginRequiredMixin, AdminOnlyMixin, BillingSummaryContextMixi
         return kwargs
 
     def get_form_valid_message(self):
-        return "The payment has been successfully processed. An email will be \
-sent to {}. Thank you.".format(self.request.user.email)
+        return "The payment has been successfully processed. An email will be"
+               "sent to {}. Thank you.".format(self.request.user.email)
 
     def form_valid(self, form):
         try:

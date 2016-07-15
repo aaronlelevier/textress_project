@@ -48,6 +48,23 @@ ubuntu server
     shutdown -r now
 
 
+User Setup / Commands
+---------------------
+
+.. code-block::
+
+# list all Users
+cut -d: -f1 /etc/passwd
+
+# create user and add to group
+sudo useradd nginx
+sudo groupadd nginx
+sudo usermod -a -G nginx nginx
+sudo passwd nginx
+
+sudo adduser web sudo
+sudo deluser web sudo
+
 ssh
 ---
 

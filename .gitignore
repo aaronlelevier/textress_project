@@ -25,3 +25,5 @@ logs/*
 node_modules/
 tmp/
 venv/
+
+_keys.txt

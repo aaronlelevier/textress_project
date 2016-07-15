@@ -91,3 +91,11 @@ Concat to create ``chained.crt``
 .. code-block::
 
     cat www.example.com.crt bundle.crt > www.example.com.chained.crt
+
+
+Misc
+----
+Address in use error:
+
+``sudo fuser -k 80/tcp`` to kill process on that port
+
